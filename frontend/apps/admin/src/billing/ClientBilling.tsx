@@ -1,6 +1,15 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import {
+  Button,
+  buttonClass,
+  FigureStrip,
+  PanelFooter,
+  RuledPanel,
+  Spinner,
+  Tabs,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -13,6 +22,8 @@ import { PaymentsList } from "../payments/PaymentsPages";
 import { InvoiceTable, RequestTable } from "./BillingPage";
 
 type Tab = "invoices" | "payments" | "methods" | "ledger" | "requests" | "charge" | "packages";
+
+const owing = (amount: string) => /[1-9]/.test(amount) && !amount.startsWith("-");
 
 /** The client's billing tab (FR-10-14): balances, invoices, ledger, payment requests and
  * one-off charges. */
@@ -115,48 +126,63 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
 
   return (
     <section aria-labelledby="client-billing" className="mt-6 space-y-4">
-      <h2 id="client-billing" className="text-lg font-semibold">
-        {t("billing.title")}
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <h2 id="client-billing" className="text-base font-semibold">
+          {t("billing.title")}
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          <a
+            className={buttonClass({ variant: "secondary", size: "sm" })}
+            href={`/api/v1/clients/${clientId}/statement?pdf=true`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t("billing.statement")}
+          </a>
+          {canInvoice ? (
+            <Button size="sm" variant="secondary" onClick={() => invoiceNow.mutate()}>
+              {t("billing.invoiceNow")}
+            </Button>
+          ) : null}
+        </div>
+      </div>
       {b ? (
-        <dl className="grid gap-3 sm:grid-cols-4">
-          {(
-            [
-              ["invoice_balance", t("billing.balances.owed")],
-              ["overdue", t("billing.balances.overdue")],
-              ["available_credit", t("billing.balances.credit")],
-              ["uninvoiced", t("billing.balances.uninvoiced")],
-            ] as const
-          ).map(([key, label]) => (
-            <div key={key} className="rounded-md border border-border p-3">
-              <dt className="text-xs text-muted-foreground">{label}</dt>
-              <dd className="text-lg font-semibold">{money(b[key])}</dd>
-            </div>
-          ))}
-        </dl>
+        <FigureStrip
+          label={t("billing.title")}
+          figures={[
+            { key: "owed", label: t("billing.balances.owed"), value: money(b.invoice_balance) },
+            {
+              key: "overdue",
+              label: t("billing.balances.overdue"),
+              value: money(b.overdue),
+              tone: owing(b.overdue.amount) ? "margin" : "default",
+            },
+            {
+              key: "credit",
+              label: t("billing.balances.credit"),
+              value: money(b.available_credit),
+            },
+            {
+              key: "uninvoiced",
+              label: t("billing.balances.uninvoiced"),
+              value: money(b.uninvoiced),
+            },
+          ]}
+        />
       ) : (
         <Spinner label={t("grid.loading")} />
       )}
-      <div className="flex flex-wrap gap-2">
-        {canInvoice ? (
-          <Button size="sm" variant="secondary" onClick={() => invoiceNow.mutate()}>
-            {t("billing.invoiceNow")}
-          </Button>
-        ) : null}
-        <a
-          className="rounded-md border border-border px-3 py-1.5 text-sm"
-          href={`/api/v1/clients/${clientId}/statement?pdf=true`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {t("billing.statement")}
-        </a>
-      </div>
       <ErrorList error={invoiceNow.error} />
       <Tabs label={t("billing.title")} tabs={tabs} value={tab} onChange={setTab}>
-        {tab === "invoices" ? <InvoiceTable rows={invoices.data?.results ?? []} /> : null}
+        {tab === "invoices" ? (
+          <InvoiceTable
+            rows={invoices.data?.results ?? []}
+            isLoading={invoices.isPending}
+            empty={t("designS7.billing.empty.all")}
+          />
+        ) : null}
         {tab === "payments" ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {canRecord ? (
               <RecordPayment clientId={clientId} currency={currency} onDone={refresh} />
             ) : null}
@@ -166,96 +192,140 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
         {tab === "methods" ? <ClientPaymentMethods clientId={clientId} /> : null}
         {tab === "packages" ? <PackagesTab clientId={clientId} /> : null}
         {tab === "ledger" ? (
-          <div className="overflow-x-auto">
+          <div
+            role="region"
+            aria-label={t("billing.ledger")}
+            tabIndex={0}
+            className="overflow-x-auto rounded-xl border border-border bg-surface"
+          >
             <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th scope="col" className="py-2 pr-3">
+              <caption className="sr-only">{t("billing.ledger")}</caption>
+              <thead className="border-b border-border">
+                <tr>
+                  <th scope="col" className="w-32 px-4 py-2.5">
                     {t("billing.date")}
                   </th>
-                  <th scope="col" className="py-2 pr-3">
+                  <th scope="col" className="px-4 py-2.5">
                     {t("billing.description")}
                   </th>
-                  <th scope="col" className="py-2 pr-3 text-right">
+                  <th scope="col" className="w-32 px-4 py-2.5 text-right">
                     {t("billing.amount")}
                   </th>
-                  <th scope="col" className="py-2 pr-3 text-right">
+                  <th scope="col" className="w-32 px-4 py-2.5 text-right">
                     {t("billing.runningBalance")}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {(ledger.data ?? []).map((entry) => (
-                  <tr key={entry.id} className="border-b border-border">
-                    <td className="py-2 pr-3">{formatDate(entry.occurred_at, i18n.language)}</td>
-                    <td className="py-2 pr-3">
-                      {entry.description || t(`billing.entry.${entry.type}`)}
+                {ledger.isPending ? (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-3">
+                      <Spinner className="sr-only" label={t("grid.loading")} />
+                      <div aria-hidden="true" className="h-4 animate-pulse rounded bg-muted" />
                     </td>
-                    <td className="py-2 pr-3 text-right">{money(entry.amount)}</td>
-                    <td className="py-2 pr-3 text-right">{money(entry.balance_after)}</td>
                   </tr>
-                ))}
+                ) : !(ledger.data ?? []).length ? (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-10 text-center text-muted-foreground">
+                      {t("grid.empty")}
+                    </td>
+                  </tr>
+                ) : (
+                  (ledger.data ?? []).map((entry) => (
+                    <tr key={entry.id}>
+                      <td className="px-4 py-2.5 whitespace-nowrap">
+                        {formatDate(entry.occurred_at, i18n.language)}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        {entry.description || t(`billing.entry.${entry.type}`)}
+                      </td>
+                      <td className="px-4 py-2.5 text-right whitespace-nowrap">
+                        {money(entry.amount)}
+                      </td>
+                      <td className="px-4 py-2.5 text-right font-medium whitespace-nowrap">
+                        {money(entry.balance_after)}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         ) : null}
         {tab === "requests" ? (
-          <div className="space-y-3">
+          <div className="space-y-6">
             {canRequest ? (
               <form
                 className="flex flex-wrap items-end gap-2"
+                aria-label={t("billing.requestPayment")}
                 onSubmit={(e) => {
                   e.preventDefault();
                   ask.mutate();
                 }}
               >
-                <TextField
-                  type="number"
-                  step="0.01"
-                  min={0}
-                  label={t("billing.requestAmount")}
-                  value={request}
-                  required
-                  onChange={(e) => setRequest(e.target.value)}
-                />
+                <div className="w-40">
+                  <TextField
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    label={t("billing.requestAmount")}
+                    value={request}
+                    required
+                    onChange={(e) => setRequest(e.target.value)}
+                  />
+                </div>
                 <Button type="submit" variant="secondary">
                   {t("billing.requestPayment")}
                 </Button>
               </form>
             ) : null}
             <ErrorList error={ask.error} />
-            <RequestTable rows={requests.data?.results ?? []} />
+            <RequestTable rows={requests.data?.results ?? []} isLoading={requests.isPending} />
           </div>
         ) : null}
         {tab === "charge" ? (
-          <form
-            className="flex flex-wrap items-end gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              addCharge.mutate();
-            }}
-          >
-            <TextField
-              label={t("billing.description")}
-              value={charge.description}
-              required
-              onChange={(e) => setCharge((c) => ({ ...c, description: e.target.value }))}
-            />
-            <TextField
-              type="number"
-              step="0.01"
-              label={t("billing.amount")}
-              hint={t("billing.discountHint")}
-              value={charge.amount}
-              required
-              onChange={(e) => setCharge((c) => ({ ...c, amount: e.target.value }))}
-            />
-            <Button type="submit" variant="secondary" disabled={addCharge.isPending}>
-              {t("billing.addCharge")}
-            </Button>
-            {addCharge.isSuccess ? <Alert tone="success">{t("billing.chargeAdded")}</Alert> : null}
-            <ErrorList error={addCharge.error} />
-          </form>
+          <RuledPanel flush>
+            <form
+              aria-label={t("billing.addCharge")}
+              onSubmit={(e) => {
+                e.preventDefault();
+                addCharge.mutate();
+              }}
+            >
+              <div className="grid gap-3 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_12rem]">
+                <TextField
+                  label={t("billing.description")}
+                  value={charge.description}
+                  required
+                  onChange={(e) => setCharge((c) => ({ ...c, description: e.target.value }))}
+                />
+                <TextField
+                  type="number"
+                  step="0.01"
+                  label={t("billing.amount")}
+                  hint={t("billing.discountHint")}
+                  value={charge.amount}
+                  required
+                  onChange={(e) => setCharge((c) => ({ ...c, amount: e.target.value }))}
+                />
+              </div>
+              <PanelFooter>
+                <Button type="submit" variant="secondary" disabled={addCharge.isPending}>
+                  {t("billing.addCharge")}
+                </Button>
+                {addCharge.isSuccess ? (
+                  <p role="status" className="text-success">
+                    {t("billing.chargeAdded")}
+                  </p>
+                ) : null}
+              </PanelFooter>
+              {addCharge.error ? (
+                <div className="px-5 pb-4">
+                  <ErrorList error={addCharge.error} />
+                </div>
+              ) : null}
+            </form>
+          </RuledPanel>
         ) : null}
       </Tabs>
     </section>

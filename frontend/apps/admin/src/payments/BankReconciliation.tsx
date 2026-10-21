@@ -1,10 +1,11 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import { Button, PanelFooter, RuledPanel, SelectField, TextField } from "@tutortrack/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
+import { PanelEmpty, PanelLoading, rowClass } from "../billing/moneyUi";
 import { ErrorList } from "../calendar/ErrorList";
 import { useCursorList } from "../lists";
 import { useClientOptions } from "./clientOptions";
@@ -37,47 +38,57 @@ function Upload({ onDone }: { onDone: () => void }) {
     onSuccess: onDone,
   });
   return (
-    <form
-      className="flex flex-wrap items-end gap-3"
-      aria-label={t("bank.upload")}
-      onSubmit={(e) => {
-        e.preventDefault();
-        upload.mutate();
-      }}
-    >
-      <label className="text-sm">
-        <span className="block font-medium">{t("bank.file")}</span>
-        <input
-          type="file"
-          accept=".csv,.ofx,.qfx,.xml,text/csv"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        />
-      </label>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          className="size-4"
-          checked={monthFirst}
-          onChange={(e) => setMonthFirst(e.target.checked)}
-        />
-        {t("bank.monthFirst")}
-      </label>
-      <Button type="submit" size="sm" disabled={!file || upload.isPending}>
-        {t("bank.import")}
-      </Button>
-      <Button type="button" size="sm" variant="secondary" onClick={() => sync.mutate()}>
-        {t("bank.syncFeed")}
-      </Button>
-      {upload.data ? (
-        <Alert tone="success">
-          {t("bank.imported", {
-            count: Number((upload.data.stats as Record<string, number>).new ?? 0),
-            duplicates: Number((upload.data.stats as Record<string, number>).duplicates ?? 0),
-          })}
-        </Alert>
-      ) : null}
-      <ErrorList error={upload.error ?? sync.error} />
-    </form>
+    <RuledPanel flush title={t("bank.upload")} description={t("bank.help")}>
+      <form
+        aria-label={t("bank.upload")}
+        onSubmit={(e) => {
+          e.preventDefault();
+          upload.mutate();
+        }}
+      >
+        <div className="flex flex-wrap items-end gap-x-6 gap-y-3 px-5 py-4">
+          <label className="text-sm">
+            <span className="mb-1 block font-medium">{t("bank.file")}</span>
+            <input
+              type="file"
+              accept=".csv,.ofx,.qfx,.xml,text/csv"
+              className="text-sm text-muted-foreground file:mr-3 file:h-9 file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+          </label>
+          <label className="flex h-9 items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4"
+              checked={monthFirst}
+              onChange={(e) => setMonthFirst(e.target.checked)}
+            />
+            {t("bank.monthFirst")}
+          </label>
+        </div>
+        <PanelFooter>
+          <Button type="submit" disabled={!file || upload.isPending}>
+            {t("bank.import")}
+          </Button>
+          <Button type="button" size="sm" variant="secondary" onClick={() => sync.mutate()}>
+            {t("bank.syncFeed")}
+          </Button>
+          {upload.data ? (
+            <p role="status" className="text-success tabular-nums">
+              {t("bank.imported", {
+                count: Number((upload.data.stats as Record<string, number>).new ?? 0),
+                duplicates: Number((upload.data.stats as Record<string, number>).duplicates ?? 0),
+              })}
+            </p>
+          ) : null}
+        </PanelFooter>
+        {upload.error ?? sync.error ? (
+          <div className="px-5 pb-4">
+            <ErrorList error={upload.error ?? sync.error} />
+          </div>
+        ) : null}
+      </form>
+    </RuledPanel>
   );
 }
 
@@ -102,7 +113,7 @@ function SplitForm({ line, onDone }: { line: Line; onDone: () => void }) {
     setParts(parts.map((p, j) => (j === i ? { ...p, [key]: value } : p)));
   return (
     <form
-      className="mt-2 space-y-2"
+      className="mt-3 space-y-2 border-t border-rule pt-3"
       aria-label={t("bank.split")}
       onSubmit={(e) => {
         e.preventDefault();
@@ -110,7 +121,7 @@ function SplitForm({ line, onDone }: { line: Line; onDone: () => void }) {
       }}
     >
       {parts.map((part, i) => (
-        <div key={i} className="flex flex-wrap gap-2">
+        <div key={i} className="grid max-w-xl gap-3 sm:grid-cols-[minmax(0,1fr)_9rem]">
           <SelectField
             label={t("bank.client", { n: i + 1 })}
             value={part.client}
@@ -119,6 +130,7 @@ function SplitForm({ line, onDone }: { line: Line; onDone: () => void }) {
           />
           <TextField
             label={t("bank.partAmount", { n: i + 1 })}
+            className="text-right"
             type="number"
             step="0.01"
             value={part.amount}
@@ -126,7 +138,10 @@ function SplitForm({ line, onDone }: { line: Line; onDone: () => void }) {
           />
         </div>
       ))}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2 pt-1">
+        <Button type="submit" size="sm">
+          {t("bank.recordSplit")}
+        </Button>
         <Button
           type="button"
           size="sm"
@@ -134,9 +149,6 @@ function SplitForm({ line, onDone }: { line: Line; onDone: () => void }) {
           onClick={() => setParts([...parts, { client: "", amount: "" }])}
         >
           {t("bank.addPart")}
-        </Button>
-        <Button type="submit" size="sm">
-          {t("bank.recordSplit")}
         </Button>
       </div>
       <ErrorList error={split.error} />
@@ -168,21 +180,31 @@ function LineRow({ line, onChange }: { line: Line; onChange: () => void }) {
   const open = line.status === "suggested" || line.status === "unmatched";
   const moneyIn = Number(line.amount.amount) > 0;
   return (
-    <li className="space-y-2 p-3">
-      <div className="flex flex-wrap justify-between gap-2">
-        <span>
-          <span className="font-medium">{formatMoney(line.amount, i18n.language)}</span> ·{" "}
-          {formatDate(line.booked_on, i18n.language)} · {line.description || line.reference}
-        </span>
-        <span className="text-muted-foreground">{t(`bank.status.${line.status}`)}</span>
+    <li className={`${rowClass} space-y-2`}>
+      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+        <div className="min-w-0">
+          <p className="font-medium">{line.description || line.reference}</p>
+          <p className="text-xs text-muted-foreground tabular-nums">
+            {formatDate(line.booked_on, i18n.language)}
+            {line.counterparty ? ` · ${line.counterparty}` : ""}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="font-semibold tabular-nums">{formatMoney(line.amount, i18n.language)}</p>
+          <p className="text-xs text-muted-foreground">{t(`bank.status.${line.status}`)}</p>
+        </div>
       </div>
       {open && line.matches.length ? (
         <ul className="space-y-1">
           {line.matches.map((m) => (
-            <li key={m.id} className="flex flex-wrap items-center gap-2 text-sm">
+            <li
+              key={m.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted/60 px-3 py-1.5 text-sm"
+            >
               <span>
                 {m.reason}
-                {m.client_name ? ` · ${m.client_name}` : ""} · {t("bank.score", { score: m.score })}
+                {m.client_name ? ` · ${m.client_name}` : ""} ·{" "}
+                <span className="tabular-nums">{t("bank.score", { score: m.score })}</span>
               </span>
               <Button size="sm" onClick={() => act.mutate({ kind: "confirm", match: m.id })}>
                 {t("bank.confirm")}
@@ -191,23 +213,25 @@ function LineRow({ line, onChange }: { line: Line; onChange: () => void }) {
           ))}
         </ul>
       ) : null}
-      <div className="flex flex-wrap gap-2">
-        {open && moneyIn ? (
-          <Button size="sm" variant="secondary" onClick={() => setSplitting(!splitting)}>
-            {t("bank.split")}
-          </Button>
-        ) : null}
-        {open ? (
-          <Button size="sm" variant="ghost" onClick={() => act.mutate({ kind: "ignore" })}>
-            {t("bank.ignore")}
-          </Button>
-        ) : null}
-        {line.status === "ignored" ? (
-          <Button size="sm" variant="ghost" onClick={() => act.mutate({ kind: "reopen" })}>
-            {t("bank.reopen")}
-          </Button>
-        ) : null}
-      </div>
+      {open || line.status === "ignored" ? (
+        <div className="flex flex-wrap gap-2">
+          {open && moneyIn ? (
+            <Button size="sm" variant="secondary" onClick={() => setSplitting(!splitting)}>
+              {t("bank.split")}
+            </Button>
+          ) : null}
+          {open ? (
+            <Button size="sm" variant="ghost" onClick={() => act.mutate({ kind: "ignore" })}>
+              {t("bank.ignore")}
+            </Button>
+          ) : null}
+          {line.status === "ignored" ? (
+            <Button size="sm" variant="ghost" onClick={() => act.mutate({ kind: "reopen" })}>
+              {t("bank.reopen")}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
       {splitting ? <SplitForm line={line} onDone={onChange} /> : null}
       <ErrorList error={act.error} />
     </li>
@@ -228,29 +252,51 @@ export function BankReconciliation() {
   );
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ["bank-transactions"] });
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">{t("bank.help")}</p>
+    <div className="space-y-6">
       <Upload onDone={refresh} />
-      <SelectField
-        label={t("bank.show")}
-        value={filter}
-        onChange={(e) => setFilter(e.target.value as Filter)}
-        options={(["suggested", "unmatched", "matched", "ignored"] as Filter[]).map((f) => ({
-          value: f,
-          label: t(`bank.status.${f}`),
-        }))}
-      />
-      {list.query.isPending ? (
-        <Spinner label={t("grid.loading")} />
-      ) : list.rows.length ? (
-        <ul className="divide-y divide-border rounded-md border border-border text-sm">
-          {list.rows.map((line) => (
-            <LineRow key={line.id} line={line} onChange={refresh} />
-          ))}
-        </ul>
-      ) : (
-        <p className="text-sm text-muted-foreground">{t("grid.empty")}</p>
-      )}
+      <div>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <SelectField
+            label={t("bank.show")}
+            hideLabel
+            size="sm"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value as Filter)}
+            options={(["suggested", "unmatched", "matched", "ignored"] as Filter[]).map((f) => ({
+              value: f,
+              label: t(`bank.status.${f}`),
+            }))}
+          />
+        </div>
+        <section
+          aria-label={t("bank.title")}
+          className="rounded-xl border border-border bg-surface text-sm"
+        >
+          {list.query.isPending ? (
+            <PanelLoading label={t("grid.loading")} />
+          ) : list.rows.length ? (
+            <ul>
+              {list.rows.map((line) => (
+                <LineRow key={line.id} line={line} onChange={refresh} />
+              ))}
+            </ul>
+          ) : (
+            <PanelEmpty>{t("designS7.bank.empty")}</PanelEmpty>
+          )}
+          {list.query.hasNextPage ? (
+            <PanelFooter className="justify-center">
+              <Button
+                size="sm"
+                variant="ghost"
+                loading={list.query.isFetchingNextPage}
+                onClick={() => void list.query.fetchNextPage()}
+              >
+                {t("grid.loadMore")}
+              </Button>
+            </PanelFooter>
+          ) : null}
+        </section>
+      </div>
     </div>
   );
 }

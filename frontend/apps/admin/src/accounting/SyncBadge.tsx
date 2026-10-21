@@ -5,14 +5,7 @@ import { useSyncStatuses } from "./useSyncStatuses";
 
 export type SyncRecord = components["schemas"]["ExternalRecordLink"];
 
-const TONES: Record<string, string> = {
-  synced: "bg-success/15",
-  error: "bg-danger/15 text-danger",
-  pending: "bg-warning/15",
-  skipped: "bg-muted",
-};
-
-/** "In Xero", "Sync error"... with the reason as accessible text. */
+/** "In Xero", "Sync error"... in words (errors in danger), with the reason as accessible text. */
 export function SyncBadge({ record }: { record?: SyncRecord }) {
   const { t } = useTranslation();
   if (!record) return null;
@@ -20,7 +13,9 @@ export function SyncBadge({ record }: { record?: SyncRecord }) {
   const label = t(`accounting.badge.${record.status}`, { provider });
   return (
     <span
-      className={`rounded px-2 py-0.5 text-xs font-medium ${TONES[record.status] ?? "bg-muted"}`}
+      className={
+        record.status === "error" ? "font-medium text-danger" : "text-muted-foreground"
+      }
       title={record.error || undefined}
     >
       {label}

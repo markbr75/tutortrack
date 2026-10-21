@@ -1,9 +1,20 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import {
+  Button,
+  DataGrid,
+  PageHeader,
+  PanelFooter,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  Tabs,
+  TextField,
+  type ColumnDef,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
@@ -13,7 +24,7 @@ import { BillingOptions, BulkPayments, RunTutorReviews } from "../g3/BillingExtr
 import { BankReconciliation } from "../payments/BankReconciliation";
 import { PaymentsList } from "../payments/PaymentsPages";
 import { LateFeesTab, PackagesTab, PlansTab, SplitsTab } from "./Phase2Tabs";
-import { StatusBadge } from "./InvoicePage";
+import { EndHead, Figure, InvoiceStatus, PanelEmpty, PanelLoading, rowClass } from "./moneyUi";
 
 type Tab =
   | "invoices"
@@ -31,6 +42,9 @@ type Tab =
   | "options";
 type InvoiceFilter = "draft" | "open" | "overdue" | "paid" | "all";
 type Money = { amount: string; currency: string };
+type Invoice = components["schemas"]["Invoice"];
+type PaymentRequest = components["schemas"]["PaymentRequest"];
+type Charge = components["schemas"]["Charge"];
 
 const FILTERS: Record<InvoiceFilter, { status?: ("draft" | "issued" | "partially_paid" | "paid")[]; overdue?: boolean }> = {
   draft: { status: ["draft"] },
@@ -45,61 +59,92 @@ function useMoney() {
   return (value: Money) => formatMoney(value, i18n.language);
 }
 
-export function InvoiceTable({ rows }: { rows: components["schemas"]["Invoice"][] }) {
+function useGridLabels(empty?: string) {
+  const { t } = useTranslation();
+  return {
+    loading: t("grid.loading"),
+    empty: empty ?? t("grid.empty"),
+    loadMore: t("grid.loadMore"),
+  };
+}
+
+/** Invoices as a register: number, client, due date, total, what is still owed, status. */
+export function InvoiceTable({
+  rows,
+  isLoading,
+  hasMore,
+  isFetchingMore,
+  onLoadMore,
+  empty,
+}: {
+  rows: Invoice[];
+  isLoading?: boolean;
+  hasMore?: boolean;
+  isFetchingMore?: boolean;
+  onLoadMore?: () => void;
+  empty?: string;
+}) {
   const { t, i18n } = useTranslation();
   const money = useMoney();
-  if (!rows.length) return <p className="text-sm text-muted-foreground">{t("grid.empty")}</p>;
+  const labels = useGridLabels(empty);
+  const columns = useMemo<ColumnDef<Invoice, unknown>[]>(
+    () => [
+      {
+        id: "number",
+        header: t("billing.number"),
+        cell: ({ row }) => (
+          <Link
+            to="/invoices/$invoiceId"
+            params={{ invoiceId: row.original.id }}
+            className="font-medium whitespace-nowrap tabular-nums underline-offset-2 hover:underline"
+          >
+            {row.original.number || t("billing.draftInvoice")}
+          </Link>
+        ),
+      },
+      { id: "client", header: t("billing.client"), cell: ({ row }) => row.original.client_name },
+      {
+        id: "due",
+        header: t("billing.due"),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap">
+            {row.original.due_date ? formatDate(row.original.due_date, i18n.language) : "—"}
+          </span>
+        ),
+      },
+      {
+        id: "total",
+        header: () => <EndHead>{t("billing.total")}</EndHead>,
+        cell: ({ row }) => <Figure>{money(row.original.total)}</Figure>,
+      },
+      {
+        id: "balance",
+        header: () => <EndHead>{t("billing.balanceDue")}</EndHead>,
+        cell: ({ row }) => <Figure strong>{money(row.original.balance_due)}</Figure>,
+      },
+      {
+        id: "status",
+        header: t("billing.statusLabel"),
+        cell: ({ row }) => (
+          <InvoiceStatus status={row.original.status} overdue={row.original.is_overdue} />
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- labels follow the language
+    [t, i18n.language],
+  );
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-border">
-            <th scope="col" className="py-2 pr-3">
-              {t("billing.number")}
-            </th>
-            <th scope="col" className="py-2 pr-3">
-              {t("billing.client")}
-            </th>
-            <th scope="col" className="py-2 pr-3">
-              {t("billing.due")}
-            </th>
-            <th scope="col" className="py-2 pr-3 text-right">
-              {t("billing.total")}
-            </th>
-            <th scope="col" className="py-2 pr-3 text-right">
-              {t("billing.balanceDue")}
-            </th>
-            <th scope="col" className="py-2 pr-3">
-              {t("billing.statusLabel")}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((inv) => (
-            <tr key={inv.id} className="border-b border-border">
-              <td className="py-2 pr-3">
-                <Link
-                  to="/invoices/$invoiceId"
-                  params={{ invoiceId: inv.id }}
-                  className="font-medium underline-offset-2 hover:underline"
-                >
-                  {inv.number || t("billing.draftInvoice")}
-                </Link>
-              </td>
-              <td className="py-2 pr-3">{inv.client_name}</td>
-              <td className="py-2 pr-3">
-                {inv.due_date ? formatDate(inv.due_date, i18n.language) : "—"}
-              </td>
-              <td className="py-2 pr-3 text-right">{money(inv.total)}</td>
-              <td className="py-2 pr-3 text-right">{money(inv.balance_due)}</td>
-              <td className="py-2 pr-3">
-                <StatusBadge status={inv.status} overdue={inv.is_overdue} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataGrid
+      caption={t("billing.tabs.invoices")}
+      rows={rows}
+      columns={columns}
+      getRowId={(r) => r.id}
+      isLoading={isLoading}
+      hasMore={hasMore}
+      isFetchingMore={isFetchingMore}
+      onLoadMore={onLoadMore}
+      labels={labels}
+    />
   );
 }
 
@@ -112,26 +157,28 @@ function Invoices() {
     ),
   );
   return (
-    <div className="space-y-3">
-      <SelectField
-        label={t("billing.show")}
-        value={filter}
-        onChange={(e) => setFilter(e.target.value as InvoiceFilter)}
-        options={(Object.keys(FILTERS) as InvoiceFilter[]).map((key) => ({
-          value: key,
-          label: t(`billing.filters.${key}`),
-        }))}
+    <div>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <SelectField
+          label={t("billing.show")}
+          hideLabel
+          size="sm"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value as InvoiceFilter)}
+          options={(Object.keys(FILTERS) as InvoiceFilter[]).map((key) => ({
+            value: key,
+            label: t(`billing.filters.${key}`),
+          }))}
+        />
+      </div>
+      <InvoiceTable
+        rows={list.rows}
+        isLoading={list.query.isPending}
+        hasMore={list.query.hasNextPage}
+        isFetchingMore={list.query.isFetchingNextPage}
+        onLoadMore={() => void list.query.fetchNextPage()}
+        empty={t(`designS7.billing.empty.${filter}`)}
       />
-      {list.query.isPending ? (
-        <Spinner label={t("grid.loading")} />
-      ) : (
-        <InvoiceTable rows={list.rows} />
-      )}
-      {list.query.hasNextPage ? (
-        <Button size="sm" variant="ghost" onClick={() => void list.query.fetchNextPage()}>
-          {t("grid.loadMore")}
-        </Button>
-      ) : null}
     </div>
   );
 }
@@ -139,69 +186,113 @@ function Invoices() {
 function Charges() {
   const { t, i18n } = useTranslation();
   const money = useMoney();
+  const labels = useGridLabels(t("designS7.billing.noCharges"));
   const list = useCursorList(["charges", "uninvoiced"], async (cursor) =>
     unwrap(
       await api.GET("/api/v1/charges", { params: { query: { status: ["uninvoiced"], cursor } } }),
     ),
   );
-  if (list.query.isPending) return <Spinner label={t("grid.loading")} />;
-  if (!list.rows.length) return <p className="text-sm text-muted-foreground">{t("grid.empty")}</p>;
+  const columns = useMemo<ColumnDef<Charge, unknown>[]>(
+    () => [
+      {
+        id: "date",
+        header: t("billing.date"),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap">{formatDate(row.original.date, i18n.language)}</span>
+        ),
+      },
+      { id: "client", header: t("billing.client"), cell: ({ row }) => row.original.client_name },
+      {
+        id: "description",
+        header: t("billing.description"),
+        cell: ({ row }) => (
+          <>
+            {row.original.description}
+            {row.original.student_name ? (
+              <span className="block text-xs text-muted-foreground">
+                {row.original.student_name}
+              </span>
+            ) : null}
+          </>
+        ),
+      },
+      {
+        id: "amount",
+        header: () => <EndHead>{t("billing.amount")}</EndHead>,
+        cell: ({ row }) => <Figure>{money(row.original.gross)}</Figure>,
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- labels follow the language
+    [t, i18n.language],
+  );
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-border">
-            <th scope="col" className="py-2 pr-3">
-              {t("billing.date")}
-            </th>
-            <th scope="col" className="py-2 pr-3">
-              {t("billing.client")}
-            </th>
-            <th scope="col" className="py-2 pr-3">
-              {t("billing.description")}
-            </th>
-            <th scope="col" className="py-2 pr-3 text-right">
-              {t("billing.amount")}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.rows.map((charge) => (
-            <tr key={charge.id} className="border-b border-border">
-              <td className="py-2 pr-3">{formatDate(charge.date, i18n.language)}</td>
-              <td className="py-2 pr-3">{charge.client_name}</td>
-              <td className="py-2 pr-3">
-                {charge.description}
-                {charge.student_name ? (
-                  <span className="block text-muted-foreground">{charge.student_name}</span>
-                ) : null}
-              </td>
-              <td className="py-2 pr-3 text-right">{money(charge.gross)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataGrid
+      caption={t("billing.tabs.charges")}
+      rows={list.rows}
+      columns={columns}
+      getRowId={(r) => r.id}
+      isLoading={list.query.isPending}
+      hasMore={list.query.hasNextPage}
+      isFetchingMore={list.query.isFetchingNextPage}
+      onLoadMore={() => void list.query.fetchNextPage()}
+      labels={labels}
+    />
   );
 }
 
-export function RequestTable({ rows }: { rows: components["schemas"]["PaymentRequest"][] }) {
-  const { t } = useTranslation();
+/** Payment requests (credit top-ups) as a register. */
+export function RequestTable({
+  rows,
+  isLoading,
+  hasMore,
+  isFetchingMore,
+  onLoadMore,
+}: {
+  rows: PaymentRequest[];
+  isLoading?: boolean;
+  hasMore?: boolean;
+  isFetchingMore?: boolean;
+  onLoadMore?: () => void;
+}) {
+  const { t, i18n } = useTranslation();
   const money = useMoney();
-  if (!rows.length) return <p className="text-sm text-muted-foreground">{t("grid.empty")}</p>;
+  const labels = useGridLabels(t("designS7.billing.noRequests"));
+  const columns = useMemo<ColumnDef<PaymentRequest, unknown>[]>(
+    () => [
+      {
+        id: "number",
+        header: t("billing.number"),
+        cell: ({ row }) => (
+          <span className="font-medium whitespace-nowrap tabular-nums">{row.original.number}</span>
+        ),
+      },
+      { id: "client", header: t("billing.client"), cell: ({ row }) => row.original.client_name },
+      {
+        id: "amount",
+        header: () => <EndHead>{t("billing.amount")}</EndHead>,
+        cell: ({ row }) => <Figure>{money(row.original.amount)}</Figure>,
+      },
+      {
+        id: "status",
+        header: t("billing.statusLabel"),
+        cell: ({ row }) => t(`billing.requestStatus.${row.original.status}`),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- labels follow the language
+    [t, i18n.language],
+  );
   return (
-    <ul className="divide-y divide-border rounded-md border border-border text-sm">
-      {rows.map((r) => (
-        <li key={r.id} className="flex flex-wrap justify-between gap-2 p-3">
-          <span>
-            {r.number} · {r.client_name}
-          </span>
-          <span>
-            {money(r.amount)} · {t(`billing.requestStatus.${r.status}`)}
-          </span>
-        </li>
-      ))}
-    </ul>
+    <DataGrid
+      caption={t("billing.tabs.requests")}
+      rows={rows}
+      columns={columns}
+      getRowId={(r) => r.id}
+      isLoading={isLoading}
+      hasMore={hasMore}
+      isFetchingMore={isFetchingMore}
+      onLoadMore={onLoadMore}
+      labels={labels}
+    />
   );
 }
 
@@ -226,44 +317,51 @@ function Requests() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["payment-requests"] }),
   });
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {canManage ? (
-        <form
-          className="flex flex-wrap items-end gap-2"
-          aria-label={t("billing.bulkRequests")}
-          onSubmit={(e) => {
-            e.preventDefault();
-            bulk.mutate();
-          }}
-        >
-          <TextField
-            type="number"
-            label={t("billing.below")}
-            value={form.below}
-            onChange={(e) => setForm((f) => ({ ...f, below: e.target.value }))}
-          />
-          <TextField
-            type="number"
-            label={t("billing.topUpTo")}
-            value={form.top_up_to}
-            onChange={(e) => setForm((f) => ({ ...f, top_up_to: e.target.value }))}
-          />
-          <Button type="submit" variant="secondary" disabled={bulk.isPending}>
-            {t("billing.bulkRequests")}
-          </Button>
-        </form>
-      ) : null}
-      {bulk.data ? (
-        <Alert tone="success">
-          {t("billing.requestsCreated", { count: bulk.data.created.length })}
-        </Alert>
+        <RuledPanel flush title={t("billing.bulkRequests")}>
+          <form
+            aria-label={t("billing.bulkRequests")}
+            onSubmit={(e) => {
+              e.preventDefault();
+              bulk.mutate();
+            }}
+          >
+            <div className="grid max-w-xl gap-3 px-5 py-4 sm:grid-cols-2">
+              <TextField
+                type="number"
+                label={t("billing.below")}
+                value={form.below}
+                onChange={(e) => setForm((f) => ({ ...f, below: e.target.value }))}
+              />
+              <TextField
+                type="number"
+                label={t("billing.topUpTo")}
+                value={form.top_up_to}
+                onChange={(e) => setForm((f) => ({ ...f, top_up_to: e.target.value }))}
+              />
+            </div>
+            <PanelFooter>
+              <Button type="submit" variant="secondary" disabled={bulk.isPending}>
+                {t("billing.bulkRequests")}
+              </Button>
+              {bulk.data ? (
+                <p role="status" className="text-success">
+                  {t("billing.requestsCreated", { count: bulk.data.created.length })}
+                </p>
+              ) : null}
+            </PanelFooter>
+          </form>
+        </RuledPanel>
       ) : null}
       <ErrorList error={bulk.error} />
-      {list.query.isPending ? (
-        <Spinner label={t("grid.loading")} />
-      ) : (
-        <RequestTable rows={list.rows} />
-      )}
+      <RequestTable
+        rows={list.rows}
+        isLoading={list.query.isPending}
+        hasMore={list.query.hasNextPage}
+        isFetchingMore={list.query.isFetchingNextPage}
+        onLoadMore={() => void list.query.fetchNextPage()}
+      />
     </div>
   );
 }
@@ -298,91 +396,135 @@ function Runs() {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {canCreate ? (
-        <form
-          className="space-y-2"
-          aria-label={t("billing.runInvoicing")}
-          onSubmit={(e) => {
-            e.preventDefault();
-            start.mutate();
-          }}
-        >
-          <div className="flex flex-wrap items-end gap-2">
-            <TextField
-              type="date"
-              label={t("billing.periodStart")}
-              value={form.period_start}
-              onChange={(e) => setForm((f) => ({ ...f, period_start: e.target.value }))}
-            />
-            <TextField
-              type="date"
-              label={t("billing.periodEnd")}
-              value={form.period_end}
-              onChange={(e) => setForm((f) => ({ ...f, period_end: e.target.value }))}
-            />
-            <SelectField
-              label={t("billing.mode")}
-              value={form.mode}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, mode: e.target.value as "arrears" | "advance" }))
-              }
-              options={[
-                { value: "arrears", label: t("billing.modes.arrears") },
-                { value: "advance", label: t("billing.modes.advance") },
-              ]}
-            />
-            <Button type="button" variant="secondary" onClick={() => preview.mutate()}>
-              {t("billing.preview")}
-            </Button>
-            <Button type="submit" disabled={start.isPending}>
-              {t("billing.runInvoicing")}
-            </Button>
-          </div>
-          {preview.data ? (
-            <p className="text-sm" aria-live="polite">
-              {t("billing.previewResult", {
-                clients: preview.data.clients,
-                charges: preview.data.charges,
-              })}
-            </p>
-          ) : null}
-          <ErrorList error={start.error ?? preview.error} />
-        </form>
-      ) : null}
-      <ul className="divide-y divide-border rounded-md border border-border text-sm">
-        {runs.rows.map((run) => (
-          <li key={run.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
-            <span>
-              {formatDate(run.period_start, i18n.language)} –{" "}
-              {formatDate(run.period_end, i18n.language)} · {t(`billing.modes.${run.mode}`)}
-            </span>
-            <span className="flex items-center gap-2">
-              {t(`billing.runStatus.${run.status}`)}
-              {typeof (run.stats as { drafts?: number }).drafts === "number"
-                ? ` · ${t("billing.drafts", { count: (run.stats as { drafts: number }).drafts })}`
-                : ""}
-              {typeof (run.stats as { held?: number }).held === "number"
-                ? ` · ${t("g3.tutorReview.held", { count: (run.stats as { held: number }).held })}`
-                : ""}
-              {run.status === "review" && canIssue ? (
-                <Button size="sm" onClick={() => approve.mutate(run.id)}>
-                  {t("billing.approveRun")}
+        <RuledPanel flush title={t("billing.runInvoicing")}>
+          <form
+            aria-label={t("billing.runInvoicing")}
+            onSubmit={(e) => {
+              e.preventDefault();
+              start.mutate();
+            }}
+          >
+            <div className="grid gap-3 px-5 py-4 sm:grid-cols-2 lg:grid-cols-[repeat(2,minmax(0,12rem))_minmax(0,22rem)]">
+              <TextField
+                type="date"
+                label={t("billing.periodStart")}
+                value={form.period_start}
+                onChange={(e) => setForm((f) => ({ ...f, period_start: e.target.value }))}
+              />
+              <TextField
+                type="date"
+                label={t("billing.periodEnd")}
+                value={form.period_end}
+                onChange={(e) => setForm((f) => ({ ...f, period_end: e.target.value }))}
+              />
+              <SelectField
+                label={t("billing.mode")}
+                value={form.mode}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, mode: e.target.value as "arrears" | "advance" }))
+                }
+                options={[
+                  { value: "arrears", label: t("billing.modes.arrears") },
+                  { value: "advance", label: t("billing.modes.advance") },
+                ]}
+              />
+            </div>
+            <PanelFooter className="justify-between">
+              <p className="tabular-nums" aria-live="polite">
+                {preview.data
+                  ? t("billing.previewResult", {
+                      clients: preview.data.clients,
+                      charges: preview.data.charges,
+                    })
+                  : null}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="secondary" onClick={() => preview.mutate()}>
+                  {t("billing.preview")}
                 </Button>
-              ) : null}
-            </span>
-            {(run.stats as { tutor_review?: boolean }).tutor_review ? (
-              <details className="w-full text-sm">
-                <summary className="cursor-pointer">{t("g3.tutorReview.title")}</summary>
-                <RunTutorReviews runId={run.id} />
-              </details>
-            ) : null}
-          </li>
-        ))}
-      </ul>
+                <Button type="submit" disabled={start.isPending}>
+                  {t("billing.runInvoicing")}
+                </Button>
+              </div>
+            </PanelFooter>
+          </form>
+          {(start.error ?? preview.error) ? (
+            <div className="px-5 pb-4">
+              <ErrorList error={start.error ?? preview.error} />
+            </div>
+          ) : null}
+        </RuledPanel>
+      ) : null}
+      <section
+        aria-label={t("billing.tabs.runs")}
+        className="rounded-xl border border-border bg-surface"
+      >
+        {runs.query.isPending ? (
+          <PanelLoading label={t("grid.loading")} />
+        ) : !runs.rows.length ? (
+          <PanelEmpty>{t("designS7.billing.noRuns")}</PanelEmpty>
+        ) : (
+          <ul>
+            {runs.rows.map((run) => {
+              const stats = run.stats as { drafts?: number; held?: number; tutor_review?: boolean };
+              const facts = [
+                typeof stats.drafts === "number"
+                  ? t("billing.drafts", { count: stats.drafts })
+                  : "",
+                typeof stats.held === "number"
+                  ? t("g3.tutorReview.held", { count: stats.held })
+                  : "",
+              ].filter(Boolean);
+              return (
+                <li key={run.id} className={rowClass}>
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                    <div className="min-w-0">
+                      <p className="font-medium tabular-nums">
+                        {formatDate(run.period_start, i18n.language)} –{" "}
+                        {formatDate(run.period_end, i18n.language)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {t(`billing.modes.${run.mode}`)}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="text-right">
+                        <p>{t(`billing.runStatus.${run.status}`)}</p>
+                        {facts.length ? (
+                          <p className="text-xs text-muted-foreground tabular-nums">
+                            {facts.join(" · ")}
+                          </p>
+                        ) : null}
+                      </div>
+                      {run.status === "review" && canIssue ? (
+                        <Button size="sm" onClick={() => approve.mutate(run.id)}>
+                          {t("billing.approveRun")}
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+                  {stats.tutor_review ? (
+                    <details className="mt-2 text-sm">
+                      <summary className="cursor-pointer font-medium text-link">
+                        {t("g3.tutorReview.title")}
+                      </summary>
+                      <RunTutorReviews runId={run.id} />
+                    </details>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+      <ErrorList error={approve.error} />
     </div>
   );
 }
+
+const BUCKETS = ["current", "one_to_30", "thirty_one_to_60", "sixty_one_to_90", "over_90"] as const;
 
 function Ageing() {
   const { t } = useTranslation();
@@ -392,46 +534,62 @@ function Ageing() {
     queryFn: async () => unwrap(await api.GET("/api/v1/billing/ageing")),
   });
   if (rows.isPending) return <Spinner label={t("grid.loading")} />;
-  if (!rows.data?.length) return <p className="text-sm text-muted-foreground">{t("grid.empty")}</p>;
-  const buckets = [
-    "current",
-    "one_to_30",
-    "thirty_one_to_60",
-    "sixty_one_to_90",
-    "over_90",
-  ] as const;
+  if (!rows.data?.length)
+    return (
+      <div className="rounded-xl border border-border bg-surface">
+        <p className="px-4 py-10 text-center text-muted-foreground">
+          {t("designS7.billing.noAgeing")}
+        </p>
+      </div>
+    );
+  const zero = (value: Money) => !/[1-9]/.test(value.amount);
   return (
-    <div className="overflow-x-auto">
+    <div
+      role="region"
+      aria-label={t("billing.tabs.ageing")}
+      tabIndex={0}
+      className="overflow-x-auto rounded-xl border border-border bg-surface"
+    >
       <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-border">
-            <th scope="col" className="py-2 pr-3">
+        <caption className="sr-only">{t("billing.tabs.ageing")}</caption>
+        <thead className="border-b border-border">
+          <tr>
+            <th scope="col" className="px-4 py-2.5 whitespace-nowrap">
               {t("billing.client")}
             </th>
-            {buckets.map((b) => (
-              <th key={b} scope="col" className="py-2 pr-3 text-right">
+            {BUCKETS.map((b) => (
+              <th key={b} scope="col" className="w-32 px-4 py-2.5 text-right whitespace-nowrap">
                 {t(`billing.ageing.${b}`)}
               </th>
             ))}
-            <th scope="col" className="py-2 pr-3 text-right">
+            <th scope="col" className="w-32 px-4 py-2.5 text-right whitespace-nowrap">
               {t("billing.total")}
             </th>
           </tr>
         </thead>
         <tbody>
           {rows.data.map((row) => (
-            <tr key={row.client} className="border-b border-border">
-              <td className="py-2 pr-3">
-                <Link to="/clients/$clientId" params={{ clientId: row.client }}>
+            <tr key={row.client}>
+              <td className="px-4 py-2.5">
+                <Link
+                  to="/clients/$clientId"
+                  params={{ clientId: row.client }}
+                  className="font-medium underline-offset-2 hover:underline"
+                >
                   {row.client_name}
                 </Link>
               </td>
-              {buckets.map((b) => (
-                <td key={b} className="py-2 pr-3 text-right">
+              {BUCKETS.map((b) => (
+                <td
+                  key={b}
+                  className={`px-4 py-2.5 text-right whitespace-nowrap ${zero(row[b]) ? "text-muted-foreground" : ""}`}
+                >
                   {money(row[b])}
                 </td>
               ))}
-              <td className="py-2 pr-3 text-right font-medium">{money(row.total)}</td>
+              <td className="px-4 py-2.5 text-right font-semibold whitespace-nowrap">
+                {money(row.total)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -470,8 +628,8 @@ export function BillingPage() {
   ];
   const [tab, setTab] = useState<Tab>("invoices");
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("billing.title")}</h1>
+    <section>
+      <PageHeader title={t("billing.title")} description={t("designS7.billing.description")} />
       <Tabs label={t("billing.title")} tabs={tabs} value={tab} onChange={setTab}>
         {tab === "invoices" ? <Invoices /> : null}
         {tab === "payments" ? <PaymentsList /> : null}
@@ -487,6 +645,6 @@ export function BillingPage() {
         {tab === "record" ? <BulkPayments /> : null}
         {tab === "options" ? <BillingOptions /> : null}
       </Tabs>
-    </div>
+    </section>
   );
 }

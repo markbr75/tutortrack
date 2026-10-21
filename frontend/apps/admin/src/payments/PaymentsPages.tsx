@@ -1,12 +1,22 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  PageHeader,
+  PanelFooter,
+  RuledPanel,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, usePermission } from "../api";
 import { SyncBadge } from "../accounting/SyncBadge";
 import { useSyncStatuses } from "../accounting/useSyncStatuses";
+import { PanelEmpty, PanelLoading, rowClass } from "../billing/moneyUi";
 import { ErrorList } from "../calendar/ErrorList";
 import { PaymentOptions } from "../g3/PaymentOptions";
 import { useCursorList } from "../lists";
@@ -40,59 +50,83 @@ export function PaymentsSettingsPage() {
   const stripe = providers.data?.find((p) => p.provider === "stripe" && !p.branch);
 
   return (
-    <div className="max-w-2xl space-y-4">
-      <h1 className="text-2xl font-semibold">{t("payments.settingsTitle")}</h1>
-      <p className="text-sm text-muted-foreground">{t("payments.settingsHelp")}</p>
-      {providers.isPending ? (
-        <Spinner label={t("grid.loading")} />
-      ) : stripe ? (
-        <section className="space-y-2 rounded-md border border-border p-4">
-          <h2 className="font-semibold">Stripe</h2>
-          <p className="text-sm">
-            {t(`payments.accountStatus.${stripe.status}`)} · {stripe.account_ref}
-          </p>
-          {stripe.requirements.length ? (
-            <Alert tone="warning">{t("payments.requirements")}</Alert>
-          ) : null}
-          {canManage ? (
-            <div className="flex flex-wrap gap-2">
-              {stripe.status !== "active" ? (
-                <Button size="sm" onClick={() => connect.mutate()}>
-                  {t("payments.finishSetup")}
+    <section className="max-w-3xl">
+      <PageHeader title={t("payments.settingsTitle")} description={t("payments.settingsHelp")} />
+      <div className="space-y-6">
+        {providers.isPending ? (
+          <Spinner label={t("grid.loading")} />
+        ) : stripe ? (
+          <RuledPanel
+            title="Stripe"
+            aside={
+              <span className="text-muted-foreground">
+                {t(`payments.accountStatus.${stripe.status}`)}
+              </span>
+            }
+            footer={
+              canManage ? (
+                <>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => act.mutate({ id: stripe.id, kind: "disconnect" })}
+                  >
+                    {t("payments.disconnect")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => act.mutate({ id: stripe.id, kind: "refresh" })}
+                  >
+                    {t("payments.checkStatus")}
+                  </Button>
+                  {stripe.status !== "active" ? (
+                    <Button size="sm" onClick={() => connect.mutate()}>
+                      {t("payments.finishSetup")}
+                    </Button>
+                  ) : null}
+                </>
+              ) : undefined
+            }
+          >
+            <p className="text-sm tabular-nums">{stripe.account_ref}</p>
+            {stripe.requirements.length ? (
+              <Alert tone="warning" className="mt-3">
+                {t("payments.requirements")}
+              </Alert>
+            ) : null}
+          </RuledPanel>
+        ) : (
+          <RuledPanel
+            title="Stripe"
+            footer={
+              canManage ? (
+                <Button onClick={() => connect.mutate()} disabled={connect.isPending}>
+                  {t("payments.connectStripe")}
                 </Button>
-              ) : null}
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => act.mutate({ id: stripe.id, kind: "refresh" })}
-              >
-                {t("payments.checkStatus")}
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => act.mutate({ id: stripe.id, kind: "disconnect" })}
-              >
-                {t("payments.disconnect")}
-              </Button>
-            </div>
-          ) : null}
-        </section>
-      ) : canManage ? (
-        <Button onClick={() => connect.mutate()} disabled={connect.isPending}>
-          {t("payments.connectStripe")}
-        </Button>
-      ) : (
-        <p className="text-sm">{t("payments.notConnected")}</p>
-      )}
-      <ErrorList error={connect.error ?? act.error} />
-      <PartnerProviders />
-      <PaymentOptions />
-    </div>
+              ) : undefined
+            }
+          >
+            <p className="text-sm text-muted-foreground">{t("payments.notConnected")}</p>
+          </RuledPanel>
+        )}
+        <ErrorList error={connect.error ?? act.error} />
+        <PartnerProviders />
+        <PaymentOptions />
+      </div>
+    </section>
   );
 }
 
-function RefundForm({ payment, onDone }: { payment: Payment; onDone: () => void }) {
+function RefundForm({
+  payment,
+  onDone,
+  onCancel,
+}: {
+  payment: Payment;
+  onDone: () => void;
+  onCancel: () => void;
+}) {
   const { t } = useTranslation();
   const [amount, setAmount] = useState("");
   const [reason, setReason] = useState("");
@@ -109,28 +143,30 @@ function RefundForm({ payment, onDone }: { payment: Payment; onDone: () => void 
   });
   return (
     <form
-      className="mt-2 flex flex-wrap items-end gap-2"
+      className="mt-3 space-y-3 border-t border-rule pt-3"
       aria-label={t("payments.refund")}
       onSubmit={(e) => {
         e.preventDefault();
         refund.mutate();
       }}
     >
-      <TextField
-        type="number"
-        step="0.01"
-        min={0}
-        label={t("payments.refundAmount")}
-        hint={t("payments.refundAll")}
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-      />
-      <TextField
-        label={t("payments.reason")}
-        required
-        value={reason}
-        onChange={(e) => setReason(e.target.value)}
-      />
+      <div className="grid max-w-2xl gap-3 sm:grid-cols-[12rem_minmax(0,1fr)]">
+        <TextField
+          type="number"
+          step="0.01"
+          min={0}
+          label={t("payments.refundAmount")}
+          hint={t("payments.refundAll")}
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+        <TextField
+          label={t("payments.reason")}
+          required
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
+      </div>
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
@@ -140,9 +176,14 @@ function RefundForm({ payment, onDone }: { payment: Payment; onDone: () => void 
         />
         {t("payments.creditInvoices")}
       </label>
-      <Button type="submit" variant="danger" disabled={refund.isPending}>
-        {t("payments.refund")}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" variant="danger" disabled={refund.isPending}>
+          {t("payments.refund")}
+        </Button>
+        <Button variant="ghost" onClick={onCancel}>
+          {t("common.cancel")}
+        </Button>
+      </div>
       <ErrorList error={refund.error} />
     </form>
   );
@@ -165,49 +206,89 @@ export function PaymentsList({ clientId }: { clientId?: string }) {
     "payment",
     list.rows.map((p) => p.id),
   );
-  if (list.query.isPending) return <Spinner label={t("grid.loading")} />;
-  if (!list.rows.length) return <p className="text-sm text-muted-foreground">{t("grid.empty")}</p>;
   return (
-    <ul className="divide-y divide-border rounded-md border border-border text-sm">
-      {list.rows.map((p) => (
-        <li key={p.id} className="p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span>
-              {p.received_at ? formatDate(p.received_at, i18n.language) : "—"} ·{" "}
-              {clientId ? "" : `${p.client_name} · `}
-              {t(`payments.methods.${p.method}`)}
-              {p.reference ? ` · ${p.reference}` : ""}
-            </span>
-            <span className="flex items-center gap-2">
-              <strong>{formatMoney(p.amount, i18n.language)}</strong>
-              <span className="text-muted-foreground">{t(`payments.status.${p.status}`)}</span>
-              <SyncBadge record={synced.data?.[p.id]} />
-              {canRefund && (p.status === "succeeded" || p.status === "partially_refunded") ? (
-                <Button size="sm" variant="ghost" onClick={() => setRefunding(p.id)}>
-                  {t("payments.refund")}
-                </Button>
+    <section
+      aria-label={t("payments.title")}
+      className="rounded-xl border border-border bg-surface text-sm"
+    >
+      {list.query.isPending ? (
+        <PanelLoading label={t("grid.loading")} />
+      ) : !list.rows.length ? (
+        <PanelEmpty>{t("designS7.payments.none")}</PanelEmpty>
+      ) : (
+        <ul>
+          {list.rows.map((p) => (
+            <li key={p.id} className={rowClass}>
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                <div className="min-w-0">
+                  <p className="font-medium">
+                    {clientId ? t(`payments.methods.${p.method}`) : p.client_name}
+                  </p>
+                  <p className="text-xs text-muted-foreground tabular-nums">
+                    {[
+                      p.received_at ? formatDate(p.received_at, i18n.language) : "—",
+                      clientId ? "" : t(`payments.methods.${p.method}`),
+                      p.reference,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                </div>
+                <div className="ml-auto flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
+                  <div className="text-right">
+                    <p className="font-semibold tabular-nums">
+                      {formatMoney(p.amount, i18n.language)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t(`payments.status.${p.status}`)}
+                      {synced.data?.[p.id] ? " · " : ""}
+                      <SyncBadge record={synced.data?.[p.id]} />
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {canRefund &&
+                    (p.status === "succeeded" || p.status === "partially_refunded") ? (
+                      <Button size="sm" variant="ghost" onClick={() => setRefunding(p.id)}>
+                        {t("payments.refund")}
+                      </Button>
+                    ) : null}
+                    <a
+                      className={buttonClass({ variant: "ghost", size: "sm" })}
+                      href={`/api/v1/payments/${p.id}/receipt`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {t("payments.receipt")}
+                    </a>
+                  </div>
+                </div>
+              </div>
+              {refunding === p.id ? (
+                <RefundForm
+                  payment={p}
+                  onCancel={() => setRefunding(null)}
+                  onDone={() => {
+                    setRefunding(null);
+                    void queryClient.invalidateQueries({ queryKey: ["payments"] });
+                  }}
+                />
               ) : null}
-              <a
-                className="underline-offset-2 hover:underline"
-                href={`/api/v1/payments/${p.id}/receipt`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {t("payments.receipt")}
-              </a>
-            </span>
-          </div>
-          {refunding === p.id ? (
-            <RefundForm
-              payment={p}
-              onDone={() => {
-                setRefunding(null);
-                void queryClient.invalidateQueries({ queryKey: ["payments"] });
-              }}
-            />
-          ) : null}
-        </li>
-      ))}
-    </ul>
+            </li>
+          ))}
+        </ul>
+      )}
+      {list.query.hasNextPage ? (
+        <PanelFooter className="justify-center">
+          <Button
+            size="sm"
+            variant="ghost"
+            loading={list.query.isFetchingNextPage}
+            onClick={() => void list.query.fetchNextPage()}
+          >
+            {t("grid.loadMore")}
+          </Button>
+        </PanelFooter>
+      ) : null}
+    </section>
   );
 }
