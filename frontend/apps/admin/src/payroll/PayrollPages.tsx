@@ -16,14 +16,8 @@ import { Link } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
-import {
-  EndHead,
-  Figure,
-  PanelEmpty,
-  PanelLoading,
-  rowClass,
-  useIsPhone,
-} from "../billing/moneyUi";
+import { EndHead, Figure, PanelEmpty, PanelLoading, rowClass } from "../billing/moneyUi";
+import { useIsPhone } from "../billing/useIsPhone";
 import { RunItems } from "../g3/PayrollExtras";
 import { WiseConnectionCard } from "./PayPhase3";
 
@@ -88,7 +82,11 @@ function Page({
 
 function useGridLabels(empty?: string) {
   const { t } = useTranslation();
-  return { loading: t("grid.loading"), empty: empty ?? t("grid.empty"), loadMore: t("grid.loadMore") };
+  return {
+    loading: t("grid.loading"),
+    empty: empty ?? t("grid.empty"),
+    loadMore: t("grid.loadMore"),
+  };
 }
 
 /** Pay runs (FR-12-5): list and open a new one for a period. */
@@ -148,7 +146,6 @@ export function PayRunsPage() {
         cell: ({ row }) => <Figure strong>{totals(row.original.totals as Totals)}</Figure>,
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- labels follow the language
     [t, i18n.language],
   );
   return (
@@ -253,8 +250,8 @@ export function PayRunPage({ id }: { id: string }) {
       title={`${t("payroll.run")} ${r.number}`}
       description={
         <span className="tabular-nums">
-          {formatDate(r.period_start, i18n.language)} – {formatDate(r.period_end, i18n.language)}{" "}
-          · {t(`payroll.runStatus.${r.status}`)}
+          {formatDate(r.period_start, i18n.language)} – {formatDate(r.period_end, i18n.language)} ·{" "}
+          {t(`payroll.runStatus.${r.status}`)}
         </span>
       }
       actions={
@@ -293,10 +290,7 @@ export function PayRunPage({ id }: { id: string }) {
         </div>
       ) : null}
 
-      <section
-        aria-labelledby="payouts-h"
-        className="rounded-xl border border-border bg-surface"
-      >
+      <section aria-labelledby="payouts-h" className="rounded-xl border border-border bg-surface">
         <div className="flex items-baseline justify-between gap-3 border-b border-border px-5 py-3.5">
           <h2 id="payouts-h" className="text-base font-semibold">
             {t("designS7.payroll.payouts")}
@@ -305,7 +299,12 @@ export function PayRunPage({ id }: { id: string }) {
             {t("designS7.payroll.payoutCount", { count: r.payouts.length })}
           </span>
         </div>
-        <div role="region" aria-labelledby="payouts-h" tabIndex={0} className="relative overflow-x-auto">
+        <div
+          role="region"
+          aria-labelledby="payouts-h"
+          tabIndex={0}
+          className="relative overflow-x-auto"
+        >
           <table className="w-full text-left text-sm md:min-w-[36rem]">
             <caption className="sr-only">{t("designS7.payroll.payouts")}</caption>
             <thead className="border-b border-border">
@@ -385,10 +384,18 @@ export function PayRunPage({ id }: { id: string }) {
             <tfoot>
               {(runTotals.length ? runTotals : [["", ""]]).map(([currency, amount], i) => (
                 <tr key={currency || "none"} className={i === 0 ? "border-t border-border" : ""}>
-                  <th scope="row" colSpan={4} className="py-3 pr-4 pl-5 text-right text-base font-semibold max-md:hidden">
+                  <th
+                    scope="row"
+                    colSpan={4}
+                    className="py-3 pr-4 pl-5 text-right text-base font-semibold max-md:hidden"
+                  >
                     {i === 0 ? t("payroll.total") : ""}
                   </th>
-                  <th scope="row" colSpan={2} className="py-3 pr-4 pl-5 text-right text-base font-semibold md:hidden">
+                  <th
+                    scope="row"
+                    colSpan={2}
+                    className="py-3 pr-4 pl-5 text-right text-base font-semibold md:hidden"
+                  >
                     {i === 0 ? t("payroll.total") : ""}
                   </th>
                   <td className="py-3 pr-5 pl-4 text-right text-base font-semibold">
@@ -681,4 +688,3 @@ export function PayItemsPage() {
     </Page>
   );
 }
-

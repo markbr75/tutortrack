@@ -24,15 +24,8 @@ import { BillingOptions, BulkPayments, RunTutorReviews } from "../g3/BillingExtr
 import { BankReconciliation } from "../payments/BankReconciliation";
 import { PaymentsList } from "../payments/PaymentsPages";
 import { LateFeesTab, PackagesTab, PlansTab, SplitsTab } from "./Phase2Tabs";
-import {
-  EndHead,
-  Figure,
-  InvoiceStatus,
-  PanelEmpty,
-  PanelLoading,
-  rowClass,
-  useIsPhone,
-} from "./moneyUi";
+import { EndHead, Figure, InvoiceStatus, PanelEmpty, PanelLoading, rowClass } from "./moneyUi";
+import { useIsPhone } from "./useIsPhone";
 
 type Tab =
   | "invoices"

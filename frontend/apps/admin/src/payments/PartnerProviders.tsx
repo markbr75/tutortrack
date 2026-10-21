@@ -102,11 +102,7 @@ export function PartnerProviders() {
                       {t("paymentProviders.connect", { name: NAMES[provider] })}
                     </Button>
                   ) : (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => disconnect.mutate(account.id)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => disconnect.mutate(account.id)}>
                       {t("payments.disconnect")}
                     </Button>
                   )

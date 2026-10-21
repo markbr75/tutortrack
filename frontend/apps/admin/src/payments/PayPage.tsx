@@ -80,18 +80,18 @@ function ProviderChoice({
     <fieldset>
       <legend className="mb-2 text-sm font-medium">{legend}</legend>
       <div className="divide-y divide-rule rounded-md border border-field">
-      {providers.map((p) => (
-        <label key={p} className="flex min-h-11 cursor-pointer items-center gap-3 px-3 text-sm">
-          <input
-            type="radio"
-            name="provider"
-            className="size-4"
-            checked={value === p}
-            onChange={() => onChange(p as Provider)}
-          />
-          {t(`payOptions.${p}`)}
-        </label>
-      ))}
+        {providers.map((p) => (
+          <label key={p} className="flex min-h-11 cursor-pointer items-center gap-3 px-3 text-sm">
+            <input
+              type="radio"
+              name="provider"
+              className="size-4"
+              checked={value === p}
+              onChange={() => onChange(p as Provider)}
+            />
+            {t(`payOptions.${p}`)}
+          </label>
+        ))}
       </div>
     </fieldset>
   );

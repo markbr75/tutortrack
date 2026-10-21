@@ -320,9 +320,7 @@ export function TaxFormsPage() {
                           {row.tin_hint ? (
                             `•••-••-${row.tin_hint}`
                           ) : (
-                            <span className="font-medium">
-                              {t("payrollPhase3.missing")}
-                            </span>
+                            <span className="font-medium">{t("payrollPhase3.missing")}</span>
                           )}
                         </td>
                         <td className="px-4 py-2.5">

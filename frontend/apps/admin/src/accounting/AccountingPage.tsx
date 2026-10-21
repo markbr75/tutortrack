@@ -173,79 +173,82 @@ function OptionsForm({ conn, canManage }: { conn: Connection; canManage: boolean
   });
   return (
     <RuledPanel flush titleId="options-heading" title={t("accounting.options")}>
-    <form
-      aria-labelledby="options-heading"
-      onSubmit={(e) => {
-        e.preventDefault();
-        save.mutate();
-      }}
-    >
-      <div className="max-w-md space-y-4 px-5 py-4">
-      <SelectField
-        label={t("accounting.mode")}
-        value={values.mode}
-        disabled={!canManage}
-        onChange={(e) => setValues({ ...values, mode: e.target.value as typeof values.mode })}
-        options={[
-          { value: "individual", label: t("accounting.modes.individual") },
-          { value: "summary", label: t("accounting.modes.summary") },
-        ]}
-      />
-      <TextField
-        type="date"
-        label={t("accounting.startDate")}
-        hint={t("accounting.startDateHelp")}
-        value={values.start_date}
-        disabled={!canManage}
-        onChange={(e) => setValues({ ...values, start_date: e.target.value })}
-      />
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          className="size-4"
-          checked={values.sync_bills}
-          disabled={!canManage}
-          onChange={(e) => setValues({ ...values, sync_bills: e.target.checked })}
-        />
-        {t("accounting.syncBills")}
-      </label>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          className="size-4"
-          checked={values.attach_pdf}
-          disabled={!canManage}
-          onChange={(e) => setValues({ ...values, attach_pdf: e.target.checked })}
-        />
-        {t("accounting.attachPdf")}
-      </label>
-      <SelectField
-        label={t("accounting.lockBehaviour")}
-        value={values.lock_behaviour}
-        disabled={!canManage}
-        onChange={(e) =>
-          setValues({ ...values, lock_behaviour: e.target.value as typeof values.lock_behaviour })
-        }
-        options={[
-          { value: "post_to_open", label: t("accounting.lock.post_to_open") },
-          { value: "hold", label: t("accounting.lock.hold") },
-        ]}
-      />
-      <ErrorList error={save.error} />
-      </div>
-      {canManage ? (
-        <PanelFooter>
-          <Button type="submit" disabled={save.isPending}>
-            {t("common.save")}
-          </Button>
-          {save.isSuccess ? (
-            <p role="status" className="text-success">
-              {t("accounting.saved")}
-            </p>
-          ) : null}
-        </PanelFooter>
-      ) : null}
-    </form>
+      <form
+        aria-labelledby="options-heading"
+        onSubmit={(e) => {
+          e.preventDefault();
+          save.mutate();
+        }}
+      >
+        <div className="max-w-md space-y-4 px-5 py-4">
+          <SelectField
+            label={t("accounting.mode")}
+            value={values.mode}
+            disabled={!canManage}
+            onChange={(e) => setValues({ ...values, mode: e.target.value as typeof values.mode })}
+            options={[
+              { value: "individual", label: t("accounting.modes.individual") },
+              { value: "summary", label: t("accounting.modes.summary") },
+            ]}
+          />
+          <TextField
+            type="date"
+            label={t("accounting.startDate")}
+            hint={t("accounting.startDateHelp")}
+            value={values.start_date}
+            disabled={!canManage}
+            onChange={(e) => setValues({ ...values, start_date: e.target.value })}
+          />
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4"
+              checked={values.sync_bills}
+              disabled={!canManage}
+              onChange={(e) => setValues({ ...values, sync_bills: e.target.checked })}
+            />
+            {t("accounting.syncBills")}
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4"
+              checked={values.attach_pdf}
+              disabled={!canManage}
+              onChange={(e) => setValues({ ...values, attach_pdf: e.target.checked })}
+            />
+            {t("accounting.attachPdf")}
+          </label>
+          <SelectField
+            label={t("accounting.lockBehaviour")}
+            value={values.lock_behaviour}
+            disabled={!canManage}
+            onChange={(e) =>
+              setValues({
+                ...values,
+                lock_behaviour: e.target.value as typeof values.lock_behaviour,
+              })
+            }
+            options={[
+              { value: "post_to_open", label: t("accounting.lock.post_to_open") },
+              { value: "hold", label: t("accounting.lock.hold") },
+            ]}
+          />
+          <ErrorList error={save.error} />
+        </div>
+        {canManage ? (
+          <PanelFooter>
+            <Button type="submit" disabled={save.isPending}>
+              {t("common.save")}
+            </Button>
+            {save.isSuccess ? (
+              <p role="status" className="text-success">
+                {t("accounting.saved")}
+              </p>
+            ) : null}
+          </PanelFooter>
+        ) : null}
+      </form>
     </RuledPanel>
   );
 }

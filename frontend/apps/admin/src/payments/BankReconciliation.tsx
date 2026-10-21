@@ -82,7 +82,7 @@ function Upload({ onDone }: { onDone: () => void }) {
             </p>
           ) : null}
         </PanelFooter>
-        {upload.error ?? sync.error ? (
+        {(upload.error ?? sync.error) ? (
           <div className="px-5 pb-4">
             <ErrorList error={upload.error ?? sync.error} />
           </div>

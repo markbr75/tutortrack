@@ -130,7 +130,11 @@ function StatusSection({ sub }: { sub: Subscription }) {
           </Button>
         ) : null,
         locked ? (
-          <Button key="reactivate" onClick={() => reactivate.mutate()} loading={reactivate.isPending}>
+          <Button
+            key="reactivate"
+            onClick={() => reactivate.mutate()}
+            loading={reactivate.isPending}
+          >
             {t("plan.reactivate")}
           </Button>
         ) : null,
@@ -600,7 +604,11 @@ function CancelSection({ sub }: { sub: Subscription }) {
   return (
     <RuledPanel titleId="plan-cancel" title={t("plan.cancelTitle")}>
       {!open ? (
-        <Button variant="ghost" className="-ml-4 text-muted-foreground" onClick={() => setOpen(true)}>
+        <Button
+          variant="ghost"
+          className="-ml-4 text-muted-foreground"
+          onClick={() => setOpen(true)}
+        >
           {t("plan.cancel")}
         </Button>
       ) : (

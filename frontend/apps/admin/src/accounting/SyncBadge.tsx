@@ -13,9 +13,7 @@ export function SyncBadge({ record }: { record?: SyncRecord }) {
   const label = t(`accounting.badge.${record.status}`, { provider });
   return (
     <span
-      className={
-        record.status === "error" ? "font-medium text-danger" : "text-muted-foreground"
-      }
+      className={record.status === "error" ? "font-medium text-danger" : "text-muted-foreground"}
       title={record.error || undefined}
     >
       {label}

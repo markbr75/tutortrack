@@ -1,6 +1,6 @@
 import { useTranslation } from "@tutortrack/i18n";
 import { cn } from "@tutortrack/ui";
-import { useSyncExternalStore, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 /** An invoice's state in words: overdue in margin red, everything else in ink or faded ink. */
 export function InvoiceStatus({
@@ -61,23 +61,5 @@ export function PanelLoading({ label }: { label: string }) {
       <div aria-hidden="true" className="h-4 animate-pulse rounded bg-muted" />
       <div aria-hidden="true" className="h-4 animate-pulse rounded bg-muted" />
     </div>
-  );
-}
-
-const PHONE = "(max-width: 767px)";
-
-function subscribe(onChange: () => void) {
-  if (typeof window === "undefined" || !window.matchMedia) return () => {};
-  const query = window.matchMedia(PHONE);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-}
-
-/** True below 768px, where money tables fold secondary columns into context lines. */
-export function useIsPhone(): boolean {
-  return useSyncExternalStore(
-    subscribe,
-    () => (typeof window !== "undefined" && window.matchMedia ? window.matchMedia(PHONE).matches : false),
-    () => false,
   );
 }
