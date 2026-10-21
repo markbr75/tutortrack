@@ -492,8 +492,8 @@ export function FunnelPage() {
             {r.stages.map((s) => (
               <tr key={s.stage}>
                 <td>{s.stage}</td>
-                <td className="text-right">{s.reached}</td>
-                <td className="text-right">{s.rate}</td>
+                <td className="text-right tabular-nums">{s.reached}</td>
+                <td className="text-right tabular-nums">{s.rate}</td>
               </tr>
             ))}
           </tbody>
@@ -514,10 +514,17 @@ export function FunnelPage() {
             {r.by_source.map((row) => (
               <tr key={row.key}>
                 <td>{t(`leads.sources.${row.key}`, { defaultValue: row.key })}</td>
-                <td className="text-right">{row.total}</td>
-                <td className="text-right">{row.won}</td>
+                <td className="text-right tabular-nums">{row.total}</td>
+                <td className="text-right tabular-nums">{row.won}</td>
               </tr>
             ))}
+            {r.by_source.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="text-muted-foreground">
+                  {t("designS5.leads.noSources")}
+                </td>
+              </tr>
+            ) : null}
           </tbody>
         </RuledTable>
       </div>

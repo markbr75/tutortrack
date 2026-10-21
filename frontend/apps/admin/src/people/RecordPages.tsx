@@ -98,7 +98,7 @@ function Loading({
 /** A component from another module that draws its own heading, set on a ruled leaf. */
 function Leaf({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-xl border border-border bg-surface px-5 py-4 [&>section]:mt-0 [&>section]:rounded-none [&>section]:border-0 [&>section]:p-0">
+    <div className="rounded-xl border border-border bg-surface px-5 py-4 [&>section]:mt-0 [&>section>h2]:text-base [&>section]:rounded-none [&>section]:border-0 [&>section]:p-0">
       {children}
     </div>
   );

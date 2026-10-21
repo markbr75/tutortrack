@@ -364,9 +364,11 @@ export function JobMatchPage({ jobId }: { jobId: string }) {
             )}
           </Card>
           <div className="space-y-6">
-            <Card title={t("matching.map")}>
-              <MatchMap origin={results.data.origin} rows={results.data.results} />
-            </Card>
+            {results.data.origin || results.data.results.some((r) => r.point) ? (
+              <Card title={t("matching.map")}>
+                <MatchMap origin={results.data.origin} rows={results.data.results} />
+              </Card>
+            ) : null}
             {canOffer ? (
               <Card title={t("matching.sendOffers")}>
                 <p className="text-sm text-muted-foreground">
@@ -597,18 +599,19 @@ function CoverPanel() {
   });
   return (
     <div className="space-y-4">
-      <SelectField
-        label={t("matching.status")}
-        hideLabel
-        size="sm"
-        className="w-auto"
-        value={status}
-        onChange={(e) => setStatus(e.target.value)}
-        options={["open", "filled", "unfilled", "cancelled"].map((s) => ({
-          value: s,
-          label: t(`matching.coverStatus.${s}`),
-        }))}
-      />
+      <div role="search" aria-label={t("matching.status")} className="flex flex-wrap gap-2">
+        <SelectField
+          label={t("matching.status")}
+          hideLabel
+          size="sm"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          options={["open", "filled", "unfilled", "cancelled"].map((s) => ({
+            value: s,
+            label: t(`matching.coverStatus.${s}`),
+          }))}
+        />
+      </div>
       <div className="rounded-xl border border-border bg-surface">
       {covers.isPending ? (
         <div className="px-5 py-4">

@@ -139,7 +139,7 @@ export function ShareShortlistSection({ jobId }: { jobId: string }) {
       <p className="px-5 pt-4 text-sm text-muted-foreground">{t("shortlistShare.intro")}</p>
       {canShare ? (
         <form
-          className="space-y-4 px-5 py-4"
+          className="max-w-xl space-y-4 px-5 py-4"
           aria-label={t("shortlistShare.form")}
           onSubmit={(e) => {
             e.preventDefault();
