@@ -332,6 +332,22 @@ def quiz_attempts(user: Any) -> QuerySet[QuizAttempt]:
     return scoped(user, QuizAttempt.objects.select_related("quiz", "student"), "learning.quiz.view")
 
 
+def tutor_tests() -> QuerySet[Quiz]:
+    """Live tutor subject tests (E18 FR-18-3, gap batch G5a)."""
+    return (
+        Quiz.objects.filter(purpose=Quiz.Purpose.TUTOR_TEST, archived_at__isnull=True)
+        .select_related("subject", "level")
+        .prefetch_related("questions")
+    )
+
+
+def tutor_test_attempts(user_ids: Any) -> QuerySet[QuizAttempt]:
+    """Subject-test attempts by these users (newest first)."""
+    return QuizAttempt.objects.filter(
+        user_id__in=list(user_ids), student__isnull=True, quiz__purpose=Quiz.Purpose.TUTOR_TEST
+    ).select_related("quiz", "quiz__subject", "quiz__level")
+
+
 # --- portal (household) -------------------------------------------------------------------------
 
 

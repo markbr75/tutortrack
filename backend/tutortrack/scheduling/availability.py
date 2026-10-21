@@ -160,11 +160,31 @@ def free_slots(
     if not free:
         return []
     busy = busy_intervals(tutor_id, free[0][0], free[-1][1], buffer_minutes=buffer_minutes)
-    earliest = now() + timedelta(hours=min_notice_hours)
+    return fit_slots(
+        free,
+        busy,
+        duration_minutes=duration_minutes,
+        step_minutes=step_minutes,
+        earliest=now() + timedelta(hours=min_notice_hours),
+    )
+
+
+def fit_slots(
+    free: list[Interval],
+    busy: list[Interval],
+    *,
+    duration_minutes: int,
+    step_minutes: int = 15,
+    earliest: datetime | None = None,
+) -> list[Slot]:
+    """The slot engine's core: start times (every ``step_minutes``, aligned within each
+    window) where ``duration_minutes`` fits inside ``free`` and outside ``busy``. Also used
+    for staff interview booking (E18, gap batch G5a)."""
+    earliest = earliest or now()
     duration = timedelta(minutes=duration_minutes)
     step = timedelta(minutes=step_minutes)
     slots = []
-    for f_start, f_end in _subtract(free, busy):
+    for f_start, f_end in _subtract(_merge(free), _merge(busy)):
         cursor = max(f_start, earliest)
         # Align to the step within the window so slots land on :00/:15/...
         offset = (cursor - f_start) % step
@@ -174,6 +194,14 @@ def free_slots(
             slots.append(Slot(cursor, cursor + duration))
             cursor += step
     return slots
+
+
+def closure_intervals(start: datetime, end: datetime) -> list[Interval]:
+    """Organisation-wide closures (holidays) between ``start`` and ``end``."""
+    events = CalendarEvent.objects.filter(
+        start__lt=end, end__gt=start, org_wide=True, type=CalendarEvent.Type.HOLIDAY
+    )
+    return _merge((e.start, e.end) for e in events)
 
 
 def within_availability(tutor_id: object, start: datetime, end: datetime, tz: str) -> bool:

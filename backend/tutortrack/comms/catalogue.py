@@ -878,6 +878,12 @@ for _key, _label, _code in (
     ("staff_compliance_submitted", _("Compliance document to verify"), "compliance.verify"),
     ("staff_compliance_expiring", _("A tutor's check is expiring"), "compliance.view"),
     ("staff_application_waiting", _("Application waiting"), "recruitment.application.edit"),
+    (
+        "staff_interview_booked",
+        _("An applicant booked an interview"),
+        "recruitment.application.edit",
+    ),
+    ("staff_probation_review", _("Probation review due"), "recruitment.performance.manage"),
     ("staff_offer_accepted", _("A tutor accepted a job offer"), "matching.offer.manage"),
     ("staff_offers_exhausted", _("No tutor accepted a job"), "matching.offer.manage"),
     ("staff_job_application", _("A tutor applied for a job"), "matching.posting.manage"),
@@ -1098,6 +1104,43 @@ def _onboarding_reminder(tutor: Any) -> list[Delivery]:
     return [Delivery(r, _base(r))]
 
 
+def _documents_requested(payload: Any) -> list[Delivery]:
+    """G5a (FR-18-8): staff asked the tutor for missing documents."""
+    from tutortrack.people.models import TutorProfile
+
+    tutor_id, names = payload
+    tutor = TutorProfile.objects.select_related("membership__user").filter(pk=tutor_id).first()
+    if tutor is None:
+        return []
+    r = tutor_recipient(tutor)
+    details = {"documents": ", ".join(names), "link": tenant_link("/portal/tutor/compliance")}
+    return [Delivery(r, _base(r, request=details))]
+
+
+def _interview_details(interview_id: Any) -> tuple[Any, dict[str, Any]] | None:
+    from tutortrack.recruitment.models import Interview
+
+    interview = Interview.objects.select_related("application").filter(pk=interview_id).first()
+    if interview is None or interview.start is None:
+        return None
+    details = {
+        "when": interview.start,
+        "minutes": interview.minutes,
+        "meeting_url": interview.meeting_url,
+    }
+    return interview, details
+
+
+def _interview_confirmed(interview_id: Any) -> list[Delivery]:
+    """G5a (FR-18-2): the booked time and the video link, to the applicant."""
+    found = _interview_details(interview_id)
+    if found is None:
+        return []
+    interview, details = found
+    r = _applicant(interview.application)
+    return [Delivery(r, _base(r, interview=details))]
+
+
 def _load_none(pk: str) -> Any:
     return None
 
@@ -1117,6 +1160,15 @@ for _key, _label, _audience, _channels, _resolve, _vars, _sample in (
      {"check": {"name": "Enhanced DBS check", "days": 30, "expiry_date": None}}),
     ("onboarding_reminder", _("Finish your onboarding"), "tutor", ("email", "in_app"),
      _onboarding_reminder, (), {}),
+    ("compliance_documents_requested", _("Documents requested"), "tutor", ("email", "in_app"),
+     _documents_requested, ("request.documents", "request.link"),
+     {"request": {"documents": "Enhanced DBS check, Right to work", "link": "https://x"}}),
+    ("interview_confirmed", _("Interview booked"), "applicant", ("email",),
+     _interview_confirmed, ("interview.when", "interview.minutes", "interview.meeting_url"),
+     {"interview": {"when": None, "minutes": 30, "meeting_url": "https://x"}}),
+    ("interview_reminder", _("Interview reminder"), "applicant", ("email",),
+     _interview_confirmed, ("interview.when", "interview.minutes", "interview.meeting_url"),
+     {"interview": {"when": None, "minutes": 30, "meeting_url": "https://x"}}),
 ):  # fmt: skip
     register(
         NotificationType(

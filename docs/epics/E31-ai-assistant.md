@@ -120,3 +120,8 @@ All of T01–T08 and FR-31-6 (matching explanations) are built. The epic defines
 - **Sub-processor list.** Anthropic is in the E29 sub-processor list (`privacy/compliance.py`, optional: only when an AI feature is on); E29 part 2 was merged alongside E31.
 - **Output moderation.** Client-facing text is never sent without a person. Refusals come from Claude's classifiers. No separate moderation model was added.
 - **Credit pricing.** AI credits are priced from list token costs (1 credit ≈ $0.005, minimum 1 per request). E04 plans gain `ai_credits_monthly` (Agency 2,000, Enterprise 10,000); `subscriptions/0003` re-syncs the catalogue.
+
+## Gap backlog (as built 2026-10-21)
+Gap batch G5a.
+
+- **Job advert writer.** The admin job-opening editor now exists (`/recruitment/openings`, E18 notes): "Draft with AI" in the editor fills the opening's description (and the title when empty). The copy-only writer on the applications page stays. This closes the "no admin job-opening editor" deviation above.

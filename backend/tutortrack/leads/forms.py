@@ -33,6 +33,7 @@ FIELD_TYPES = (
     "postcode",
     "students",
     "file",
+    "referees",
 )
 MAPPINGS = (
     "contact.first_name",
@@ -53,6 +54,23 @@ MAPPINGS = (
     "enquiry.availability",
     "enquiry.how_heard",
 )
+# Tutor application forms (E18 FR-18-1) map onto the applicant instead.
+APPLICATION_MAPPINGS = (
+    "applicant.first_name",
+    "applicant.last_name",
+    "applicant.email",
+    "applicant.phone",
+    "applicant.postcode",
+    "applicant.subjects",
+    "applicant.qualifications",
+    "applicant.experience",
+    "applicant.right_to_work",
+    "applicant.video_url",
+    "applicant.cv",
+    "applicant.video",
+    "referees",
+)
+FILE_MAPPINGS = {"applicant.cv": "cv", "applicant.video": "video"}
 EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
@@ -60,9 +78,12 @@ def fields_of(schema: dict[str, Any]) -> list[dict[str, Any]]:
     return [f for step in schema.get("steps", []) for f in step.get("fields", [])]
 
 
-def clean_schema(schema: Any) -> dict[str, Any]:
+def clean_schema(schema: Any, form_type: str = "enquiry") -> dict[str, Any]:
+    from tutortrack.core.storage.public import KINDS
+
     if not isinstance(schema, dict) or not isinstance(schema.get("steps"), list):
         raise BusinessRuleViolation(_("A form needs at least one step."))
+    allowed = (*MAPPINGS, *APPLICATION_MAPPINGS) if form_type == "application" else MAPPINGS
     keys: set[str] = set()
     for step in schema["steps"]:
         for f in step.get("fields", []):
@@ -74,8 +95,20 @@ def clean_schema(schema: Any) -> dict[str, Any]:
                 raise BusinessRuleViolation(_("Unknown field type: %(t)s") % {"t": f.get("type")})
             if f.get("consent_key") and not re.fullmatch(r"[a-z0-9-]{1,60}", str(f["consent_key"])):
                 raise BusinessRuleViolation(_("Consent fields name a consent type by its key."))
-            if f.get("maps_to") and f["maps_to"] not in MAPPINGS:
+            if f.get("maps_to") and f["maps_to"] not in allowed:
                 raise BusinessRuleViolation(_("Unknown mapping: %(m)s") % {"m": f["maps_to"]})
+            if f.get("type") == "file":
+                kind = f.setdefault("file_kind", "document")
+                if kind not in KINDS:
+                    raise BusinessRuleViolation(_("Unknown kind of file: %(k)s") % {"k": kind})
+                wanted = FILE_MAPPINGS.get(str(f.get("maps_to", "")))
+                if wanted and (kind != wanted or f.get("multiple")):
+                    raise BusinessRuleViolation(
+                        _("Map a single %(kind)s upload onto %(target)s.")
+                        % {"kind": wanted, "target": f["maps_to"]}
+                    )
+            elif f.get("maps_to") in FILE_MAPPINGS:
+                raise BusinessRuleViolation(_("Only a file upload field can hold a file."))
     mapped = {f.get("maps_to") for f in fields_of(schema)}
     if not mapped & {"contact.email", "contact.phone", "applicant.email"}:
         raise BusinessRuleViolation(_("Ask for an email address or phone number."))
@@ -113,6 +146,17 @@ def clean_submission(schema: dict[str, Any], data: dict[str, Any]) -> dict[str, 
                 isinstance(r, dict) and EMAIL.match(str(r.get("email", "")).strip()) for r in value
             ):
                 errors[key] = [_("Give each referee's name and email address.")]
+        elif kind == "file":
+            from tutortrack.core.storage.public import MAX_FILES_PER_FIELD, tokens_of
+
+            tokens = tokens_of(value)
+            limit = MAX_FILES_PER_FIELD if f.get("multiple") else 1
+            if not tokens:
+                errors[key] = [_("Upload the file again.")]
+            elif len(tokens) > limit:
+                errors[key] = [_("Add at most %(n)s files.") % {"n": limit}]
+            else:
+                value = tokens
         elif kind == "students":
             if not isinstance(value, list) or not all(isinstance(s, dict) for s in value):
                 errors[key] = [_("Add each student.")]
@@ -131,6 +175,7 @@ class Mapped:
     students: list[dict[str, Any]] = field(default_factory=list)
     enquiry: dict[str, Any] = field(default_factory=dict)
     extra: dict[str, Any] = field(default_factory=dict)
+    files: dict[str, list[str]] = field(default_factory=dict)  # field key -> upload tokens
 
 
 def map_answers(schema: dict[str, Any], answers: dict[str, Any]) -> Mapped:
@@ -143,7 +188,9 @@ def map_answers(schema: dict[str, Any], answers: dict[str, Any]) -> Mapped:
             continue
         value = answers[key]
         target = f.get("maps_to", "")
-        if target == "students":
+        if f.get("type") == "file":
+            mapped.files[key] = list(value)
+        elif target == "students":
             mapped.students += [
                 {
                     "first_name": str(s.get("first_name", "")).strip()[:100],
@@ -183,3 +230,48 @@ def _subjects(value: Any) -> list[dict[str, str]]:
         else:
             out.append({"subject": str(item)[:100], "level": ""})
     return [s for s in out if s["subject"]]
+
+
+# --- file uploads (G5a) ----------------------------------------------------------------------
+
+
+def upload_kinds_for_form(slug: str) -> set[str] | None:
+    """Upload context ``form``: a published enquiry or registration form with file fields."""
+    from tutortrack.core.storage.public import file_kinds
+
+    from .models import Form
+
+    form = Form.objects.filter(slug=slug, published=True).exclude(type=Form.Type.APPLICATION)
+    found = form.first()
+    return file_kinds(fields_of(found.schema)) if found else None
+
+
+def claim_files(
+    schema: dict[str, Any], files: dict[str, list[str]], *, owner: Any, context: str
+) -> dict[str, list[Any]]:
+    """Attach each file field's uploads to ``owner``; returns the stored files per field."""
+    from tutortrack.core.storage.public import claim
+
+    by_key = {f["key"]: f for f in fields_of(schema)}
+    out: dict[str, list[Any]] = {}
+    for key, tokens in files.items():
+        f = by_key.get(key)
+        if f is None or not tokens:
+            continue
+        try:
+            out[key] = claim(
+                tokens, owner=owner, kinds=[f.get("file_kind") or "document"], context=context
+            )
+        except BusinessRuleViolation as exc:
+            raise BusinessRuleViolation(
+                _("Check the form."), extra={"errors": {key: [str(exc.detail)]}}
+            ) from exc
+    return out
+
+
+def file_answers(stored: dict[str, list[Any]]) -> dict[str, list[dict[str, str]]]:
+    """What the submission keeps instead of the upload tokens."""
+    return {
+        key: [{"file": str(s.pk), "filename": s.filename} for s in files]
+        for key, files in stored.items()
+    }

@@ -7,10 +7,13 @@ from .processes import (
     TutorApplicationWorkflow,
     TutorOnboardingWorkflow,
 )
+from .review_processes import InterviewWorkflow, ProbationReviewWorkflow
 
 __all__ = [
     "BackgroundCheckWorkflow",
     "ComplianceRecordWorkflow",
+    "InterviewWorkflow",
+    "ProbationReviewWorkflow",
     "ReferenceRequestWorkflow",
     "TutorApplicationWorkflow",
     "TutorOnboardingWorkflow",

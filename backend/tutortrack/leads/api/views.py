@@ -122,7 +122,7 @@ class EnquiryViewSet(
         qs = scope_queryset(
             self.request.user,
             Enquiry.objects.select_related("client", "contact", "stage", "owner").prefetch_related(
-                "students"
+                "students", "attachments"
             ),
             "leads.enquiry.view",
         )

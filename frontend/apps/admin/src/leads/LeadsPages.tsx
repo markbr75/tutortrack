@@ -7,6 +7,7 @@ import { useState, type DragEvent, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
 import { AiEnquiryExtract, AiEnquiryTriage } from "../ai/AiWidgets";
+import { AttachedFiles } from "../components/AttachedFiles";
 import { RecordActivity } from "../crm/Activity";
 import { ProposalsSection } from "./ProposalPages";
 
@@ -328,6 +329,7 @@ export function EnquiryPage({ id }: { id: string }) {
             {(e.subjects as { subject: string }[]).map((s) => s.subject).join(", ") || "–"}
           </p>
           {e.notes ? <p className="whitespace-pre-line">{e.notes}</p> : null}
+          <AttachedFiles files={e.attachments} label={t("hiring.files.attachments")} />
           {e.trial_outcome ? (
             <p>
               {t("leads.trialOutcome")}: {t(`leads.outcomes.${e.trial_outcome}`)}

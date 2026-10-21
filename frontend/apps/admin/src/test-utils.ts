@@ -18,7 +18,20 @@ export function mockApi(routes: Record<string, Route>): RecordedCall[] {
   const calls: RecordedCall[] = [];
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (request: Request) => {
+    vi.fn(async (input: Request | string, init?: RequestInit) => {
+      // Direct uploads (G5a) call fetch(url, init) for the presigned PUT.
+      if (typeof input === "string") {
+        const url = new URL(input);
+        calls.push({
+          method: init?.method ?? "GET",
+          path: url.pathname,
+          search: url.search,
+          body: undefined,
+        });
+        const route = routes[`${init?.method ?? "GET"} ${url.pathname}`];
+        return new Response(null, { status: route ? 200 : 404 });
+      }
+      const request = input;
       const url = new URL(request.url);
       const path = url.pathname;
       const text = request.method === "GET" ? "" : await request.clone().text();

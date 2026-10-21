@@ -18,6 +18,7 @@ import {
   ReceiptText,
   ShieldCheck,
   Sun,
+  ClipboardCheck,
   UserRound,
   Wallet,
 } from "lucide-react";
@@ -117,6 +118,7 @@ export function TutorShell() {
     { to: "/tutor/notifications", label: t("tutor.nav.notifications"), icon: Bell, group: "you" },
     { to: "/tutor/onboarding", label: t("tutor.nav.onboarding"), icon: ListChecks, group: "you" },
     { to: "/tutor/compliance", label: t("tutor.nav.compliance"), icon: ShieldCheck, group: "you" },
+    { to: "/tutor/tests", label: t("hiring.tests.nav"), icon: ClipboardCheck, group: "you" },
     { to: "/tutor/profile", label: t("tutor.nav.profile"), icon: UserRound, group: "you" },
     { to: "/tutor/referrals", label: t("referrals.tutorPortal.nav"), icon: Gift, group: "you" },
   ];

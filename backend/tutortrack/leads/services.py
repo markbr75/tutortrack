@@ -358,6 +358,7 @@ def submit_form(
     )
     if form.type == Form.Type.REGISTRATION and form.settings.get("create_active", True):
         result = _register(form, submission, mapped)
+        _attach_uploads(form, submission, mapped, owner=submission)
         records = result.get("records", {})
         _capture_consent(
             form, answers, contact_id=records.get("contact"), student_ids=records.get("students")
@@ -385,6 +386,9 @@ def submit_form(
     FormSubmission.objects.filter(pk=submission.pk).update(
         created_records={"enquiry": str(enquiry.pk), "client": str(enquiry.client_id)}
     )
+    uploaded = _attach_uploads(form, submission, mapped, owner=enquiry)
+    if uploaded:
+        enquiry.attachments.add(*uploaded)
     _capture_consent(
         form,
         answers,
@@ -392,6 +396,20 @@ def submit_form(
         student_ids=list(enquiry.students.values_list("pk", flat=True)),
     )
     return {"submission": submission, "enquiry": enquiry, "pay_url": ""}
+
+
+def _attach_uploads(
+    form: Form, submission: FormSubmission, mapped: forms.Mapped, *, owner: Any
+) -> list[Any]:
+    """G5a: claim the visitor's uploads for the new record and keep file references (not
+    the upload tokens) on the submission."""
+    if not mapped.files:
+        return []
+    stored = forms.claim_files(form.schema, mapped.files, owner=owner, context=f"form:{form.slug}")
+    FormSubmission.objects.filter(pk=submission.pk).update(
+        data={**submission.data, **forms.file_answers(stored)}
+    )
+    return [s for files in stored.values() for s in files]
 
 
 def _capture_consent(

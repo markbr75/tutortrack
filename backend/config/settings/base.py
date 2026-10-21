@@ -243,6 +243,13 @@ FILE_UPLOADS = {
     ],
     "PRESIGN_EXPIRY_SECONDS": 900,
 }
+# Anonymous uploads on public forms (G5a, ``core.storage.public``): per-kind size limits and
+# how long a visitor's upload token stays valid before the form must be sent.
+PUBLIC_UPLOADS = {
+    "DOCUMENT_MAX_BYTES": env.int("PUBLIC_UPLOAD_DOCUMENT_MAX_BYTES", default=10 * 1024 * 1024),
+    "VIDEO_MAX_BYTES": env.int("PUBLIC_UPLOAD_VIDEO_MAX_BYTES", default=100 * 1024 * 1024),
+    "TOKEN_MAX_AGE_SECONDS": 24 * 3600,
+}
 CLAMAV = {
     "ENABLED": env.bool("CLAMAV_ENABLED", default=False),
     "HOST": env("CLAMAV_HOST", default="localhost"),
@@ -319,6 +326,8 @@ REST_FRAMEWORK = {
         "password_reset": "10/hour",
         "mfa": "20/minute",
         "public_form": env("THROTTLE_PUBLIC_FORM", default="20/hour"),
+        # Anonymous file uploads on public forms (G5a), per client IP.
+        "public_upload": env("THROTTLE_PUBLIC_UPLOAD", default="60/hour"),
         # Read-only public widget/website data (E24), per client IP.
         "public_widget": env("THROTTLE_PUBLIC_WIDGET", default="600/hour"),
     },
@@ -341,6 +350,12 @@ SPECTACULAR_SETTINGS = {
         "ProposalStatusEnum": "tutortrack.leads.models.Proposal.Status",
         "ProposalStateEnum": "tutortrack.leads.api.serializers.PROPOSAL_STATES",
         "LedgerPaymentImportStatusEnum": "tutortrack.accounting.models.LedgerPaymentImport.Status",
+        # Gap batch G5a (recruitment and public-form uploads)
+        "PerformanceNoteKindEnum": "tutortrack.recruitment.models.PerformanceNote.Kind",
+        "ProbationReviewStatusEnum": "tutortrack.recruitment.models.ProbationReview.Status",
+        "InterviewModeEnum": "tutortrack.recruitment.models.Interview.Mode",
+        "SubjectTestStatusEnum": "tutortrack.recruitment.api.serializers.SUBJECT_TEST_STATUSES",
+        "PublicUploadKindEnum": "tutortrack.core.storage.public.KIND_CHOICES",
         # Phase 3 (ADR 0032)
         "BackgroundCheckStatusEnum": "tutortrack.recruitment.models.BackgroundCheck.Status",
         "BackgroundCheckResultEnum": "tutortrack.recruitment.models.BackgroundCheck.Result",

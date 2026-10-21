@@ -1387,6 +1387,18 @@ function QuizzesSection() {
       unwrap(await api.GET("/api/v1/learning/quizzes", { params: { query: PAGE } })),
   });
   const [title, setTitle] = useState("");
+  // G5a (FR-18-3): a quiz can be a tutor subject test, with a subject and a pass mark.
+  const [purpose, setPurpose] = useState<"learning" | "tutor_test">("learning");
+  const [subject, setSubject] = useState("");
+  const [passPercent, setPassPercent] = useState("50");
+  const subjects = useQuery({
+    queryKey: ["g3", "subjects"],
+    enabled: canManage,
+    queryFn: async () => {
+      const rows = unwrap(await api.GET("/api/v1/catalogue/subjects"));
+      return ("results" in rows ? rows.results : rows) as { id: string; name: string }[];
+    },
+  });
   const [questions, setQuestions] = useState<DraftQuestion[]>([
     { kind: "single", prompt: "", choices: "", answer: "" },
   ]);
@@ -1396,6 +1408,9 @@ function QuizzesSection() {
         await api.POST("/api/v1/learning/quizzes", {
           body: {
             title,
+            purpose,
+            subject: subject || null,
+            pass_percent: Number(passPercent),
             questions: questions.map((q) => {
               const choices = q.choices
                 .split("\n")
@@ -1418,6 +1433,8 @@ function QuizzesSection() {
       ),
     onSuccess: () => {
       setTitle("");
+      setPurpose("learning");
+      setSubject("");
       setQuestions([{ kind: "single", prompt: "", choices: "", answer: "" }]);
       void invalidate();
     },
@@ -1431,6 +1448,7 @@ function QuizzesSection() {
           caption={t("learning.tabs.quizzes")}
           headers={[
             t("learning.quizzes.titleLabel"),
+            t("hiring.tests.purpose"),
             t("learning.quizzes.questions"),
             t("learning.quizzes.attempts"),
           ]}
@@ -1438,6 +1456,7 @@ function QuizzesSection() {
           {quizzes.data.results.map((q) => (
             <tr key={q.id}>
               <Cell>{q.title}</Cell>
+              <Cell>{t(`hiring.tests.purposes.${q.purpose ?? "learning"}`)}</Cell>
               <Cell>{q.questions?.length ?? 0}</Cell>
               <Cell>{q.attempts_count}</Cell>
             </tr>
@@ -1459,6 +1478,34 @@ function QuizzesSection() {
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+          />
+          <SelectField
+            label={t("hiring.tests.purpose")}
+            hint={purpose === "tutor_test" ? t("hiring.tests.purposeHint") : undefined}
+            value={purpose}
+            onChange={(e) => setPurpose(e.target.value as "learning" | "tutor_test")}
+            options={(["learning", "tutor_test"] as const).map((v) => ({
+              value: v,
+              label: t(`hiring.tests.purposes.${v}`),
+            }))}
+          />
+          <SelectField
+            label={t("hiring.tests.subject")}
+            required={purpose === "tutor_test"}
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            options={[
+              { value: "", label: t("hiring.tests.anySubject") },
+              ...(subjects.data ?? []).map((sub) => ({ value: sub.id, label: sub.name })),
+            ]}
+          />
+          <TextField
+            label={t("hiring.tests.passMark")}
+            type="number"
+            min={0}
+            max={100}
+            value={passPercent}
+            onChange={(e) => setPassPercent(e.target.value)}
           />
           {questions.map((q, i) => (
             <fieldset

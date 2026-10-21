@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 
 import { PayProfileCard } from "../payroll/PayProfileCard";
 import { BackgroundChecksCard } from "../recruitment/BackgroundChecksCard";
+import { TutorOffboardingCard, TutorPerformanceCard } from "../recruitment/HiringPages";
 import { TutorComplianceCard } from "../recruitment/RecruitmentPages";
 import { api, usePermission } from "../api";
 import { ClientBilling } from "../billing/ClientBilling";
@@ -371,6 +372,8 @@ export function TutorPage({ tutorId }: { tutorId: string }) {
         <PayProfileCard tutorId={tutorId} />
         <TutorComplianceCard tutorId={tutorId} />
         <BackgroundChecksCard tutorId={tutorId} />
+        <TutorPerformanceCard tutorId={tutorId} />
+        <TutorOffboardingCard tutorId={tutorId} />
         <Card title={t("people.details")}>
           <Facts
             items={[

@@ -2,7 +2,13 @@ from __future__ import annotations
 
 from typing import Any
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+
+from tutortrack.core.api.public_uploads import AttachedFileSerializer
+from tutortrack.core.api.serializers import TenantRelatedField
+from tutortrack.leads.models import Form
+from tutortrack.tenancy.models import Branch
 
 from ..models import (
     ApplicationStage,
@@ -10,6 +16,8 @@ from ..models import (
     ComplianceRecord,
     Interview,
     JobOpening,
+    PerformanceNote,
+    ProbationReview,
     ReferenceRequest,
     RequirementType,
     Scorecard,
@@ -18,6 +26,12 @@ from ..models import (
 
 
 class JobOpeningSerializer(serializers.ModelSerializer):
+    slug = serializers.SlugField(max_length=80, required=False, allow_blank=True)
+    form = TenantRelatedField(Form, required=False, allow_null=True)
+    branch = TenantRelatedField(Branch, required=False, allow_null=True)
+    form_name = serializers.CharField(source="form.name", read_only=True, default="")
+    applications_open = serializers.SerializerMethodField()
+
     class Meta:
         model = JobOpening
         fields = [
@@ -29,9 +43,23 @@ class JobOpeningSerializer(serializers.ModelSerializer):
             "location",
             "branch",
             "form",
+            "form_name",
             "published",
             "closes_on",
+            "applications_open",
         ]
+
+    def get_applications_open(self, obj: JobOpening) -> int:
+        counts = self.context.get("open_counts")
+        if counts is not None:
+            return int(counts.get(obj.pk, 0))
+        return obj.applications.filter(status="open").count()
+
+
+class ApplicationFormSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    slug = serializers.CharField()
 
 
 class ApplicationStageSerializer(serializers.ModelSerializer):
@@ -81,7 +109,20 @@ class ReferenceSerializer(serializers.ModelSerializer):
 class InterviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Interview
-        fields = ["id", "interviewer", "options", "minutes", "meeting_url", "start", "status"]
+        fields = [
+            "id",
+            "interviewer",
+            "options",
+            "minutes",
+            "meeting_url",
+            "host_url",
+            "video_provider",
+            "start",
+            "status",
+            "mode",
+            "window_start",
+            "window_end",
+        ]
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
@@ -125,9 +166,20 @@ class ApplicationDetailSerializer(ApplicationSerializer):
     scorecards = ScorecardSerializer(many=True, read_only=True)
     references = ReferenceSerializer(many=True, read_only=True)
     interviews = InterviewSerializer(many=True, read_only=True)
+    cv_file = AttachedFileSerializer(source="cv", read_only=True, allow_null=True)
+    video_file = AttachedFileSerializer(source="video", read_only=True, allow_null=True)
+    attachments = AttachedFileSerializer(many=True, read_only=True)
 
     class Meta(ApplicationSerializer.Meta):
-        fields = [*ApplicationSerializer.Meta.fields, "scorecards", "references", "interviews"]
+        fields = [
+            *ApplicationSerializer.Meta.fields,
+            "scorecards",
+            "references",
+            "interviews",
+            "cv_file",
+            "video_file",
+            "attachments",
+        ]
         read_only_fields = fields
 
 
@@ -159,9 +211,16 @@ class ApproveSerializer(serializers.Serializer):
 
 
 class ProposeInterviewSerializer(serializers.Serializer):
-    options = serializers.ListField(child=serializers.DateTimeField(), min_length=1, max_length=10)
+    mode = serializers.ChoiceField(choices=Interview.Mode.choices, default=Interview.Mode.TIMES)
+    options = serializers.ListField(
+        child=serializers.DateTimeField(), required=False, max_length=10, default=list
+    )
+    window_start = serializers.DateField(required=False, allow_null=True, default=None)
+    window_end = serializers.DateField(required=False, allow_null=True, default=None)
     minutes = serializers.IntegerField(min_value=10, max_value=180, default=30)
-    meeting_url = serializers.URLField(required=False, allow_blank=True, default="")
+    meeting_url = serializers.URLField(
+        required=False, allow_blank=True, default="", max_length=1000
+    )
 
 
 class RequestReferenceSerializer(serializers.Serializer):
@@ -329,6 +388,8 @@ class PublicInterviewSerializer(serializers.Serializer):
     start = serializers.DateTimeField(allow_null=True)
     meeting_url = serializers.CharField(allow_blank=True)
     organisation = serializers.CharField()
+    mode = serializers.CharField()
+    timezone = serializers.CharField()
 
 
 class BookInterviewSerializer(serializers.Serializer):
@@ -365,3 +426,181 @@ def public_opening(opening: JobOpening) -> dict[str, Any]:
         "subjects": opening.subjects,
         "closes_on": opening.closes_on,
     }
+
+
+# --- gap batch G5a ------------------------------------------------------------------------------
+
+
+class RequestMissingSerializer(serializers.Serializer):
+    tutors = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+        allow_null=True,
+        default=None,
+        help_text="Leave out to ask every tutor with gaps.",
+    )
+    requirements = serializers.ListField(
+        child=serializers.SlugField(),
+        required=False,
+        default=list,
+        help_text="Requirement keys to ask for; leave empty for all gaps.",
+    )
+
+
+class RequestedTutorSerializer(serializers.Serializer):
+    tutor = serializers.UUIDField()
+    requirements = serializers.ListField(child=serializers.CharField())
+
+
+class RequestMissingResultSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
+    requests = RequestedTutorSerializer(many=True)
+
+
+class ProbationReviewSerializer(serializers.ModelSerializer):
+    tutor_name = serializers.CharField(source="tutor.full_name", read_only=True)
+    reviewer_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProbationReview
+        fields = [
+            "id",
+            "tutor",
+            "tutor_name",
+            "due_on",
+            "status",
+            "outcome_notes",
+            "reviewer",
+            "reviewer_name",
+            "reviewed_at",
+            "previous",
+            "created_at",
+        ]
+        read_only_fields = fields
+
+    def get_reviewer_name(self, obj: ProbationReview) -> str:
+        return (obj.reviewer.get_full_name() or obj.reviewer.email) if obj.reviewer else ""
+
+
+class ScheduleProbationSerializer(serializers.Serializer):
+    tutor = serializers.UUIDField()
+    due_on = serializers.DateField()
+
+
+class CompleteProbationSerializer(serializers.Serializer):
+    outcome = serializers.ChoiceField(choices=["passed", "extended", "failed", "cancelled"])
+    notes = serializers.CharField(required=False, allow_blank=True, default="", max_length=5000)
+    extend_to = serializers.DateField(required=False, allow_null=True, default=None)
+
+
+class PerformanceNoteSerializer(serializers.ModelSerializer):
+    author_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PerformanceNote
+        fields = ["id", "tutor", "kind", "body", "author", "author_name", "created_at"]
+        read_only_fields = ["id", "author", "author_name", "created_at"]
+
+    def get_author_name(self, obj: PerformanceNote) -> str:
+        return (obj.author.get_full_name() or obj.author.email) if obj.author else ""
+
+
+class AddPerformanceNoteSerializer(serializers.Serializer):
+    tutor = serializers.UUIDField()
+    kind = serializers.ChoiceField(choices=PerformanceNote.Kind.choices)
+    body = serializers.CharField(max_length=5000)
+
+
+class OffboardingItemSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    auto = serializers.BooleanField()
+    done = serializers.BooleanField()
+    done_at = serializers.CharField(allow_null=True)
+
+
+class OffboardingSerializer(serializers.Serializer):
+    id = serializers.UUIDField(allow_null=True)
+    reason = serializers.CharField(allow_blank=True)
+    leaving_on = serializers.DateField(allow_null=True)
+    started_at = serializers.DateTimeField(allow_null=True)
+    completed_at = serializers.DateTimeField(allow_null=True)
+    items = OffboardingItemSerializer(many=True)
+    tutor_status = serializers.CharField()
+
+
+class StartOffboardingSerializer(serializers.Serializer):
+    reason = serializers.CharField(required=False, allow_blank=True, default="", max_length=500)
+    leaving_on = serializers.DateField(required=False, allow_null=True, default=None)
+
+
+SUBJECT_TEST_STATUSES = ["not_taken", "passed", "failed"]
+
+
+class SubjectTestSerializer(serializers.Serializer):
+    id = serializers.UUIDField(source="quiz.pk")
+    title = serializers.CharField(source="quiz.title")
+    description = serializers.CharField(source="quiz.description")
+    subject = serializers.CharField(source="quiz.subject.name", default="")
+    level = serializers.CharField(source="quiz.level.name", default="")
+    pass_percent = serializers.IntegerField(source="quiz.pass_percent")
+    time_limit_minutes = serializers.IntegerField(source="quiz.time_limit_minutes", allow_null=True)
+    question_count = serializers.SerializerMethodField()
+    subjects = serializers.ListField(child=serializers.CharField())
+    status = serializers.ChoiceField(choices=SUBJECT_TEST_STATUSES)
+    percent = serializers.DecimalField(max_digits=5, decimal_places=2, allow_null=True)
+    taken_at = serializers.DateTimeField(allow_null=True)
+    retake_at = serializers.DateTimeField(allow_null=True)
+    can_take = serializers.BooleanField()
+
+    @extend_schema_field(serializers.IntegerField())
+    def get_question_count(self, obj: dict[str, Any]) -> int:
+        return len(obj["quiz"].questions.all())
+
+
+class SubjectTestQuestionSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    kind = serializers.CharField()
+    prompt = serializers.CharField()
+    choices = serializers.ListField(child=serializers.DictField())
+    points = serializers.IntegerField()
+
+
+class SubjectTestDetailSerializer(SubjectTestSerializer):
+    questions = serializers.SerializerMethodField()
+
+    @extend_schema_field(SubjectTestQuestionSerializer(many=True))
+    def get_questions(self, obj: dict[str, Any]) -> list[dict[str, Any]]:
+        if not obj["can_take"]:
+            return []
+        return [
+            {
+                "id": q.pk,
+                "kind": q.kind,
+                "prompt": q.prompt,
+                "choices": q.choices,
+                "points": q.points,
+            }
+            for q in obj["quiz"].questions.all()
+        ]
+
+
+class TakeSubjectTestSerializer(serializers.Serializer):
+    answers = serializers.DictField(help_text="Question id → choice id(s) or a short answer.")
+
+
+class SubjectTestResultSerializer(serializers.Serializer):
+    percent = serializers.DecimalField(max_digits=5, decimal_places=2)
+    passed = serializers.BooleanField()
+    pass_percent = serializers.IntegerField()
+    assessed = serializers.ListField(child=serializers.CharField())
+
+
+class SubjectTestAttemptSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    quiz = serializers.UUIDField(source="quiz_id")
+    title = serializers.CharField(source="quiz.title")
+    subject = serializers.CharField(source="quiz.subject.name", default="")
+    percent = serializers.DecimalField(max_digits=5, decimal_places=2)
+    passed = serializers.BooleanField()
+    submitted_at = serializers.DateTimeField()

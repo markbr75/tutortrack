@@ -51,6 +51,94 @@ def _stage(kind: str) -> ApplicationStage:
     return next(s for s in stages() if s.kind == kind)
 
 
+# --- job openings (T01; G5a editor) ---------------------------------------------------------
+
+OPENING_FIELDS = (
+    "title",
+    "slug",
+    "description",
+    "subjects",
+    "location",
+    "branch",
+    "form",
+    "published",
+    "closes_on",
+)
+
+
+def default_application_form() -> Any:
+    """The standard tutor application form (FR-18-1: details, subjects, qualifications,
+    experience, right to work, CV and video uploads, referees, privacy notice), created on
+    first use and then edited like any other form."""
+    from django.utils.text import slugify
+
+    from tutortrack.leads.models import Form
+
+    existing = Form.objects.filter(type=Form.Type.APPLICATION, settings__standard=True).first()
+    if existing is not None:
+        return existing
+    slug = "tutor-application"
+    n = 1
+    while Form.objects.filter(slug=slug).exists():
+        n += 1
+        slug = slugify(f"tutor-application-{n}")
+    form = Form.objects.create(
+        name=_("Tutor application"),
+        slug=slug,
+        type=Form.Type.APPLICATION,
+        schema=catalogue.APPLICATION_FORM,
+        settings={"standard": True},
+        published=True,
+    )
+    audit.record(form, "create", {"name": [None, form.name]})
+    return form
+
+
+@transaction.atomic
+def save_opening(opening: JobOpening | None, *, user: Any = None, **data: Any) -> JobOpening:
+    """Create or edit a job opening (G5a admin editor). The slug is unique per organisation
+    and the form must be a tutor application form."""
+    from django.utils.text import slugify
+
+    from tutortrack.leads.models import Form
+
+    created = opening is None
+    opening = opening or JobOpening()
+    data = {k: v for k, v in data.items() if k in OPENING_FIELDS}
+    if "slug" in data or created:
+        slug = slugify(data.get("slug") or data.get("title") or opening.title)[:80]
+        if not slug:
+            raise BusinessRuleViolation(
+                _("Give the opening a title."), extra={"errors": {"title": [_("Required.")]}}
+            )
+        clash = JobOpening.objects.filter(slug=slug)
+        if not created:
+            clash = clash.exclude(pk=opening.pk)
+        if clash.exists():
+            raise BusinessRuleViolation(
+                _("Another opening uses this web address."),
+                extra={"errors": {"slug": [_("Choose another.")]}},
+            )
+        data["slug"] = slug
+    form = data.pop("form", None) or (None if not created else default_application_form())
+    if form is not None:
+        if form.type != Form.Type.APPLICATION:
+            raise BusinessRuleViolation(
+                _("Choose a tutor application form."),
+                extra={"errors": {"form": [_("Choose a tutor application form.")]}},
+            )
+        data["form"] = form
+    if "subjects" in data:
+        from tutortrack.leads.forms import _subjects
+
+        data["subjects"] = _subjects(data["subjects"])
+    with audit.track(opening, action="create" if created else "update"):
+        for key, value in data.items():
+            setattr(opening, key, value)
+        opening.save()
+    return opening
+
+
 # --- applications (T01) ---------------------------------------------------------------------
 
 
@@ -85,11 +173,14 @@ def apply(
     applicant: dict[str, Any] = {}
     referees: list[dict[str, str]] = []
     extra: dict[str, Any] = {}
+    uploads: dict[str, list[str]] = {}
     for f in fields:
         if f["key"] not in answers:
             continue
         value, target = answers[f["key"]], f.get("maps_to", "")
-        if target.startswith("applicant."):
+        if f.get("type") == "file":
+            uploads[f["key"]] = list(value)
+        elif target.startswith("applicant."):
             applicant[target.split(".", 1)[1]] = value
         elif target == "referees":
             referees = [
@@ -104,11 +195,6 @@ def apply(
             extra[f.get("label", f["key"])] = value
     if not applicant.get("email") or not applicant.get("first_name"):
         raise BusinessRuleViolation(_("Name and email are required."))
-    cv = None
-    if applicant.get("cv"):
-        from tutortrack.core.models import StoredFile
-
-        cv = StoredFile.objects.filter(pk=applicant["cv"]).first()
     first = next(s for s in stages() if s.kind == ApplicationStage.Kind.OPEN)
     application = TutorApplication.objects.create(
         opening=opening,
@@ -123,15 +209,59 @@ def apply(
         experience=str(applicant.get("experience", "")),
         right_to_work=str(applicant.get("right_to_work", ""))[:200],
         video_url=str(applicant.get("video_url", ""))[:200],
-        cv=cv,
         answers=extra,
         stage=first,
         stage_entered_at=now(),
     )
+    if uploads:
+        _attach_uploads(application, opening, submission, uploads)
     for referee in referees:
         request_reference(application, **referee)
     publish(events.ApplicationSubmitted(subject_id=application.pk, opening_id=str(opening.pk)))
     return application
+
+
+def _attach_uploads(
+    application: TutorApplication,
+    opening: JobOpening,
+    submission: Any,
+    uploads: dict[str, list[str]],
+) -> None:
+    """G5a: the CV, video introduction and other files uploaded on the public form."""
+    from tutortrack.leads import forms
+    from tutortrack.leads.models import FormSubmission
+
+    schema = opening.form.schema
+    stored = forms.claim_files(
+        schema, uploads, owner=application, context=f"opening:{opening.slug}"
+    )
+    targets = {f["key"]: f.get("maps_to", "") for f in forms.fields_of(schema)}
+    others = []
+    for key, files in stored.items():
+        target = targets.get(key, "")
+        if target == "applicant.cv":
+            application.cv = files[0]
+        elif target == "applicant.video":
+            application.video = files[0]
+        else:
+            others += files
+    application.save(update_fields=["cv", "video", "updated_at"])
+    if others:
+        application.attachments.add(*others)
+    FormSubmission.objects.filter(pk=submission.pk).update(
+        data={**submission.data, **forms.file_answers(stored)}
+    )
+
+
+def upload_kinds_for_opening(slug: str) -> set[str] | None:
+    """Upload context ``opening``: a published, open job opening whose form has file fields."""
+    from tutortrack.core.storage.public import file_kinds
+    from tutortrack.leads import forms
+
+    opening = JobOpening.objects.filter(slug=slug, published=True).select_related("form").first()
+    if opening is None or (opening.closes_on and opening.closes_on < compliance.today()):
+        return None
+    return file_kinds(forms.fields_of(opening.form.schema))
 
 
 @transaction.atomic
@@ -213,14 +343,38 @@ def propose_interview(
     application: TutorApplication,
     *,
     interviewer: Any,
-    options: list[datetime],
+    options: list[datetime] | None = None,
     minutes: int = 30,
     meeting_url: str = "",
+    mode: str = Interview.Mode.TIMES,
+    window_start: Any = None,
+    window_end: Any = None,
 ) -> tuple[Interview, str]:
-    """Offer times; the applicant picks one from the emailed link."""
-    future = sorted(o for o in options if o > now())
-    if not future:
-        raise BusinessRuleViolation(_("Offer at least one time in the future."))
+    """Offer times, or (G5a) a booking link over the interviewer's free time in a date
+    window; the applicant picks one from the emailed link."""
+    from . import interviews
+
+    if application.status != TutorApplication.Status.OPEN:
+        raise BusinessRuleViolation(_("This application is closed."))
+    future: list[datetime] = []
+    if mode == Interview.Mode.AVAILABILITY:
+        if window_start is None or window_end is None:
+            raise BusinessRuleViolation(
+                _("Choose the dates to offer."),
+                extra={"errors": {"window_start": [_("Required.")]}},
+            )
+        interviews.check_window(window_start, window_end)
+        if not interviews.interviewer_slots(
+            interviewer, start=window_start, end=window_end, minutes=minutes
+        ):
+            raise BusinessRuleViolation(
+                _("The interviewer has no free time on those dates."),
+                extra={"code": "no_free_slots"},
+            )
+    else:
+        future = sorted(o for o in (options or []) if o > now())
+        if not future:
+            raise BusinessRuleViolation(_("Offer at least one time in the future."))
     token = secrets.token_urlsafe(24)
     interview = Interview.objects.create(
         application=application,
@@ -229,7 +383,11 @@ def propose_interview(
         minutes=minutes,
         meeting_url=meeting_url,
         token_hash=_hash(token),
+        mode=mode,
+        window_start=window_start if mode == Interview.Mode.AVAILABILITY else None,
+        window_end=window_end if mode == Interview.Mode.AVAILABILITY else None,
     )
+    audit.record(interview, "create", {"mode": [None, mode]})
     from tutortrack.comms import services as comms
 
     transaction.on_commit(
@@ -251,12 +409,31 @@ def interview_for_token(token: str) -> Interview:
 
 @transaction.atomic
 def book_interview(token: str, start: str) -> Interview:
-    interview = Interview.objects.select_for_update().get(pk=interview_for_token(token).pk)
+    from . import interviews
+
+    found = interview_for_token(token)
+    interviews.lock_interviewer(found.interviewer_id)
+    interview = Interview.objects.select_for_update().get(pk=found.pk)
     if interview.status != Interview.Status.PROPOSED:
         raise BusinessRuleViolation(_("This interview is already booked."))
-    if start not in interview.options:
+    try:
+        moment = datetime.fromisoformat(start)
+    except ValueError:
+        raise BusinessRuleViolation(_("Choose one of the offered times.")) from None
+    if interview.mode == Interview.Mode.AVAILABILITY:
+        if (
+            moment.tzinfo is None
+            or not interview.window_start
+            or not interview.window_end
+            or not interviews.is_free(interview, moment)
+        ):
+            raise BusinessRuleViolation(
+                _("That time has just been taken. Please choose another."),
+                extra={"code": "slot_taken"},
+            )
+    elif start not in interview.options:
         raise BusinessRuleViolation(_("Choose one of the offered times."))
-    interview.start = datetime.fromisoformat(start)
+    interview.start = moment
     interview.status = Interview.Status.BOOKED
     interview.save(update_fields=["start", "status", "updated_at"])
     publish(

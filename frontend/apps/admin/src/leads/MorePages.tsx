@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { api } from "../api";
 import { Turnstile } from "../components/Turnstile";
+import { PublicFileField, type UploadTarget } from "../components/PublicFileField";
 import { PublicLayout } from "../layout/PublicLayout";
 import { LeadsPage } from "./LeadsPages";
 
@@ -21,6 +22,9 @@ export interface Field {
   show_if?: { field: string; equals: unknown };
   /** G6: the E29 consent type a ticked ``consent`` field records. */
   consent_key?: string;
+  /** G5a: what a ``file`` field takes (``document``, ``cv`` or ``video``), and how many. */
+  file_kind?: "document" | "cv" | "video";
+  multiple?: boolean;
 }
 
 export interface Schema {
@@ -49,7 +53,14 @@ const STARTER: Schema = {
 }; // prettier-ignore
 
 const FIELD_TYPES = ["text", "textarea", "email", "phone", "number", "date", "select",
-                     "checkbox", "consent", "postcode", "students"]; // prettier-ignore
+                     "checkbox", "consent", "postcode", "students", "file"]; // prettier-ignore
+// G5a: tutor application forms (E18) map onto the applicant and take referees.
+const APPLICATION_FIELD_TYPES = [...FIELD_TYPES, "referees"];
+const APPLICATION_MAPPINGS = ["", "applicant.first_name", "applicant.last_name",
+  "applicant.email", "applicant.phone", "applicant.postcode", "applicant.subjects",
+  "applicant.qualifications", "applicant.experience", "applicant.right_to_work",
+  "applicant.video_url", "applicant.cv", "applicant.video", "referees"]; // prettier-ignore
+const FILE_KINDS = ["document", "cv", "video"] as const;
 const CONSENT_KEYS = ["", "terms", "privacy-policy", "marketing-email", "marketing-sms",
                       "photo-video", "lesson-recording"]; // prettier-ignore
 const MAPPINGS = ["", "contact.first_name", "contact.last_name", "contact.email", "contact.phone",
@@ -154,6 +165,9 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
             },
       ),
     });
+  const isApplication = form.type === "application";
+  const fieldTypes = isApplication ? APPLICATION_FIELD_TYPES : FIELD_TYPES;
+  const mappings = isApplication ? APPLICATION_MAPPINGS : MAPPINGS;
   const remove = (step: number, index: number) =>
     setSchema({
       steps: schema.steps.map((s, i) =>
@@ -207,7 +221,7 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
                   value={f.type}
                   onChange={(e) => update(s, i, { type: e.target.value })}
                 >
-                  {FIELD_TYPES.map((type) => (
+                  {fieldTypes.map((type) => (
                     <option key={type} value={type}>
                       {type}
                     </option>
@@ -221,13 +235,41 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
                   value={f.maps_to ?? ""}
                   onChange={(e) => update(s, i, { maps_to: e.target.value || undefined })}
                 >
-                  {MAPPINGS.map((m) => (
+                  {mappings.map((m) => (
                     <option key={m} value={m}>
                       {m || t("leads.notMapped")}
                     </option>
                   ))}
                 </select>
               </label>
+              {f.type === "file" ? (
+                <>
+                  <label className="flex flex-col gap-1">
+                    <span className="font-medium">{t("hiring.formBuilder.fileKind")}</span>
+                    <select
+                      className="h-10 rounded-md border border-border bg-background px-2"
+                      value={f.file_kind ?? "document"}
+                      onChange={(e) =>
+                        update(s, i, { file_kind: e.target.value as Field["file_kind"] })
+                      }
+                    >
+                      {FILE_KINDS.map((k) => (
+                        <option key={k} value={k}>
+                          {t(`hiring.formBuilder.fileKinds.${k}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(f.multiple)}
+                      onChange={(e) => update(s, i, { multiple: e.target.checked })}
+                    />
+                    {t("hiring.formBuilder.multiple")}
+                  </label>
+                </>
+              ) : null}
               {f.type === "consent" ? (
                 <label className="flex flex-col gap-1">
                   <span className="font-medium">{t("gapG6.consentKey")}</span>
@@ -468,6 +510,7 @@ export function PublicFormPage({ slug }: { slug: string }) {
                     value={answers[f.key]}
                     error={errors?.[f.key]?.[0]}
                     onChange={(v) => set(f.key, v)}
+                    uploadTarget={{ target: "form", slug }}
                   />
                 ))}
             </fieldset>
@@ -502,13 +545,30 @@ export function PublicField({
   value,
   error,
   onChange,
+  uploadTarget,
 }: {
   field: Field;
   value: unknown;
   error?: string;
   onChange: (value: unknown) => void;
+  /** G5a: where a ``file`` field's uploads go (the form or job opening). */
+  uploadTarget?: UploadTarget;
 }) {
   const { t } = useTranslation();
+  if (field.type === "file") {
+    if (!uploadTarget) return null;
+    return (
+      <PublicFileField
+        label={field.label}
+        kind={field.file_kind ?? "document"}
+        multiple={field.multiple}
+        required={field.required}
+        error={error}
+        where={uploadTarget}
+        onChange={onChange}
+      />
+    );
+  }
   if (field.type === "students") {
     const students = (value as { first_name: string; subjects: string }[] | undefined) ?? [
       { first_name: "", subjects: "" },

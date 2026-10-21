@@ -83,6 +83,11 @@ class TutorApplication(TenantModel):
     cv = models.ForeignKey(
         "core.StoredFile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
+    # G5a: a video introduction uploaded on the public form, and any other uploads.
+    video = models.ForeignKey(
+        "core.StoredFile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    attachments = models.ManyToManyField("core.StoredFile", blank=True, related_name="+")
     answers = models.JSONField(default=dict, blank=True)
     stage = models.ForeignKey(ApplicationStage, on_delete=models.PROTECT, related_name="+")
     stage_entered_at = models.DateTimeField()
@@ -143,6 +148,10 @@ class Interview(TenantModel):
         BOOKED = "booked", _("Booked")
         CANCELLED = "cancelled", _("Cancelled")
 
+    class Mode(models.TextChoices):
+        TIMES = "times", _("Times offered by staff")
+        AVAILABILITY = "availability", _("Booking link from the interviewer's free time")
+
     application = models.ForeignKey(
         TutorApplication, on_delete=models.CASCADE, related_name="interviews"
     )
@@ -151,8 +160,15 @@ class Interview(TenantModel):
     )
     options = models.JSONField(default=list)  # ISO datetimes
     minutes = models.PositiveSmallIntegerField(default=30)
-    meeting_url = models.URLField(blank=True, default="")
+    meeting_url = models.URLField(max_length=1000, blank=True, default="")
     start = models.DateTimeField(null=True, blank=True)
+    # G5a (FR-18-2): booking through the slot engine and an automatic video link (E22).
+    mode = models.CharField(max_length=12, choices=Mode.choices, default=Mode.TIMES)
+    window_start = models.DateField(null=True, blank=True)
+    window_end = models.DateField(null=True, blank=True)
+    video_provider = models.CharField(max_length=20, blank=True, default="")
+    host_url = models.URLField(max_length=1000, blank=True, default="")
+    meeting_external_id = models.CharField(max_length=200, blank=True, default="")
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PROPOSED)
     token_hash = models.CharField(max_length=64, db_index=True)
 
@@ -362,6 +378,102 @@ class BackgroundCheck(TenantModel):
 
     def __str__(self) -> str:
         return f"{self.provider} check for {self.tutor_id} ({self.status})"
+
+
+class ProbationReview(TenantModel):
+    """A probation review due on a date (FR-18-9, gap batch G5a). ``ProbationReviewWorkflow``
+    reminds staff before it is due and chases it until an outcome is recorded."""
+
+    class Status(models.TextChoices):
+        SCHEDULED = "scheduled", _("Scheduled")
+        PASSED = "passed", _("Passed")
+        EXTENDED = "extended", _("Extended")
+        FAILED = "failed", _("Not passed")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    tutor = models.ForeignKey(
+        "people.TutorProfile", on_delete=models.CASCADE, related_name="probation_reviews"
+    )
+    due_on = models.DateField()
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.SCHEDULED)
+    outcome_notes = models.TextField(blank=True, default="")
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    previous = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-due_on"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tutor"],
+                condition=models.Q(status="scheduled"),
+                name="probation_one_scheduled",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"Probation review {self.tutor_id} {self.due_on}"
+
+
+class PerformanceNote(TenantModel):
+    """A staff note on a tutor's performance (FR-18-9): praise, a concern or a plain note."""
+
+    class Kind(models.TextChoices):
+        PRAISE = "praise", _("Praise")
+        CONCERN = "concern", _("Concern")
+        NOTE = "note", _("Note")
+
+    tutor = models.ForeignKey(
+        "people.TutorProfile", on_delete=models.CASCADE, related_name="performance_notes"
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    kind = models.CharField(max_length=8, choices=Kind.choices, default=Kind.NOTE)
+    body = models.TextField()
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.kind} note on {self.tutor_id}"
+
+
+class OffboardingChecklist(TenantModel):
+    """Offboarding a tutor (FR-18-9): reassign jobs and lessons, revoke access, final pay,
+    keep records. ``items`` copy ``catalogue.OFFBOARDING``; ``done`` = key -> {"at", "by"}."""
+
+    tutor = models.ForeignKey(
+        "people.TutorProfile", on_delete=models.CASCADE, related_name="offboardings"
+    )
+    reason = models.CharField(max_length=500, blank=True, default="")
+    leaving_on = models.DateField(null=True, blank=True)
+    items = models.JSONField(default=list)
+    done = models.JSONField(default=dict, blank=True)
+    started_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tutor"],
+                condition=models.Q(completed_at__isnull=True),
+                name="offboarding_one_open",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"Offboarding {self.tutor_id}"
 
 
 class TutorComplianceState(TenantModel):

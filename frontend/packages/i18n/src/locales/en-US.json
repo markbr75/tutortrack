@@ -182,6 +182,13 @@
       "cancelled": "Canceled"
     }
   },
+  "hiring": {
+    "performance": {
+      "outcomes": {
+        "cancelled": "Canceled"
+      }
+    }
+  },
   "accountingG5": {
     "ledgerHelp": "Each branch can keep its own books. Records go to their branch's ledger when it has one switched on, otherwise to the organization's.",
     "wholeOrganisation": "{{provider}} · whole organization",
