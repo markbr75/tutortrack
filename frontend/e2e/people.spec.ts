@@ -51,6 +51,8 @@ test("a coordinator adds a note to a family and changes a student's status", asy
 
   await page.getByRole("link", { name: /Sky/ }).click();
   await expect(page.getByRole("heading", { level: 1, name: /Sky/ })).toBeVisible();
+  // "Change status" in the record header opens the select and its confirming button.
+  await page.getByRole("button", { name: "Change status" }).click();
   await page.getByLabel("Status").selectOption({ label: "Paused" });
   await page.getByRole("button", { name: "Change status" }).click();
   await expect(page.getByText(/Paused/).first()).toBeVisible();

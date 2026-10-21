@@ -1,7 +1,7 @@
 import { useTranslation } from "@tutortrack/i18n";
-import { PageHeader } from "@tutortrack/ui";
+import { Button, PageHeader } from "@tutortrack/ui";
 import { ChevronLeft } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 /**
  * A record page's header: the way back (one or more links, faded ink), then the shared page
@@ -49,4 +49,63 @@ export function RecordLayout({ main, side }: { main: ReactNode; side?: ReactNode
 /** The separator between two back links. */
 export function BackSeparator() {
   return <span aria-hidden="true">·</span>;
+}
+
+/**
+ * A small secondary action in the record header that opens its form in place (status
+ * changes): the button gives way to the form and a faded-ink Cancel; focus moves into the
+ * form and back to the button when it closes.
+ */
+export function HeaderReveal({
+  label,
+  children,
+}: {
+  label: string;
+  children: (close: () => void) => ReactNode;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (open) formRef.current?.querySelector<HTMLElement>("select, input, textarea")?.focus();
+    else if (wasOpen.current) buttonRef.current?.focus();
+    wasOpen.current = open;
+  }, [open]);
+  if (!open) {
+    return (
+      <Button
+        ref={buttonRef}
+        type="button"
+        size="sm"
+        variant="secondary"
+        aria-expanded={false}
+        onClick={() => setOpen(true)}
+      >
+        {label}
+      </Button>
+    );
+  }
+  const close = () => setOpen(false);
+  return (
+    <div
+      ref={formRef}
+      className="flex flex-wrap items-center gap-2"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") close();
+      }}
+    >
+      {children(close)}
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        className="text-muted-foreground"
+        onClick={close}
+      >
+        {t("common.cancel")}
+      </Button>
+    </div>
+  );
 }

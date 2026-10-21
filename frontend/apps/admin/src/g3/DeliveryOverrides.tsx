@@ -154,7 +154,7 @@ export function TemplateAssignments({
   ) => (
     <fieldset className="space-y-1">
       <legend className="text-sm font-medium">{label}</legend>
-      <div className="max-h-40 space-y-1.5 overflow-y-auto rounded-md border border-field bg-surface p-2.5">
+      <div className="relative max-h-40 space-y-1.5 overflow-y-auto rounded-md border border-field bg-surface p-2.5">
         {(rows ?? []).map((r) => (
           <label key={r.id} className="flex items-start gap-2 text-sm">
             <input

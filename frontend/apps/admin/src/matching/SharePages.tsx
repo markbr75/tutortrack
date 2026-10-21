@@ -80,7 +80,7 @@ export function TutorCard({
       <input
         type="radio"
         name={name}
-        className="float-right mt-1 ml-3 size-4"
+        className="float-right mt-1 ml-3 size-4 accent-brand"
         checked={selected}
         onChange={onSelect}
         aria-label={t("shortlistShare.choose", { name: card.name })}

@@ -221,7 +221,7 @@ export function LessonFeedbackPage() {
             role="region"
             aria-label={t("lessonFeedback.title")}
             tabIndex={0}
-            className="overflow-x-auto rounded-xl border border-border bg-surface"
+            className="relative overflow-x-auto rounded-xl border border-border bg-surface"
           >
             <table className="w-full text-left text-sm [&_td]:px-4 [&_td]:py-2.5 [&_th]:px-4 [&_th]:py-2.5">
               <caption className="sr-only">{t("lessonFeedback.title")}</caption>

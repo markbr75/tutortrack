@@ -11,6 +11,7 @@ import {
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
@@ -202,7 +203,7 @@ function ProposalEditor({
       </fieldset>
       <fieldset>
         <legend className="text-sm font-medium">{t("proposals.tutors")}</legend>
-        <div className="mt-1 max-h-40 space-y-1 overflow-y-auto rounded-md border border-border px-3 py-2">
+        <div className="relative mt-1 max-h-40 space-y-1 overflow-y-auto rounded-md border border-border px-3 py-2">
           {(tutorList.data?.results ?? []).map((tutor) => (
             <label key={tutor.id} className="flex items-center gap-2 text-sm">
               <input
@@ -457,7 +458,7 @@ export function PublicProposalPage({ token }: { token: string }) {
           role="region"
           aria-label={t("proposals.pricing")}
           tabIndex={0}
-          className="overflow-x-auto rounded-xl border border-border bg-surface"
+          className="relative overflow-x-auto rounded-xl border border-border bg-surface"
         >
           <table className="w-full text-sm [&_td]:px-4 [&_td]:py-2.5 [&_th]:px-4 [&_th]:py-2.5">
             <caption className="border-b border-border px-4 py-3 text-left text-base font-semibold">
@@ -506,9 +507,18 @@ export function PublicProposalPage({ token }: { token: string }) {
           </table>
         </div>
         {p.terms ? (
-          <details>
-            <summary className="cursor-pointer text-sm font-medium">{t("proposals.terms")}</summary>
-            <p className="mt-2 text-sm whitespace-pre-line text-muted-foreground">{p.terms}</p>
+          <details className="group">
+            <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium [&::-webkit-details-marker]:hidden">
+              <ChevronRight
+                aria-hidden="true"
+                strokeWidth={1.75}
+                className="size-4 text-muted-foreground transition-transform duration-150 group-open:rotate-90"
+              />
+              {t("proposals.terms")}
+            </summary>
+            <p className="mt-2 pl-5.5 text-sm whitespace-pre-line text-muted-foreground">
+              {p.terms}
+            </p>
           </details>
         ) : null}
         <p className="text-sm">
@@ -544,16 +554,28 @@ export function PublicProposalPage({ token }: { token: string }) {
                 error={errors.name ?? errors.tutor}
                 onChange={(e) => setName(e.target.value)}
               />
-              <Button type="submit" disabled={accept.isPending || name.trim().length < 2}>
-                {p.deposit ? t("proposals.acceptAndPay") : t("proposals.accept")}
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button type="submit" disabled={accept.isPending || name.trim().length < 2}>
+                  {p.deposit ? t("proposals.acceptAndPay") : t("proposals.accept")}
+                </Button>
+                {declining ? null : (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    onClick={() => setDeclining(true)}
+                  >
+                    {t("proposals.notForUs")}
+                  </Button>
+                )}
+              </div>
             </form>
             {accept.error && !Object.keys(errors).length ? (
               <Alert tone="danger">{accept.error.message}</Alert>
             ) : null}
             {declining ? (
               <form
-                className="space-y-2"
+                className="space-y-3 rounded-xl border border-border bg-surface px-5 py-4"
                 aria-label={t("proposals.declineForm")}
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -569,11 +591,7 @@ export function PublicProposalPage({ token }: { token: string }) {
                   {t("proposals.decline")}
                 </Button>
               </form>
-            ) : (
-              <Button variant="ghost" onClick={() => setDeclining(true)}>
-                {t("proposals.notForUs")}
-              </Button>
-            )}
+            ) : null}
           </>
         ) : (
           <div role="status" className="space-y-2">

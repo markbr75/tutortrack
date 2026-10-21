@@ -18,7 +18,12 @@ import { Link } from "@tanstack/react-router";
 import { useState, type DragEvent, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
-import { AiEnquiryExtract, AiEnquiryTriage } from "../ai/AiWidgets";
+import {
+  AiEnquiryExtract,
+  AiEnquiryTriageButton,
+  AiEnquiryTriageResult,
+  useEnquiryTriage,
+} from "../ai/AiWidgets";
 import { AttachedFiles } from "../components/AttachedFiles";
 import { RecordHeader, RecordLayout } from "../components/RecordHeader";
 import { RecordActivity } from "../crm/Activity";
@@ -39,7 +44,7 @@ export function LeadsNav() {
   return (
     <nav
       aria-label={t("leads.title")}
-      className="mb-6 flex gap-1 overflow-x-auto border-b border-border [scrollbar-width:none]"
+      className="relative mb-6 flex gap-1 overflow-x-auto border-b border-border [scrollbar-width:none]"
     >
       {links.map((l) => (
         <Link
@@ -147,7 +152,7 @@ export function BoardPage() {
         role="region"
         aria-label={t("leads.board")}
         tabIndex={0}
-        className="flex items-start gap-4 overflow-x-auto pb-2"
+        className="relative flex items-start gap-4 overflow-x-auto pb-2"
       >
         {board.data?.map((column) => (
           <section
@@ -370,12 +375,14 @@ export function EnquiryPage({ id }: { id: string }) {
         main={
           <>
             {e.status === "open" ? (
-              <AiEnquiryTriage
-                enquiryId={id}
-                onApplied={() => void queryClient.invalidateQueries({ queryKey: ["enquiry", id] })}
+              <EnquiryActions
+                enquiry={e}
+                onDone={refresh}
+                onTriageApplied={() =>
+                  void queryClient.invalidateQueries({ queryKey: ["enquiry", id] })
+                }
               />
             ) : null}
-            {e.status === "open" ? <EnquiryActions enquiry={e} onDone={refresh} /> : null}
             <ProposalsSection enquiryId={id} />
             <RecordActivity target={{ target_type: "leads.enquiry", target_id: id }} />
           </>
@@ -447,8 +454,17 @@ export function EnquiryPage({ id }: { id: string }) {
   );
 }
 
-function EnquiryActions({ enquiry, onDone }: { enquiry: Enquiry; onDone: (e: Enquiry) => void }) {
+function EnquiryActions({
+  enquiry,
+  onDone,
+  onTriageApplied,
+}: {
+  enquiry: Enquiry;
+  onDone: (e: Enquiry) => void;
+  onTriageApplied: () => void;
+}) {
   const { t } = useTranslation();
+  const triage = useEnquiryTriage(enquiry.id);
   const canConvert = usePermission("leads.enquiry.convert");
   const [reason, setReason] = useState("");
   const [service, setService] = useState("");
@@ -516,8 +532,9 @@ function EnquiryActions({ enquiry, onDone }: { enquiry: Enquiry; onDone: (e: Enq
   const error = lose.error ?? convert.error ?? trial.error ?? recordOutcome.error;
   const row = "flex flex-wrap items-end gap-3 px-5 py-4";
   return (
-    <Panel title={t("leads.actions")} flush>
+    <Panel title={t("leads.actions")} aside={<AiEnquiryTriageButton triage={triage} />} flush>
       <div className="divide-y divide-rule">
+        <AiEnquiryTriageResult triage={triage} onApplied={onTriageApplied} className="px-5 py-4" />
         <div className={row}>
           <div className="min-w-56 flex-1 sm:max-w-sm">
             <SelectField

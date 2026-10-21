@@ -24,7 +24,12 @@ import { TutorOffboardingCard, TutorPerformanceCard } from "../recruitment/Hirin
 import { TutorComplianceCard } from "../recruitment/RecruitmentPages";
 import { api, usePermission } from "../api";
 import { ClientBilling } from "../billing/ClientBilling";
-import { BackSeparator, RecordHeader, RecordLayout } from "../components/RecordHeader";
+import {
+  BackSeparator,
+  HeaderReveal,
+  RecordHeader,
+  RecordLayout,
+} from "../components/RecordHeader";
 import { InviteButton } from "../portal/InviteButton";
 import { RecordActivity } from "../crm/Activity";
 import { StudentJobs } from "../jobs/StudentJobs";
@@ -165,7 +170,11 @@ export function ClientPage({ clientId }: { clientId: string }) {
                           .join(" · ")}
                         aside={
                           canInvite && contact.email ? (
-                            <InviteButton contactId={contact.id} name={contact.full_name} />
+                            <InviteButton
+                              contactId={contact.id}
+                              name={contact.full_name}
+                              variant="secondary"
+                            />
                           ) : null
                         }
                       />
@@ -227,6 +236,7 @@ export function ClientPage({ clientId }: { clientId: string }) {
   );
 }
 
+/** "Change status" in the record header: opens a compact select and the confirming button. */
 function StatusChanger({
   current,
   statuses,
@@ -238,39 +248,44 @@ function StatusChanger({
   current: string;
   statuses: readonly string[];
   prefix: string;
-  onChange: (status: string) => void;
+  onChange: (status: string, done: () => void) => void;
   pending: boolean;
   error: unknown;
 }) {
   const { t } = useTranslation();
   return (
-    <Panel title={t("people.changeStatus")}>
-      <form
-        className="flex flex-wrap items-end gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const value = new FormData(e.currentTarget).get("status");
-          if (typeof value === "string" && value !== current) onChange(value);
-        }}
-      >
-        <div className="min-w-40 flex-1">
-          <SelectField
-            name="status"
-            label={t("people.status")}
-            defaultValue={current}
-            options={statuses.map((s) => ({ value: s, label: t(`${prefix}.${s}`) }))}
-          />
-        </div>
-        <Button type="submit" variant="secondary" loading={pending}>
-          {t("people.changeStatus")}
-        </Button>
-      </form>
+    <>
+      <HeaderReveal label={t("people.changeStatus")}>
+        {(close) => (
+          <form
+            className="flex flex-wrap items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const value = new FormData(e.currentTarget).get("status");
+              if (typeof value === "string" && value !== current) onChange(value, close);
+              else close();
+            }}
+          >
+            <SelectField
+              name="status"
+              label={t("people.status")}
+              hideLabel
+              size="sm"
+              defaultValue={current}
+              options={statuses.map((s) => ({ value: s, label: t(`${prefix}.${s}`) }))}
+            />
+            <Button type="submit" size="sm" loading={pending}>
+              {t("people.changeStatus")}
+            </Button>
+          </form>
+        )}
+      </HeaderReveal>
       {error ? (
-        <Alert tone="danger" className="mt-3">
+        <Alert tone="danger" className="basis-full">
           {t("errors.generic")}
         </Alert>
       ) : null}
-    </Panel>
+    </>
   );
 }
 
@@ -311,7 +326,21 @@ export function StudentPage({ studentId }: { studentId: string }) {
         description={[s.year_group, t(`people.studentStatus.${s.status ?? "active"}`)]
           .filter(Boolean)
           .join(" · ")}
-        actions={s.merged_into ? null : <MergeLink entity="students" id={s.id} />}
+        actions={
+          <>
+            {canEdit ? (
+              <StatusChanger
+                current={s.status ?? "active"}
+                statuses={STUDENT_STATUSES}
+                prefix="people.studentStatus"
+                onChange={(value, done) => status.mutate(value, { onSuccess: done })}
+                pending={status.isPending}
+                error={status.error}
+              />
+            ) : null}
+            {s.merged_into ? null : <MergeLink entity="students" id={s.id} />}
+          </>
+        }
       />
       <MergedBanner entity="students" mergedInto={s.merged_into} />
       <RecordLayout
@@ -348,16 +377,6 @@ export function StudentPage({ studentId }: { studentId: string }) {
               />
             </Panel>
             <StudentMatchingCard student={s} />
-            {canEdit ? (
-              <StatusChanger
-                current={s.status ?? "active"}
-                statuses={STUDENT_STATUSES}
-                prefix="people.studentStatus"
-                onChange={(value) => status.mutate(value)}
-                pending={status.isPending}
-                error={status.error}
-              />
-            ) : null}
           </>
         }
       />
@@ -462,6 +481,18 @@ export function TutorPage({ tutorId }: { tutorId: string }) {
         ]
           .filter(Boolean)
           .join(" · ")}
+        actions={
+          canEdit ? (
+            <StatusChanger
+              current={p.status}
+              statuses={TUTOR_STATUSES}
+              prefix="people.tutorStatus"
+              onChange={(value, done) => status.mutate(value, { onSuccess: done })}
+              pending={status.isPending}
+              error={status.error}
+            />
+          ) : null
+        }
       />
       <RecordLayout
         main={
@@ -519,16 +550,6 @@ export function TutorPage({ tutorId }: { tutorId: string }) {
               />
             </Panel>
             <TutorMatchingCard tutor={p} />
-            {canEdit ? (
-              <StatusChanger
-                current={p.status}
-                statuses={TUTOR_STATUSES}
-                prefix="people.tutorStatus"
-                onChange={(value) => status.mutate(value)}
-                pending={status.isPending}
-                error={status.error}
-              />
-            ) : null}
           </>
         }
       />

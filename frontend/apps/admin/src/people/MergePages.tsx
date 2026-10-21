@@ -92,7 +92,7 @@ export function DuplicatesPage() {
             role="region"
             aria-label={t("peopleTools.duplicates.title")}
             tabIndex={0}
-            className="overflow-x-auto rounded-xl border border-border bg-surface"
+            className="relative overflow-x-auto rounded-xl border border-border bg-surface"
           >
             <table className="w-full text-left text-sm">
               <caption className="sr-only">{t("peopleTools.duplicates.title")}</caption>
@@ -388,7 +388,7 @@ export function MergePage({
             role="region"
             aria-label={t("peopleTools.merge.values")}
             tabIndex={0}
-            className="overflow-x-auto rounded-xl border border-border bg-surface"
+            className="relative overflow-x-auto rounded-xl border border-border bg-surface"
           >
             <table className="w-full text-left text-sm">
               <caption className="border-b border-border px-5 py-3.5 text-left text-base font-semibold">

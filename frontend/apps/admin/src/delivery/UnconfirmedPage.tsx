@@ -81,7 +81,8 @@ export function UnconfirmedPage() {
           aria-label={t("delivery.unconfirmed.title")}
           className="rounded-xl border border-border bg-surface"
         >
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border px-4 py-3">
+          {/* Margin red: these lessons are over and still to mark (the One Red Rule). */}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-margin px-4 py-3">
             <label className="flex items-center gap-3 text-sm">
               <input
                 type="checkbox"
@@ -133,7 +134,7 @@ export function UnconfirmedPage() {
             role="region"
             aria-label={t("designS5.delivery.lessonsTable")}
             tabIndex={0}
-            className="overflow-x-auto"
+            className="relative overflow-x-auto"
           >
             <table className="w-full text-left text-sm">
               <thead className="border-b border-border">

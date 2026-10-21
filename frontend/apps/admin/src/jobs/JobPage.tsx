@@ -20,7 +20,12 @@ import { useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
 import { formatRate } from "../catalogue/format";
-import { BackSeparator, RecordHeader, RecordLayout } from "../components/RecordHeader";
+import {
+  BackSeparator,
+  HeaderReveal,
+  RecordHeader,
+  RecordLayout,
+} from "../components/RecordHeader";
 import { RecordActivity } from "../crm/Activity";
 import { NEXT_STATUSES, type JobStatus } from "./statuses";
 
@@ -75,47 +80,60 @@ function StatusControl({ job }: { job: Job }) {
   });
   if (!next.length) return null;
   return (
-    <Panel title={t("jobs.changeStatus")}>
-      <form
-        className="flex flex-wrap items-end gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (status) change.mutate();
-        }}
-      >
-        <SelectField
-          label={t("jobs.changeStatus")}
-          value={status}
-          onChange={(e) => setStatus(e.target.value as JobStatus)}
-          options={[
-            { value: "", label: t("jobs.chooseStatus") },
-            ...next.map((s) => ({ value: s, label: t(`jobs.status.${s}`) })),
-          ]}
-        />
-        {status ? (
-          <TextField
-            label={t("jobs.reason")}
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-          />
-        ) : null}
-        {status === "paused" ? (
-          <label className="flex h-10 items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              className="size-4"
-              checked={cancelFuture}
-              onChange={(e) => setCancelFuture(e.target.checked)}
+    <>
+      <HeaderReveal label={t("jobs.changeStatus")}>
+        {(close) => (
+          <form
+            className="flex flex-wrap items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (status) change.mutate(undefined, { onSuccess: close });
+            }}
+          >
+            <SelectField
+              label={t("jobs.changeStatus")}
+              hideLabel
+              size="sm"
+              value={status}
+              onChange={(e) => setStatus(e.target.value as JobStatus)}
+              options={[
+                { value: "", label: t("jobs.chooseStatus") },
+                ...next.map((s) => ({ value: s, label: t(`jobs.status.${s}`) })),
+              ]}
             />
-            {t("jobs.cancelFuture")}
-          </label>
-        ) : null}
-        <Button type="submit" variant="secondary" disabled={!status || change.isPending}>
-          {t("jobs.apply")}
-        </Button>
-        <ErrorText error={change.error} />
-      </form>
-    </Panel>
+            {status ? (
+              <TextField
+                label={t("jobs.reason")}
+                hideLabel
+                size="sm"
+                placeholder={t("jobs.reason")}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
+            ) : null}
+            {status === "paused" ? (
+              <label className="flex h-9 items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4"
+                  checked={cancelFuture}
+                  onChange={(e) => setCancelFuture(e.target.checked)}
+                />
+                {t("jobs.cancelFuture")}
+              </label>
+            ) : null}
+            <Button type="submit" size="sm" disabled={!status} loading={change.isPending}>
+              {t("jobs.apply")}
+            </Button>
+          </form>
+        )}
+      </HeaderReveal>
+      {change.error ? (
+        <div className="basis-full">
+          <ErrorText error={change.error} />
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -404,6 +422,48 @@ function Summary({ jobId }: { jobId: string }) {
 }
 
 /** One job: details, students, tutors, status, economics and activity (E07-T07). */
+/** One student on the job as a name plate: name, then year group · status (from the
+ * student's record), any rate override and when they left the job. */
+function JobStudentRow({ link }: { link: Job["students"][number] }) {
+  const { t, i18n } = useTranslation();
+  const canView = usePermission("people.student.view");
+  const student = useQuery({
+    queryKey: ["students", link.student],
+    enabled: canView,
+    retry: false,
+    queryFn: async () =>
+      unwrap(await api.GET("/api/v1/students/{id}", { params: { path: { id: link.student } } })),
+  });
+  const s = student.data;
+  return (
+    <PanelRow className={link.active_to ? "text-muted-foreground" : undefined}>
+      <NamePlate
+        name={
+          <Link
+            className={linkClass}
+            to="/students/$studentId"
+            params={{ studentId: link.student }}
+          >
+            {link.student_name}
+          </Link>
+        }
+        context={
+          [
+            s?.year_group ?? "",
+            s ? t(`people.studentStatus.${s.status ?? "active"}`) : "",
+            link.charge_rate_override ? formatRate(link.charge_rate_override, i18n.language) : "",
+            link.active_to
+              ? t("jobs.leftOn", { when: formatDate(link.active_to, i18n.language) })
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" · ") || undefined
+        }
+      />
+    </PanelRow>
+  );
+}
+
 export function JobPage({ jobId }: { jobId: string }) {
   const { t, i18n } = useTranslation();
   const canSeeCharge = usePermission("billing.rates.view_charge");
@@ -440,15 +500,18 @@ export function JobPage({ jobId }: { jobId: string }) {
         title={j.name ?? ""}
         description={`${j.reference} · ${t(`jobs.status.${j.status}`)} · ${j.service_name}`}
         actions={
-          canMatch && j.status !== "completed" && j.status !== "cancelled" ? (
-            <Link
-              to="/jobs/$jobId/match"
-              params={{ jobId: j.id }}
-              className={buttonClass({ variant: "secondary", size: "sm" })}
-            >
-              {t("matching.findTutor")}
-            </Link>
-          ) : null
+          <>
+            {canChangeStatus ? <StatusControl job={j} /> : null}
+            {canMatch && j.status !== "completed" && j.status !== "cancelled" ? (
+              <Link
+                to="/jobs/$jobId/match"
+                params={{ jobId: j.id }}
+                className={buttonClass({ variant: "secondary", size: "sm" })}
+              >
+                {t("matching.findTutor")}
+              </Link>
+            ) : null}
+          </>
         }
       />
       <RecordLayout
@@ -458,36 +521,7 @@ export function JobPage({ jobId }: { jobId: string }) {
             <Panel title={t("jobs.students")} flush>
               <PanelRows>
                 {j.students.map((link) => (
-                  <PanelRow
-                    key={link.id}
-                    className={link.active_to ? "text-muted-foreground" : undefined}
-                  >
-                    <NamePlate
-                      name={
-                        <Link
-                          className={linkClass}
-                          to="/students/$studentId"
-                          params={{ studentId: link.student }}
-                        >
-                          {link.student_name}
-                        </Link>
-                      }
-                      context={
-                        [
-                          link.charge_rate_override
-                            ? formatRate(link.charge_rate_override, i18n.language)
-                            : "",
-                          link.active_to
-                            ? t("jobs.leftOn", {
-                                when: formatDate(link.active_to, i18n.language),
-                              })
-                            : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" · ") || undefined
-                      }
-                    />
-                  </PanelRow>
+                  <JobStudentRow key={link.id} link={link} />
                 ))}
               </PanelRows>
             </Panel>
@@ -531,7 +565,6 @@ export function JobPage({ jobId }: { jobId: string }) {
               ) : null}
             </Panel>
             {canSeeCharge ? <Summary jobId={j.id} /> : null}
-            {canChangeStatus ? <StatusControl job={j} /> : null}
           </>
         }
       />

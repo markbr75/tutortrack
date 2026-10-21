@@ -230,131 +230,140 @@ export function JobMatchPage({ jobId }: { jobId: string }) {
       current.includes(id) ? current.filter((c) => c !== id) : [...current, id],
     );
   const openPosting = postings.data?.results.find((p) => p.status === "open");
+  const restrictedBox = canRestricted ? (
+    <label className="flex h-9 items-center gap-2 text-sm">
+      <input
+        type="checkbox"
+        className="size-4"
+        checked={includeRestricted}
+        onChange={(e) => setIncludeRestricted(e.target.checked)}
+      />
+      {t("matching.includeRestricted")}
+    </label>
+  ) : null;
   return (
     <div className="space-y-6">
-      <div>
-        <RecordHeader
-          back={
-            <Link to="/jobs/$jobId" params={{ jobId }}>
-              {job.data?.name ?? t("jobs.title")}
-            </Link>
-          }
-          title={t("matching.findTutor")}
-        />
-        {canRestricted ? (
-          <label className="-mt-2 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              className="size-4"
-              checked={includeRestricted}
-              onChange={(e) => setIncludeRestricted(e.target.checked)}
-            />
-            {t("matching.includeRestricted")}
-          </label>
-        ) : null}
-      </div>
+      <RecordHeader
+        back={
+          <Link to="/jobs/$jobId" params={{ jobId }}>
+            {job.data?.name ?? t("jobs.title")}
+          </Link>
+        }
+        title={t("matching.findTutor")}
+        description={results.data?.needs ? t("g5c.needs.intro") : undefined}
+      />
       {results.data?.needs ? (
-        <Card title={t("g5c.needs.title")}>
-          <p className="text-sm text-muted-foreground">{t("g5c.needs.intro")}</p>
-          <MatchNeedsForm
-            key={JSON.stringify(results.data.needs)}
-            needs={results.data.needs}
-            onApply={setNeeds}
-          />
-        </Card>
+        <MatchNeedsForm
+          key={JSON.stringify(results.data.needs)}
+          needs={results.data.needs}
+          onApply={setNeeds}
+        >
+          {restrictedBox}
+        </MatchNeedsForm>
+      ) : restrictedBox ? (
+        <div className="flex flex-wrap items-center gap-2">{restrictedBox}</div>
       ) : null}
       {results.error ? <Alert tone="danger">{results.error.message}</Alert> : null}
       {results.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {results.data ? (
         <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-          <Card title={t("matching.results", { count: results.data.results.length })} flush>
-            {results.data.results.length === 0 ? (
-              <p className="px-5 py-4 text-sm text-muted-foreground">{t("matching.none")}</p>
-            ) : (
-              <div
-                role="region"
-                aria-label={t("matching.results", { count: results.data.results.length })}
-                tabIndex={0}
-                className="overflow-x-auto"
-              >
-                <table className={TABLE}>
-                  <thead className="border-b border-border">
-                    <tr className="text-left whitespace-nowrap">
-                      {canOffer ? <th scope="col">{t("matching.offer")}</th> : null}
-                      <th scope="col">#</th>
-                      <th scope="col">{t("matching.tutor")}</th>
-                      <th scope="col">{t("matching.score")}</th>
-                      <th scope="col">{t("matching.distance")}</th>
-                      <th scope="col">{t("matching.availability")}</th>
-                      <th scope="col">
-                        <span className="sr-only">{t("matching.actions")}</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {results.data.results.map((row) => (
-                      <tr key={row.tutor.id} className="align-top">
-                        {canOffer ? (
-                          <td>
-                            <input
-                              type="checkbox"
-                              className="size-4"
-                              aria-label={t("matching.choose", { name: row.tutor.name })}
-                              checked={chosen.includes(row.tutor.id)}
-                              disabled={row.restricted}
-                              onChange={() => toggle(row.tutor.id)}
-                            />
-                          </td>
-                        ) : null}
-                        <td className="tabular-nums">{row.rank}</td>
-                        <td>
-                          <Link
-                            to="/tutors/$tutorId"
-                            params={{ tutorId: row.tutor.id }}
-                            className={linkClass}
-                          >
-                            {row.tutor.name}
-                          </Link>
-                          {row.restricted ? (
-                            <span className="block text-xs font-semibold text-warning">
-                              {t("matching.restricted")}
-                            </span>
-                          ) : null}
-                          <div className="mt-1 space-y-1 [&_button]:whitespace-nowrap">
-                            <Breakdown row={row} />
-                            <AiMatchExplain jobId={jobId} tutorId={row.tutor.id} />
-                          </div>
-                        </td>
-                        <td className="font-semibold tabular-nums">{row.score}</td>
-                        <td className="whitespace-nowrap tabular-nums">
-                          {row.distance_km === null ? "—" : `${row.distance_km} km`}
-                        </td>
-                        <td>
-                          <SlotFit fit={row.slot_fit} slots={slots} />
-                        </td>
-                        <td>
-                          {canOffer && !row.shortlisted ? (
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => shortlist.mutate(row.tutor.id)}
-                            >
-                              {t("matching.shortlist")}
-                            </Button>
-                          ) : row.shortlisted ? (
-                            <span className="text-xs text-muted-foreground">
-                              {t("matching.shortlisted")}
-                            </span>
-                          ) : null}
-                        </td>
+          <div className="min-w-0 space-y-6">
+            <Card title={t("matching.results", { count: results.data.results.length })} flush>
+              {results.data.results.length === 0 ? (
+                <p className="px-5 py-4 text-sm text-muted-foreground">{t("matching.none")}</p>
+              ) : (
+                <div
+                  role="region"
+                  aria-label={t("matching.results", { count: results.data.results.length })}
+                  tabIndex={0}
+                  className="relative overflow-x-auto"
+                >
+                  <table className={TABLE}>
+                    <thead className="border-b border-border">
+                      <tr className="text-left whitespace-nowrap">
+                        {canOffer ? <th scope="col">{t("matching.offer")}</th> : null}
+                        <th scope="col">#</th>
+                        <th scope="col">{t("matching.tutor")}</th>
+                        <th scope="col">{t("matching.score")}</th>
+                        <th scope="col">{t("matching.distance")}</th>
+                        <th scope="col">{t("matching.availability")}</th>
+                        <th scope="col">
+                          <span className="sr-only">{t("matching.actions")}</span>
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Card>
-          <div className="space-y-6">
+                    </thead>
+                    <tbody>
+                      {results.data.results.map((row) => (
+                        <tr key={row.tutor.id} className="align-top">
+                          {canOffer ? (
+                            <td>
+                              <input
+                                type="checkbox"
+                                className="size-4"
+                                aria-label={t("matching.choose", { name: row.tutor.name })}
+                                checked={chosen.includes(row.tutor.id)}
+                                disabled={row.restricted}
+                                onChange={() => toggle(row.tutor.id)}
+                              />
+                            </td>
+                          ) : null}
+                          <td className="tabular-nums">{row.rank}</td>
+                          <td>
+                            <Link
+                              to="/tutors/$tutorId"
+                              params={{ tutorId: row.tutor.id }}
+                              className={linkClass}
+                            >
+                              {row.tutor.name}
+                            </Link>
+                            {row.restricted ? (
+                              <span className="block text-xs font-semibold text-warning">
+                                {t("matching.restricted")}
+                              </span>
+                            ) : null}
+                            <div className="mt-1 space-y-1 [&_button]:whitespace-nowrap">
+                              <Breakdown row={row} />
+                              <AiMatchExplain jobId={jobId} tutorId={row.tutor.id} />
+                            </div>
+                          </td>
+                          <td className="font-semibold tabular-nums">{row.score}</td>
+                          <td className="whitespace-nowrap tabular-nums">
+                            {row.distance_km === null ? "—" : `${row.distance_km} km`}
+                          </td>
+                          <td>
+                            <SlotFit fit={row.slot_fit} slots={slots} />
+                          </td>
+                          <td>
+                            {canOffer && !row.shortlisted ? (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => shortlist.mutate(row.tutor.id)}
+                              >
+                                {t("matching.shortlist")}
+                              </Button>
+                            ) : row.shortlisted ? (
+                              <span className="text-xs text-muted-foreground">
+                                {t("matching.shortlisted")}
+                              </span>
+                            ) : null}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </Card>
+            {canOffer && batches.data?.results.length ? (
+              <Card title={t("matching.offers")} flush>
+                {batches.data.results.map((batch) => (
+                  <BatchPanel key={batch.id} batch={batch} onChange={refresh} />
+                ))}
+              </Card>
+            ) : null}
+          </div>
+          <div className="min-w-0 space-y-6">
             {results.data.origin || results.data.results.some((r) => r.point) ? (
               <Card title={t("matching.map")}>
                 <MatchMap origin={results.data.origin} rows={results.data.results} />
@@ -406,17 +415,10 @@ export function JobMatchPage({ jobId }: { jobId: string }) {
                 {post.error ? <Alert tone="danger">{post.error.message}</Alert> : null}
               </Card>
             ) : null}
+            <ShareShortlistSection jobId={jobId} />
           </div>
         </div>
       ) : null}
-      {canOffer && batches.data?.results.length ? (
-        <Card title={t("matching.offers")} flush>
-          {batches.data.results.map((batch) => (
-            <BatchPanel key={batch.id} batch={batch} onChange={refresh} />
-          ))}
-        </Card>
-      ) : null}
-      <ShareShortlistSection jobId={jobId} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import { Alert, Button, Panel, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
@@ -279,9 +279,10 @@ export function RecordActivity({ target }: { target: TargetRef }) {
   const canSeeDocuments = usePermission("crm.document.view");
   const [tab, setTab] = useState<Tab>("notes");
   return (
-    <section
-      aria-label={t("crm.activity")}
-      className="min-w-0 rounded-xl border border-border bg-surface pt-1 pb-5 [&_[role=tablist]]:px-3 [&_[role=tabpanel]]:px-5"
+    <Panel
+      title={t("crm.activity")}
+      flush
+      bodyClassName="pb-5 [&_[role=tablist]]:px-5 [&_[role=tabpanel]]:px-5"
     >
       <Tabs
         label={t("crm.activity")}
@@ -297,6 +298,6 @@ export function RecordActivity({ target }: { target: TargetRef }) {
         {tab === "timeline" ? <Timeline target={target} /> : null}
         {tab === "documents" ? <Documents target={target} /> : null}
       </Tabs>
-    </section>
+    </Panel>
   );
 }
