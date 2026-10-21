@@ -21,7 +21,7 @@ control. Status: ✅ in place · 🟡 partial · ⏳ planned (epic) · ➖ not a
 | V7 Error handling & logging | No sensitive data in logs, audit of security events | ✅ | structlog without PII, `AuditEntry` (append-only, privileges), login events, sensitive-read audit (E29-T03) |
 | V8 Data protection | Sensitive data classification, caching, retention | 🟡 | Field permissions, encryption of secrets/tax ids; retention + DSAR ⏳ E29 part 2 |
 | V9 Communications | TLS everywhere, HSTS | ✅ | HSTS preload (Django + CloudFront), TLS 1.2+ at ALB/CloudFront, `rediss://` |
-| V10 Malicious code | Dependency and code scanning, integrity | ✅ | CI: Semgrep, ruff `S` (Bandit), pip-audit, pnpm audit, gitleaks; Dependabot |
+| V10 Malicious code | Dependency and code scanning, integrity | ✅ | CI: Semgrep, ruff `S` (Bandit), pip-audit, pnpm audit, gitleaks; Dependabot security updates |
 | V11 Business logic | Rate limits, anti-automation | ✅ | DRF scoped throttles on auth/signup, Turnstile on public forms, idempotency keys |
 | V12 Files & resources | Upload type/size limits, AV scan, SSRF | ✅ | Presigned uploads with type/size checks, ClamAV, `core.net.safe_url` for outbound fetches |
 | V13 API | Auth on every endpoint, schema validation, CORS | ✅ | OpenAPI-validated in CI, explicit CORS allowlist, CSRF for session auth |
