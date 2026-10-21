@@ -369,13 +369,13 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
                       <td className="py-2.5 pr-4 pl-5 align-top md:pl-4">
                         {row.description}
                         {row.tutor_name ? (
-                          <span className="block text-xs text-muted-foreground">
+                          <span className="block text-xs text-muted-foreground max-md:hidden">
                             {row.tutor_name}
                           </span>
                         ) : null}
-                        {/* On phones the date and student fold into the line's context. */}
+                        {/* On phones tutor, date and student fold into the line's one caption. */}
                         <span className="block text-xs text-muted-foreground tabular-nums md:hidden">
-                          {[formatDate(row.date, i18n.language), row.student_name]
+                          {[row.tutor_name, formatDate(row.date, i18n.language), row.student_name]
                             .filter(Boolean)
                             .join(" · ")}
                         </span>
