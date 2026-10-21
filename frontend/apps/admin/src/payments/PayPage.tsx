@@ -15,6 +15,34 @@ interface Mounted {
 
 type Provider = "stripe" | "gocardless" | "paypal";
 
+/** One phone-first column for the public pay and setup pages. */
+const PAGE = "mx-auto max-w-lg space-y-6 px-4 py-8 sm:px-6";
+
+/** The business the family is paying, as a ruled brand line above the page heading: the
+ * tenant's logo when it has one, otherwise its name in ink. Never a faded kicker. */
+function BrandLine({ name }: { name: string }) {
+  const brand = useQuery({
+    queryKey: ["public-branding"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/public/branding")),
+    staleTime: 10 * 60_000,
+    retry: false,
+  });
+  const logo = brand.data?.logo_url;
+  const dark = brand.data?.logo_dark_url;
+  return (
+    <div className="mb-5 border-b border-border pb-4">
+      {logo ? (
+        <picture>
+          {dark ? <source srcSet={dark} media="(prefers-color-scheme: dark)" /> : null}
+          <img src={logo} alt={name} className="h-8 w-auto" />
+        </picture>
+      ) : (
+        <p className="text-base font-semibold">{name}</p>
+      )}
+    </div>
+  );
+}
+
 /** What a provider added to our URL when the customer came back from its pages:
  * GoCardless ``intent``, PayPal ``token`` or Stripe ``payment_intent``. */
 function returned(): { provider: Provider; intent: string } | null {
@@ -74,20 +102,22 @@ function ProviderChoice({
   const { t } = useTranslation();
   if (providers.length < 2) return null;
   return (
-    <fieldset className="space-y-1">
-      <legend className="text-sm font-medium">{legend}</legend>
-      {providers.map((p) => (
-        <label key={p} className="flex items-center gap-2 text-sm">
-          <input
-            type="radio"
-            name="provider"
-            className="size-4"
-            checked={value === p}
-            onChange={() => onChange(p as Provider)}
-          />
-          {t(`payOptions.${p}`)}
-        </label>
-      ))}
+    <fieldset>
+      <legend className="mb-2 text-sm font-medium">{legend}</legend>
+      <div className="divide-y divide-rule rounded-md border border-field">
+        {providers.map((p) => (
+          <label key={p} className="flex min-h-11 cursor-pointer items-center gap-3 px-3 text-sm">
+            <input
+              type="radio"
+              name="provider"
+              className="size-4"
+              checked={value === p}
+              onChange={() => onChange(p as Provider)}
+            />
+            {t(`payOptions.${p}`)}
+          </label>
+        ))}
+      </div>
     </fieldset>
   );
 }
@@ -161,10 +191,15 @@ export function PayPage({ token }: { token: string }) {
     else confirm.mutate({ id: result.paymentIntent?.id ?? intent.data.intent, via: "stripe" });
   };
 
-  if (page.isPending) return <Spinner label={t("grid.loading")} />;
+  if (page.isPending)
+    return (
+      <main className={PAGE}>
+        <Spinner label={t("grid.loading")} />
+      </main>
+    );
   if (!page.data)
     return (
-      <main className="mx-auto max-w-lg p-6">
+      <main className={PAGE}>
         <Alert tone="danger">{t("pay.notFound")}</Alert>
       </main>
     );
@@ -174,49 +209,62 @@ export function PayPage({ token }: { token: string }) {
   const choosing = !intent.data || Boolean(intent.data.redirect_url);
 
   return (
-    <main className="mx-auto max-w-lg space-y-6 p-6">
+    <main className={PAGE}>
       <header>
-        <p className="text-sm text-muted-foreground">{data.organisation}</p>
-        <h1 className="text-2xl font-semibold">
+        <BrandLine name={data.organisation} />
+        <h1 className="text-xl font-semibold">
           {data.kind === "invoice"
             ? t("pay.invoiceTitle", { number: data.number })
             : t("pay.requestTitle", { number: data.number })}
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground tabular-nums">
           {data.client_name}
           {data.due_date
             ? ` · ${t("pay.dueOn", { date: formatDate(data.due_date, i18n.language) })}`
             : ""}
         </p>
       </header>
-      <ul className="divide-y divide-border rounded-md border border-border text-sm">
-        {data.lines.map((line, i) => (
-          <li key={i} className="flex justify-between gap-4 p-3">
-            <span>{line.description}</span>
-            <span>{money(line.amount)}</span>
-          </li>
-        ))}
-      </ul>
-      <p className="flex justify-between text-lg font-semibold">
-        <span>{t("pay.amountDue")}</span>
-        <span>{money(data.amount_due)}</span>
-      </p>
-      {data.has_pdf ? (
-        <a
-          className="text-sm underline-offset-2 hover:underline"
-          href={`/api/v1/pay/${token}/pdf`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {t("pay.downloadPdf")}
-        </a>
-      ) : null}
+      <section
+        aria-label={t("billing.lines")}
+        className="rounded-xl border border-border bg-surface text-sm"
+      >
+        <ul>
+          {data.lines.map((line, i) => (
+            <li
+              key={i}
+              className="flex justify-between gap-4 border-t border-rule px-5 py-2.5 first:border-0"
+            >
+              <span className="min-w-0">{line.description}</span>
+              <span className="w-28 shrink-0 text-right tabular-nums">{money(line.amount)}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="flex justify-between gap-4 border-t border-border px-5 py-3 text-base font-semibold">
+          <span>{t("pay.amountDue")}</span>
+          <span className="w-28 shrink-0 text-right tabular-nums">{money(data.amount_due)}</span>
+        </p>
+        {data.has_pdf ? (
+          <p className="border-t border-rule px-5 py-3">
+            <a
+              className="font-medium text-link underline-offset-2 hover:underline"
+              href={`/api/v1/pay/${token}/pdf`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t("pay.downloadPdf")}
+            </a>
+          </p>
+        ) : null}
+      </section>
       {paid || due === 0 ? (
         <Alert tone="success">{paid ? t("pay.thanks") : t("pay.nothingDue")}</Alert>
       ) : !data.can_pay_online ? (
         <Alert>{t("pay.offline")}</Alert>
       ) : (
-        <section aria-label={t("pay.payOnline")} className="space-y-3">
+        <section
+          aria-label={t("pay.payOnline")}
+          className="space-y-4 rounded-xl border border-border bg-surface p-5"
+        >
           {choosing ? (
             <>
               <ProviderChoice
@@ -238,14 +286,22 @@ export function PayPage({ token }: { token: string }) {
               ) : (
                 <p className="text-sm text-muted-foreground">{t(`payOptions.${provider}Help`)}</p>
               )}
-              <Button onClick={() => intent.mutate()} disabled={intent.isPending}>
+              <Button
+                className="w-full"
+                onClick={() => intent.mutate()}
+                disabled={intent.isPending}
+              >
                 {t("pay.payAmount", { amount: money(data.amount_due) })}
               </Button>
             </>
           ) : (
             <>
               <div ref={element.ref} />
-              <Button onClick={() => void pay()} disabled={!element.mounted || confirm.isPending}>
+              <Button
+                className="w-full"
+                onClick={() => void pay()}
+                disabled={!element.mounted || confirm.isPending}
+              >
                 {t("pay.payNow")}
               </Button>
             </>
@@ -349,9 +405,11 @@ export function SetupPage({ token }: { token: string }) {
 
   const header = (
     <header>
-      {page.data ? <p className="text-sm text-muted-foreground">{page.data.organisation}</p> : null}
-      <h1 className="text-2xl font-semibold">{t("pay.setupTitle")}</h1>
-      {page.data ? <p className="text-sm text-muted-foreground">{page.data.client_name}</p> : null}
+      {page.data ? <BrandLine name={page.data.organisation} /> : null}
+      <h1 className="text-xl font-semibold">{t("pay.setupTitle")}</h1>
+      {page.data ? (
+        <p className="mt-1 text-sm text-muted-foreground">{page.data.client_name}</p>
+      ) : null}
     </header>
   );
   const finished = done ? (
@@ -363,7 +421,7 @@ export function SetupPage({ token }: { token: string }) {
 
   if (back?.provider === "gocardless")
     return (
-      <main className="mx-auto max-w-lg space-y-6 p-6">
+      <main className={PAGE}>
         {header}
         {finished ??
           (complete.error ? (
@@ -373,20 +431,25 @@ export function SetupPage({ token }: { token: string }) {
           ))}
       </main>
     );
-  if (page.isPending) return <Spinner label={t("grid.loading")} />;
+  if (page.isPending)
+    return (
+      <main className={PAGE}>
+        <Spinner label={t("grid.loading")} />
+      </main>
+    );
   if (!page.data)
     return (
-      <main className="mx-auto max-w-lg p-6">
+      <main className={PAGE}>
         <Alert tone="danger">{t("pay.linkExpired")}</Alert>
       </main>
     );
   const redirecting = Boolean(page.data.redirect_url);
   return (
-    <main className="mx-auto max-w-lg space-y-6 p-6">
+    <main className={PAGE}>
       {header}
       {finished ?? (
         <form
-          className="space-y-3"
+          className="space-y-4 rounded-xl border border-border bg-surface p-5"
           onSubmit={(e) => {
             e.preventDefault();
             void save();
@@ -412,7 +475,11 @@ export function SetupPage({ token }: { token: string }) {
             />
             <span>{page.data.consent_text}</span>
           </label>
-          <Button type="submit" disabled={(!element.mounted && !redirecting) || complete.isPending}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={(!element.mounted && !redirecting) || complete.isPending}
+          >
             {redirecting ? t("payOptions.continueToGoCardless") : t("pay.saveDetails")}
           </Button>
           {message || element.error || complete.error ? (

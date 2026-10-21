@@ -12,6 +12,7 @@ export {
 } from "./CookieBanner";
 export { DataGrid, type DataGridLabels, type DataGridProps } from "./DataGrid";
 export { ErrorBoundary, ErrorFallback, type ErrorFallbackProps } from "./ErrorFallback";
+export { FigureStrip, type StripFigure } from "./FigureStrip";
 export {
   Alert,
   SelectField,
@@ -32,5 +33,6 @@ export {
 } from "./LearningCharts";
 export { PageHeader } from "./PageHeader";
 export { RegisterMark } from "./RegisterMark";
+export { PanelFooter, RuledPanel, type RuledPanelProps } from "./RuledPanel";
 export { registerMarkFor, type RegisterMarkKind } from "./registerMarks";
 export { Tabs, type TabItem, type TabsProps } from "./Tabs";

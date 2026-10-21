@@ -74,7 +74,10 @@ export function DataGrid<Row>({
       role={caption ? "region" : undefined}
       aria-label={caption}
       tabIndex={caption ? 0 : undefined}
-      className={cn("overflow-x-auto rounded-xl border border-border bg-surface", className)}
+      className={cn(
+        "relative overflow-x-auto rounded-xl border border-border bg-surface",
+        className,
+      )}
     >
       <table className="w-full text-left text-sm">
         {caption && <caption className="sr-only">{caption}</caption>}

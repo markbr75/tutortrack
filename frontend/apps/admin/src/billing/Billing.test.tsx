@@ -129,7 +129,7 @@ describe("billing", () => {
     );
     render(<App />);
     expect(await screen.findByRole("heading", { name: /Draft invoice/ })).toBeInTheDocument();
-    expect(screen.getAllByText("£80.00", { selector: "dd" })).toHaveLength(2); // total, due
+    expect(screen.getAllByText("£80.00", { selector: "tfoot td" })).toHaveLength(2); // total, due
     fireEvent.click(screen.getByRole("button", { name: "Issue invoice" }));
     expect(await screen.findByRole("heading", { name: /INV-000001/ })).toBeInTheDocument();
 
