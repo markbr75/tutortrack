@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-21T12:00:00Z",
+  "generatedAt": "2026-10-21T18:00:00Z",
   "title": "Design System: TutorTrack",
   "extensions": {
     "colorMeta": {
@@ -499,7 +499,7 @@
     "typographyMeta": {
       "headline": {
         "displayName": "Headline",
-        "purpose": "Admin page titles: the Home greeting and every page header; an invoice's number (tabular) with its status in words beside it at 16px/500. Portal screens and the public pay pages title at 20px/600 instead."
+        "purpose": "Admin page titles: the Home greeting, every page header and every record's title (a person, a job, an enquiry, a lesson report); an invoice's number (tabular) with its status in words beside it at 16px/500. Portal screens and the public pay pages title at 20px/600 instead. The public proposal and shortlist pages still title at 26px under the TutorTrack masthead (a known gap, deferred to stage 11)."
       },
       "figure": {
         "displayName": "Figure",
@@ -507,15 +507,15 @@
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Panel headings and the settings area heading; the Amount due row and the payouts total row in money tables; in the portal (16px reading base) a row's primary line, such as the lesson title and the owed line."
+        "purpose": "Panel headings, enquiries board column headings, a tutor card's name and the settings area heading; the Amount due row and the payouts total row in money tables; in the portal (16px reading base) a row's primary line, such as the lesson title and the owed line."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "The working size: tables, lists, navigation, buttons, subtitles."
+        "purpose": "The working size: tables, lists, navigation, buttons, subtitles; at 500 for a name plate's name and a register row's lesson title."
       },
       "caption": {
         "displayName": "Caption",
-        "purpose": "One muted context line under a row, field hints, chart axis labels, table column headings (at 600), the portal tab bar's labels."
+        "purpose": "One muted context line under a row (a name plate's context, a lesson's date), field hints, chart axis labels, table column headings (at 600), the portal tab bar's labels."
       },
       "label": {
         "displayName": "Label",
@@ -531,7 +531,7 @@
       {
         "name": "floating-menu",
         "value": "0 8px 24px -8px rgb(15 23 42 / 0.25)",
-        "purpose": "The account menu (admin and portal) and other elements that float over the page; the only shadow. The portal's modal More sheet has none."
+        "purpose": "The account menu (admin and portal) and the admin's command palette (a modal dialog over a 40% black backdrop); the only shadow. The portal's modal More sheet has none."
       },
       {
         "name": "current-margin-rule",
@@ -572,17 +572,17 @@
       {
         "name": "sm",
         "value": "640px",
-        "purpose": "Register tables show the tutor column; portal lesson-card actions leave their two phone columns for one wrapping row; Copy link moves beside its value; plan rows on Billing & plan become three columns; the public pay page's sides grow to 24px."
+        "purpose": "Register tables show the tutor column (also Unconfirmed lessons); the Activity timeline puts its 9rem time column beside the event; portal lesson-card actions leave their two phone columns for one wrapping row; Copy link moves beside its value; plan rows on Billing & plan become three columns; the public pay page's sides grow to 24px; a full-width segmented switcher returns to its own width."
       },
       {
         "name": "md",
         "value": "768px",
-        "purpose": "Admin: the rail is shown (below it, a modal drawer); below it money tables fold secondary columns into the primary cell's caption and figure strips stack. Portal: the 240px rail replaces the tab bar."
+        "purpose": "Admin: the rail is shown (below it, a modal drawer); below it money tables fold secondary columns into the primary cell's caption, and figure strips sit in a ruled two-column grid (an even number of figures) or stack (an odd number). Portal: the 240px rail replaces the tab bar."
       },
       {
         "name": "lg",
         "value": "1024px",
-        "purpose": "Home gains its 22rem attention column; settings sub-menu becomes a sticky side column; an invoice with credit notes gains its 22rem credit-notes column."
+        "purpose": "Home gains its 22rem attention column; record pages and Find a tutor gain their 22rem side column; settings sub-menu becomes a sticky side column; an invoice with credit notes gains its 22rem credit-notes column; lesson feedback's By tutor and settings panels sit side by side."
       }
     ],
     "layout": {
@@ -625,7 +625,17 @@
       "publicPayWidth": "32rem",
       "publicPayAmountColumn": "7rem",
       "unitFieldWidth": "6rem",
-      "backLinkGap": "1.5rem"
+      "backLinkGap": "1.5rem",
+      "recordAsideWidth": "22rem",
+      "recordColumns": "minmax(0,1fr) | minmax(0,1fr) 22rem from 1024px",
+      "recordBackTrailGap": "0.375rem",
+      "factLabelColumn": "minmax(6rem, 40%)",
+      "segmentedOptionHeight": "1.75rem",
+      "boardColumnWidth": "18rem",
+      "timelineTimeColumn": "9rem",
+      "commandPaletteWidth": "32rem (full width less 1rem each side on phones)",
+      "commandPaletteTop": "6rem",
+      "unconfirmedMarkColumn": "5rem"
     },
     "globalDefaults": [
       {
@@ -807,17 +817,49 @@
       "name": "Figure Strip",
       "kind": "custom",
       "refersTo": "money-figure",
-      "description": "FigureStrip: figures as one ruled <dl>; columns follow the count, faint vertical rules, 20px/600 tabular values, an optional one-sentence note that carries the tone. Stacks with horizontal rules below 768px.",
+      "description": "FigureStrip: figures as one ruled <dl>; from 768px columns follow the count, faint vertical rules, 20px/600 tabular values, an optional one-sentence note that carries the tone. Below 768px an even number of figures sits in a ruled two-column grid (2 × 2 for four) and an odd number stacks with faint horizontal rules.",
       "html": "<dl class=\"ds-fs\" aria-label=\"Billing\"><div><dt>Owed</dt><dd class=\"ds-fs-val\">£92.50</dd></div><div><dt>Overdue</dt><dd class=\"ds-fs-val\">£92.50</dd><dd class=\"ds-fs-margin\">Overdue since 6 Oct 2026.</dd></div><div><dt>Credit</dt><dd class=\"ds-fs-val\">£0.00</dd></div><div><dt>Not yet invoiced</dt><dd class=\"ds-fs-val\">£25.00</dd></div></dl>",
-      "css": ".ds-fs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; border-top: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-bottom: 1px solid hsl(var(--tt-border, 212 48% 84%)); font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-fs > div { min-width: 0; padding: 16px 20px; border-left: 1px solid hsl(var(--tt-rule, 212 51% 93%)); } .ds-fs > div:first-child { border-left: 0; padding-left: 0; } .ds-fs dt { color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-fs dd { margin: 0; } .ds-fs-val { margin-top: 4px !important; font-size: 20px; line-height: 1.4; font-weight: 600; font-variant-numeric: tabular-nums; } .ds-fs-margin { color: hsl(var(--tt-margin, 4 63% 48%)); font-weight: 500; } @media (max-width: 767px) { .ds-fs { grid-template-columns: 1fr; } .ds-fs > div { border-left: 0; padding: 16px 0; border-top: 1px solid hsl(var(--tt-rule, 212 51% 93%)); } .ds-fs > div:first-child { border-top: 0; } }"
+      "css": ".ds-fs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; border-top: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-bottom: 1px solid hsl(var(--tt-border, 212 48% 84%)); font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-fs > div { min-width: 0; padding: 16px 20px; border-left: 1px solid hsl(var(--tt-rule, 212 51% 93%)); } .ds-fs > div:first-child { border-left: 0; padding-left: 0; } .ds-fs dt { color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-fs dd { margin: 0; } .ds-fs-val { margin-top: 4px !important; font-size: 20px; line-height: 1.4; font-weight: 600; font-variant-numeric: tabular-nums; } .ds-fs-margin { color: hsl(var(--tt-margin, 4 63% 48%)); font-weight: 500; } @media (max-width: 767px) { .ds-fs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ds-fs > div { padding: 16px 16px 16px 0; } .ds-fs > div:nth-child(even) { border-left: 1px solid hsl(var(--tt-rule, 212 51% 93%)); padding-left: 16px; padding-right: 0; } .ds-fs > div:nth-child(odd) { border-left: 0; } .ds-fs > div:nth-child(n+3) { border-top: 1px solid hsl(var(--tt-rule, 212 51% 93%)); } }"
     },
     {
       "name": "Ruled Panel",
       "kind": "card",
       "refersTo": "panel-footer",
-      "description": "RuledPanel: a clean-leaf section labelled by its 16px/600 heading, an aside on the right (a count or a status in words), a 16×20 body and a PanelFooter row under a faint rule.",
+      "description": "RuledPanel, also exported as Panel (one component, two names): a clean-leaf section labelled by its 16px/600 heading (or by `label` when it has no visible title), an aside on the right (a count or a status in words), a 16×20 body and a PanelFooter row under a faint rule.",
       "html": "<section class=\"ds-rp\" aria-labelledby=\"ds-rp-h\"><div class=\"ds-rp-head\"><h2 id=\"ds-rp-h\">Stripe</h2><span class=\"ds-rp-wait\">Setup not finished</span></div><div class=\"ds-rp-body\"><p>Finish setting up Stripe to take card payments.</p></div><div class=\"ds-rp-foot\"><button class=\"ds-rp-btn ds-rp-sec\" type=\"button\">Continue setup</button><button class=\"ds-rp-btn ds-rp-ghost\" type=\"button\">Disconnect</button></div></section>",
       "css": ".ds-rp { width: 520px; font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; color: hsl(var(--tt-foreground, 218 31% 15%)); background: hsl(var(--tt-surface, 0 0% 100%)); border: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-radius: 12px; overflow: hidden; } .ds-rp-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; padding: 14px 20px; border-bottom: 1px solid hsl(var(--tt-border, 212 48% 84%)); } .ds-rp-head h2 { margin: 0; font-size: 16px; font-weight: 600; } .ds-rp-wait { color: hsl(var(--tt-margin, 4 63% 48%)); font-weight: 600; } .ds-rp-body { padding: 16px 20px; } .ds-rp-body p { margin: 0; } .ds-rp-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid hsl(var(--tt-rule, 212 51% 93%)); } .ds-rp-btn { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 12px; border-radius: 8px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1); } .ds-rp-sec { background: hsl(var(--tt-surface, 0 0% 100%)); color: hsl(var(--tt-foreground, 218 31% 15%)); border: 1px solid hsl(var(--tt-border, 212 48% 84%)); } .ds-rp-ghost { background: transparent; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); border: 0; } .ds-rp-btn:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-rp-btn:focus-visible { outline: 2px solid hsl(var(--tt-link, 219 59% 40%)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Record Header",
+      "kind": "custom",
+      "refersTo": "record-back-link",
+      "description": "RecordHeader: a faded-ink back trail led by a chevron, the record's name as the 26px headline, one faded-ink context line that holds the status in words, and small secondary actions on the right. HeaderReveal turns one of them (Change status) into a compact form in place.",
+      "html": "<header class=\"ds-rh\"><nav class=\"ds-rh-back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m15 18-6-6 6-6\"/></svg><a href=\"#\">Jobs</a><span aria-hidden=\"true\">·</span><a href=\"#\">The Patel Family</a></nav><div class=\"ds-rh-row\"><div><h1>GCSE Higher Maths – Arjun Patel</h1><p>JOB-000001 · Active · GCSE Maths 1:1</p></div><div class=\"ds-rh-actions\"><button class=\"ds-rh-btn\" type=\"button\" aria-expanded=\"false\">Change status</button><a class=\"ds-rh-btn\" href=\"#\">Find a tutor</a></div></div></header>",
+      "css": ".ds-rh { width: 720px; font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-rh-back { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-rh-back a { color: inherit; text-decoration: none; } .ds-rh-back a:hover { color: hsl(var(--tt-foreground, 218 31% 15%)); text-decoration: underline; } .ds-rh-row { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; } .ds-rh h1 { margin: 0; font-size: 26px; line-height: 1.25; font-weight: 600; } .ds-rh p { margin: 4px 0 0; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-rh-actions { display: flex; flex-wrap: wrap; gap: 8px; } .ds-rh-btn { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid hsl(var(--tt-border, 212 48% 84%)); background: hsl(var(--tt-surface, 0 0% 100%)); color: inherit; font: inherit; font-weight: 500; text-decoration: none; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4,0,0.2,1); } .ds-rh-btn:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-rh a:focus-visible, .ds-rh-btn:focus-visible { outline: 2px solid hsl(var(--tt-link, 219 59% 40%)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Fact List",
+      "kind": "card",
+      "refersTo": "fact-row",
+      "description": "FactList inside a flush Panel: label and value pairs as 10×20 ruled rows, the label in faded ink in a column at least 6rem and at most 40% wide; empty values left out or named (\"None recorded\").",
+      "html": "<section class=\"ds-fl\" aria-labelledby=\"ds-fl-h\"><h2 id=\"ds-fl-h\">Economics</h2><dl><div><dt>Charge per lesson</dt><dd>£45.00</dd></div><div><dt>Pay per lesson</dt><dd>£28.00</dd></div><div><dt>Margin</dt><dd>£17.00 (37.8%)</dd></div></dl></section>",
+      "css": ".ds-fl { width: 352px; font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; color: hsl(var(--tt-foreground, 218 31% 15%)); background: hsl(var(--tt-surface, 0 0% 100%)); border: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-radius: 12px; overflow: hidden; } .ds-fl h2 { margin: 0; padding: 14px 20px; font-size: 16px; font-weight: 600; border-bottom: 1px solid hsl(var(--tt-border, 212 48% 84%)); } .ds-fl dl { margin: 0; } .ds-fl dl > div { display: grid; grid-template-columns: minmax(6rem, 40%) minmax(0, 1fr); column-gap: 16px; padding: 10px 20px; } .ds-fl dl > div + div { border-top: 1px solid hsl(var(--tt-rule, 212 51% 93%)); } .ds-fl dt { color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-fl dd { margin: 0; min-width: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Name Plate",
+      "kind": "card",
+      "refersTo": "name-plate-context",
+      "description": "NamePlate rows inside a flush Panel: the name at 500 (an ink link to the record, underlined on hover), one caption context line in faded ink, and an optional small aside on the right that wraps under the name when narrow.",
+      "html": "<section class=\"ds-np\" aria-labelledby=\"ds-np-h\"><h2 id=\"ds-np-h\">Contacts</h2><ul><li><div class=\"ds-np-row\"><div><div class=\"ds-np-name\"><a href=\"#\">Priya Patel</a></div><div class=\"ds-np-ctx\">Parent · Primary · Bill payer · priya.patel@example.com</div></div><button class=\"ds-np-btn\" type=\"button\">Invite to portal</button></div></li><li><div class=\"ds-np-row\"><div><div class=\"ds-np-name\"><a href=\"#\">Arjun Patel</a></div><div class=\"ds-np-ctx\">Year 10 · Active</div></div></div></li></ul></section>",
+      "css": ".ds-np { width: 352px; font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; font-size: 14px; color: hsl(var(--tt-foreground, 218 31% 15%)); background: hsl(var(--tt-surface, 0 0% 100%)); border: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-radius: 12px; overflow: hidden; } .ds-np h2 { margin: 0; padding: 14px 20px; font-size: 16px; font-weight: 600; border-bottom: 1px solid hsl(var(--tt-border, 212 48% 84%)); } .ds-np ul { margin: 0; padding: 0; list-style: none; } .ds-np li { padding: 10px 20px; } .ds-np li + li { border-top: 1px solid hsl(var(--tt-rule, 212 51% 93%)); } .ds-np-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; } .ds-np-name { font-weight: 500; } .ds-np-name a { color: inherit; text-decoration: none; text-underline-offset: 2px; } .ds-np-name a:hover { text-decoration: underline; } .ds-np-ctx { font-size: 12px; line-height: 16px; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); } .ds-np-btn { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid hsl(var(--tt-border, 212 48% 84%)); background: hsl(var(--tt-surface, 0 0% 100%)); color: inherit; font: inherit; font-weight: 500; cursor: pointer; } .ds-np-btn:hover { background: hsl(var(--tt-muted, 210 42% 95%)); } .ds-np a:focus-visible, .ds-np-btn:focus-visible { outline: 2px solid hsl(var(--tt-link, 219 59% 40%)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Segmented Switcher",
+      "kind": "chip",
+      "refersTo": "segmented-option-pressed",
+      "description": "Segmented: a clean-leaf strip with 8px corners and a register-rule edge; 28px options in faded ink, the pressed one an ink fill with stock lettering at 500 (aria-pressed).",
+      "html": "<div class=\"ds-seg\" role=\"group\" aria-label=\"View\"><button type=\"button\" aria-pressed=\"true\">List</button><button type=\"button\" aria-pressed=\"false\">Board</button></div>",
+      "css": ".ds-seg { display: inline-flex; padding: 2px; border: 1px solid hsl(var(--tt-border, 212 48% 84%)); border-radius: 8px; background: hsl(var(--tt-surface, 0 0% 100%)); font-family: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif; } .ds-seg button { height: 28px; padding: 0 12px; border: 0; border-radius: 4px; background: transparent; font: inherit; font-size: 14px; color: hsl(var(--tt-muted-foreground, 222 18% 41%)); cursor: pointer; } .ds-seg button:hover { color: hsl(var(--tt-foreground, 218 31% 15%)); } .ds-seg button[aria-pressed=\"true\"] { background: hsl(var(--tt-foreground, 218 31% 15%)); color: hsl(var(--tt-background, 60 23% 97%)); font-weight: 500; } .ds-seg button:focus-visible { outline: 2px solid hsl(var(--tt-link, 219 59% 40%)); outline-offset: 2px; }"
     },
     {
       "name": "Invoice Lines and Totals",
@@ -846,15 +888,16 @@
   ],
   "narrative": {
     "northStar": "The Register",
-    "overview": "**Creative North Star: \"The Register\"**\n\nTutorTrack's admin app is drawn from the teacher's register and mark book, because marking a lesson is what bills it and pays for it. The navigation is the bookcloth cover: a deep green rail with the organisation's name at the top and modules grouped by job. The work area is the register's stock: a near-white ground ruled in pale blue, written in blue-black ink. One red margin rule is the only loud colour, and it means one thing: now, or something that still needs marking or is overdue. Lesson state is shown with authored register marks (a tick, a ring, a struck ring, a dashed ring), never with generic status badges.\n\nThe system is dense and desk-oriented: one family in five sizes, 14px body text, tabular figures wherever numbers are compared, and 1px rules instead of shadows or tinted cards. Depth comes from rules and the shell/stock contrast, not elevation. The tenant's brand colour reaches primary-button fills, the caret, text selection and, in the portal, a soft tint behind the current navigation item only; the ink (including the focus ring), the rules, the shell and the margin red stay constant so contrast holds in both colour schemes and under any tenant colour.\n\nThe portal (families, students, tutors and partners) is the same register carried in a pocket, and it is white-labelled: it has no bookcloth cover. Its navigation is a clean leaf (a tab bar under the thumb on phones, a rail on wider screens) with the tenant's logo or name in ink. The tenant colour appears on primary fills and as a soft tint behind the current tab or row, never as text.\n\nScope of this record: it is evidenced by stages 1 to 4 and stage 7 of the build. Stage 1: the shared tokens and font in `packages/ui/src/styles.css`, the register marks, the admin shell and Home. Stage 2: the shared components in `packages/ui` (page header, button styles for links, fields, alerts, tabs, the data grid, chart labels), global defaults for form-control edges and hand-built tables, and the people list screens (Clients, Students, Tutors). Stage 3: the admin calendar (toolbar, day/week/tutor/room time grids, month and agenda). Stage 4: the portal's shared frame (`apps/portal/src/layout/PortalFrame.tsx`: header, tab bar, More sheet, rail, account menu) for every role, sign-in, the lesson card, and each role's home screen (family Home, tutor Today, affiliate Overview). Stage 7: the admin money screens (every Billing tab, the invoice record, the billing section of a client record but not the record page around it, Payments setup and bank reconciliation, the public pay and payment-details pages, Payroll with its pay runs, pay run record and pay items, Accounting settings, and Billing & plan), with two shared components in `packages/ui`: `FigureStrip` and `RuledPanel`. The other admin modules' screens and the portal's inner screens (Schedule, Billing, Messages, Classes, Privacy and the rest) sit inside their converted shells but have not themselves been carried into this world, beyond what they inherit from the shared components and global defaults. The reporting dashboard below Home is ruled off from Home's work area and no longer repeats Home's figures, but its widgets and heading still predate the world. Treat those surfaces as unconverted, not as examples.",
+    "overview": "**Creative North Star: \"The Register\"**\n\nTutorTrack's admin app is drawn from the teacher's register and mark book, because marking a lesson is what bills it and pays for it. The navigation is the bookcloth cover: a deep green rail with the organisation's name at the top and modules grouped by job. The work area is the register's stock: a near-white ground ruled in pale blue, written in blue-black ink. One red margin rule is the only loud colour, and it means one thing: now, or something that still needs marking or is overdue. Lesson state is shown with authored register marks (a tick, a ring, a struck ring, a dashed ring), never with generic status badges.\n\nThe system is dense and desk-oriented: one family in five sizes, 14px body text, tabular figures wherever numbers are compared, and 1px rules instead of shadows or tinted cards. Depth comes from rules and the shell/stock contrast, not elevation. The tenant's brand colour reaches primary-button fills, the caret, text selection and, in the portal, a soft tint behind the current navigation item only; the ink (including the focus ring), the rules, the shell and the margin red stay constant so contrast holds in both colour schemes and under any tenant colour.\n\nThe portal (families, students, tutors and partners) is the same register carried in a pocket, and it is white-labelled: it has no bookcloth cover. Its navigation is a clean leaf (a tab bar under the thumb on phones, a rail on wider screens) with the tenant's logo or name in ink. The tenant colour appears on primary fills and as a soft tint behind the current tab or row, never as text.\n\nScope of this record: it is evidenced by stages 1 to 5 and stage 7 of the build. Stage 1: the shared tokens and font in `packages/ui/src/styles.css`, the register marks, the admin shell and Home. Stage 2: the shared components in `packages/ui` (page header, button styles for links, fields, alerts, tabs, the data grid, chart labels), global defaults for form-control edges and hand-built tables, and the people list screens (Clients, Students, Tutors). Stage 3: the admin calendar (toolbar, day/week/tutor/room time grids, month and agenda). Stage 4: the portal's shared frame (`apps/portal/src/layout/PortalFrame.tsx`: header, tab bar, More sheet, rail, account menu) for every role, sign-in, the lesson card, and each role's home screen (family Home, tutor Today, affiliate Overview). Stage 5: the admin's people records (the client record with its contacts, the student and tutor records) and Add a family; CRM (the Activity panel's notes, tasks, timeline and documents, and the command palette); leads (the enquiries board and enquiry record, the waitlist and its suggestions, proposals, including the public proposal page); matching (Find a tutor and the public shortlist page); jobs (the jobs list and board, and the job record); and delivery (Unconfirmed lessons, lesson reports, lesson feedback and lesson policies). It adds shared components in `packages/ui` (`Panel`, which is `RuledPanel` under a second name, with `PanelRows`, `FactList` and `NamePlate`; and `Segmented`) and the admin's record frame (`RecordHeader`, `RecordLayout` and `HeaderReveal` in `apps/admin/src/components/RecordHeader.tsx`). The public proposal and shortlist pages still open with the TutorTrack masthead from the shared public layout (`layout/PublicLayout.tsx`), so they are not yet white-label: a known gap, deferred to stage 11. Stage 7: the admin money screens (every Billing tab, the invoice record, the billing section of a client record, Payments setup and bank reconciliation, the public pay and payment-details pages, Payroll with its pay runs, pay run record and pay items, Accounting settings, and Billing & plan), with two shared components in `packages/ui`: `FigureStrip` and `RuledPanel`. The other admin modules' screens and the portal's inner screens (Schedule, Billing, Messages, Classes, Privacy and the rest) sit inside their converted shells but have not themselves been carried into this world, beyond what they inherit from the shared components and global defaults. The reporting dashboard below Home is ruled off from Home's work area and no longer repeats Home's figures, but its widgets and heading still predate the world. Treat those surfaces as unconverted, not as examples.",
     "keyCharacteristics": [
       "Bookcloth-green navigation rail on a ruled, near-white register stock (dark scheme: night-green rail on a blue-slate stock).",
       "Blue-black ink for text; register-blue rules (1px) for every divider, table row and panel edge.",
       "One red margin rule for now, needs-marking, overdue and waiting counts; nothing else is red except errors.",
       "Source Sans 3 (self-hosted variable font) is the only family, in five fixed sizes, with tabular figures in tables, inputs, times and money.",
       "Authored SVG register marks for lesson state, the same five marks everywhere.",
-      "Flat: panels are ruled, not raised. The only shadow is on floating menus.",
+      "Flat: panels are ruled, not raised. The only shadow is on floating menus and the command palette.",
       "Money reads as ruled lines and ruled tables: figure strips, totals in the amount column, statuses in words.",
+      "A record reads as one leading work area beside a 22rem side column of ruled facts and name plates, with its status as a word in the one line under its title.",
       "The portal is white-labelled: a clean-leaf header and tab bar (rail on wide screens), the business name in ink, the tenant colour only on primary fills and as a soft tint behind the current item."
     ],
     "rules": [
@@ -900,7 +943,7 @@
       },
       {
         "name": "The One Work Area Rule",
-        "body": "Each screen has one leading work area; side columns stay narrower and subordinate (Home: register first, attention lists at 22rem).",
+        "body": "Each screen has one leading work area; side columns stay narrower and subordinate (Home: register first, attention lists at 22rem; a record: its own work first, its facts at 22rem).",
         "section": "layout"
       },
       {
@@ -945,13 +988,17 @@
       "**Do** collapse navigation groups when more than 16 items are visible, and show waiting counts on closed groups.",
       "**Do** use tabular figures for times, tables and money, and pick sizes only from 12, 14, 16, 20 and 26px.",
       "**Do** open a page with the shared page header, secondary actions small and the primary last, with any destructive actions after it as small faded-ink ghosts.",
-      "**Do** open a record inside a section (an invoice, a pay run) with a back link to the section, not with the section's tabs.",
+      "**Do** open a record with `RecordHeader` (a back trail, not the section's tabs; the name; one context line that holds the status in words; small secondary actions) and lay it out with `RecordLayout`: one work area, a 22rem side column.",
+      "**Do** show a person in a row as a `NamePlate` (name, one context line, at most a small aside) and a record's facts as a `FactList`, leaving empty values out or naming them (\"None recorded\").",
+      "**Do** open a header's secondary form in place with `HeaderReveal`: focus to its first field, Escape and Cancel close it.",
+      "**Do** switch between views of the same things with `Segmented` in the page header's actions.",
       "**Do** put a total in the column of the figures it adds up, in a `<tfoot>` row under a register rule, with figure columns right-aligned and fixed in width.",
       "**Do** fold a money table's secondary columns into the primary cell's one caption below 768px, joined by \" · \".",
       "**Do** give money statuses in words: margin red at 600 for overdue or waiting, danger for failures, faded ink for draft, void or closed, ink otherwise.",
-      "**Do** build figures with `FigureStrip` and panels with `RuledPanel` and `PanelFooter`.",
+      "**Do** build figures with `FigureStrip`, and panels with `RuledPanel` (also exported as `Panel`; one component), `PanelRows` and `PanelFooter`.",
       "**Do** put list filters in one compact row with self-describing first options, above a data grid.",
       "**Do** style links that act as buttons with the shared button styles.",
+      "**Do** make every hand-built scroll region positioned, labelled and focusable, with grid tracks of `minmax(0, 1fr)` around it, so wide content scrolls inside it and never widens a phone page.",
       "**Do** check every new pair in both schemes; the dark scheme has its own values for every token.",
       "**Do** build portal screens inside `PortalFrame`: up to four everyday tabs plus More on phones, the rail from 768px, one navigation landmark at a time, sign out in the account menu.",
       "**Do** mark the current portal tab or rail row with the soft brand tint (15% behind the tab's icon, 10% behind the rail row) and the label in ink at 600.",
@@ -962,12 +1009,12 @@
       "**Don't** let the tenant colour reach link text, the focus outline, rules, the shell or the margin red.",
       "**Don't** build KPI tiles, sparklines, stat cards, pricing cards or usage progress bars; money reads as one ruled strip, and plans and usage read as ruled rows (\"9 of 15\").",
       "**Don't** put a coloured side border thicker than 1px on any card, row or nav item.",
-      "**Don't** use unicode glyphs or generic status badges for lesson state, or badges and pills for any other status (invoice, payout, sync, plan); state is a register mark or words.",
-      "**Don't** add drop shadows to panels or cards; only floating menus cast one.",
+      "**Don't** use unicode glyphs or generic status badges for lesson state or ratings, or badges and pills for any other status (invoice, payout, sync, plan, a person's or a job's status); state is a register mark, drawn stars or words.",
+      "**Don't** add drop shadows to panels or cards; only floating menus and the command palette cast one.",
       "**Don't** add a second typeface or a display size above 26px.",
       "**Don't** use uppercase tracked labels as kickers above headings, or a faded line naming the business or section above a page title; a business name above a public page's title is a brand line in ink, ruled off below.",
       "**Don't** show the flat list of every module; navigation stays grouped by job and permission-gated.",
-      "**Don't** use raw palette colours (amber, white overlays) for status tints or rail lines; use `warning`, `danger`, `success` and `shell-rule`.",
+      "**Don't** use raw palette colours (amber, violet, white overlays) for status tints, rail lines or AI results; use `warning`, `danger`, `success` and `shell-rule`, and set AI results on the clean leaf.",
       "**Don't** repeat a figure the screen already shows in a second widget or tile.",
       "**Don't** set text, icons or edges in the tenant colour in the portal; the business name is ink and the current item is a tint, not brand-coloured text.",
       "**Don't** use bookcloth green in the portal, or wrap the portal's destinations into a cloud of links; the rest go under More, grouped by job."
