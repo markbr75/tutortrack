@@ -25,7 +25,7 @@ export function SubscriptionBanner() {
   return (
     <Alert tone={tone} className="mb-6 flex flex-wrap items-center justify-between gap-2">
       <span>{message}</span>
-      <Link to={PLAN_PAGE} className="font-medium underline">
+      <Link to={PLAN_PAGE} className="font-medium text-link underline-offset-2 hover:underline">
         {t("plan.banner.action")}
       </Link>
     </Alert>

@@ -1,6 +1,15 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  PageHeader,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -57,9 +66,9 @@ export function PayPhase3Fields({ tutorId }: { tutorId: string }) {
   const p = profile.data;
   const currentBasis = basis ?? p.pay_basis;
   return (
-    <div className="mt-3 space-y-3 border-t border-border pt-3">
+    <div className="divide-y divide-rule">
       <form
-        className="space-y-2"
+        className="space-y-3 px-5 py-4"
         aria-label={t("payrollPhase3.payBasis")}
         onSubmit={(e) => {
           e.preventDefault();
@@ -94,7 +103,7 @@ export function PayPhase3Fields({ tutorId }: { tutorId: string }) {
         <ErrorList error={saveBasis.error} />
       </form>
       <form
-        className="space-y-2"
+        className="space-y-3 px-5 py-4"
         aria-label={t("payrollPhase3.taxId")}
         onSubmit={(e) => {
           e.preventDefault();
@@ -166,11 +175,11 @@ export function WiseConnectionCard() {
   );
   const payoutProviders = (providers.data ?? []).filter((p) => p.capabilities.includes("payouts"));
   return (
-    <section className="rounded-lg border border-border p-4" aria-labelledby="wise-heading">
-      <h2 id="wise-heading" className="font-semibold">
-        {t("payrollPhase3.wiseTitle")}
-      </h2>
-      <p className="mb-2 text-sm text-muted-foreground">{t("payrollPhase3.wiseHelp")}</p>
+    <RuledPanel
+      titleId="wise-heading"
+      title={t("payrollPhase3.wiseTitle")}
+      description={t("payrollPhase3.wiseHelp")}
+    >
       {wise ? (
         <p className="text-sm">
           {t("payrollPhase3.wiseConnected", { name: wise.account_name || wise.provider_name })}
@@ -178,7 +187,7 @@ export function WiseConnectionCard() {
       ) : (
         <ConnectProviders level="organisation" providers={payoutProviders} returnPath="/payroll" />
       )}
-    </section>
+    </RuledPanel>
   );
 }
 
@@ -209,96 +218,147 @@ export function TaxFormsPage() {
   const years = [lastYear, lastYear - 1, lastYear - 2];
   const data = summary.data;
   return (
-    <div className="max-w-5xl space-y-4">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold">{t("payrollPhase3.taxFormsTitle")}</h1>
-        <PayrollNav />
-        <p className="text-sm text-muted-foreground">{t("payrollPhase3.taxFormsHelp")}</p>
-      </header>
-      <div className="flex flex-wrap items-end gap-3">
-        <SelectField
-          label={t("payrollPhase3.taxYear")}
-          value={String(year)}
-          options={years.map((y) => ({ value: String(y), label: String(y) }))}
-          onChange={(e) => setYear(Number(e.target.value))}
-        />
-        {canManage ? (
-          <Button onClick={() => finalise.mutate()} loading={finalise.isPending}>
-            {t("payrollPhase3.finalise")}
-          </Button>
+    <section className="max-w-6xl">
+      <PageHeader
+        title={t("payrollPhase3.taxFormsTitle")}
+        description={t("payrollPhase3.taxFormsHelp")}
+        actions={
+          <>
+            <a
+              className={buttonClass({ variant: "secondary", size: "sm" })}
+              href={`/api/v1/payroll/tax-years/${year}/1099/export`}
+            >
+              {t("payrollPhase3.downloadCsv")}
+            </a>
+            {canSeeTin ? (
+              <a
+                className={buttonClass({ variant: "secondary", size: "sm" })}
+                href={`/api/v1/payroll/tax-years/${year}/1099/export?full_tin=true`}
+              >
+                {t("payrollPhase3.downloadCsvFull")}
+              </a>
+            ) : null}
+            {canManage ? (
+              <Button onClick={() => finalise.mutate()} loading={finalise.isPending}>
+                {t("payrollPhase3.finalise")}
+              </Button>
+            ) : null}
+          </>
+        }
+      />
+      <PayrollNav />
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <SelectField
+            size="sm"
+            hideLabel
+            label={t("payrollPhase3.taxYear")}
+            value={String(year)}
+            options={years.map((y) => ({
+              value: String(y),
+              label: t("designS7.payroll.taxYearOption", { year: y }),
+            }))}
+            onChange={(e) => setYear(Number(e.target.value))}
+          />
+          {data ? (
+            <p className="text-sm text-muted-foreground tabular-nums">
+              {t("payrollPhase3.thresholdNote", {
+                threshold: formatMoney(
+                  { amount: data.threshold, currency: data.currency },
+                  i18n.language,
+                ),
+                count: data.reportable,
+              })}
+            </p>
+          ) : null}
+        </div>
+        <ErrorList error={finalise.error ?? summary.error} />
+        {finalise.isSuccess ? (
+          <Alert tone="success">
+            {t("payrollPhase3.finalised", { count: finalise.data.length })}
+          </Alert>
         ) : null}
-        <a className="text-sm underline" href={`/api/v1/payroll/tax-years/${year}/1099/export`}>
-          {t("payrollPhase3.downloadCsv")}
-        </a>
-        {canSeeTin ? (
-          <a
-            className="text-sm underline"
-            href={`/api/v1/payroll/tax-years/${year}/1099/export?full_tin=true`}
-          >
-            {t("payrollPhase3.downloadCsvFull")}
-          </a>
+        {summary.isPending ? <Spinner label={t("common.loading")} /> : null}
+        {data ? (
+          <>
+            <div
+              role="region"
+              aria-label={t("payrollPhase3.taxFormsTitle")}
+              tabIndex={0}
+              className="relative overflow-x-auto rounded-xl border border-border bg-surface"
+            >
+              <table className="w-full text-left text-sm">
+                <caption className="sr-only">{t("payrollPhase3.taxFormsTitle")}</caption>
+                <thead className="border-b border-border">
+                  <tr>
+                    <th scope="col" className="px-4 py-2.5">
+                      {t("payrollPhase3.tutor")}
+                    </th>
+                    <th scope="col" className="px-4 py-2.5">
+                      {t("payrollPhase3.tin")}
+                    </th>
+                    <th scope="col" className="px-4 py-2.5">
+                      {t("payrollPhase3.status")}
+                    </th>
+                    <th scope="col" className="w-36 px-4 py-2.5 text-right">
+                      {t("payrollPhase3.box1")}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.rows.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-10 text-center text-muted-foreground">
+                        {t("payrollPhase3.noPayments")}
+                      </td>
+                    </tr>
+                  ) : (
+                    data.rows.map((row) => (
+                      <tr key={row.tutor}>
+                        <td className="px-4 py-2.5 font-medium">{row.name}</td>
+                        <td className="px-4 py-2.5">
+                          {row.tin_hint ? (
+                            `•••-••-${row.tin_hint}`
+                          ) : (
+                            <span className="font-medium">{t("payrollPhase3.missing")}</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2.5">
+                          {!row.reportable ? (
+                            <span className="text-muted-foreground">
+                              {t("payrollPhase3.belowThreshold")}
+                            </span>
+                          ) : row.problems.length ? (
+                            <span className="font-medium">
+                              {row.problems.map((p) => t(`payrollPhase3.problems.${p}`)).join(", ")}
+                            </span>
+                          ) : row.filing ? (
+                            row.changed_since_filing ? (
+                              t("payrollPhase3.changed")
+                            ) : (
+                              t("payrollPhase3.filed")
+                            )
+                          ) : (
+                            t("payrollPhase3.ready")
+                          )}
+                        </td>
+                        <td className="px-4 py-2.5 text-right font-medium">
+                          {formatMoney(row.box1, i18n.language)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t("payrollPhase3.generated", {
+                when: formatDateTime(new Date().toISOString(), i18n.language),
+              })}
+            </p>
+          </>
         ) : null}
       </div>
-      <ErrorList error={finalise.error ?? summary.error} />
-      {finalise.isSuccess ? (
-        <Alert tone="success">
-          {t("payrollPhase3.finalised", { count: finalise.data.length })}
-        </Alert>
-      ) : null}
-      {summary.isPending ? <Spinner label={t("common.loading")} /> : null}
-      {data ? (
-        <>
-          <p className="text-sm">
-            {t("payrollPhase3.thresholdNote", {
-              threshold: formatMoney(
-                { amount: data.threshold, currency: data.currency },
-                i18n.language,
-              ),
-              count: data.reportable,
-            })}
-          </p>
-          {data.rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("payrollPhase3.noPayments")}</p>
-          ) : (
-            <table className="w-full text-sm">
-              <caption className="sr-only">{t("payrollPhase3.taxFormsTitle")}</caption>
-              <thead>
-                <tr className="text-left">
-                  <th scope="col">{t("payrollPhase3.tutor")}</th>
-                  <th scope="col">{t("payrollPhase3.tin")}</th>
-                  <th scope="col">{t("payrollPhase3.box1")}</th>
-                  <th scope="col">{t("payrollPhase3.status")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.rows.map((row) => (
-                  <tr key={row.tutor} className="border-t border-border">
-                    <td className="py-1">{row.name}</td>
-                    <td>{row.tin_hint ? `•••-••-${row.tin_hint}` : t("payrollPhase3.missing")}</td>
-                    <td>{formatMoney(row.box1, i18n.language)}</td>
-                    <td>
-                      {!row.reportable
-                        ? t("payrollPhase3.belowThreshold")
-                        : row.problems.length
-                          ? row.problems.map((p) => t(`payrollPhase3.problems.${p}`)).join(", ")
-                          : row.filing
-                            ? row.changed_since_filing
-                              ? t("payrollPhase3.changed")
-                              : t("payrollPhase3.filed")
-                            : t("payrollPhase3.ready")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-          <p className="text-xs text-muted-foreground">
-            {t("payrollPhase3.generated", {
-              when: formatDateTime(new Date().toISOString(), i18n.language),
-            })}
-          </p>
-        </>
-      ) : null}
-    </div>
+    </section>
   );
 }

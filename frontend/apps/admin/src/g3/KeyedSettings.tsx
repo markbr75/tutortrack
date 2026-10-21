@@ -2,7 +2,7 @@ import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
 
@@ -25,12 +25,15 @@ export function KeyedSettings({
   label,
   branch,
   optionLabel,
+  units,
 }: {
   area: string;
   keys: string[];
   label: string;
   branch?: string;
   optionLabel?: (key: string, value: string) => string;
+  /** Short numeric settings shown as a narrow field with this unit after it ("%", "days"). */
+  units?: Record<string, string>;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -136,6 +139,23 @@ export function KeyedSettings({
             </fieldset>
           );
         }
+        const unit = units?.[d.key];
+        if (unit)
+          return (
+            <UnitField
+              key={d.key}
+              label={d.label}
+              hint={d.help_text || undefined}
+              unit={unit}
+              disabled={!canManage}
+              numeric={d.type === "int"}
+              min={d.min_value ?? undefined}
+              max={d.max_value ?? undefined}
+              value={String(value ?? "")}
+              error={errors[d.key]}
+              onChange={(v) => set(d.key, d.type === "int" ? Number(v) : v)}
+            />
+          );
         return (
           <TextField
             key={d.key}
@@ -161,5 +181,66 @@ export function KeyedSettings({
         </Button>
       ) : null}
     </form>
+  );
+}
+
+/** A narrow numeric field with its unit after it, wired like the shared fields. */
+function UnitField({
+  label,
+  hint,
+  unit,
+  error,
+  numeric,
+  value,
+  onChange,
+  disabled,
+  min,
+  max,
+}: {
+  label: string;
+  hint?: string;
+  unit: string;
+  error?: string;
+  numeric: boolean;
+  value: string;
+  onChange: (value: string) => void;
+  disabled: boolean;
+  min?: number;
+  max?: number;
+}) {
+  const id = useId();
+  const described = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="text-sm font-medium">
+        {label}
+      </label>
+      <div className="flex items-center gap-2">
+        <input
+          id={id}
+          type={numeric ? "number" : "text"}
+          inputMode="decimal"
+          min={min}
+          max={max}
+          value={value}
+          disabled={disabled}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={described}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-24 rounded-md border border-field bg-surface px-3 text-right text-sm tabular-nums aria-[invalid=true]:border-danger"
+        />
+        <span className="text-sm text-muted-foreground">{unit}</span>
+      </div>
+      {hint && !error ? (
+        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
+          {hint}
+        </p>
+      ) : null}
+      {error ? (
+        <p id={`${id}-error`} className="text-xs text-danger" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
 }

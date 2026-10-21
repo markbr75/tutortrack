@@ -546,7 +546,7 @@
 <tr><td><span class="ui">Not yet invoiced</span></td><td>Charges waiting for the next invoice.</td></tr>
 <tr><td><span class="ui">Payment requests</span></td><td>Requests for prepayment that top up a client's credit. <span class="ui">Request top-ups</span> asks every client whose credit is below an amount to top up.</td></tr>
 <tr><td><span class="ui">Invoice runs</span></td><td>Invoice many clients at once (see below).</td></tr>
-<tr><td><span class="ui">Ageing</span></td><td>Money owed by age: not yet due, 1–30, 31–60, 61–90 and over 90 days.</td></tr>
+<tr><td><span class="ui">Ageing</span></td><td>Money owed by age: not yet due, 1–30, 31–60, 61–90 and over 90 days. Amounts past their due date are in red, and a <span class="ui">Total</span> row adds up each column.</td></tr>
 <tr><td><span class="ui">Packages</span></td><td>Prepaid bundles of hours. <span class="ui">Sell package</span>, <span class="ui">Extend</span> or <span class="ui">Cancel package</span> (unused value is refunded by credit note).</td></tr>
 <tr><td><span class="ui">Recurring fees</span></td><td>Fixed fees charged every week, month or term. <span class="ui">Pause</span>, <span class="ui">Resume</span> or <span class="ui">End</span> them.</td></tr>
 <tr><td><span class="ui">Late fees</span></td><td>The late-fee rule, and clients <span class="ui">In collections</span>.</td></tr>
@@ -559,7 +559,7 @@
 </div>
 
 <h5 id="invoice-page">Invoices</h5>
-<p>Open an invoice to see its lines and totals (<span class="ui">Subtotal</span>, <span class="ui">Tax</span>, <span class="ui">Total</span>, <span class="ui">Credit applied</span>, <span class="ui">Paid</span>, <span class="ui">Amount due</span>). Its status is <span class="ui">Draft</span>, <span class="ui">Issued</span>, <span class="ui">Partly paid</span>, <span class="ui">Paid</span>, <span class="ui">Void</span>, <span class="ui">Written off</span> or <span class="ui">Overdue</span>.</p>
+<p>Open an invoice to see its lines and totals (<span class="ui">Subtotal</span>, <span class="ui">Tax</span>, <span class="ui">Total</span>, <span class="ui">Credit applied</span>, <span class="ui">Paid</span>, <span class="ui">Amount due</span>). Its status is <span class="ui">Draft</span>, <span class="ui">Issued</span>, <span class="ui">Partly paid</span>, <span class="ui">Paid</span>, <span class="ui">Void</span>, <span class="ui">Written off</span> or <span class="ui">Overdue</span> (in red). The totals sit in one column under the line amounts. On a phone, each line shows its date and student under the description.</p>
 <ul>
 <li><strong>Drafts</strong> can be changed: <span class="ui">Add line</span>, <span class="ui">Remove</span> or <span class="ui">Delete draft</span>. Select <span class="ui">Issue invoice</span> when it is right. Issuing gives it the next invoice number, sets the due date from the payment terms and locks the lessons on it.</li>
 <li><strong>Issued invoices:</strong> <span class="ui">Email to client</span>, <span class="ui">Download PDF</span>, <span class="ui">Use client credit</span>, or <span class="ui">Collect now</span> from a saved card or direct debit.</li>

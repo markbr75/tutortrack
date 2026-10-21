@@ -1,6 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner } from "@tutortrack/ui";
+import { Alert, Button, PageHeader, RuledPanel, SelectField, Spinner } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
@@ -103,15 +103,17 @@ export function XeroPayrollPage() {
   const data = status.data;
   return (
     <div className="max-w-4xl space-y-6">
-      <header className="space-y-1">
-        <p className="text-sm">
-          <Link to="/settings/accounting" className="underline">
+      <div>
+        <p className="mb-2 text-sm">
+          <Link to="/settings/accounting" className="font-medium text-link hover:underline">
             {t("accounting.title")}
           </Link>
         </p>
-        <h1 className="text-2xl font-semibold">{t("accountingPhase3.payrollTitle")}</h1>
-        <p className="text-sm text-muted-foreground">{t("accountingPhase3.payrollHelp")}</p>
-      </header>
+        <PageHeader
+          title={t("accountingPhase3.payrollTitle")}
+          description={t("accountingPhase3.payrollHelp")}
+        />
+      </div>
       {complete.isSuccess ? (
         <Alert tone="success">{t("accountingPhase3.payrollConnected")}</Alert>
       ) : null}
@@ -128,77 +130,94 @@ export function XeroPayrollPage() {
       />
       {status.isPending ? <Spinner label={t("common.loading")} /> : null}
       {data && !data.connected ? (
-        canManage ? (
-          <Button onClick={() => connect.mutate()} loading={connect.isPending}>
-            {t("accountingPhase3.connectPayroll")}
-          </Button>
-        ) : (
+        <RuledPanel
+          footer={
+            canManage ? (
+              <Button onClick={() => connect.mutate()} loading={connect.isPending}>
+                {t("accountingPhase3.connectPayroll")}
+              </Button>
+            ) : undefined
+          }
+        >
           <p className="text-sm text-muted-foreground">
             {t("accountingPhase3.payrollNotConnected")}
           </p>
-        )
+        </RuledPanel>
       ) : null}
       {data?.connected ? (
         <>
           <p className="text-sm">
             {t("accountingPhase3.payrollAccount", { name: data.account_name || "Xero" })}
           </p>
-          <section className="space-y-2" aria-labelledby="rate-heading">
-            <h2 id="rate-heading" className="text-lg font-semibold">
-              {t("accountingPhase3.earningsRate")}
-            </h2>
+          <RuledPanel titleId="rate-heading" title={t("accountingPhase3.earningsRate")}>
             {rates.data ? (
-              <SelectField
-                label={t("accountingPhase3.earningsRate")}
-                hint={t("accountingPhase3.earningsRateHint")}
-                disabled={!canManage}
-                value={data.earnings_rate?.id ?? ""}
-                options={[
-                  { value: "", label: t("accountingPhase3.firstOrdinary") },
-                  ...rates.data.map((r) => ({ value: r.id, label: r.name })),
-                ]}
-                onChange={(e) => e.target.value && rate.mutate(e.target.value)}
-              />
+              <div className="max-w-md">
+                <SelectField
+                  label={t("accountingPhase3.earningsRate")}
+                  hint={t("accountingPhase3.earningsRateHint")}
+                  disabled={!canManage}
+                  value={data.earnings_rate?.id ?? ""}
+                  options={[
+                    { value: "", label: t("accountingPhase3.firstOrdinary") },
+                    ...rates.data.map((r) => ({ value: r.id, label: r.name })),
+                  ]}
+                  onChange={(e) => e.target.value && rate.mutate(e.target.value)}
+                />
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {data.earnings_rate?.name ?? t("accountingPhase3.firstOrdinary")}
+              </p>
+            )}
+          </RuledPanel>
+          <RuledPanel
+            flush
+            titleId="employees-heading"
+            title={t("accountingPhase3.employees")}
+            aside={
+              canManage ? (
+                <Button size="sm" variant="secondary" onClick={() => match.mutate()}>
+                  {t("accountingPhase3.matchByEmail")}
+                </Button>
+              ) : undefined
+            }
+          >
+            {data.links.length ? (
+              <ul className="text-sm">
+                {data.links.map((l) => (
+                  <li key={l.tutor} className="border-b border-rule px-5 py-2.5">
+                    {t("accountingPhase3.linked", {
+                      tutor: l.tutor_name,
+                      employee: l.name || l.employee_id,
+                    })}
+                  </li>
+                ))}
+              </ul>
             ) : null}
-          </section>
-          <section className="space-y-2" aria-labelledby="employees-heading">
-            <h2 id="employees-heading" className="text-lg font-semibold">
-              {t("accountingPhase3.employees")}
-            </h2>
-            {canManage ? (
-              <Button size="sm" variant="secondary" onClick={() => match.mutate()}>
-                {t("accountingPhase3.matchByEmail")}
-              </Button>
-            ) : null}
-            <ul className="space-y-1 text-sm">
-              {data.links.map((l) => (
-                <li key={l.tutor}>
-                  {t("accountingPhase3.linked", {
-                    tutor: l.tutor_name,
-                    employee: l.name || l.employee_id,
-                  })}
-                </li>
-              ))}
-            </ul>
             {data.unlinked.length ? (
-              <ul className="space-y-2 text-sm" aria-label={t("accountingPhase3.unlinked")}>
+              <ul className="text-sm" aria-label={t("accountingPhase3.unlinked")}>
                 {data.unlinked.map((u) => (
-                  <li key={u.tutor} className="flex flex-wrap items-end gap-2">
-                    <SelectField
-                      label={t("accountingPhase3.employeeFor", { tutor: u.tutor_name })}
-                      value={picked[u.tutor] ?? ""}
-                      disabled={!canManage}
-                      options={[
-                        { value: "", label: t("accountingPhase3.choose") },
-                        ...(employees.data ?? []).map((e) => ({
-                          value: e.id,
-                          label: `${e.first_name} ${e.last_name}`.trim() || e.email,
-                        })),
-                      ]}
-                      onChange={(e) => setPicked({ ...picked, [u.tutor]: e.target.value })}
-                    />
+                  <li
+                    key={u.tutor}
+                    className="flex flex-wrap items-end gap-2 border-b border-rule px-5 py-3 last:border-0"
+                  >
+                    <div className="min-w-56 flex-1 sm:max-w-sm">
+                      <SelectField
+                        label={t("accountingPhase3.employeeFor", { tutor: u.tutor_name })}
+                        value={picked[u.tutor] ?? ""}
+                        disabled={!canManage}
+                        options={[
+                          { value: "", label: t("accountingPhase3.choose") },
+                          ...(employees.data ?? []).map((e) => ({
+                            value: e.id,
+                            label: `${e.first_name} ${e.last_name}`.trim() || e.email,
+                          })),
+                        ]}
+                        onChange={(e) => setPicked({ ...picked, [u.tutor]: e.target.value })}
+                      />
+                    </div>
                     <Button
-                      size="sm"
+                      variant="secondary"
                       disabled={!canManage || !picked[u.tutor]}
                       onClick={() =>
                         link.mutate({ tutor: u.tutor, employee: picked[u.tutor] ?? "" })
@@ -210,22 +229,32 @@ export function XeroPayrollPage() {
                 ))}
               </ul>
             ) : null}
-          </section>
-          <section className="space-y-2" aria-labelledby="syncs-heading">
-            <h2 id="syncs-heading" className="text-lg font-semibold">
-              {t("accountingPhase3.syncs")}
-            </h2>
+            {!data.links.length && !data.unlinked.length ? (
+              <p className="px-5 py-4 text-sm text-muted-foreground">
+                {t("designS7.accounting.noEmployees")}
+              </p>
+            ) : null}
+          </RuledPanel>
+          <RuledPanel flush titleId="syncs-heading" title={t("accountingPhase3.syncs")}>
             {data.syncs.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("accountingPhase3.noSyncs")}</p>
+              <p className="px-5 py-4 text-sm text-muted-foreground">
+                {t("accountingPhase3.noSyncs")}
+              </p>
             ) : (
-              <ul className="space-y-2 text-sm">
+              <ul className="text-sm">
                 {data.syncs.map((s) => (
-                  <li key={s.id} className="rounded-md border border-border p-2">
-                    <p>
-                      {s.pay_run_number} · {t(`accountingPhase3.syncStatus.${s.status}`)}
-                      {s.synced_at ? ` · ${formatDateTime(s.synced_at, i18n.language)}` : ""}
-                    </p>
-                    {s.error ? <p className="text-danger">{s.error}</p> : null}
+                  <li
+                    key={s.id}
+                    className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-t border-rule px-5 py-2.5 first:border-0"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium tabular-nums">{s.pay_run_number}</p>
+                      <p className="text-xs text-muted-foreground tabular-nums">
+                        {t(`accountingPhase3.syncStatus.${s.status}`)}
+                        {s.synced_at ? ` · ${formatDateTime(s.synced_at, i18n.language)}` : ""}
+                      </p>
+                      {s.error ? <p className="text-xs text-danger">{s.error}</p> : null}
+                    </div>
                     {canManage && s.status !== "synced" ? (
                       <Button
                         size="sm"
@@ -239,7 +268,7 @@ export function XeroPayrollPage() {
                 ))}
               </ul>
             )}
-          </section>
+          </RuledPanel>
         </>
       ) : null}
     </div>

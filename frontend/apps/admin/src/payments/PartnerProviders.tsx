@@ -1,6 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button } from "@tutortrack/ui";
+import { Alert, Button, RuledPanel } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
@@ -73,39 +73,49 @@ export function PartnerProviders() {
 
   return (
     <section className="space-y-3" aria-label={t("paymentProviders.title")}>
-      <h2 className="text-lg font-semibold">{t("paymentProviders.title")}</h2>
+      <h2 className="text-base font-semibold">{t("paymentProviders.title")}</h2>
       {complete.isSuccess ? <Alert tone="success">{t("paymentProviders.connected")}</Alert> : null}
-      {PARTNERS.map((provider) => {
-        const account = providers.data?.find((p) => p.provider === provider && !p.branch);
-        return (
-          <div key={provider} className="space-y-2 rounded-md border border-border p-4">
-            <h3 className="font-semibold">{NAMES[provider]}</h3>
-            <p className="text-sm text-muted-foreground">{t(`paymentProviders.${provider}Help`)}</p>
-            {account ? (
-              <p className="text-sm">
-                {t(`payments.accountStatus.${account.status}`)} · {account.account_ref}
+      <div className="grid gap-4 md:grid-cols-2">
+        {PARTNERS.map((provider) => {
+          const account = providers.data?.find((p) => p.provider === provider && !p.branch);
+          return (
+            <RuledPanel
+              key={provider}
+              level={3}
+              title={NAMES[provider]}
+              description={t(`paymentProviders.${provider}Help`)}
+              aside={
+                account ? (
+                  <span className="text-muted-foreground">
+                    {t(`payments.accountStatus.${account.status}`)}
+                  </span>
+                ) : null
+              }
+              footer={
+                canManage ? (
+                  !account || account.status === "pending" ? (
+                    <Button
+                      size="sm"
+                      onClick={() => connect.mutate(provider)}
+                      disabled={connect.isPending}
+                    >
+                      {t("paymentProviders.connect", { name: NAMES[provider] })}
+                    </Button>
+                  ) : (
+                    <Button size="sm" variant="ghost" onClick={() => disconnect.mutate(account.id)}>
+                      {t("payments.disconnect")}
+                    </Button>
+                  )
+                ) : undefined
+              }
+            >
+              <p className="text-sm text-muted-foreground tabular-nums">
+                {account ? account.account_ref : t("designS7.payments.notConnected")}
               </p>
-            ) : null}
-            {canManage ? (
-              <div className="flex flex-wrap gap-2">
-                {!account || account.status === "pending" ? (
-                  <Button
-                    size="sm"
-                    onClick={() => connect.mutate(provider)}
-                    disabled={connect.isPending}
-                  >
-                    {t("paymentProviders.connect", { name: NAMES[provider] })}
-                  </Button>
-                ) : (
-                  <Button size="sm" variant="ghost" onClick={() => disconnect.mutate(account.id)}>
-                    {t("payments.disconnect")}
-                  </Button>
-                )}
-              </div>
-            ) : null}
-          </div>
-        );
-      })}
+            </RuledPanel>
+          );
+        })}
+      </div>
       <ErrorList error={connect.error ?? complete.error ?? disconnect.error} />
     </section>
   );
