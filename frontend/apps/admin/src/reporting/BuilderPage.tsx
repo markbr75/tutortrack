@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
 import { Chart } from "./Chart";
-import { ReportsNav, ResultTable } from "./ReportingPages";
+import { ReportsNav, ResultTable, ScheduleForm } from "./ReportingPages";
 
 type Dataset = components["schemas"]["BuilderDataset"];
 type Dimension = components["schemas"]["BuilderDimension"];
@@ -348,6 +348,9 @@ export function BuilderPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const canExport = usePermission("reporting.export");
+  const canSchedule = usePermission("reporting.schedule.manage");
+  const [scheduling, setScheduling] = useState<string | null>(null);
+  const [scheduledName, setScheduled] = useState("");
   const [def, setDef] = useState<Definition>(EMPTY);
   const [current, setCurrent] = useState<Saved | null>(null);
   const [name, setName] = useState("");
@@ -573,6 +576,11 @@ export function BuilderPage() {
           <h2 id="custom-saved" className="text-lg font-semibold">
             {t("reportBuilder.saved")}
           </h2>
+          {scheduledName ? (
+            <p role="status" className="text-sm">
+              {t("reportingG5.scheduled", { name: scheduledName })}
+            </p>
+          ) : null}
           {saved.data?.results.length ? (
             <ul className="space-y-2 text-sm">
               {saved.data.results.map((r) => (
@@ -596,6 +604,27 @@ export function BuilderPage() {
                     >
                       {t("reportBuilder.delete")}
                     </Button>
+                  ) : null}
+                  {r.is_mine && canSchedule && canExport ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      aria-expanded={scheduling === r.id}
+                      aria-label={t("reportingG5.scheduleNamed", { name: r.name })}
+                      onClick={() => setScheduling(scheduling === r.id ? null : r.id)}
+                    >
+                      {t("reporting.scheduleEmail")}
+                    </Button>
+                  ) : null}
+                  {scheduling === r.id ? (
+                    <ScheduleForm
+                      saved={{ id: r.id, name: r.name, kind: "custom" }}
+                      onDone={() => {
+                        setScheduling(null);
+                        setScheduled(r.name);
+                        void queryClient.invalidateQueries({ queryKey: ["scheduled-reports"] });
+                      }}
+                    />
                   ) : null}
                 </li>
               ))}

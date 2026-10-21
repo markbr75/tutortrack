@@ -67862,7 +67862,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "description": "Client custom field, key=value"
+                        "description": "Custom field filter, [entity.]key=value: entity is client (the default), student or tutor, as the report's custom_field_entities allow (e.g. student.year_group=Y10)"
                     },
                     {
                         "in": "query",
@@ -68059,7 +68059,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "description": "Client custom field, key=value"
+                        "description": "Custom field filter, [entity.]key=value: entity is client (the default), student or tutor, as the report's custom_field_entities allow (e.g. student.year_group=Y10)"
                     },
                     {
                         "in": "query",
@@ -71494,6 +71494,34 @@
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/ScheduledReportRequest"
+                            },
+                            "examples": {
+                                "ASavedReportView,Weekly": {
+                                    "value": {
+                                        "saved_report": "6f1c2a8e-1d2b-4c3d-9e8f-0a1b2c3d4e5f",
+                                        "frequency": "weekly",
+                                        "weekday": 0,
+                                        "time": "07:00",
+                                        "format": "csv",
+                                        "recipients": [
+                                            "2b7e4f1a-3c5d-4e6f-8a9b-0c1d2e3f4a5b"
+                                        ]
+                                    },
+                                    "summary": "A saved report view, weekly"
+                                },
+                                "ACustomReport,Monthly": {
+                                    "value": {
+                                        "custom_report": "9a8b7c6d-5e4f-4a3b-2c1d-0e9f8a7b6c5d",
+                                        "frequency": "monthly",
+                                        "day_of_month": 1,
+                                        "time": "08:30",
+                                        "format": "xlsx",
+                                        "recipients": [
+                                            "2b7e4f1a-3c5d-4e6f-8a9b-0c1d2e3f4a5b"
+                                        ]
+                                    },
+                                    "summary": "A custom report, monthly"
+                                }
                             }
                         },
                         "application/x-www-form-urlencoded": {
@@ -97620,6 +97648,15 @@
                     "label",
                     "type"
                 ]
+            },
+            "CustomFieldEntitiesEnum": {
+                "enum": [
+                    "client",
+                    "student",
+                    "tutor"
+                ],
+                "type": "string",
+                "description": "* `client` - client\n* `student` - student\n* `tutor` - tutor"
             },
             "CustomFieldRequest": {
                 "type": "object",
@@ -136987,6 +137024,13 @@
                             "type": "string"
                         }
                     },
+                    "custom_field_entities": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CustomFieldEntitiesEnum"
+                        },
+                        "description": "Records whose custom fields the custom_field filter may name."
+                    },
                     "group_by": {
                         "type": "array",
                         "items": {
@@ -137003,6 +137047,7 @@
                 "required": [
                     "category",
                     "category_label",
+                    "custom_field_entities",
                     "default_period",
                     "description",
                     "filters",
@@ -140233,6 +140278,7 @@
             },
             "ScheduledReport": {
                 "type": "object",
+                "description": "Give either a saved standard report view (``saved_report``) or a custom report\n(``custom_report``, gap G5).",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -140241,9 +140287,20 @@
                     },
                     "saved_report": {
                         "type": "string",
-                        "format": "uuid"
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "custom_report": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
                     },
                     "saved_report_name": {
+                        "type": "string",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "report_name": {
                         "type": "string",
                         "readOnly": true
                     },
@@ -140300,17 +140357,24 @@
                     "last_run_at",
                     "recipient_details",
                     "report_key",
-                    "saved_report",
+                    "report_name",
                     "saved_report_name",
                     "time"
                 ]
             },
             "ScheduledReportRequest": {
                 "type": "object",
+                "description": "Give either a saved standard report view (``saved_report``) or a custom report\n(``custom_report``, gap G5).",
                 "properties": {
                     "saved_report": {
                         "type": "string",
-                        "format": "uuid"
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "custom_report": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
                     },
                     "frequency": {
                         "$ref": "#/components/schemas/ReportFrequencyEnum"
@@ -140347,7 +140411,6 @@
                 "required": [
                     "frequency",
                     "recipients",
-                    "saved_report",
                     "time"
                 ]
             },

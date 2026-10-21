@@ -260,7 +260,8 @@ class SavedReport(TenantModel):
 
 
 class ScheduledReport(TenantModel):
-    """Email a saved report to staff on a schedule (FR-26-4); a Temporal Schedule per row."""
+    """Email a saved report view or a custom report (gap G5) to staff on a schedule
+    (FR-26-4); a Temporal Schedule per row. Exactly one of the two sources is set."""
 
     class Frequency(models.TextChoices):
         DAILY = "daily", _("Daily")
@@ -273,7 +274,10 @@ class ScheduledReport(TenantModel):
         PDF = "pdf", _("PDF")
 
     saved_report = models.ForeignKey(
-        SavedReport, on_delete=models.CASCADE, related_name="schedules"
+        SavedReport, null=True, blank=True, on_delete=models.CASCADE, related_name="schedules"
+    )
+    custom_report = models.ForeignKey(
+        "CustomReport", null=True, blank=True, on_delete=models.CASCADE, related_name="schedules"
     )
     frequency = models.CharField(max_length=7, choices=Frequency.choices)
     weekday = models.PositiveSmallIntegerField(default=0)  # Monday = 0 (weekly)
@@ -287,13 +291,25 @@ class ScheduledReport(TenantModel):
 
     class Meta(TenantModel.Meta):
         ordering = ["created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(Q(saved_report__isnull=False) & Q(custom_report__isnull=True))
+                | (Q(saved_report__isnull=True) & Q(custom_report__isnull=False)),
+                name="scheduled_report_one_source",
+            )
+        ]
 
     def __str__(self) -> str:
-        return f"{self.saved_report_id} {self.frequency}"
+        return f"{self.saved_report_id or self.custom_report_id} {self.frequency}"
+
+    @property
+    def source(self) -> Any:
+        """The saved view or custom report this schedule sends."""
+        return self.saved_report if self.saved_report_id else self.custom_report
 
     @classmethod
     def own_scope_q(cls, user: Any) -> Q:
-        return Q(saved_report__owner=user)
+        return Q(saved_report__owner=user) | Q(custom_report__owner=user)
 
 
 class ReportRun(TenantModel):

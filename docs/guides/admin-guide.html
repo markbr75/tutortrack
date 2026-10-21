@@ -539,6 +539,7 @@
           <li><span class="ui">Archive</span> removes a role from everyone who has it.</li>
           <li>A custom role is a copy: it does <strong>not</strong> get permissions added in later releases. Review your custom roles after new features ship.</li>
           <li>The only way to make someone other than the owner a Designated Safeguarding Lead is a custom role that allows <code>safeguarding.dsl</code>.</li>
+          <li>The referral, affiliate and review reports need two permissions: <code>reporting.sales.view</code> and the matching reviews and referrals one (<code>growth.referral.view</code>, <code>growth.affiliate.view</code> or <code>growth.review.view</code>), whose scope also limits the figures. Coordinators get all three reports; Finance gets the referral and affiliate reports but not <span class="ui">Review scores</span>. Scheduled reports only go to people who hold both.</li>
         </ul>
 
         <h3 id="roles-fields">Sensitive fields</h3>

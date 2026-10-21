@@ -118,5 +118,12 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
 - **Admin UI:** "Reviews & referrals" (`/growth`) has tabs for reviews (queue, approve, hide, reply, show on website), review requests, the referral programme and referrals (with fraud flags), affiliates (with links and commission rules), statements (issue, mark paid, bank file), tutor referrals and settings.
 - **Not built:**
   - `demo.py` (in-product demo data), as for E20. Dev seed data is in `growth/seeds.py`.
-  - E26 referral, affiliate and review reports. E26 still lists them as waiting.
+  - E26 referral, affiliate and review reports (built later in gap batch G5; see below).
   - Portal clients can't leave reviews unprompted. Reviews come from requests or staff.
+
+## Gap backlog (as built 2026-10-21)
+
+Batch G5d of `docs/05-gap-backlog.md` (reporting). Details are in E26's *Gap backlog (as built 2026-10-21)* notes.
+
+- **Referral, affiliate and review reports (FR-26-2; E25:121):** E26 standard reports `referral_performance`, `affiliate_performance` and `review_scores` in the sales family (`reporting/reports/growth.py`). They read growth data only through `growth.selectors` (`referrals`, `affiliates`, `affiliate_links`, `affiliate_referrals`, `commission_items`, `reviews`, `review_requests`), so the growth permission's data scope (all / branch via the client's branch / own) applies on top of the report family.
+- No growth models, services or permissions changed.

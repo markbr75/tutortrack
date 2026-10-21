@@ -17,6 +17,7 @@ from .base import (
     Params,
     ReportDef,
     Result,
+    filter_custom_field,
     filter_facts,
     in_period,
     percent,
@@ -46,6 +47,8 @@ def active_students(user: Any, params: Params) -> Result:
     qs = LessonAttendee.objects.filter(lesson_id__in=lessons.values("lesson_id")).exclude(
         outcome__startswith="cancelled"
     )
+    if params.custom_field:  # students' own custom fields (tutors' apply to the lessons)
+        qs = filter_custom_field(qs, params, {"student": "student_id"})
     field = {
         "subject": "lesson__service__subject_id",
         "level": "lesson__service__level_id",
@@ -84,7 +87,8 @@ register(
         codename=CODENAME,
         description=_("Students having lessons in the period, by subject, level or service."),
         run=active_students,
-        filters=("branch", "tutor", "service", "subject"),
+        filters=("branch", "tutor", "service", "subject", "custom_field"),
+        custom_fields=("student", "tutor"),
         group_by=("subject", "level", "service", "branch"),
         ordering="-students",
     )
@@ -106,6 +110,8 @@ def tutor_compliance(user: Any, params: Params) -> Result:
         tutors = tutors.filter(pk__in=params.tutor)
     if params.branch:
         tutors = tutors.filter(branches__in=params.branch)
+    if params.custom_field:
+        tutors = filter_custom_field(tutors, params, {"tutor": "pk"})
     today = periods.org_today()
     soon = today + timedelta(days=30)
     records = (
@@ -168,7 +174,8 @@ register(
         codename=CODENAME,
         description=_("Each working tutor's checks: verified, missing, expired and expiring."),
         run=tutor_compliance,
-        filters=("branch", "tutor"),
+        filters=("branch", "tutor", "custom_field"),
+        custom_fields=("tutor",),
         period=False,
         ordering="-problems",
     )

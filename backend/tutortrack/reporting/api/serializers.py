@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -22,6 +23,10 @@ class ReportDefinitionSerializer(serializers.Serializer):
     category_label = serializers.CharField()
     description = serializers.CharField()
     filters = serializers.ListField(child=serializers.CharField())
+    custom_field_entities = serializers.ListField(
+        child=serializers.ChoiceField(choices=["client", "student", "tutor"]),
+        help_text="Records whose custom fields the custom_field filter may name.",
+    )
     group_by = OptionSerializer(many=True)
     period = serializers.BooleanField()
     default_period = serializers.CharField()
@@ -153,9 +158,20 @@ class RecipientSerializer(serializers.Serializer):
 
 
 class ScheduledReportSerializer(serializers.ModelSerializer):
-    saved_report = serializers.PrimaryKeyRelatedField(queryset=SavedReport.objects.none())
-    saved_report_name = serializers.CharField(source="saved_report.name", read_only=True)
-    report_key = serializers.CharField(source="saved_report.report_key", read_only=True)
+    """Give either a saved standard report view (``saved_report``) or a custom report
+    (``custom_report``, gap G5)."""
+
+    saved_report = serializers.PrimaryKeyRelatedField(
+        queryset=SavedReport.objects.none(), required=False, allow_null=True
+    )
+    custom_report = serializers.PrimaryKeyRelatedField(
+        queryset=CustomReport.objects.none(), required=False, allow_null=True
+    )
+    saved_report_name = serializers.CharField(
+        source="saved_report.name", read_only=True, allow_null=True, default=None
+    )
+    report_name = serializers.SerializerMethodField()
+    report_key = serializers.SerializerMethodField()
     recipients = serializers.ListField(child=serializers.UUIDField(), write_only=True)
     recipient_details = serializers.SerializerMethodField()
     time = serializers.TimeField(format="%H:%M")
@@ -165,7 +181,9 @@ class ScheduledReportSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "saved_report",
+            "custom_report",
             "saved_report_name",
+            "report_name",
             "report_key",
             "frequency",
             "weekday",
@@ -184,10 +202,28 @@ class ScheduledReportSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
         request = self.context.get("request")
         if request is not None and getattr(request, "organisation", None) is not None:
-            from ..selectors import saved_reports
+            from ..selectors import custom_reports, saved_reports
 
             field: Any = self.fields["saved_report"]
             field.queryset = saved_reports(request.user)
+            custom: Any = self.fields["custom_report"]
+            custom.queryset = custom_reports(request.user)
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        if bool(attrs.get("saved_report")) == bool(attrs.get("custom_report")):
+            raise serializers.ValidationError(
+                {"saved_report": [_("Choose a saved report view or a custom report.")]}
+            )
+        return attrs
+
+    def get_report_name(self, obj: ScheduledReport) -> str:
+        source = obj.saved_report or obj.custom_report
+        return source.name if source is not None else ""
+
+    def get_report_key(self, obj: ScheduledReport) -> str:
+        if obj.custom_report_id:
+            return f"custom:{obj.custom_report_id}"
+        return obj.saved_report.report_key if obj.saved_report is not None else ""
 
     @extend_schema_field(RecipientSerializer(many=True))
     def get_recipient_details(self, obj: ScheduledReport) -> list[dict[str, Any]]:
@@ -235,7 +271,10 @@ class ReportRunSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.CharField(allow_null=True))
     def get_saved_report_name(self, obj: ReportRun) -> str | None:
         scheduled = obj.scheduled_report
-        return scheduled.saved_report.name if scheduled is not None else None
+        if scheduled is None:
+            return None
+        source = scheduled.saved_report or scheduled.custom_report
+        return source.name if source is not None else None
 
 
 class ReportDownloadSerializer(serializers.Serializer):

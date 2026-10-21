@@ -73,8 +73,8 @@ Tick an item when it is built, and record the as-built details in the owning epi
 - [x] Per-branch ledgers (FR-23-1; E23:216). *M–L*
 - [x] Payment reallocations and lost disputes after sync (FR-23-2/3; E23:217-219). *M*
 - [x] Summary journals in non-base currencies; bad-debt VAT adjustment; self-billing VAT in GL exports (FR-23-2/5; E23:220-225). *M*
-- [ ] Referral, affiliate and review reports (FR-26-2; E25:121, E26:88). *S–M*
-- [ ] Room utilisation per room; custom-field filters for students and tutors; tutor utilisation net of time off; scheduling custom reports (FR-26-2/4; E26:89-90, E26:114). *S each*
+- [x] Referral, affiliate and review reports (FR-26-2; E25:121, E26:88). *S–M*
+- [x] Room utilisation per room; custom-field filters for students and tutors; tutor utilisation net of time off; scheduling custom reports (FR-26-2/4; E26:89-90, E26:114). *S each*
 
 ## Batch G6 — Public API, migration, privacy, platform, subscriptions and sites (E04, E24, E27–E30, E32)
 - [x] **Consent ticked on public forms, enrolments, referrals and imports is written as E29 consent records** (FR-29-3; E29:106). *S–M*
