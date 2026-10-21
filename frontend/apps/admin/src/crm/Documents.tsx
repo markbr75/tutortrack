@@ -167,56 +167,56 @@ export function Documents({ target }: { target: TargetRef }) {
         <p className="text-sm text-muted-foreground">{t("esign.none")}</p>
       ) : null}
       {rows.length ? (
-      <ul className="divide-y divide-rule border-t border-rule">
-        {rows.map((d) => (
-          <li key={d.id} className="py-2.5 text-sm">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="min-w-0">
-                <p className="font-medium">{d.title}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t(`esign.categories.${d.category ?? "other"}`)} ·{" "}
-                  {formatDateTime(d.created_at, i18n.language)} ·{" "}
-                  {t(`esign.status.${d.signature_status}`)}
-                </p>
+        <ul className="divide-y divide-rule border-t border-rule">
+          {rows.map((d) => (
+            <li key={d.id} className="py-2.5 text-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-medium">{d.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t(`esign.categories.${d.category ?? "other"}`)} ·{" "}
+                    {formatDateTime(d.created_at, i18n.language)} ·{" "}
+                    {t(`esign.status.${d.signature_status}`)}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" variant="secondary" onClick={() => void openFile(d.file)}>
+                    {t("esign.download", { title: d.title })}
+                  </Button>
+                  {canCreate && signable && d.signature_status === "not_required" ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => request.mutate({ id: d.id, required: true })}
+                    >
+                      {t("esign.requestSignature")}
+                    </Button>
+                  ) : null}
+                  {canCreate && d.signature_status === "awaiting" ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => request.mutate({ id: d.id, required: false })}
+                    >
+                      {t("esign.cancelRequest")}
+                    </Button>
+                  ) : null}
+                  {d.signature_status === "signed" ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      aria-expanded={open === d.id}
+                      onClick={() => setOpen(open === d.id ? null : d.id)}
+                    >
+                      {t("esign.auditTrail")}
+                    </Button>
+                  ) : null}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="secondary" onClick={() => void openFile(d.file)}>
-                  {t("esign.download", { title: d.title })}
-                </Button>
-                {canCreate && signable && d.signature_status === "not_required" ? (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => request.mutate({ id: d.id, required: true })}
-                  >
-                    {t("esign.requestSignature")}
-                  </Button>
-                ) : null}
-                {canCreate && d.signature_status === "awaiting" ? (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => request.mutate({ id: d.id, required: false })}
-                  >
-                    {t("esign.cancelRequest")}
-                  </Button>
-                ) : null}
-                {d.signature_status === "signed" ? (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-expanded={open === d.id}
-                    onClick={() => setOpen(open === d.id ? null : d.id)}
-                  >
-                    {t("esign.auditTrail")}
-                  </Button>
-                ) : null}
-              </div>
-            </div>
-            {open === d.id ? <Signatures document={d} /> : null}
-          </li>
-        ))}
-      </ul>
+              {open === d.id ? <Signatures document={d} /> : null}
+            </li>
+          ))}
+        </ul>
       ) : null}
       {request.isError ? <Alert tone="danger">{request.error.message}</Alert> : null}
     </div>

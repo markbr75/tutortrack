@@ -213,6 +213,8 @@ describe("G5a recruitment", () => {
       }, // prettier-ignore
     });
     render(<App />);
+    // Performance and leaving sit on their own tab of the tutor record.
+    fireEvent.click(await screen.findByRole("tab", { name: "Performance and leaving" }));
     expect(await screen.findByText(/Due on/)).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Review notes"), { target: { value: "Great start" } });
     fireEvent.click(screen.getByRole("button", { name: "Record outcome" }));

@@ -376,9 +376,9 @@ export function TutorPage({ tutorId }: { tutorId: string }) {
   const canApprove = usePermission("people.tutor.approve_subjects");
   const canPay = usePermission("payroll.view");
   const canCompliance = usePermission("compliance.view");
-  const canPerformance =
-    usePermission("recruitment.performance.view") ||
-    usePermission("recruitment.offboarding.manage");
+  const canSeePerformance = usePermission("recruitment.performance.view");
+  const canOffboard = usePermission("recruitment.offboarding.manage");
+  const canPerformance = canSeePerformance || canOffboard;
   const [tab, setTab] = useState<TutorTab>("subjects");
   const tutor = useQuery({
     queryKey: ["tutors", tutorId],
@@ -410,7 +410,9 @@ export function TutorPage({ tutorId }: { tutorId: string }) {
   const tabs: { key: TutorTab; label: string }[] = [
     { key: "subjects", label: t("people.subjects") },
     ...(canPay ? [{ key: "pay" as const, label: t("designS5.tutor.pay") }] : []),
-    ...(canCompliance ? [{ key: "compliance" as const, label: t("designS5.tutor.compliance") }] : []),
+    ...(canCompliance
+      ? [{ key: "compliance" as const, label: t("designS5.tutor.compliance") }]
+      : []),
     ...(canPerformance
       ? [{ key: "performance" as const, label: t("designS5.tutor.performance") }]
       : []),
@@ -420,7 +422,10 @@ export function TutorPage({ tutorId }: { tutorId: string }) {
       {p.subjects.length ? (
         <PanelRows>
           {p.subjects.map((subject) => (
-            <PanelRow key={subject.id} className="flex flex-wrap items-center justify-between gap-2">
+            <PanelRow
+              key={subject.id}
+              className="flex flex-wrap items-center justify-between gap-2"
+            >
               <span>{[subject.subject, subject.level].filter(Boolean).join(" · ")}</span>
               {subject.approved ? (
                 <span className="text-muted-foreground">{t("people.approved")}</span>
@@ -462,7 +467,12 @@ export function TutorPage({ tutorId }: { tutorId: string }) {
         main={
           <>
             {tabs.length > 1 ? (
-              <Tabs label={t("designS5.tutor.sections")} tabs={tabs} value={current} onChange={setTab}>
+              <Tabs
+                label={t("designS5.tutor.sections")}
+                tabs={tabs}
+                value={current}
+                onChange={setTab}
+              >
                 <div className="space-y-6 [&>section]:rounded-xl [&>section]:bg-surface">
                   {current === "subjects" ? subjects : null}
                   {current === "pay" ? <PayProfileCard tutorId={tutorId} /> : null}

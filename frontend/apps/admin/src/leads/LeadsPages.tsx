@@ -404,9 +404,10 @@ export function EnquiryPage({ id }: { id: string }) {
                   [t("leads.students"), e.student_names.join(", ")],
                   [t("leads.subjects"), subjects],
                   ...(e.trial_outcome
-                    ? ([
-                        [t("leads.trialOutcome"), t(`leads.outcomes.${e.trial_outcome}`)],
-                      ] as [string, string][])
+                    ? ([[t("leads.trialOutcome"), t(`leads.outcomes.${e.trial_outcome}`)]] as [
+                        string,
+                        string,
+                      ][])
                     : []),
                 ]}
               />
@@ -573,7 +574,11 @@ function EnquiryActions({ enquiry, onDone }: { enquiry: Enquiry; onDone: (e: Enq
               />
               {t("leads.invitePortal")}
             </label>
-            <Button disabled={!service} onClick={() => convert.mutate()} loading={convert.isPending}>
+            <Button
+              disabled={!service}
+              onClick={() => convert.mutate()}
+              loading={convert.isPending}
+            >
               {t("leads.convert")}
             </Button>
           </div>

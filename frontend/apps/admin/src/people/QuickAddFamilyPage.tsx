@@ -76,33 +76,33 @@ export function QuickAddFamilyPage() {
             {t("people.quickAdd.parent")}
           </legend>
           <div className="clear-both grid gap-4 px-5 py-4 sm:grid-cols-2">
-          <TextField
-            label={t("people.firstName")}
-            required
-            autoComplete="off"
-            value={contact.first_name}
-            onChange={(e) => setContact((c) => ({ ...c, first_name: e.target.value }))}
-          />
-          <TextField
-            label={t("people.lastName")}
-            autoComplete="off"
-            value={contact.last_name}
-            onChange={(e) => setContact((c) => ({ ...c, last_name: e.target.value }))}
-          />
-          <TextField
-            label={t("people.email")}
-            type="email"
-            autoComplete="off"
-            value={contact.email}
-            onChange={(e) => setContact((c) => ({ ...c, email: e.target.value }))}
-          />
-          <TextField
-            label={t("people.phone")}
-            type="tel"
-            autoComplete="off"
-            value={contact.phone}
-            onChange={(e) => setContact((c) => ({ ...c, phone: e.target.value }))}
-          />
+            <TextField
+              label={t("people.firstName")}
+              required
+              autoComplete="off"
+              value={contact.first_name}
+              onChange={(e) => setContact((c) => ({ ...c, first_name: e.target.value }))}
+            />
+            <TextField
+              label={t("people.lastName")}
+              autoComplete="off"
+              value={contact.last_name}
+              onChange={(e) => setContact((c) => ({ ...c, last_name: e.target.value }))}
+            />
+            <TextField
+              label={t("people.email")}
+              type="email"
+              autoComplete="off"
+              value={contact.email}
+              onChange={(e) => setContact((c) => ({ ...c, email: e.target.value }))}
+            />
+            <TextField
+              label={t("people.phone")}
+              type="tel"
+              autoComplete="off"
+              value={contact.phone}
+              onChange={(e) => setContact((c) => ({ ...c, phone: e.target.value }))}
+            />
           </div>
         </fieldset>
 
@@ -111,48 +111,48 @@ export function QuickAddFamilyPage() {
             {t("people.students")}
           </legend>
           <div className="clear-both divide-y divide-rule">
-          {students.map((student, index) => (
-            <div
-              key={index}
-              className="grid gap-3 px-5 py-4 sm:grid-cols-[1fr_10rem_1fr_auto] sm:items-end"
-            >
-              <TextField
-                label={t("people.quickAdd.studentName", { n: index + 1 })}
-                value={student.first_name}
-                onChange={(e) => setStudent(index, { first_name: e.target.value })}
-              />
-              <TextField
-                label={t("people.yearGroup")}
-                value={student.year_group}
-                onChange={(e) => setStudent(index, { year_group: e.target.value })}
-              />
-              <TextField
-                label={t("people.quickAdd.subject")}
-                value={student.subject}
-                onChange={(e) => setStudent(index, { subject: e.target.value })}
-              />
-              {students.length > 1 ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  aria-label={t("people.quickAdd.removeStudent", { n: index + 1 })}
-                  onClick={() => setStudents((list) => list.filter((_, i) => i !== index))}
-                >
-                  {t("people.quickAdd.remove")}
-                </Button>
-              ) : null}
+            {students.map((student, index) => (
+              <div
+                key={index}
+                className="grid gap-3 px-5 py-4 sm:grid-cols-[1fr_10rem_1fr_auto] sm:items-end"
+              >
+                <TextField
+                  label={t("people.quickAdd.studentName", { n: index + 1 })}
+                  value={student.first_name}
+                  onChange={(e) => setStudent(index, { first_name: e.target.value })}
+                />
+                <TextField
+                  label={t("people.yearGroup")}
+                  value={student.year_group}
+                  onChange={(e) => setStudent(index, { year_group: e.target.value })}
+                />
+                <TextField
+                  label={t("people.quickAdd.subject")}
+                  value={student.subject}
+                  onChange={(e) => setStudent(index, { subject: e.target.value })}
+                />
+                {students.length > 1 ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    aria-label={t("people.quickAdd.removeStudent", { n: index + 1 })}
+                    onClick={() => setStudents((list) => list.filter((_, i) => i !== index))}
+                  >
+                    {t("people.quickAdd.remove")}
+                  </Button>
+                ) : null}
+              </div>
+            ))}
+            <div className="px-5 py-3">
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => setStudents((list) => [...list, { ...EMPTY_STUDENT }])}
+              >
+                {t("people.quickAdd.addStudent")}
+              </Button>
             </div>
-          ))}
-          <div className="px-5 py-3">
-          <Button
-            type="button"
-            size="sm"
-            variant="secondary"
-            onClick={() => setStudents((list) => [...list, { ...EMPTY_STUDENT }])}
-          >
-            {t("people.quickAdd.addStudent")}
-          </Button>
-          </div>
           </div>
         </fieldset>
 
@@ -161,21 +161,21 @@ export function QuickAddFamilyPage() {
             {t("people.billingAddress")}
           </legend>
           <div className="clear-both grid gap-4 px-5 py-4 sm:grid-cols-3">
-          <TextField
-            label={t("people.address.line1")}
-            value={address.line1}
-            onChange={(e) => setAddress((a) => ({ ...a, line1: e.target.value }))}
-          />
-          <TextField
-            label={t("people.address.city")}
-            value={address.city}
-            onChange={(e) => setAddress((a) => ({ ...a, city: e.target.value }))}
-          />
-          <TextField
-            label={t("people.address.postcode")}
-            value={address.postcode}
-            onChange={(e) => setAddress((a) => ({ ...a, postcode: e.target.value }))}
-          />
+            <TextField
+              label={t("people.address.line1")}
+              value={address.line1}
+              onChange={(e) => setAddress((a) => ({ ...a, line1: e.target.value }))}
+            />
+            <TextField
+              label={t("people.address.city")}
+              value={address.city}
+              onChange={(e) => setAddress((a) => ({ ...a, city: e.target.value }))}
+            />
+            <TextField
+              label={t("people.address.postcode")}
+              value={address.postcode}
+              onChange={(e) => setAddress((a) => ({ ...a, postcode: e.target.value }))}
+            />
           </div>
         </fieldset>
 

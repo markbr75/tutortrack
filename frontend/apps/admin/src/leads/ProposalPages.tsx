@@ -579,7 +579,10 @@ export function PublicProposalPage({ token }: { token: string }) {
           <div role="status" className="space-y-2">
             <p>{t(`proposals.publicStates.${p.status}`)}</p>
             {p.pay_url ? (
-              <a className="font-medium text-link underline-offset-2 hover:underline" href={p.pay_url}>
+              <a
+                className="font-medium text-link underline-offset-2 hover:underline"
+                href={p.pay_url}
+              >
                 {t("proposals.payDeposit")}
               </a>
             ) : null}

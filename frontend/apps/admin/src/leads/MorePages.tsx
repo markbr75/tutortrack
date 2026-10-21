@@ -220,140 +220,140 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
         {t("leads.editForm")}
       </h2>
       <div className="space-y-4 px-5 py-4">
-      <div className="flex flex-wrap items-end gap-3">
-        <TextField
-          label={t("leads.formName")}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <TextField
-          label={t("leads.formSlug")}
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-        />
-        <label className="flex h-10 items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="size-4"
-            checked={published}
-            onChange={(e) => setPublished(e.target.checked)}
+        <div className="flex flex-wrap items-end gap-3">
+          <TextField
+            label={t("leads.formName")}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
-          {t("leads.publish")}
-        </label>
-      </div>
-      {schema.steps.map((step, s) => (
-        <fieldset key={s} className="rounded-xl border border-border">
-          <legend className="float-left w-full border-b border-border px-4 py-2.5 text-sm font-semibold">
-            {step.title}
-          </legend>
-          <div className="clear-both divide-y divide-rule">
-          {step.fields.map((f, i) => (
-            <div key={i} className="flex flex-wrap items-end gap-2 px-4 py-3 text-sm">
-              <TextField
-                label={t("leads.fieldLabel")}
-                value={f.label}
-                onChange={(e) => update(s, i, { label: e.target.value })}
-              />
-              <TextField
-                label={t("leads.fieldKey")}
-                value={f.key}
-                onChange={(e) => update(s, i, { key: e.target.value })}
-              />
-              <label className="flex flex-col gap-1">
-                <span className="font-medium">{t("leads.fieldType")}</span>
-                <select
-                  className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
-                  value={f.type}
-                  onChange={(e) => update(s, i, { type: e.target.value })}
-                >
-                  {fieldTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="font-medium">{t("leads.fieldMapsTo")}</span>
-                <select
-                  className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
-                  value={f.maps_to ?? ""}
-                  onChange={(e) => update(s, i, { maps_to: e.target.value || undefined })}
-                >
-                  {mappings.map((m) => (
-                    <option key={m} value={m}>
-                      {m || t("leads.notMapped")}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              {f.type === "file" ? (
-                <>
+          <TextField
+            label={t("leads.formSlug")}
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+          />
+          <label className="flex h-10 items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4"
+              checked={published}
+              onChange={(e) => setPublished(e.target.checked)}
+            />
+            {t("leads.publish")}
+          </label>
+        </div>
+        {schema.steps.map((step, s) => (
+          <fieldset key={s} className="rounded-xl border border-border">
+            <legend className="float-left w-full border-b border-border px-4 py-2.5 text-sm font-semibold">
+              {step.title}
+            </legend>
+            <div className="clear-both divide-y divide-rule">
+              {step.fields.map((f, i) => (
+                <div key={i} className="flex flex-wrap items-end gap-2 px-4 py-3 text-sm">
+                  <TextField
+                    label={t("leads.fieldLabel")}
+                    value={f.label}
+                    onChange={(e) => update(s, i, { label: e.target.value })}
+                  />
+                  <TextField
+                    label={t("leads.fieldKey")}
+                    value={f.key}
+                    onChange={(e) => update(s, i, { key: e.target.value })}
+                  />
                   <label className="flex flex-col gap-1">
-                    <span className="font-medium">{t("hiring.formBuilder.fileKind")}</span>
+                    <span className="font-medium">{t("leads.fieldType")}</span>
                     <select
                       className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
-                      value={f.file_kind ?? "document"}
-                      onChange={(e) =>
-                        update(s, i, { file_kind: e.target.value as Field["file_kind"] })
-                      }
+                      value={f.type}
+                      onChange={(e) => update(s, i, { type: e.target.value })}
                     >
-                      {FILE_KINDS.map((k) => (
-                        <option key={k} value={k}>
-                          {t(`hiring.formBuilder.fileKinds.${k}`)}
+                      {fieldTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
                         </option>
                       ))}
                     </select>
                   </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="font-medium">{t("leads.fieldMapsTo")}</span>
+                    <select
+                      className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
+                      value={f.maps_to ?? ""}
+                      onChange={(e) => update(s, i, { maps_to: e.target.value || undefined })}
+                    >
+                      {mappings.map((m) => (
+                        <option key={m} value={m}>
+                          {m || t("leads.notMapped")}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {f.type === "file" ? (
+                    <>
+                      <label className="flex flex-col gap-1">
+                        <span className="font-medium">{t("hiring.formBuilder.fileKind")}</span>
+                        <select
+                          className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
+                          value={f.file_kind ?? "document"}
+                          onChange={(e) =>
+                            update(s, i, { file_kind: e.target.value as Field["file_kind"] })
+                          }
+                        >
+                          {FILE_KINDS.map((k) => (
+                            <option key={k} value={k}>
+                              {t(`hiring.formBuilder.fileKinds.${k}`)}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="flex h-10 items-center gap-2">
+                        <input
+                          type="checkbox"
+                          className="size-4"
+                          checked={Boolean(f.multiple)}
+                          onChange={(e) => update(s, i, { multiple: e.target.checked })}
+                        />
+                        {t("hiring.formBuilder.multiple")}
+                      </label>
+                    </>
+                  ) : null}
+                  {f.type === "consent" ? (
+                    <label className="flex flex-col gap-1">
+                      <span className="font-medium">{t("gapG6.consentKey")}</span>
+                      <select
+                        className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
+                        value={f.consent_key ?? ""}
+                        onChange={(e) => update(s, i, { consent_key: e.target.value || undefined })}
+                      >
+                        {CONSENT_KEYS.map((k) => (
+                          <option key={k} value={k}>
+                            {t(`gapG6.consentKeys.${k || "default"}`)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ) : null}
                   <label className="flex h-10 items-center gap-2">
                     <input
                       type="checkbox"
                       className="size-4"
-                      checked={Boolean(f.multiple)}
-                      onChange={(e) => update(s, i, { multiple: e.target.checked })}
+                      checked={Boolean(f.required)}
+                      onChange={(e) => update(s, i, { required: e.target.checked })}
                     />
-                    {t("hiring.formBuilder.multiple")}
+                    {t("leads.required")}
                   </label>
-                </>
-              ) : null}
-              {f.type === "consent" ? (
-                <label className="flex flex-col gap-1">
-                  <span className="font-medium">{t("gapG6.consentKey")}</span>
-                  <select
-                    className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
-                    value={f.consent_key ?? ""}
-                    onChange={(e) => update(s, i, { consent_key: e.target.value || undefined })}
-                  >
-                    {CONSENT_KEYS.map((k) => (
-                      <option key={k} value={k}>
-                        {t(`gapG6.consentKeys.${k || "default"}`)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : null}
-              <label className="flex h-10 items-center gap-2">
-                <input
-                  type="checkbox"
-                  className="size-4"
-                  checked={Boolean(f.required)}
-                  onChange={(e) => update(s, i, { required: e.target.checked })}
-                />
-                {t("leads.required")}
-              </label>
-              <Button size="sm" variant="ghost" className="mb-1" onClick={() => remove(s, i)}>
-                {t("leads.removeField")}
-              </Button>
+                  <Button size="sm" variant="ghost" className="mb-1" onClick={() => remove(s, i)}>
+                    {t("leads.removeField")}
+                  </Button>
+                </div>
+              ))}
+              <div className="px-4 py-3">
+                <Button size="sm" variant="secondary" onClick={() => add(s)}>
+                  {t("leads.addField")}
+                </Button>
+              </div>
             </div>
-          ))}
-          <div className="px-4 py-3">
-          <Button size="sm" variant="secondary" onClick={() => add(s)}>
-            {t("leads.addField")}
-          </Button>
-          </div>
-          </div>
-        </fieldset>
-      ))}
+          </fieldset>
+        ))}
       </div>
       <div className="flex flex-wrap items-center gap-2 border-t border-rule px-5 py-3">
         <Button onClick={() => save.mutate()} loading={save.isPending}>

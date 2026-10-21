@@ -32,15 +32,7 @@ type Cover = components["schemas"]["CoverRequest"];
 const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 const linkClass = "font-medium underline-offset-2 hover:underline";
 
-function Card({
-  title,
-  flush,
-  children,
-}: {
-  title: string;
-  flush?: boolean;
-  children: ReactNode;
-}) {
+function Card({ title, flush, children }: { title: string; flush?: boolean; children: ReactNode }) {
   return (
     <Panel title={title} flush={flush} bodyClassName={flush ? undefined : "space-y-3"}>
       {children}
@@ -87,12 +79,12 @@ export function MatchMap({ origin, rows }: { origin: Point | null; rows: Row[] }
       {points.map(({ row, p }) => (
         <g key={row.tutor.id}>
           <title>{`${row.rank}. ${row.tutor.name} (${row.score})`}</title>
-          <circle cx={x(p.lng)} cy={y(p.lat)} r={6} className="fill-link" />
+          <circle cx={x(p.lng)} cy={y(p.lat)} r={9} className="fill-link" />
           <text
             x={x(p.lng)}
-            y={y(p.lat) + 3}
+            y={y(p.lat) + 4}
             textAnchor="middle"
-            className="fill-surface text-[7px] font-semibold"
+            className="fill-surface text-xs font-semibold tabular-nums"
           >
             {row.rank}
           </text>
@@ -241,25 +233,25 @@ export function JobMatchPage({ jobId }: { jobId: string }) {
   return (
     <div className="space-y-6">
       <div>
-      <RecordHeader
-        back={
-          <Link to="/jobs/$jobId" params={{ jobId }}>
-            {job.data?.name ?? t("jobs.title")}
-          </Link>
-        }
-        title={t("matching.findTutor")}
-      />
-      {canRestricted ? (
-        <label className="-mt-2 flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="size-4"
-            checked={includeRestricted}
-            onChange={(e) => setIncludeRestricted(e.target.checked)}
-          />
-          {t("matching.includeRestricted")}
-        </label>
-      ) : null}
+        <RecordHeader
+          back={
+            <Link to="/jobs/$jobId" params={{ jobId }}>
+              {job.data?.name ?? t("jobs.title")}
+            </Link>
+          }
+          title={t("matching.findTutor")}
+        />
+        {canRestricted ? (
+          <label className="-mt-2 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4"
+              checked={includeRestricted}
+              onChange={(e) => setIncludeRestricted(e.target.checked)}
+            />
+            {t("matching.includeRestricted")}
+          </label>
+        ) : null}
       </div>
       {results.data?.needs ? (
         <Card title={t("g5c.needs.title")}>
@@ -613,51 +605,51 @@ function CoverPanel() {
         />
       </div>
       <div className="rounded-xl border border-border bg-surface">
-      {covers.isPending ? (
-        <div className="px-5 py-4">
-          <Spinner label={t("grid.loading")} />
-        </div>
-      ) : null}
-      {covers.data?.results.length === 0 ? (
-        <p className="px-5 py-10 text-center text-sm text-muted-foreground">
-          {t("matching.noCover")}
-        </p>
-      ) : null}
-      <ul className="divide-y divide-rule">
-        {covers.data?.results.map((c: Cover) => (
-          <li key={c.id} className="space-y-1 px-5 py-3 text-sm">
-            <p className="font-medium">
-              {c.original_tutor_name} · {t(`matching.coverStatus.${c.status}`)}
-              {c.accepted_by_name ? ` → ${c.accepted_by_name}` : ""}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {c.lessons
-                .map((l) => `${l.title} ${formatDateTime(l.start, i18n.language)}`)
-                .join("; ")}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t("matching.coverDeadline", { when: formatDateTime(c.deadline, i18n.language) })} ·{" "}
-              {t("matching.notified", { count: c.notified_count })}
-            </p>
-            {c.status === "open" ? (
-              <div className="flex gap-2 pt-1">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  aria-expanded={open === c.id}
-                  onClick={() => setOpen(open === c.id ? null : c.id)}
-                >
-                  {t("matching.candidates")}
-                </Button>
-                <Button size="sm" variant="secondary" onClick={() => cancel.mutate(c.id)}>
-                  {t("matching.cancelCover")}
-                </Button>
-              </div>
-            ) : null}
-            {open === c.id ? <CoverCandidates id={c.id} /> : null}
-          </li>
-        ))}
-      </ul>
+        {covers.isPending ? (
+          <div className="px-5 py-4">
+            <Spinner label={t("grid.loading")} />
+          </div>
+        ) : null}
+        {covers.data?.results.length === 0 ? (
+          <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+            {t("matching.noCover")}
+          </p>
+        ) : null}
+        <ul className="divide-y divide-rule">
+          {covers.data?.results.map((c: Cover) => (
+            <li key={c.id} className="space-y-1 px-5 py-3 text-sm">
+              <p className="font-medium">
+                {c.original_tutor_name} · {t(`matching.coverStatus.${c.status}`)}
+                {c.accepted_by_name ? ` → ${c.accepted_by_name}` : ""}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {c.lessons
+                  .map((l) => `${l.title} ${formatDateTime(l.start, i18n.language)}`)
+                  .join("; ")}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("matching.coverDeadline", { when: formatDateTime(c.deadline, i18n.language) })} ·{" "}
+                {t("matching.notified", { count: c.notified_count })}
+              </p>
+              {c.status === "open" ? (
+                <div className="flex gap-2 pt-1">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    aria-expanded={open === c.id}
+                    onClick={() => setOpen(open === c.id ? null : c.id)}
+                  >
+                    {t("matching.candidates")}
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={() => cancel.mutate(c.id)}>
+                    {t("matching.cancelCover")}
+                  </Button>
+                </div>
+              ) : null}
+              {open === c.id ? <CoverCandidates id={c.id} /> : null}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
@@ -726,54 +718,58 @@ function AnalyticsPanel() {
         />
       </section>
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-2">
-      <Card title={t("matching.acceptance")} flush>
-        <table className={TABLE}>
-          <thead className="border-b border-border">
-            <tr className="text-left">
-              <th scope="col">{t("matching.tutor")}</th>
-              <th scope="col">{t("matching.sent")}</th>
-              <th scope="col">{t("matching.accepted")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {d.offers.map((o) => (
-              <tr key={o.tutor}>
-                <td>{o.name}</td>
-                <td className="tabular-nums">{o.sent}</td>
-                <td className="tabular-nums">{Math.round(o.acceptance_rate * 100)}%</td>
+        <Card title={t("matching.acceptance")} flush>
+          <table className={TABLE}>
+            <thead className="border-b border-border">
+              <tr className="text-left">
+                <th scope="col">{t("matching.tutor")}</th>
+                <th scope="col">{t("matching.sent")}</th>
+                <th scope="col">{t("matching.accepted")}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {d.offers.length === 0 ? (
-          <p className="px-5 py-4 text-sm text-muted-foreground">{t("designS5.matching.noData")}</p>
-        ) : null}
-      </Card>
-      <Card title={t("matching.unmatched")} flush>
-        <table className={TABLE}>
-          <thead className="border-b border-border">
-            <tr className="text-left">
-              <th scope="col">{t("matching.subject")}</th>
-              <th scope="col">{t("matching.area")}</th>
-              <th scope="col">{t("matching.jobs")}</th>
-              <th scope="col">{t("matching.oldestDays")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {d.unmatched.map((u) => (
-              <tr key={`${u.subject}-${u.area}`}>
-                <td>{u.subject || "—"}</td>
-                <td>{u.area || "—"}</td>
-                <td className="tabular-nums">{u.jobs}</td>
-                <td className="tabular-nums">{u.oldest_days}</td>
+            </thead>
+            <tbody>
+              {d.offers.map((o) => (
+                <tr key={o.tutor}>
+                  <td>{o.name}</td>
+                  <td className="tabular-nums">{o.sent}</td>
+                  <td className="tabular-nums">{Math.round(o.acceptance_rate * 100)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {d.offers.length === 0 ? (
+            <p className="px-5 py-4 text-sm text-muted-foreground">
+              {t("designS5.matching.noData")}
+            </p>
+          ) : null}
+        </Card>
+        <Card title={t("matching.unmatched")} flush>
+          <table className={TABLE}>
+            <thead className="border-b border-border">
+              <tr className="text-left">
+                <th scope="col">{t("matching.subject")}</th>
+                <th scope="col">{t("matching.area")}</th>
+                <th scope="col">{t("matching.jobs")}</th>
+                <th scope="col">{t("matching.oldestDays")}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {d.unmatched.length === 0 ? (
-          <p className="px-5 py-4 text-sm text-muted-foreground">{t("designS5.matching.noData")}</p>
-        ) : null}
-      </Card>
+            </thead>
+            <tbody>
+              {d.unmatched.map((u) => (
+                <tr key={`${u.subject}-${u.area}`}>
+                  <td>{u.subject || "—"}</td>
+                  <td>{u.area || "—"}</td>
+                  <td className="tabular-nums">{u.jobs}</td>
+                  <td className="tabular-nums">{u.oldest_days}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {d.unmatched.length === 0 ? (
+            <p className="px-5 py-4 text-sm text-muted-foreground">
+              {t("designS5.matching.noData")}
+            </p>
+          ) : null}
+        </Card>
       </div>
     </div>
   );
@@ -809,21 +805,24 @@ function WeightsPanel() {
         save.mutate();
       }}
     >
-      <h2 id="matching-weights" className="border-b border-border px-5 py-3.5 text-base font-semibold">
+      <h2
+        id="matching-weights"
+        className="border-b border-border px-5 py-3.5 text-base font-semibold"
+      >
         {t("matching.weights")}
       </h2>
       <div className="grid gap-4 px-5 py-4 sm:grid-cols-3">
-      {Object.entries(weights.data.weights).map(([key, value]) => (
-        <TextField
-          key={key}
-          label={t(`matching.factors.${key}`)}
-          type="number"
-          min={0}
-          max={100}
-          value={draft[key] ?? String(value)}
-          onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
-        />
-      ))}
+        {Object.entries(weights.data.weights).map(([key, value]) => (
+          <TextField
+            key={key}
+            label={t(`matching.factors.${key}`)}
+            type="number"
+            min={0}
+            max={100}
+            value={draft[key] ?? String(value)}
+            onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
+          />
+        ))}
       </div>
       <div className="flex flex-wrap items-center gap-3 border-t border-rule px-5 py-3">
         <Button type="submit" loading={save.isPending}>

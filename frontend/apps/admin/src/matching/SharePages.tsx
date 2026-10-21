@@ -40,9 +40,7 @@ export function TutorCard({
     .join(", ");
   const background = [
     card.qualifications.map((q) => q.title).join("; "),
-    card.languages.length
-      ? t("shortlistShare.languages", { list: card.languages.join(", ") })
-      : "",
+    card.languages.length ? t("shortlistShare.languages", { list: card.languages.join(", ") }) : "",
   ].filter(Boolean);
   const body = (
     <div className="flex gap-3">

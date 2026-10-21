@@ -7396,7 +7396,7 @@
     },
     "leads": {
       "empty": "No enquiries here.",
-      "noForms": "No forms yet. Make one to take enquiries on your website.",
+      "noForms": "No forms yet.",
       "noHistory": "Nothing has happened yet.",
       "waiting": "Waiting",
       "noSources": "No enquiries yet."

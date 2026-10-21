@@ -278,10 +278,11 @@
 </ul>
 <p>The bar shows progress and lists any records that failed, with the reason (for example "no marketing consent").</p>
 <h5 id="record-pages">The record pages</h5>
+<p>Each record page opens with the way back (for example <span class="ui">Clients</span>), the name and one line of context, and its actions on the right, such as <span class="ui">Merge with another record</span>. The record's work (billing, jobs, subjects, activity) is in the wide column; details, contacts and <span class="ui">Change status</span> are in the narrow column on the right, or below on a phone.</p>
 <ul>
 <li><strong>Client:</strong> <span class="ui">Contacts</span> (with <span class="ui">Invite to portal</span> for each contact with an email), <span class="ui">Students</span>, billing facts and, with billing access, the client's balances, invoices, payments, packages and payment methods (see <a href="#client-billing">billing on the client record</a>).</li>
 <li><strong>Student:</strong> details (year group, school, date of birth, subjects, goals, learning needs), <span class="ui">Needs for matching</span> (exam boards and, for staff who may see sensitive details, special educational needs and the family's tutor gender preference when your organisation allows it; <span class="ui">Edit</span> to change them), <span class="ui">Change status</span>, the student's jobs with <span class="ui">Set up lessons</span>, and privacy and safeguarding information.</li>
-<li><strong>Tutor:</strong> details, pay rate, how they teach, <span class="ui">Subjects</span> (approve new subjects with <span class="ui">Approve</span>), <span class="ui">Matching profile</span> (<span class="ui">SEN experience</span>, <span class="ui">Exam boards</span> and, with <code>people.tutor.view_sensitive</code>, <span class="ui">Gender</span>, which is only used for families' gender preferences), pay profile, compliance and background checks, and <span class="ui">Change status</span>.</li>
+<li><strong>Tutor:</strong> details, pay rate, how they teach, <span class="ui">Matching profile</span> (<span class="ui">SEN experience</span>, <span class="ui">Exam boards</span> and, with <code>people.tutor.view_sensitive</code>, <span class="ui">Gender</span>, which is only used for families' gender preferences) and <span class="ui">Change status</span>. The work area has tabs: <span class="ui">Subjects</span> (approve new subjects with <span class="ui">Approve</span>), <span class="ui">Pay</span> (pay profile and bank details), <span class="ui">Compliance</span> (documents and background checks) and <span class="ui">Performance and leaving</span>. You only see the tabs your role allows.</li>
 </ul>
 <p>Every record (and every job) has an <span class="ui">Activity</span> panel:</p>
 <ul>
@@ -372,7 +373,7 @@
 <section id="unconfirmed" data-route="admin:/unconfirmed" aria-labelledby="unconfirmed-h">
 <h4 id="unconfirmed-h">Unconfirmed lessons</h4>
 <p><span class="ui">Unconfirmed lessons</span> lists past lessons that nobody has marked as completed or cancelled. Unconfirmed lessons are not charged or paid, so clear this list before you run invoices or payroll. It needs <code>scheduling.lesson.complete</code>.</p>
-<p>Tick lessons (or <span class="ui">Select all</span>) and select <span class="ui">Mark completed</span>, <span class="ui">Cancel</span> or <span class="ui">Remind tutors</span>. Lessons marked completed in bulk count every student as present. Your organisation can also complete lessons automatically after a number of hours.</p>
+<p>Each lesson shows the red dashed "not marked yet" mark. Tick lessons (or the <span class="ui">Select all</span> box at the top of the list) and select <span class="ui">Mark completed</span>, <span class="ui">Cancel</span> or <span class="ui">Remind tutors</span>; the buttons work once something is ticked. Lessons marked completed in bulk count every student as present. Your organisation can also complete lessons automatically after a number of hours.</p>
 </section>
 
 <section id="availability" data-route="admin:/availability" aria-labelledby="availability-h">
@@ -479,14 +480,14 @@
 <ul>
 <li>Open a report to read it. If your organisation requires approval, select <span class="ui">Approve</span> or <span class="ui">Return to tutor</span> with a note on <span class="ui">What needs changing</span>.</li>
 <li><span class="ui">Share with client</span> makes it visible in the portal. If approval isn't required, reports are shared automatically when submitted.</li>
-<li>Use <span class="ui">Add a comment</span> to discuss it. Choose <span class="ui">Staff and tutor only</span> or <span class="ui">Client too</span>.</li>
+<li>Use <span class="ui">Add a comment</span> in the <span class="ui">Comments</span> column beside the report to discuss it. Choose <span class="ui">Staff and tutor only</span> or <span class="ui">Client too</span>.</li>
 </ul>
 <p>Reports have a deadline. Tutors get a reminder, then the report becomes overdue, and finally a task is created for the office. Your organisation can hold the tutor's pay for the lesson until the report is in. A report drafted with AI shows an <span class="ui">AI-assisted</span> badge.</p>
 </section>
 
 <section id="lesson-feedback" data-route="admin:/lesson-feedback" aria-labelledby="lesson-feedback-h">
 <h4 id="lesson-feedback-h">Lesson feedback</h4>
-<p>If turned on, TutorTrack asks families to rate some lessons from 1 to 5 stars, with an optional comment. <span class="ui">Lesson feedback</span> (<code>delivery.feedback.view</code>) shows the <span class="ui">Feedback summary</span> (average stars, answer rate, low ratings and results <span class="ui">By tutor</span>) and every request with its status. Filter on <span class="ui">Low ratings only</span> to follow up unhappy families. <span class="ui">Withdraw</span> cancels a request that hasn't been answered.</p>
+<p>If turned on, TutorTrack asks families to rate some lessons from 1 to 5 stars, with an optional comment. <span class="ui">Lesson feedback</span> (<code>delivery.feedback.view</code>) shows the <span class="ui">Feedback summary</span> (average stars, answer rate, low ratings and results <span class="ui">By tutor</span>) and every request with its status. The figures sit in one line at the top, the requests below with each family's comment under the lesson, then <span class="ui">By tutor</span> and the <span class="ui">Feedback requests</span> settings. Filter on <span class="ui">Low ratings only</span> to follow up unhappy families. <span class="ui">Withdraw</span> cancels a request that hasn't been answered.</p>
 <p>Low ratings alert the office. Families can opt out of feedback requests. Admins turn requests on and set how often they go out in the <span class="ui">Feedback requests</span> section of this page.</p>
 </section>
 
@@ -614,7 +615,7 @@
 <h5 id="tax-forms">US tax forms and bank details</h5>
 <ul>
 <li><span class="ui">US tax forms</span> lists 1099-NEC forms for US tutors by <span class="ui">Tax year</span>. Fix any <span class="ui">Missing</span> taxpayer ids or addresses, then <span class="ui">Finalise the year</span> and download the CSV for filing.</li>
-<li>On a tutor's page, <span class="ui">Show full bank details</span> asks you to confirm it's you (password, authenticator code or passkey) and records that you looked. The <span class="ui">Earnings summary</span> PDFs are there too.</li>
+<li>On a tutor's page, on the <span class="ui">Pay</span> tab, <span class="ui">Show full bank details</span> asks you to confirm it's you (password, authenticator code or passkey) and records that you looked. The <span class="ui">Earnings summary</span> PDFs are there too.</li>
 </ul>
 </section>
 
@@ -657,7 +658,7 @@
 <p><span class="ui">Compliance</span> (<code>compliance.view</code>) is a grid of tutors against required documents and checks (DBS, right to work, ID, qualifications, safeguarding training and so on). Each cell is <span class="ui">Verified</span>, <span class="ui">To check</span>, <span class="ui">Missing</span>, <span class="ui">Rejected</span> or <span class="ui">Expired</span>, with the expiry date.</p>
 <ul>
 <li>To check a document, open the tutor and use the compliance card: <span class="ui">Verify</span> or <span class="ui">Reject</span> (<code>compliance.verify</code>). You can't verify your own records.</li>
-<li>To run an online check, use <span class="ui">Start an online check</span> on the tutor's page, choose the provider and type, confirm the tutor agreed and select <span class="ui">Start check</span>. Results are only shown to people allowed to see them, and each look is recorded.</li>
+<li>To run an online check, use <span class="ui">Start an online check</span> on the <span class="ui">Compliance</span> tab of the tutor's page, choose the provider and type, confirm the tutor agreed and select <span class="ui">Start check</span>. Results are only shown to people allowed to see them, and each look is recorded.</li>
 <li>Tutors get reminders 60, 30 and 7 days before expiry. When a required item expires, the tutor is <strong>restricted</strong>: they can't be given new lessons and their pay is held until it is fixed.</li>
 <li>Filter the grid by <span class="ui">Tutor status</span>, <span class="ui">Requirement</span> or <span class="ui">Only tutors with gaps</span>. <span class="ui">Export CSV</span> downloads what you see, with a status and expiry date for each requirement.</li>
 <li>To chase documents, tick tutors and select <span class="ui">Request documents from … tutors</span>, or select <span class="ui">Request missing documents</span> to ask everyone shown (<code>compliance.verify</code>). Each tutor gets an email and a message listing what is missing, rejected or expired, at most once a day.</li>
@@ -666,7 +667,7 @@
 
 <section id="tutor-performance" aria-labelledby="tutor-performance-h">
 <h4 id="tutor-performance-h">Probation, performance notes and offboarding</h4>
-<p>On a tutor's page:</p>
+<p>On a tutor's page, on the <span class="ui">Performance and leaving</span> tab:</p>
 <ul>
 <li><span class="ui">Performance</span> (<code>recruitment.performance.view</code>; recording needs <code>recruitment.performance.manage</code>): a tutor who finishes onboarding gets a <span class="ui">Probation review</span> about three months later, or use <span class="ui">Schedule review</span>. You are reminded a week before, on the day, and weekly until you choose an <span class="ui">Outcome</span> (<span class="ui">Passed</span>, <span class="ui">Extended</span> with the <span class="ui">Next review</span> date, <span class="ui">Not passed</span> or <span class="ui">Cancelled</span>) and select <span class="ui">Record outcome</span>. Add <span class="ui">Performance notes</span> (note, praise or concern); tutors don't see them. Subject-test results are listed here too.</li>
 <li><span class="ui">Offboarding</span> (<code>recruitment.offboarding.manage</code>): enter the <span class="ui">Reason for leaving</span> and <span class="ui">Leaving date</span> and select <span class="ui">Start offboarding</span>. The tutor stops getting new work at once. Reassigning jobs and future lessons and the final pay tick themselves when they are done; <span class="ui">Revoke access</span> ends their login; tick the other steps with <span class="ui">Mark done</span>. <span class="ui">Finish offboarding</span> archives the tutor; their records are kept for the retention period.</li>

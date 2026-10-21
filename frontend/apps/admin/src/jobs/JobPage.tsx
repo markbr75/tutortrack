@@ -76,45 +76,45 @@ function StatusControl({ job }: { job: Job }) {
   if (!next.length) return null;
   return (
     <Panel title={t("jobs.changeStatus")}>
-    <form
-      className="flex flex-wrap items-end gap-2"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (status) change.mutate();
-      }}
-    >
-      <SelectField
-        label={t("jobs.changeStatus")}
-        value={status}
-        onChange={(e) => setStatus(e.target.value as JobStatus)}
-        options={[
-          { value: "", label: t("jobs.chooseStatus") },
-          ...next.map((s) => ({ value: s, label: t(`jobs.status.${s}`) })),
-        ]}
-      />
-      {status ? (
-        <TextField
-          label={t("jobs.reason")}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
+      <form
+        className="flex flex-wrap items-end gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (status) change.mutate();
+        }}
+      >
+        <SelectField
+          label={t("jobs.changeStatus")}
+          value={status}
+          onChange={(e) => setStatus(e.target.value as JobStatus)}
+          options={[
+            { value: "", label: t("jobs.chooseStatus") },
+            ...next.map((s) => ({ value: s, label: t(`jobs.status.${s}`) })),
+          ]}
         />
-      ) : null}
-      {status === "paused" ? (
-        <label className="flex h-10 items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="size-4"
-            checked={cancelFuture}
-            onChange={(e) => setCancelFuture(e.target.checked)}
+        {status ? (
+          <TextField
+            label={t("jobs.reason")}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
           />
-          {t("jobs.cancelFuture")}
-        </label>
-      ) : null}
-      <Button type="submit" variant="secondary" disabled={!status || change.isPending}>
-        {t("jobs.apply")}
-      </Button>
-      <ErrorText error={change.error} />
-    </form>
+        ) : null}
+        {status === "paused" ? (
+          <label className="flex h-10 items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4"
+              checked={cancelFuture}
+              onChange={(e) => setCancelFuture(e.target.checked)}
+            />
+            {t("jobs.cancelFuture")}
+          </label>
+        ) : null}
+        <Button type="submit" variant="secondary" disabled={!status || change.isPending}>
+          {t("jobs.apply")}
+        </Button>
+        <ErrorText error={change.error} />
+      </form>
     </Panel>
   );
 }
@@ -315,27 +315,27 @@ function Tutors({ job }: { job: Job }) {
                 .join(" · ")}
               aside={
                 canManage && open ? (
-                <>
-                  {link.status === "active" ? (
+                  <>
+                    {link.status === "active" ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        aria-expanded={replacing === link.id}
+                        aria-label={t("jobs.replaceNamed", { name: link.tutor_name })}
+                        onClick={() => setReplacing(replacing === link.id ? null : link.id)}
+                      >
+                        {t("jobs.replace")}
+                      </Button>
+                    ) : null}
                     <Button
                       size="sm"
-                      variant="secondary"
-                      aria-expanded={replacing === link.id}
-                      aria-label={t("jobs.replaceNamed", { name: link.tutor_name })}
-                      onClick={() => setReplacing(replacing === link.id ? null : link.id)}
+                      variant="ghost"
+                      aria-label={t("jobs.removeNamed", { name: link.tutor_name })}
+                      onClick={() => remove.mutate(link.id)}
                     >
-                      {t("jobs.replace")}
+                      {t("jobs.remove")}
                     </Button>
-                  ) : null}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    aria-label={t("jobs.removeNamed", { name: link.tutor_name })}
-                    onClick={() => remove.mutate(link.id)}
-                  >
-                    {t("jobs.remove")}
-                  </Button>
-                </>
+                  </>
                 ) : null
               }
             />

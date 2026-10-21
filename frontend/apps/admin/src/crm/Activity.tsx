@@ -214,7 +214,10 @@ export function TaskList({ tasks, onChanged }: { tasks: Task[]; onChanged: () =>
                 ? t("crm.task.dueOn", { when: formatDateTime(task.due_at, i18n.language) })
                 : t("crm.task.noDue")}
               {task.is_overdue ? (
-                <span className="font-semibold text-margin"> · {t("crm.task.overdue")}</span>
+                <>
+                  {" · "}
+                  <span className="font-semibold text-margin">{t("crm.task.overdue")}</span>
+                </>
               ) : null}
             </p>
           </div>

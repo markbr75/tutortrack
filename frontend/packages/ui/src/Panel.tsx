@@ -129,7 +129,12 @@ export function NamePlate({
   className?: string;
 }) {
   return (
-    <div className={cn("flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1", className)}>
+    <div
+      className={cn(
+        "flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1",
+        className,
+      )}
+    >
       <div className="min-w-0">
         <div className="font-medium">{name}</div>
         {context ? <div className="text-xs text-muted-foreground">{context}</div> : null}

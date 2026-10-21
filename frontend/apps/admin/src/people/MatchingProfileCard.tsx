@@ -118,15 +118,14 @@ export function TutorMatchingCard({ tutor }: { tutor: Tutor }) {
         </form>
       ) : (
         <Facts
-            items={[
-              [t("g5c.profile.senExperience"), (tutor.sen_tags ?? []).join(", ")],
-              [t("g5c.needs.examBoards"), (tutor.exam_boards ?? []).join(", ")],
-              ...(seesGender
-                ? ([[t("g5c.profile.gender"), genderLabel(tutor.gender)]] as [string, string][])
-                : []),
-            ]}
-          />
-
+          items={[
+            [t("g5c.profile.senExperience"), (tutor.sen_tags ?? []).join(", ")],
+            [t("g5c.needs.examBoards"), (tutor.exam_boards ?? []).join(", ")],
+            ...(seesGender
+              ? ([[t("g5c.profile.gender"), genderLabel(tutor.gender)]] as [string, string][])
+              : []),
+          ]}
+        />
       )}
     </Panel>
   );
@@ -217,20 +216,19 @@ export function StudentMatchingCard({ student }: { student: Student }) {
         </form>
       ) : (
         <Facts
-            items={[
-              [t("g5c.needs.examBoards"), boardsOf(student.exam_boards)],
-              ...(sensitive
-                ? ([[t("g5c.needs.senTags"), (student.sen_tags ?? []).join(", ")]] as [
-                    string,
-                    string,
-                  ][])
-                : []),
-              ...(sensitive && preferences
-                ? ([[t("g5c.needs.gender"), preference]] as [string, string][])
-                : []),
-            ]}
-          />
-
+          items={[
+            [t("g5c.needs.examBoards"), boardsOf(student.exam_boards)],
+            ...(sensitive
+              ? ([[t("g5c.needs.senTags"), (student.sen_tags ?? []).join(", ")]] as [
+                  string,
+                  string,
+                ][])
+              : []),
+            ...(sensitive && preferences
+              ? ([[t("g5c.needs.gender"), preference]] as [string, string][])
+              : []),
+          ]}
+        />
       )}
     </Panel>
   );

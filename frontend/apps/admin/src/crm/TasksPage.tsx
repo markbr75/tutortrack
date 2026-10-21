@@ -43,7 +43,11 @@ export function TasksPage() {
             <div className="py-3">
               <Spinner className="sr-only" label={t("grid.loading")} />
               {[0, 1, 2].map((i) => (
-                <div key={i} aria-hidden="true" className="my-2 h-8 animate-pulse rounded bg-muted" />
+                <div
+                  key={i}
+                  aria-hidden="true"
+                  className="my-2 h-8 animate-pulse rounded bg-muted"
+                />
               ))}
             </div>
           ) : tasks.data.results.length === 0 ? (

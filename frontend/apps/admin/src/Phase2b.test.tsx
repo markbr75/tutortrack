@@ -253,7 +253,7 @@ describe("shortlist sharing (E19-T08)", () => {
     });
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Tutors for Maths GCSE" })).toBeVisible();
-    expect(screen.getByText("Rated 4.8 out of 5 (12 ratings)")).toBeInTheDocument();
+    expect(screen.getByText(/Rated 4\.8 out of 5 \(12 ratings\)/)).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText("Choose Nia A."));
     fireEvent.change(screen.getByLabelText("Anything we should know? (optional)"), {
       target: { value: "Tuesdays please" },
