@@ -15,6 +15,8 @@ export interface RuledPanelProps {
   aside?: ReactNode;
   /** The header rule: the register rule, or margin red for something that still waits. */
   rule?: "border" | "margin";
+  /** Accessible name when the panel has no visible title. */
+  label?: string;
   /** Leave the body unpadded, for lists, tables and forms that bring their own rows. */
   flush?: boolean;
   /** A ruled footer row: the one link onward, or the panel's Save. */
@@ -35,6 +37,7 @@ export function RuledPanel({
   description,
   aside,
   rule = "border",
+  label,
   flush = false,
   footer,
   className,
@@ -47,6 +50,7 @@ export function RuledPanel({
   return (
     <section
       aria-labelledby={title ? id : undefined}
+      aria-label={title ? undefined : label}
       className={cn("min-w-0 rounded-xl border border-border bg-surface", className)}
     >
       {title ? (
@@ -64,10 +68,14 @@ export function RuledPanel({
               <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
             ) : null}
           </div>
-          {aside ? <div className="text-sm">{aside}</div> : null}
+          {aside ? <div className="flex items-center gap-2 text-sm">{aside}</div> : null}
         </div>
       ) : null}
-      {flush ? children : <div className={cn("px-5 py-4", bodyClassName)}>{children}</div>}
+      {flush && !bodyClassName ? (
+        children
+      ) : (
+        <div className={cn(!flush && "px-5 py-4", bodyClassName)}>{children}</div>
+      )}
       {footer ? <PanelFooter>{footer}</PanelFooter> : null}
     </section>
   );

@@ -1,65 +1,10 @@
-import { useId, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { cn } from "./cn";
+import { RuledPanel } from "./RuledPanel";
 
-/**
- * A ruled panel: a clean leaf on the stock with a register-rule edge and 12px corners. The
- * header (14px × 20px) holds the title left and a count, total or action right, ruled off
- * below; the body is inset 20px, or `flush` for ruled rows and tables that set their own
- * padding; an optional footer row holds the one link onward.
- */
-export function Panel({
-  title,
-  aside,
-  footer,
-  flush = false,
-  rule,
-  label,
-  className,
-  bodyClassName,
-  children,
-}: {
-  /** The panel's heading (an h2). Without it the panel is a plain ruled leaf. */
-  title?: ReactNode;
-  /** Right side of the header: a count, total or one small action. */
-  aside?: ReactNode;
-  /** A ruled footer row (the link onward). */
-  footer?: ReactNode;
-  /** Leave the body unpadded (ruled rows, tables). */
-  flush?: boolean;
-  /** The header's rule colour class; `border-margin` only while something waits. */
-  rule?: string;
-  /** Accessible name when the panel has no visible title. */
-  label?: string;
-  className?: string;
-  bodyClassName?: string;
-  children?: ReactNode;
-}) {
-  const id = useId();
-  return (
-    <section
-      aria-labelledby={title ? id : undefined}
-      aria-label={title ? undefined : label}
-      className={cn("min-w-0 rounded-xl border border-border bg-surface", className)}
-    >
-      {title ? (
-        <div
-          className={cn(
-            "flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b px-5 py-3.5",
-            rule ?? "border-border",
-          )}
-        >
-          <h2 id={id} className="text-base font-semibold">
-            {title}
-          </h2>
-          {aside ? <div className="flex items-center gap-2 text-sm">{aside}</div> : null}
-        </div>
-      ) : null}
-      <div className={cn(flush ? undefined : "px-5 py-4", bodyClassName)}>{children}</div>
-      {footer ? <div className="border-t border-rule px-5 py-3 text-sm">{footer}</div> : null}
-    </section>
-  );
-}
+/** The record pages' name for `RuledPanel`: one panel component, two names in use. */
+export const Panel = RuledPanel;
 
 /** Ruled list rows inside a flush panel: 10px × 20px, faint rules between rows. */
 export function PanelRows({ children, className }: { children: ReactNode; className?: string }) {
