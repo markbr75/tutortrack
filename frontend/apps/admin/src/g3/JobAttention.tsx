@@ -10,17 +10,14 @@ export const ATTENTION_REASONS = [
 ] as const;
 export type AttentionReason = (typeof ATTENTION_REASONS)[number];
 
-/** Small labelled badges; nothing when the job is fine. */
+/** The reasons in words, one per line; nothing when the job is fine. */
 export function AttentionReasons({ reasons }: { reasons: readonly string[] | undefined }) {
   const { t } = useTranslation();
   if (!reasons?.length) return null;
   return (
-    <ul className="flex flex-wrap gap-1" aria-label={t("g3.attention.column")}>
+    <ul className="text-sm" aria-label={t("g3.attention.column")}>
       {reasons.map((r) => (
-        <li
-          key={r}
-          className="rounded-full border border-warning/60 px-2 py-0.5 text-xs text-warning"
-        >
+        <li key={r} className="whitespace-nowrap">
           {t(`g3.attention.reasons.${r}`)}
         </li>
       ))}

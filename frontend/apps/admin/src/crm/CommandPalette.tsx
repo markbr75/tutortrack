@@ -86,9 +86,9 @@ export function CommandPalette() {
       <dialog
         ref={dialogRef}
         aria-label={t("search.title")}
-        className="mt-24 w-full max-w-lg rounded-lg border border-border bg-background p-0 shadow-lg backdrop:bg-black/40"
+        className="mx-auto mt-24 w-[calc(100%-2rem)] max-w-lg rounded-xl border border-border bg-surface p-0 text-foreground shadow-[0_8px_24px_-8px_rgb(15_23_42/0.25)] backdrop:bg-black/40"
       >
-        <div className="p-3">
+        <div className="border-b border-border p-3">
           <input
             ref={inputRef}
             type="search"
@@ -116,14 +116,14 @@ export function CommandPalette() {
                 go(hits[active]);
               }
             }}
-            className="w-full rounded-md border border-border bg-background px-3 py-2"
+            className="h-10 w-full rounded-md border border-field bg-surface px-3 text-sm"
           />
         </div>
         <ul
           id={listId}
           role="listbox"
           aria-label={t("search.results")}
-          className="max-h-80 overflow-y-auto pb-2"
+          className="max-h-80 divide-y divide-rule overflow-y-auto empty:hidden"
         >
           {hits.map((hit, index) => (
             <li
@@ -131,12 +131,12 @@ export function CommandPalette() {
               id={`${listId}-${index}`}
               role="option"
               aria-selected={index === active}
-              className="cursor-pointer px-4 py-2 aria-selected:bg-muted"
+              className="cursor-pointer px-4 py-2.5 text-sm aria-selected:bg-muted"
               onMouseEnter={() => setActive(index)}
               onClick={() => go(hit)}
             >
-              <span className="font-medium">{hit.title}</span>{" "}
-              <span className="text-sm text-muted-foreground">
+              <span className="block font-medium">{hit.title}</span>{" "}
+              <span className="block text-xs text-muted-foreground">
                 {t(
                   hit.type === "job" || hit.type === "invoice"
                     ? `peopleTools.searchType.${hit.type}`
@@ -148,7 +148,7 @@ export function CommandPalette() {
           ))}
         </ul>
         {term.length >= 2 && results.isSuccess && hits.length === 0 ? (
-          <p className="px-4 pb-4 text-sm text-muted-foreground" role="status">
+          <p className="px-4 py-4 text-sm text-muted-foreground" role="status">
             {t("search.none")}
           </p>
         ) : null}

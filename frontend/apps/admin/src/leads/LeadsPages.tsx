@@ -1,6 +1,18 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FactList,
+  NamePlate,
+  PageHeader,
+  Panel,
+  PanelRow,
+  PanelRows,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState, type DragEvent, type ReactNode } from "react";
@@ -8,12 +20,14 @@ import { useState, type DragEvent, type ReactNode } from "react";
 import { api, usePermission } from "../api";
 import { AiEnquiryExtract, AiEnquiryTriage } from "../ai/AiWidgets";
 import { AttachedFiles } from "../components/AttachedFiles";
+import { RecordHeader, RecordLayout } from "../components/RecordHeader";
 import { RecordActivity } from "../crm/Activity";
 import { ProposalsSection } from "./ProposalPages";
 
 type Enquiry = components["schemas"]["Enquiry"];
 type Stage = components["schemas"]["Stage"];
 
+/** The enquiries area's own pages, as a row of links ruled like tabs. */
 export function LeadsNav() {
   const { t } = useTranslation();
   const links = [
@@ -23,13 +37,16 @@ export function LeadsNav() {
     { to: "/leads/reports", label: t("leads.reports") },
   ] as const;
   return (
-    <nav aria-label={t("leads.title")} className="mb-4 flex flex-wrap gap-3 text-sm">
+    <nav
+      aria-label={t("leads.title")}
+      className="mb-6 flex gap-1 overflow-x-auto border-b border-border [scrollbar-width:none]"
+    >
       {links.map((l) => (
         <Link
           key={l.to}
           to={l.to}
           activeOptions={{ exact: true }}
-          className="rounded-md px-2 py-1 hover:bg-muted [&.active]:font-medium"
+          className="-mb-px shrink-0 border-b-2 border-transparent px-3 py-2 text-sm whitespace-nowrap text-muted-foreground hover:text-foreground [&.active]:border-foreground [&.active]:font-semibold [&.active]:text-foreground"
         >
           {l.label}
         </Link>
@@ -38,12 +55,22 @@ export function LeadsNav() {
   );
 }
 
-export function LeadsPage({ title, children }: { title: string; children: ReactNode }) {
+export function LeadsPage({
+  title,
+  description,
+  actions,
+  children,
+}: {
+  title: string;
+  description?: ReactNode;
+  actions?: ReactNode;
+  children: ReactNode;
+}) {
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{title}</h1>
+    <div>
+      <PageHeader title={title} description={description} actions={actions} className="mb-4" />
       <LeadsNav />
-      {children}
+      <div className="space-y-6">{children}</div>
     </div>
   );
 }
@@ -60,6 +87,8 @@ export function BoardPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const canEdit = usePermission("leads.enquiry.edit");
+  const canCreate = usePermission("leads.enquiry.create");
+  const [adding, setAdding] = useState(false);
   const pipelines = usePipelines();
   const [pipeline, setPipeline] = useState("");
   const current = pipeline || pipelines.data?.[0]?.id || "";
@@ -90,26 +119,27 @@ export function BoardPage() {
   };
   const stages = board.data?.map((c) => c.stage) ?? [];
   return (
-    <LeadsPage title={t("leads.title")}>
-      <div className="flex flex-wrap items-end gap-3">
-        {pipelines.data && pipelines.data.length > 1 ? (
-          <label className="flex items-center gap-2 text-sm">
-            <span>{t("leads.pipeline")}</span>
-            <select
-              className="h-9 rounded-md border border-border bg-background px-2"
-              value={current}
-              onChange={(e) => setPipeline(e.target.value)}
-            >
-              {pipelines.data.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : null}
-        <NewEnquiry />
-      </div>
+    <LeadsPage
+      title={t("leads.title")}
+      actions={
+        canCreate && !adding ? (
+          <Button onClick={() => setAdding(true)}>{t("leads.newEnquiry")}</Button>
+        ) : null
+      }
+    >
+      {adding ? <NewEnquiry onClose={() => setAdding(false)} /> : null}
+      {pipelines.data && pipelines.data.length > 1 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <SelectField
+            label={t("leads.pipeline")}
+            hideLabel
+            size="sm"
+            value={current}
+            onChange={(e) => setPipeline(e.target.value)}
+            options={pipelines.data.map((p) => ({ value: p.id ?? "", label: p.name }))}
+          />
+        </div>
+      ) : null}
       {move.error ? <Alert tone="danger">{move.error.message}</Alert> : null}
       {board.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {/* Scrolls sideways when the stages outgrow the page: focusable so keyboards can scroll it. */}
@@ -117,31 +147,37 @@ export function BoardPage() {
         role="region"
         aria-label={t("leads.board")}
         tabIndex={0}
-        className="flex gap-3 overflow-x-auto pb-2"
+        className="flex items-start gap-4 overflow-x-auto pb-2"
       >
         {board.data?.map((column) => (
           <section
             key={column.stage.id}
             aria-label={column.stage.name}
-            className="w-72 shrink-0 rounded-md bg-muted/50 p-2"
+            className="w-72 shrink-0 rounded-xl border border-border bg-surface"
             onDragOver={(e) => e.preventDefault()}
             onDrop={onDrop(column.stage.id!)}
           >
-            <h2 className="mb-2 flex justify-between text-sm font-semibold">
-              <span>{column.stage.name}</span>
-              <span className="text-muted-foreground">{column.enquiries.length}</span>
+            <h2 className="flex items-baseline justify-between gap-2 border-b border-border px-4 py-3 text-base font-semibold">
+              <span className="min-w-0 truncate">{column.stage.name}</span>
+              <span className="text-sm font-normal text-muted-foreground tabular-nums">
+                {column.enquiries.length}
+              </span>
             </h2>
-            <ul className="space-y-2">
-              {column.enquiries.map((enquiry) => (
-                <Card
-                  key={enquiry.id}
-                  enquiry={enquiry}
-                  stages={stages}
-                  canEdit={canEdit}
-                  onMove={(stage) => move.mutate({ id: enquiry.id, stage })}
-                />
-              ))}
-            </ul>
+            {column.enquiries.length ? (
+              <ul className="divide-y divide-rule">
+                {column.enquiries.map((enquiry) => (
+                  <Card
+                    key={enquiry.id}
+                    enquiry={enquiry}
+                    stages={stages}
+                    canEdit={canEdit}
+                    onMove={(stage) => move.mutate({ id: enquiry.id, stage })}
+                  />
+                ))}
+              </ul>
+            ) : (
+              <p className="px-4 py-4 text-sm text-muted-foreground">{t("designS5.leads.empty")}</p>
+            )}
           </section>
         ))}
       </div>
@@ -165,47 +201,52 @@ function Card({
     <li
       draggable={canEdit}
       onDragStart={(e) => e.dataTransfer.setData("text/enquiry", enquiry.id)}
-      className="space-y-1 rounded-md border border-border bg-background p-2 text-sm"
+      className="space-y-1.5 px-4 py-2.5 text-sm hover:bg-muted/60"
     >
-      <Link to="/leads/$id" params={{ id: enquiry.id }} className="font-medium underline">
-        {enquiry.title}
-      </Link>
-      <p className="text-xs text-muted-foreground">
-        {enquiry.student_names.join(", ")}
-        {enquiry.value_estimate ? ` · ${formatMoney(enquiry.value_estimate)}` : ""}
-        {` · ${t("leads.age", { count: Math.floor(enquiry.age_hours / 24) })}`}
-        {enquiry.owner_name ? ` · ${enquiry.owner_name}` : ""}
-      </p>
+      <NamePlate
+        name={
+          <Link
+            to="/leads/$id"
+            params={{ id: enquiry.id }}
+            className="underline-offset-2 hover:underline"
+          >
+            {enquiry.title}
+          </Link>
+        }
+        context={[
+          enquiry.student_names.join(", "),
+          enquiry.value_estimate ? formatMoney(enquiry.value_estimate) : "",
+          t("leads.age", { count: Math.floor(enquiry.age_hours / 24) }),
+          enquiry.owner_name,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+      />
       {enquiry.sla_breached ? (
-        <p className="text-xs font-medium text-danger">{t("leads.slaBreached")}</p>
+        <p className="text-xs font-semibold text-margin">{t("leads.slaBreached")}</p>
       ) : null}
       {canEdit ? (
-        <label className="flex items-center gap-1 text-xs">
-          <span className="sr-only">{t("leads.moveTo", { title: enquiry.title })}</span>
-          <select
-            aria-label={t("leads.moveTo", { title: enquiry.title })}
-            className="h-7 rounded border border-border bg-background px-1"
-            value={enquiry.stage}
-            onChange={(e) => onMove(e.target.value)}
-          >
-            {stages.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <select
+          aria-label={t("leads.moveTo", { title: enquiry.title })}
+          className="h-8 w-full rounded-md border border-field bg-surface px-2 text-sm"
+          value={enquiry.stage}
+          onChange={(e) => onMove(e.target.value)}
+        >
+          {stages.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
       ) : null}
     </li>
   );
 }
 
 /** A phone or walk-in enquiry (FR-17-1 manual entry). */
-function NewEnquiry() {
+function NewEnquiry({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const canCreate = usePermission("leads.enquiry.create");
-  const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ first_name: "", last_name: "", email: "", phone: "",
                                      student: "", notes: "" }); // prettier-ignore
   const create = useMutation({
@@ -225,12 +266,10 @@ function NewEnquiry() {
         }),
       ),
     onSuccess: () => {
-      setOpen(false);
+      onClose();
       void queryClient.invalidateQueries({ queryKey: ["enquiry-board"] });
     },
   });
-  if (!canCreate) return null;
-  if (!open) return <Button onClick={() => setOpen(true)}>{t("leads.newEnquiry")}</Button>;
   const field = (key: keyof typeof form, label: string) => (
     <TextField
       label={label}
@@ -239,50 +278,56 @@ function NewEnquiry() {
     />
   );
   return (
-    <form
-      aria-label={t("leads.newEnquiry")}
-      className="grid w-full gap-2 rounded-md border border-border p-3 sm:grid-cols-3"
-      onSubmit={(e) => {
-        e.preventDefault();
-        create.mutate();
-      }}
-    >
-      {field("first_name", t("leads.firstName"))}
-      {field("last_name", t("leads.lastName"))}
-      {field("email", t("leads.email"))}
-      {field("phone", t("leads.phone"))}
-      {field("student", t("leads.studentName"))}
-      {field("notes", t("leads.notes"))}
-      <AiEnquiryExtract
-        onExtract={(x) =>
-          setForm((f) => ({
-            first_name: x.contact.first_name || f.first_name,
-            last_name: x.contact.last_name || f.last_name,
-            email: x.contact.email || f.email,
-            phone: x.contact.phone || f.phone,
-            student: x.students[0]?.first_name || f.student,
-            notes: [
-              f.notes,
-              x.summary,
-              x.subjects.map((s) => `${s.subject} ${s.level}`.trim()).join(", "),
-              x.availability.join("; "),
-              [x.location.area, x.location.postcode, x.location.mode].filter(Boolean).join(", "),
-            ]
-              .filter(Boolean)
-              .join("\n"),
-          }))
-        }
-      />
-      <div className="flex gap-2 sm:col-span-3">
-        <Button type="submit" loading={create.isPending}>
-          {t("leads.add")}
-        </Button>
-        <Button variant="ghost" onClick={() => setOpen(false)}>
-          {t("common.cancel")}
-        </Button>
-      </div>
-      {create.error ? <Alert tone="danger">{create.error.message}</Alert> : null}
-    </form>
+    <Panel title={t("leads.newEnquiry")} className="max-w-4xl">
+      <form
+        aria-label={t("leads.newEnquiry")}
+        className="grid gap-4 sm:grid-cols-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          create.mutate();
+        }}
+      >
+        {field("first_name", t("leads.firstName"))}
+        {field("last_name", t("leads.lastName"))}
+        {field("email", t("leads.email"))}
+        {field("phone", t("leads.phone"))}
+        {field("student", t("leads.studentName"))}
+        {field("notes", t("leads.notes"))}
+        <AiEnquiryExtract
+          onExtract={(x) =>
+            setForm((f) => ({
+              first_name: x.contact.first_name || f.first_name,
+              last_name: x.contact.last_name || f.last_name,
+              email: x.contact.email || f.email,
+              phone: x.contact.phone || f.phone,
+              student: x.students[0]?.first_name || f.student,
+              notes: [
+                f.notes,
+                x.summary,
+                x.subjects.map((s) => `${s.subject} ${s.level}`.trim()).join(", "),
+                x.availability.join("; "),
+                [x.location.area, x.location.postcode, x.location.mode].filter(Boolean).join(", "),
+              ]
+                .filter(Boolean)
+                .join("\n"),
+            }))
+          }
+        />
+        <div className="flex gap-2 sm:col-span-3">
+          <Button type="submit" loading={create.isPending}>
+            {t("leads.add")}
+          </Button>
+          <Button variant="ghost" onClick={onClose}>
+            {t("common.cancel")}
+          </Button>
+        </div>
+        {create.error ? (
+          <Alert tone="danger" className="sm:col-span-3">
+            {create.error.message}
+          </Alert>
+        ) : null}
+      </form>
+    </Panel>
   );
 }
 
@@ -306,57 +351,98 @@ export function EnquiryPage({ id }: { id: string }) {
   };
   if (!enquiry.data) return <Spinner label={t("grid.loading")} />;
   const e = enquiry.data;
+  const subjects = (e.subjects as { subject: string }[]).map((s) => s.subject).join(", ");
   return (
-    <LeadsPage title={e.title}>
-      <p className="text-sm">
-        {e.stage_name} · {t(`leads.status.${e.status}`)} · {t(`leads.sources.${e.source}`)}
-        {e.source_detail ? ` (${e.source_detail})` : ""} · {formatDate(e.created_at)}
-      </p>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <section className="space-y-1 rounded-md border border-border p-4 text-sm">
-          <h2 className="font-semibold">{t("leads.contact")}</h2>
-          <p>
-            <Link to="/clients/$clientId" params={{ clientId: e.client }} className="underline">
-              {e.contact_name || e.client_name}
-            </Link>
-          </p>
-          <p>{[e.contact_email, e.contact_phone].filter(Boolean).join(" · ")}</p>
-          <p>
-            {t("leads.students")}: {e.student_names.join(", ") || "–"}
-          </p>
-          <p>
-            {t("leads.subjects")}:{" "}
-            {(e.subjects as { subject: string }[]).map((s) => s.subject).join(", ") || "–"}
-          </p>
-          {e.notes ? <p className="whitespace-pre-line">{e.notes}</p> : null}
-          <AttachedFiles files={e.attachments} label={t("hiring.files.attachments")} />
-          {e.trial_outcome ? (
-            <p>
-              {t("leads.trialOutcome")}: {t(`leads.outcomes.${e.trial_outcome}`)}
-            </p>
-          ) : null}
-        </section>
-        <section className="space-y-2 rounded-md border border-border p-4 text-sm">
-          <h2 className="font-semibold">{t("leads.history")}</h2>
-          <ol className="space-y-1">
-            {history.data?.map((h) => (
-              <li key={h.id}>
-                {formatDateTime(h.created_at)} · {h.to_stage_name}
-              </li>
-            ))}
-          </ol>
-        </section>
-      </div>
-      {e.status === "open" ? (
-        <AiEnquiryTriage
-          enquiryId={id}
-          onApplied={() => void queryClient.invalidateQueries({ queryKey: ["enquiry", id] })}
-        />
-      ) : null}
-      {e.status === "open" ? <EnquiryActions enquiry={e} onDone={refresh} /> : null}
-      <ProposalsSection enquiryId={id} />
-      <RecordActivity target={{ target_type: "leads.enquiry", target_id: id }} />
-    </LeadsPage>
+    <article>
+      <RecordHeader
+        back={<Link to="/leads">{t("leads.title")}</Link>}
+        title={e.title}
+        description={[
+          e.stage_name,
+          t(`leads.status.${e.status}`),
+          `${t(`leads.sources.${e.source}`)}${e.source_detail ? ` (${e.source_detail})` : ""}`,
+          formatDate(e.created_at),
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+      />
+      <RecordLayout
+        main={
+          <>
+            {e.status === "open" ? (
+              <AiEnquiryTriage
+                enquiryId={id}
+                onApplied={() => void queryClient.invalidateQueries({ queryKey: ["enquiry", id] })}
+              />
+            ) : null}
+            {e.status === "open" ? <EnquiryActions enquiry={e} onDone={refresh} /> : null}
+            <ProposalsSection enquiryId={id} />
+            <RecordActivity target={{ target_type: "leads.enquiry", target_id: id }} />
+          </>
+        }
+        side={
+          <>
+            <Panel title={t("leads.contact")} flush>
+              <div className="px-5 py-2.5 text-sm">
+                <NamePlate
+                  name={
+                    <Link
+                      to="/clients/$clientId"
+                      params={{ clientId: e.client }}
+                      className="underline-offset-2 hover:underline"
+                    >
+                      {e.contact_name || e.client_name}
+                    </Link>
+                  }
+                  context={[e.contact_email, e.contact_phone].filter(Boolean).join(" · ")}
+                />
+              </div>
+              <FactList
+                className="border-t border-rule"
+                empty="–"
+                items={[
+                  [t("leads.students"), e.student_names.join(", ")],
+                  [t("leads.subjects"), subjects],
+                  ...(e.trial_outcome
+                    ? ([
+                        [t("leads.trialOutcome"), t(`leads.outcomes.${e.trial_outcome}`)],
+                      ] as [string, string][])
+                    : []),
+                ]}
+              />
+              {e.notes ? (
+                <p className="border-t border-rule px-5 py-2.5 text-sm whitespace-pre-line">
+                  {e.notes}
+                </p>
+              ) : null}
+              {e.attachments?.length ? (
+                <div className="border-t border-rule px-5 py-2.5 text-sm">
+                  <AttachedFiles files={e.attachments} label={t("hiring.files.attachments")} />
+                </div>
+              ) : null}
+            </Panel>
+            <Panel title={t("leads.history")} flush>
+              {history.data?.length ? (
+                <PanelRows>
+                  {history.data.map((h) => (
+                    <PanelRow key={h.id}>
+                      <span className="block">{h.to_stage_name}</span>
+                      <time dateTime={h.created_at} className="block text-xs text-muted-foreground">
+                        {formatDateTime(h.created_at)}
+                      </time>
+                    </PanelRow>
+                  ))}
+                </PanelRows>
+              ) : (
+                <p className="px-5 py-4 text-sm text-muted-foreground">
+                  {history.isPending ? t("grid.loading") : t("designS5.leads.noHistory")}
+                </p>
+              )}
+            </Panel>
+          </>
+        }
+      />
+    </article>
   );
 }
 
@@ -427,98 +513,94 @@ function EnquiryActions({ enquiry, onDone }: { enquiry: Enquiry; onDone: (e: Enq
   });
   const reasons = (settings.data?.values["leads.lost_reasons"] as string[] | undefined) ?? [];
   const error = lose.error ?? convert.error ?? trial.error ?? recordOutcome.error;
+  const row = "flex flex-wrap items-end gap-3 px-5 py-4";
   return (
-    <section
-      aria-labelledby="enquiry-actions"
-      className="space-y-3 rounded-md border border-border p-4"
-    >
-      <h2 id="enquiry-actions" className="font-semibold">
-        {t("leads.actions")}
-      </h2>
-      <label className="flex flex-wrap items-center gap-2 text-sm">
-        <span>{t("leads.service")}</span>
-        <select
-          className="h-9 rounded-md border border-border bg-background px-2"
-          value={service}
-          onChange={(e) => setService(e.target.value)}
-        >
-          <option value="">{t("leads.chooseService")}</option>
-          {services.data?.results.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      {!enquiry.trial_lesson ? (
-        <div className="flex flex-wrap items-end gap-2">
-          <TextField
-            label={t("leads.trialStart")}
-            type="datetime-local"
-            value={trialStart}
-            onChange={(e) => setTrialStart(e.target.value)}
-          />
-          <Button
-            variant="secondary"
-            disabled={!service || !trialStart}
-            onClick={() => trial.mutate()}
-          >
-            {t("leads.bookFreeTrial")}
-          </Button>
+    <Panel title={t("leads.actions")} flush>
+      <div className="divide-y divide-rule">
+        <div className={row}>
+          <div className="min-w-56 flex-1 sm:max-w-sm">
+            <SelectField
+              label={t("leads.service")}
+              value={service}
+              onChange={(e) => setService(e.target.value)}
+              options={[
+                { value: "", label: t("leads.chooseService") },
+                ...(services.data?.results ?? []).map((s) => ({ value: s.id, label: s.name })),
+              ]}
+            />
+          </div>
         </div>
-      ) : !enquiry.trial_outcome ? (
-        <div className="flex flex-wrap items-end gap-2">
-          <label className="flex items-center gap-2 text-sm">
-            <span>{t("leads.trialOutcome")}</span>
-            <select
-              className="h-9 rounded-md border border-border bg-background px-2"
+        {!enquiry.trial_lesson ? (
+          <div className={row}>
+            <TextField
+              label={t("leads.trialStart")}
+              type="datetime-local"
+              value={trialStart}
+              onChange={(e) => setTrialStart(e.target.value)}
+            />
+            <Button
+              variant="secondary"
+              disabled={!service || !trialStart}
+              onClick={() => trial.mutate()}
+            >
+              {t("leads.bookFreeTrial")}
+            </Button>
+          </div>
+        ) : !enquiry.trial_outcome ? (
+          <div className={row}>
+            <SelectField
+              label={t("leads.trialOutcome")}
               value={outcome}
               onChange={(e) => setOutcome(e.target.value as typeof outcome)}
-            >
-              {(["continuing", "not_continuing", "undecided"] as const).map((o) => (
-                <option key={o} value={o}>
-                  {t(`leads.outcomes.${o}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Button variant="secondary" onClick={() => recordOutcome.mutate()}>
-            {t("leads.saveOutcome")}
-          </Button>
-        </div>
-      ) : null}
-      {canConvert ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={invite} onChange={(e) => setInvite(e.target.checked)} />
-            {t("leads.invitePortal")}
-          </label>
-          <Button disabled={!service} onClick={() => convert.mutate()} loading={convert.isPending}>
-            {t("leads.convert")}
-          </Button>
-        </div>
-      ) : null}
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="flex items-center gap-2 text-sm">
-          <span>{t("leads.lostReason")}</span>
-          <select
-            className="h-9 rounded-md border border-border bg-background px-2"
+              options={(["continuing", "not_continuing", "undecided"] as const).map((o) => ({
+                value: o,
+                label: t(`leads.outcomes.${o}`),
+              }))}
+            />
+            <Button variant="secondary" onClick={() => recordOutcome.mutate()}>
+              {t("leads.saveOutcome")}
+            </Button>
+          </div>
+        ) : null}
+        {canConvert ? (
+          <div className="flex flex-wrap items-center gap-3 px-5 py-4">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="size-4"
+                checked={invite}
+                onChange={(e) => setInvite(e.target.checked)}
+              />
+              {t("leads.invitePortal")}
+            </label>
+            <Button disabled={!service} onClick={() => convert.mutate()} loading={convert.isPending}>
+              {t("leads.convert")}
+            </Button>
+          </div>
+        ) : null}
+        <div className={row}>
+          <SelectField
+            label={t("leads.lostReason")}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-          >
-            <option value="">{t("leads.chooseReason")}</option>
-            {reasons.map((r) => (
-              <option key={r} value={r}>
-                {t(`leads.lostReasons.${r}`, { defaultValue: r })}
-              </option>
-            ))}
-          </select>
-        </label>
-        <Button variant="ghost" disabled={!reason} onClick={() => lose.mutate()}>
-          {t("leads.markLost")}
-        </Button>
+            options={[
+              { value: "", label: t("leads.chooseReason") },
+              ...reasons.map((r) => ({
+                value: r,
+                label: t(`leads.lostReasons.${r}`, { defaultValue: r }),
+              })),
+            ]}
+          />
+          <Button variant="ghost" disabled={!reason} onClick={() => lose.mutate()}>
+            {t("leads.markLost")}
+          </Button>
+        </div>
+        {error ? (
+          <div className="px-5 py-4">
+            <Alert tone="danger">{error.message}</Alert>
+          </div>
+        ) : null}
       </div>
-      {error ? <Alert tone="danger">{error.message}</Alert> : null}
-    </section>
+    </Panel>
   );
 }

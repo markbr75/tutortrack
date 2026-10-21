@@ -1,6 +1,17 @@
 import { ApiError, unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, ErrorFallback, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  ErrorFallback,
+  PageHeader,
+  Panel,
+  PanelRow,
+  PanelRows,
+  Spinner,
+  Tabs,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
@@ -41,8 +52,10 @@ export function DuplicatesPage() {
   const entity = ENTITY_OF[kind];
   return (
     <section>
-      <h1 className="mb-2 text-2xl font-semibold">{t("peopleTools.duplicates.title")}</h1>
-      <p className="mb-4 text-sm text-muted-foreground">{t("peopleTools.duplicates.intro")}</p>
+      <PageHeader
+        title={t("peopleTools.duplicates.title")}
+        description={t("peopleTools.duplicates.intro")}
+      />
       <Tabs
         label={t("peopleTools.duplicates.tabs")}
         tabs={(["client", "contact", "student"] as const).map((key) => ({
@@ -52,7 +65,16 @@ export function DuplicatesPage() {
         value={kind}
         onChange={setKind}
       >
-        {pairs.isPending ? <Spinner label={t("grid.loading")} /> : null}
+        {pairs.isPending ? (
+          <div className="rounded-xl border border-border bg-surface">
+            <Spinner className="sr-only" label={t("grid.loading")} />
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="border-t border-rule px-4 py-3 first:border-0">
+                <div aria-hidden="true" className="h-4 animate-pulse rounded bg-muted" />
+              </div>
+            ))}
+          </div>
+        ) : null}
         {pairs.isError ? (
           <ErrorFallback
             title={t("errors.generic")}
@@ -61,33 +83,40 @@ export function DuplicatesPage() {
           />
         ) : null}
         {pairs.data && pairs.data.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("peopleTools.duplicates.none")}</p>
+          <p className="rounded-xl border border-border bg-surface px-4 py-10 text-center text-sm text-muted-foreground">
+            {t("peopleTools.duplicates.none")}
+          </p>
         ) : null}
         {pairs.data && pairs.data.length > 0 ? (
-          <div className="overflow-x-auto rounded-md border border-border">
+          <div
+            role="region"
+            aria-label={t("peopleTools.duplicates.title")}
+            tabIndex={0}
+            className="overflow-x-auto rounded-xl border border-border bg-surface"
+          >
             <table className="w-full text-left text-sm">
               <caption className="sr-only">{t("peopleTools.duplicates.title")}</caption>
-              <thead className="bg-muted text-muted-foreground">
+              <thead className="border-b border-border">
                 <tr>
-                  <th scope="col" className="px-3 py-2 font-medium">
+                  <th scope="col" className="px-4 py-2.5 whitespace-nowrap">
                     {t("peopleTools.duplicates.older")}
                   </th>
-                  <th scope="col" className="px-3 py-2 font-medium">
+                  <th scope="col" className="px-4 py-2.5 whitespace-nowrap">
                     {t("peopleTools.duplicates.newer")}
                   </th>
-                  <th scope="col" className="px-3 py-2 font-medium">
+                  <th scope="col" className="px-4 py-2.5 whitespace-nowrap">
                     {t("peopleTools.duplicates.reasonLabel")}
                   </th>
-                  <th scope="col" className="px-3 py-2 font-medium">
+                  <th scope="col" className="px-4 py-2.5">
                     <span className="sr-only">{t("peopleTools.duplicates.review")}</span>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {pairs.data.map((pair: Pair) => (
-                  <tr key={`${pair.a.id}-${pair.b.id}`} className="border-t border-border">
+                  <tr key={`${pair.a.id}-${pair.b.id}`}>
                     {[pair.a, pair.b].map((person) => (
-                      <td key={person.id} className="px-3 py-2 align-top">
+                      <td key={person.id} className="px-4 py-2.5 align-top">
                         <Link
                           className={linkClass}
                           {...recordLink(entity, person.id, person.client_id)}
@@ -101,12 +130,12 @@ export function DuplicatesPage() {
                         </p>
                       </td>
                     ))}
-                    <td className="px-3 py-2 align-top">
+                    <td className="px-4 py-2.5 align-top">
                       {t(`peopleTools.duplicates.reason.${pair.reason}`, {
                         defaultValue: pair.reason,
                       })}
                     </td>
-                    <td className="px-3 py-2 align-top">
+                    <td className="px-4 py-2.5 text-right align-top">
                       <Link
                         className={actionLink}
                         to="/people/merge/$entity/$sourceId/$targetId"
@@ -181,32 +210,48 @@ function TargetPicker({
   };
   const results = (found.data ?? []).filter((c) => c.id !== sourceId);
   return (
-    <section className="mt-4 rounded-md border border-border p-4">
-      <h2 className="mb-2 font-semibold">{t("peopleTools.merge.chooseTarget")}</h2>
-      <form role="search" onSubmit={submit} className="flex flex-wrap items-end gap-2">
-        <TextField
-          label={t("peopleTools.merge.search")}
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-        <Button type="submit">{t("peopleTools.merge.searchButton")}</Button>
+    <Panel title={t("peopleTools.merge.chooseTarget")} flush className="max-w-3xl">
+      <form role="search" onSubmit={submit} className="flex flex-wrap items-end gap-2 px-5 py-4">
+        <div className="min-w-56 flex-1">
+          <TextField
+            label={t("peopleTools.merge.search")}
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+        </div>
+        <Button type="submit" variant="secondary">
+          {t("peopleTools.merge.searchButton")}
+        </Button>
       </form>
-      {found.isFetching ? <Spinner label={t("grid.loading")} /> : null}
-      {search && found.data && results.length === 0 ? (
-        <p className="mt-2 text-sm text-muted-foreground">{t("peopleTools.merge.noMatches")}</p>
+      {found.isFetching ? (
+        <div className="border-t border-rule px-5 py-3">
+          <Spinner label={t("grid.loading")} />
+        </div>
       ) : null}
-      <ul className="mt-3 space-y-2">
-        {results.map((c) => (
-          <li key={c.id} className="flex flex-wrap items-center gap-2">
-            <span>{[c.name, c.detail].filter(Boolean).join(" · ")}</span>
-            <Button size="sm" variant="secondary" onClick={() => onPick(c.id)}>
-              {t("peopleTools.merge.pick", { name: c.name })}
-            </Button>
-          </li>
-        ))}
-      </ul>
-    </section>
+      {search && found.data && results.length === 0 ? (
+        <p className="border-t border-rule px-5 py-4 text-sm text-muted-foreground">
+          {t("peopleTools.merge.noMatches")}
+        </p>
+      ) : null}
+      {results.length ? (
+        <PanelRows className="border-t border-rule">
+          {results.map((c) => (
+            <PanelRow key={c.id} className="flex flex-wrap items-center justify-between gap-2">
+              <span className="min-w-0">
+                <span className="block font-medium">{c.name}</span>
+                {c.detail ? (
+                  <span className="block text-xs text-muted-foreground">{c.detail}</span>
+                ) : null}
+              </span>
+              <Button size="sm" variant="secondary" onClick={() => onPick(c.id)}>
+                {t("peopleTools.merge.pick", { name: c.name })}
+              </Button>
+            </PanelRow>
+          ))}
+        </PanelRows>
+      ) : null}
+    </Panel>
   );
 }
 
@@ -276,21 +321,20 @@ export function MergePage({
   if (merge.data && data) {
     const kept = data.target;
     return (
-      <section>
-        <h1 className="mb-4 text-2xl font-semibold">{t(`peopleTools.merge.entity.${entity}`)}</h1>
+      <section className="max-w-3xl space-y-6">
+        <PageHeader title={t(`peopleTools.merge.entity.${entity}`)} className="mb-0" />
         <Alert tone="success">{t("peopleTools.merge.merged", { name: kept.name })}</Alert>
         {merge.data.notes.length ? (
-          <div className="mt-3">
-            <h2 className="font-semibold">{t("peopleTools.merge.notes")}</h2>
-            <ul className="list-disc pl-5 text-sm">
+          <Panel title={t("peopleTools.merge.notes")} flush>
+            <PanelRows>
               {merge.data.notes.map((note) => (
-                <li key={note}>{note}</li>
+                <PanelRow key={note}>{note}</PanelRow>
               ))}
-            </ul>
-          </div>
+            </PanelRows>
+          </Panel>
         ) : null}
         {entity !== "contacts" ? (
-          <p className="mt-4">
+          <p>
             <Link className={actionLink} {...recordLink(entity, kept.id)}>
               {t("peopleTools.merge.open", { name: kept.name })}
             </Link>
@@ -301,10 +345,10 @@ export function MergePage({
   }
   return (
     <section>
-      <h1 className="mb-2 text-2xl font-semibold">{t(`peopleTools.merge.entity.${entity}`)}</h1>
-      <p className="mb-4 max-w-prose text-sm text-muted-foreground">
-        {t("peopleTools.merge.intro")}
-      </p>
+      <PageHeader
+        title={t(`peopleTools.merge.entity.${entity}`)}
+        description={<span className="block max-w-prose">{t("peopleTools.merge.intro")}</span>}
+      />
       {!targetId ? <TargetPicker entity={entity} sourceId={sourceId} onPick={pick} /> : null}
       {targetId && preview.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {preview.isError ? (
@@ -316,6 +360,7 @@ export function MergePage({
       ) : null}
       {data ? (
         <form
+          className="max-w-4xl space-y-6"
           onSubmit={(e) => {
             e.preventDefault();
             if (confirmed && data.can_merge) merge.mutate();
@@ -331,7 +376,7 @@ export function MergePage({
             </Alert>
           ) : null}
           {data.warnings.length ? (
-            <Alert tone="warning" title={t("peopleTools.merge.warnings")} className="mt-3">
+            <Alert tone="warning" title={t("peopleTools.merge.warnings")}>
               <ul className="list-disc pl-5">
                 {data.warnings.map((w) => (
                   <li key={w}>{w}</li>
@@ -339,20 +384,25 @@ export function MergePage({
               </ul>
             </Alert>
           ) : null}
-          <div className="mt-4 overflow-x-auto rounded-md border border-border">
+          <div
+            role="region"
+            aria-label={t("peopleTools.merge.values")}
+            tabIndex={0}
+            className="overflow-x-auto rounded-xl border border-border bg-surface"
+          >
             <table className="w-full text-left text-sm">
-              <caption className="px-3 py-2 text-left font-semibold">
+              <caption className="border-b border-border px-5 py-3.5 text-left text-base font-semibold">
                 {t("peopleTools.merge.values")}
               </caption>
-              <thead className="bg-muted text-muted-foreground">
+              <thead className="border-b border-border">
                 <tr>
-                  <th scope="col" className="px-3 py-2 font-medium">
+                  <th scope="col" className="w-40 px-5 py-2.5">
                     {t("peopleTools.merge.field")}
                   </th>
-                  <th scope="col" className="px-3 py-2 font-medium">
+                  <th scope="col" className="px-4 py-2.5">
                     {t("peopleTools.merge.duplicate")}: {data.source.name}
                   </th>
-                  <th scope="col" className="px-3 py-2 font-medium">
+                  <th scope="col" className="px-4 py-2.5">
                     {t("peopleTools.merge.keep")}: {data.target.name}
                   </th>
                 </tr>
@@ -362,19 +412,19 @@ export function MergePage({
                   const chosen = choiceOf(row.name, row.default);
                   const group = `merge-${row.name}`;
                   return (
-                    <tr key={row.name} className="border-t border-border">
-                      <th scope="row" className="px-3 py-2 align-top font-medium">
+                    <tr key={row.name}>
+                      <th scope="row" className="px-5 py-2.5 align-top font-medium">
                         {row.label}
                       </th>
                       {row.same || row.hidden ? (
-                        <td colSpan={2} className="px-3 py-2 text-muted-foreground">
+                        <td colSpan={2} className="px-4 py-2.5 text-muted-foreground">
                           {row.hidden
                             ? t("peopleTools.merge.hidden")
                             : `${display(row.target, false, t)} · ${t("peopleTools.merge.same")}`}
                         </td>
                       ) : (
                         (["source", "target"] as const).map((side) => (
-                          <td key={side} className="px-3 py-2 align-top">
+                          <td key={side} className="px-4 py-2.5 align-top">
                             <label className="flex items-start gap-2">
                               <input
                                 type="radio"
@@ -400,21 +450,22 @@ export function MergePage({
               </tbody>
             </table>
           </div>
-          <section className="mt-4">
-            <h2 className="font-semibold">{t("peopleTools.merge.moves")}</h2>
+          <Panel title={t("peopleTools.merge.moves")} flush>
             {data.moves.length ? (
-              <ul className="mt-1 list-disc pl-5 text-sm">
+              <PanelRows>
                 {data.moves.map((m) => (
-                  <li key={m.key}>
+                  <PanelRow key={m.key} className="tabular-nums">
                     {m.label}: {m.count}
-                  </li>
+                  </PanelRow>
                 ))}
-              </ul>
+              </PanelRows>
             ) : (
-              <p className="text-sm text-muted-foreground">{t("peopleTools.merge.nothingMoves")}</p>
+              <p className="px-5 py-4 text-sm text-muted-foreground">
+                {t("peopleTools.merge.nothingMoves")}
+              </p>
             )}
-          </section>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+          </Panel>
+          <div className="flex flex-wrap items-center gap-3">
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -427,11 +478,14 @@ export function MergePage({
             </label>
           </div>
           {merge.error ? (
-            <Alert tone="danger" className="mt-3">
+            <Alert tone="danger">
               {merge.error instanceof ApiError ? merge.error.message : t("errors.generic")}
             </Alert>
           ) : null}
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="secondary" onClick={swap}>
+              {t("peopleTools.merge.swap")}
+            </Button>
             <Button
               type="submit"
               variant="danger"
@@ -439,9 +493,6 @@ export function MergePage({
               loading={merge.isPending}
             >
               {merge.isPending ? t("peopleTools.merge.merging") : t("peopleTools.merge.submit")}
-            </Button>
-            <Button type="button" variant="secondary" onClick={swap}>
-              {t("peopleTools.merge.swap")}
             </Button>
           </div>
         </form>

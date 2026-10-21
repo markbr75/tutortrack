@@ -1,8 +1,18 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FigureStrip,
+  NamePlate,
+  Panel,
+  PanelRow,
+  PanelRows,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { api } from "../api";
 import { Turnstile } from "../components/Turnstile";
@@ -97,28 +107,54 @@ export function FormsPage() {
     },
   });
   return (
-    <LeadsPage title={t("leads.forms")}>
-      <Button onClick={() => create.mutate()}>{t("leads.newForm")}</Button>
-      <ul className="divide-y divide-border rounded-md border border-border text-sm">
-        {forms.data?.map((f) => (
-          <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
-            <span>
-              {f.name} · {t(`leads.formTypes.${f.type ?? "enquiry"}`)} ·{" "}
-              {f.published ? t("leads.published") : t("leads.draft")}
-            </span>
-            <span className="flex gap-2">
-              {f.published ? (
-                <a className="underline" href={`/f/${f.slug}`}>
-                  {t("leads.openForm")}
-                </a>
-              ) : null}
-              <Button size="sm" variant="ghost" onClick={() => setEditing(f)}>
-                {t("leads.edit")}
-              </Button>
-            </span>
-          </li>
-        ))}
-      </ul>
+    <LeadsPage
+      title={t("leads.forms")}
+      actions={
+        <Button onClick={() => create.mutate()} loading={create.isPending}>
+          {t("leads.newForm")}
+        </Button>
+      }
+    >
+      {create.error ? <Alert tone="danger">{create.error.message}</Alert> : null}
+      <div className="rounded-xl border border-border bg-surface">
+        {forms.isPending ? (
+          <div className="px-5 py-4">
+            <Spinner label={t("grid.loading")} />
+          </div>
+        ) : forms.data?.length ? (
+          <PanelRows>
+            {forms.data.map((f) => (
+              <PanelRow key={f.id}>
+                <NamePlate
+                  name={f.name}
+                  context={`${t(`leads.formTypes.${f.type ?? "enquiry"}`)} · ${
+                    f.published ? t("leads.published") : t("leads.draft")
+                  }`}
+                  aside={
+                    <>
+                      {f.published ? (
+                        <a
+                          className="font-medium text-link underline-offset-2 hover:underline"
+                          href={`/f/${f.slug}`}
+                        >
+                          {t("leads.openForm")}
+                        </a>
+                      ) : null}
+                      <Button size="sm" variant="secondary" onClick={() => setEditing(f)}>
+                        {t("leads.edit")}
+                      </Button>
+                    </>
+                  }
+                />
+              </PanelRow>
+            ))}
+          </PanelRows>
+        ) : (
+          <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+            {t("designS5.leads.noForms")}
+          </p>
+        )}
+      </div>
       {editing ? <FormEditor form={editing} onClose={() => setEditing(null)} /> : null}
     </LeadsPage>
   );
@@ -178,9 +214,13 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
   return (
     <section
       aria-label={t("leads.editForm")}
-      className="space-y-3 rounded-md border border-border p-4"
+      className="rounded-xl border border-border bg-surface"
     >
-      <div className="flex flex-wrap gap-2">
+      <h2 className="border-b border-border px-5 py-3.5 text-base font-semibold">
+        {t("leads.editForm")}
+      </h2>
+      <div className="space-y-4 px-5 py-4">
+      <div className="flex flex-wrap items-end gap-3">
         <TextField
           label={t("leads.formName")}
           value={name}
@@ -191,9 +231,10 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
         />
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex h-10 items-center gap-2 text-sm">
           <input
             type="checkbox"
+            className="size-4"
             checked={published}
             onChange={(e) => setPublished(e.target.checked)}
           />
@@ -201,10 +242,13 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
         </label>
       </div>
       {schema.steps.map((step, s) => (
-        <fieldset key={s} className="space-y-2 rounded-md border border-border p-3">
-          <legend className="px-1 text-sm font-medium">{step.title}</legend>
+        <fieldset key={s} className="rounded-xl border border-border">
+          <legend className="float-left w-full border-b border-border px-4 py-2.5 text-sm font-semibold">
+            {step.title}
+          </legend>
+          <div className="clear-both divide-y divide-rule">
           {step.fields.map((f, i) => (
-            <div key={i} className="flex flex-wrap items-end gap-2 text-sm">
+            <div key={i} className="flex flex-wrap items-end gap-2 px-4 py-3 text-sm">
               <TextField
                 label={t("leads.fieldLabel")}
                 value={f.label}
@@ -218,7 +262,7 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
               <label className="flex flex-col gap-1">
                 <span className="font-medium">{t("leads.fieldType")}</span>
                 <select
-                  className="h-10 rounded-md border border-border bg-background px-2"
+                  className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
                   value={f.type}
                   onChange={(e) => update(s, i, { type: e.target.value })}
                 >
@@ -232,7 +276,7 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
               <label className="flex flex-col gap-1">
                 <span className="font-medium">{t("leads.fieldMapsTo")}</span>
                 <select
-                  className="h-10 rounded-md border border-border bg-background px-2"
+                  className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
                   value={f.maps_to ?? ""}
                   onChange={(e) => update(s, i, { maps_to: e.target.value || undefined })}
                 >
@@ -248,7 +292,7 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
                   <label className="flex flex-col gap-1">
                     <span className="font-medium">{t("hiring.formBuilder.fileKind")}</span>
                     <select
-                      className="h-10 rounded-md border border-border bg-background px-2"
+                      className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
                       value={f.file_kind ?? "document"}
                       onChange={(e) =>
                         update(s, i, { file_kind: e.target.value as Field["file_kind"] })
@@ -261,9 +305,10 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
                       ))}
                     </select>
                   </label>
-                  <label className="flex items-center gap-1">
+                  <label className="flex h-10 items-center gap-2">
                     <input
                       type="checkbox"
+                      className="size-4"
                       checked={Boolean(f.multiple)}
                       onChange={(e) => update(s, i, { multiple: e.target.checked })}
                     />
@@ -275,7 +320,7 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
                 <label className="flex flex-col gap-1">
                   <span className="font-medium">{t("gapG6.consentKey")}</span>
                   <select
-                    className="h-10 rounded-md border border-border bg-background px-2"
+                    className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
                     value={f.consent_key ?? ""}
                     onChange={(e) => update(s, i, { consent_key: e.target.value || undefined })}
                   >
@@ -287,25 +332,30 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
                   </select>
                 </label>
               ) : null}
-              <label className="flex items-center gap-1">
+              <label className="flex h-10 items-center gap-2">
                 <input
                   type="checkbox"
+                  className="size-4"
                   checked={Boolean(f.required)}
                   onChange={(e) => update(s, i, { required: e.target.checked })}
                 />
                 {t("leads.required")}
               </label>
-              <Button size="sm" variant="ghost" onClick={() => remove(s, i)}>
+              <Button size="sm" variant="ghost" className="mb-1" onClick={() => remove(s, i)}>
                 {t("leads.removeField")}
               </Button>
             </div>
           ))}
+          <div className="px-4 py-3">
           <Button size="sm" variant="secondary" onClick={() => add(s)}>
             {t("leads.addField")}
           </Button>
+          </div>
+          </div>
         </fieldset>
       ))}
-      <div className="flex gap-2">
+      </div>
+      <div className="flex flex-wrap items-center gap-2 border-t border-rule px-5 py-3">
         <Button onClick={() => save.mutate()} loading={save.isPending}>
           {t("common.save")}
         </Button>
@@ -313,7 +363,11 @@ function FormEditor({ form, onClose }: { form: FormDef; onClose: () => void }) {
           {t("common.cancel")}
         </Button>
       </div>
-      {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
+      {save.error ? (
+        <div className="px-5 pb-4">
+          <Alert tone="danger">{save.error.message}</Alert>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -340,30 +394,57 @@ export function WaitlistPage() {
   return (
     <LeadsPage title={t("leads.waitlist")}>
       <WaitlistSuggestions />
-      {entries.data && !entries.data.results.length ? (
-        <p className="text-sm">{t("leads.nobodyWaiting")}</p>
-      ) : null}
-      <ul className="space-y-2">
-        {entries.data?.results.map((entry) => (
-          <li
-            key={entry.id}
-            className="flex flex-wrap items-end gap-2 rounded-md border border-border p-3 text-sm"
-          >
-            <span className="min-w-48">
-              #{entry.position} · <strong>{entry.student_name}</strong> · {entry.subject || "–"} ·{" "}
-              {t("leads.since", { date: formatDate(entry.created_at) })}
+      <Panel
+        title={t("designS5.leads.waiting")}
+        flush
+        aside={
+          entries.data?.results.length ? (
+            <span className="text-muted-foreground tabular-nums">
+              {entries.data.results.length}
             </span>
-            <TextField
-              label={t("leads.offerDetails")}
-              value={details[entry.id] ?? ""}
-              onChange={(e) => setDetails({ ...details, [entry.id]: e.target.value })}
-            />
-            <Button size="sm" disabled={!details[entry.id]} onClick={() => offer.mutate(entry.id)}>
-              {t("leads.offerPlace")}
-            </Button>
-          </li>
-        ))}
-      </ul>
+          ) : null
+        }
+      >
+        {entries.isPending ? (
+          <div className="px-5 py-4">
+            <Spinner label={t("grid.loading")} />
+          </div>
+        ) : null}
+        {entries.data && !entries.data.results.length ? (
+          <p className="px-5 py-4 text-sm text-muted-foreground">{t("leads.nobodyWaiting")}</p>
+        ) : null}
+        <PanelRows>
+          {entries.data?.results.map((entry) => (
+            <PanelRow key={entry.id} className="flex flex-wrap items-end gap-x-4 gap-y-2">
+              <span className="w-8 shrink-0 self-center font-semibold tabular-nums">
+                #{entry.position}
+              </span>
+              <NamePlate
+                className="min-w-48 flex-1 self-center"
+                name={entry.student_name}
+                context={[
+                  entry.subject || "–",
+                  t("leads.since", { date: formatDate(entry.created_at) }),
+                ].join(" · ")}
+              />
+              <TextField
+                label={t("leads.offerDetails")}
+                size="sm"
+                value={details[entry.id] ?? ""}
+                onChange={(e) => setDetails({ ...details, [entry.id]: e.target.value })}
+              />
+              <Button
+                size="sm"
+                className="h-9"
+                disabled={!details[entry.id]}
+                onClick={() => offer.mutate(entry.id)}
+              >
+                {t("leads.offerPlace")}
+              </Button>
+            </PanelRow>
+          ))}
+        </PanelRows>
+      </Panel>
       {offer.error ? <Alert tone="danger">{offer.error.message}</Alert> : null}
     </LeadsPage>
   );
@@ -380,66 +461,86 @@ export function FunnelPage() {
   const r = report.data;
   return (
     <LeadsPage title={t("leads.reports")}>
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {[
-          [t("leads.enquiries"), String(r.total)],
-          [t("leads.winRate"), `${r.win_rate}%`],
-          [
-            t("leads.firstResponse"),
-            r.first_response_hours === null
-              ? "–"
-              : t("leads.hours", { count: r.first_response_hours }),
-          ],
-        ].map(([label, value]) => (
-          <div key={label} className="rounded-md border border-border p-3">
-            <dt className="text-sm text-muted-foreground">{label}</dt>
-            <dd className="text-xl font-semibold">{value}</dd>
-          </div>
-        ))}
-      </dl>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <caption className="text-left font-semibold">{t("leads.byStage")}</caption>
-          <thead>
+      <FigureStrip
+        label={t("leads.reports")}
+        figures={[
+          { label: t("leads.enquiries"), value: String(r.total) },
+          { label: t("leads.winRate"), value: `${r.win_rate}%` },
+          {
+            label: t("leads.firstResponse"),
+            value:
+              r.first_response_hours === null
+                ? "–"
+                : t("leads.hours", { count: r.first_response_hours }),
+          },
+        ]}
+      />
+      <div className="grid items-start gap-6 lg:grid-cols-2">
+        <RuledTable caption={t("leads.byStage")}>
+          <thead className="border-b border-border">
             <tr className="text-left">
               <th scope="col">{t("leads.stage")}</th>
-              <th scope="col">{t("leads.reached")}</th>
-              <th scope="col">%</th>
+              <th scope="col" className="text-right">
+                {t("leads.reached")}
+              </th>
+              <th scope="col" className="text-right">
+                %
+              </th>
             </tr>
           </thead>
           <tbody>
             {r.stages.map((s) => (
-              <tr key={s.stage} className="border-t border-border">
+              <tr key={s.stage}>
                 <td>{s.stage}</td>
-                <td>{s.reached}</td>
-                <td>{s.rate}</td>
+                <td className="text-right">{s.reached}</td>
+                <td className="text-right">{s.rate}</td>
               </tr>
             ))}
           </tbody>
-        </table>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <caption className="text-left font-semibold">{t("leads.bySource")}</caption>
-          <thead>
+        </RuledTable>
+        <RuledTable caption={t("leads.bySource")}>
+          <thead className="border-b border-border">
             <tr className="text-left">
               <th scope="col">{t("leads.source")}</th>
-              <th scope="col">{t("leads.enquiries")}</th>
-              <th scope="col">{t("leads.won")}</th>
+              <th scope="col" className="text-right">
+                {t("leads.enquiries")}
+              </th>
+              <th scope="col" className="text-right">
+                {t("leads.won")}
+              </th>
             </tr>
           </thead>
           <tbody>
             {r.by_source.map((row) => (
-              <tr key={row.key} className="border-t border-border">
+              <tr key={row.key}>
                 <td>{t(`leads.sources.${row.key}`, { defaultValue: row.key })}</td>
-                <td>{row.total}</td>
-                <td>{row.won}</td>
+                <td className="text-right">{row.total}</td>
+                <td className="text-right">{row.won}</td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </RuledTable>
       </div>
     </LeadsPage>
+  );
+}
+
+/** A hand-built table in a ruled panel, its caption as the panel's heading. */
+function RuledTable({ caption, children }: { caption: string; children: ReactNode }) {
+  return (
+    <div
+      role="region"
+      aria-label={caption}
+      tabIndex={0}
+      className="overflow-x-auto rounded-xl border border-border bg-surface"
+    >
+      <table className="w-full text-sm [&_td]:px-5 [&_td]:py-2.5 [&_th]:px-5 [&_th]:py-2.5">
+        <caption className="border-b border-border px-5 py-3.5 text-left text-base font-semibold">
+          {caption}
+        </caption>
+        {children}
+      </table>
+    </div>
   );
 }
 
@@ -502,7 +603,7 @@ export function PublicFormPage({ slug }: { slug: string }) {
         >
           {schema.steps.map((step, s) => (
             <fieldset key={s} className="space-y-3">
-              <legend className="text-lg font-semibold">{step.title}</legend>
+              <legend className="mb-1 text-base font-semibold">{step.title}</legend>
               {step.fields
                 .filter((f) => !f.show_if || answers[f.show_if.field] === f.show_if.equals)
                 .map((f) => (
@@ -528,7 +629,9 @@ export function PublicFormPage({ slug }: { slug: string }) {
               />
             </label>
           </div>
-          {form.data.consent_text ? <p className="text-sm">{form.data.consent_text}</p> : null}
+          {form.data.consent_text ? (
+            <p className="text-sm text-muted-foreground">{form.data.consent_text}</p>
+          ) : null}
           {form.data.turnstile_site_key ? (
             <Turnstile siteKey={form.data.turnstile_site_key} onToken={setToken} />
           ) : null}
@@ -602,7 +705,7 @@ export function PublicField({
         >
           {t("leads.addStudent")}
         </Button>
-        {error ? <p className="text-sm text-danger">{error}</p> : null}
+        {error ? <p className="text-xs text-danger">{error}</p> : null}
       </div>
     );
   }
@@ -637,7 +740,7 @@ export function PublicField({
             />
           </div>
         ))}
-        {error ? <p className="text-sm text-danger">{error}</p> : null}
+        {error ? <p className="text-xs text-danger">{error}</p> : null}
       </div>
     );
   }
@@ -646,11 +749,12 @@ export function PublicField({
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
+          className="size-4"
           checked={Boolean(value)}
           onChange={(e) => onChange(e.target.checked)}
         />
         {field.label}
-        {error ? <span className="text-danger">{error}</span> : null}
+        {error ? <span className="text-xs text-danger">{error}</span> : null}
       </label>
     );
   }
@@ -660,7 +764,7 @@ export function PublicField({
         <span className="font-medium">{field.label}</span>
         <select
           required={field.required}
-          className="h-10 rounded-md border border-border bg-background px-2"
+          className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
         >
@@ -671,7 +775,7 @@ export function PublicField({
             </option>
           ))}
         </select>
-        {error ? <span className="text-danger">{error}</span> : null}
+        {error ? <span className="text-xs text-danger">{error}</span> : null}
       </label>
     );
   }
@@ -682,7 +786,7 @@ export function PublicField({
       <label className="flex flex-col gap-1 text-sm">
         <span className="font-medium">{field.label}</span>
         <textarea
-          className="rounded-md border border-border p-2"
+          className="rounded-md border border-field bg-surface px-3 py-2"
           rows={4}
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
@@ -731,7 +835,7 @@ export function OfferPage({ token }: { token: string }) {
       {o.status === "offered" ? (
         <>
           {o.expires_at ? (
-            <p className="text-sm">
+            <p className="mt-2 text-sm text-muted-foreground">
               {t("leads.offerUntil", { date: formatDateTime(o.expires_at) })}
             </p>
           ) : null}
@@ -747,7 +851,11 @@ export function OfferPage({ token }: { token: string }) {
           {t(`leads.offerStatus.${o.status}`)}
         </p>
       )}
-      {respond.error ? <Alert tone="danger">{respond.error.message}</Alert> : null}
+      {respond.error ? (
+        <Alert tone="danger" className="mt-4">
+          {respond.error.message}
+        </Alert>
+      ) : null}
     </PublicLayout>
   );
 }

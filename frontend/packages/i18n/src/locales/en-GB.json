@@ -7357,5 +7357,20 @@
     "badDebtHelp": "When you write off an invoice, reclaim the VAT in the amount written off (bad debt relief). Write-offs then post the VAT back to the VAT account at the invoice's rates.",
     "exportBranch": "Branch",
     "allBranches": "All branches"
+  },
+  "designS5": {
+    "back": "Breadcrumb",
+    "noDetails": "Nothing recorded yet.",
+    "client": {
+      "noContacts": "No contacts yet.",
+      "billingDetails": "Billing details"
+    },
+    "tutor": {
+      "sections": "Tutor record",
+      "pay": "Pay",
+      "compliance": "Compliance",
+      "performance": "Performance and leaving",
+      "noSubjects": "No subjects yet."
+    }
   }
 }

@@ -63,9 +63,9 @@ function Notes({ target }: { target: TargetRef }) {
               value={body}
               aria-invalid={errors.body ? true : undefined}
               onChange={(e) => setBody(e.target.value)}
-              className="w-full rounded-md border border-border bg-background p-2 text-sm"
+              className="w-full rounded-md border border-field bg-surface px-3 py-2 text-sm"
             />
-            {errors.body ? <p className="mt-1 text-sm text-danger">{errors.body}</p> : null}
+            {errors.body ? <p className="mt-1 text-xs text-danger">{errors.body}</p> : null}
           </div>
           <div className="flex flex-wrap items-end gap-3">
             <SelectField
@@ -87,19 +87,23 @@ function Notes({ target }: { target: TargetRef }) {
         </form>
       ) : null}
       {notes.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      <ul className="space-y-3">
-        {(notes.data?.results ?? []).map((note) => (
-          <li key={note.id} className="rounded-md border border-border p-3">
-            <p className="mb-1 text-xs text-muted-foreground">
-              {formatDateTime(note.created_at, i18n.language)} ·{" "}
-              {t(`crm.note.${note.visibility ?? "staff_only"}`)}
-              {note.pinned ? ` · ${t("crm.note.pinned")}` : ""}
-            </p>
-            {/* The server stores sanitised HTML (nh3 allow-list). */}
-            <div className="prose prose-sm" dangerouslySetInnerHTML={{ __html: note.body }} />
-          </li>
-        ))}
-      </ul>
+      {notes.data?.results.length ? (
+        <ul className="divide-y divide-rule border-t border-rule">
+          {notes.data.results.map((note) => (
+            <li key={note.id} className="py-2.5 text-sm">
+              {/* The server stores sanitised HTML (nh3 allow-list). */}
+              <div className="prose prose-sm" dangerouslySetInnerHTML={{ __html: note.body }} />
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                <time dateTime={note.created_at}>
+                  {formatDateTime(note.created_at, i18n.language)}
+                </time>{" "}
+                · {t(`crm.note.${note.visibility ?? "staff_only"}`)}
+                {note.pinned ? ` · ${t("crm.note.pinned")}` : ""}
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {notes.data && notes.data.results.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("crm.note.none")}</p>
       ) : null}
@@ -186,9 +190,9 @@ export function TaskList({ tasks, onChanged }: { tasks: Task[]; onChanged: () =>
     onSuccess: onChanged,
   });
   return (
-    <ul className="divide-y divide-border">
+    <ul className="divide-y divide-rule">
       {tasks.map((task) => (
-        <li key={task.id} className="flex items-start gap-3 py-2">
+        <li key={task.id} className="flex items-start gap-3 py-2.5 text-sm">
           <input
             type="checkbox"
             className="mt-1 size-4"
@@ -197,14 +201,20 @@ export function TaskList({ tasks, onChanged }: { tasks: Task[]; onChanged: () =>
             disabled={!canEdit || complete.isPending}
             onChange={(e) => complete.mutate({ id: task.id, done: e.target.checked })}
           />
-          <div>
-            <p className={task.status === "done" ? "line-through" : undefined}>{task.title}</p>
+          <div className="min-w-0">
+            <p
+              className={
+                task.status === "done" ? "text-muted-foreground line-through" : "font-medium"
+              }
+            >
+              {task.title}
+            </p>
             <p className="text-xs text-muted-foreground">
               {task.due_at
                 ? t("crm.task.dueOn", { when: formatDateTime(task.due_at, i18n.language) })
                 : t("crm.task.noDue")}
               {task.is_overdue ? (
-                <span className="ml-2 font-medium text-danger">{t("crm.task.overdue")}</span>
+                <span className="font-semibold text-margin"> · {t("crm.task.overdue")}</span>
               ) : null}
             </p>
           </div>
@@ -226,20 +236,27 @@ function Timeline({ target }: { target: TargetRef }) {
     return <p className="text-sm text-muted-foreground">{t("crm.timeline.none")}</p>;
   }
   return (
-    <ol className="space-y-3 border-l border-border pl-4">
+    <ol className="divide-y divide-rule">
       {timeline.data.map((item) => (
-        <li key={`${item.kind}-${item.id}`}>
-          <p className="text-xs text-muted-foreground">
-            {formatDateTime(item.at, i18n.language)} ·{" "}
-            {t(
-              ["lesson", "invoice", "payment"].includes(item.kind)
-                ? `peopleTools.timeline.${item.kind}`
-                : `crm.timeline.${item.kind}`,
-            )}
-          </p>
-          <p className="text-sm">
-            {item.kind === "note" ? stripTags(item.body) : item.title || item.body}
-          </p>
+        <li
+          key={`${item.kind}-${item.id}`}
+          className="grid gap-x-4 gap-y-0.5 py-2.5 text-sm sm:grid-cols-[9rem_minmax(0,1fr)]"
+        >
+          <time dateTime={item.at} className="text-xs text-muted-foreground sm:pt-0.5">
+            {formatDateTime(item.at, i18n.language)}
+          </time>
+          <div className="min-w-0">
+            <p className="break-words">
+              {item.kind === "note" ? stripTags(item.body) : item.title || item.body}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {t(
+                ["lesson", "invoice", "payment"].includes(item.kind)
+                  ? `peopleTools.timeline.${item.kind}`
+                  : `crm.timeline.${item.kind}`,
+              )}
+            </p>
+          </div>
         </li>
       ))}
     </ol>
@@ -259,7 +276,10 @@ export function RecordActivity({ target }: { target: TargetRef }) {
   const canSeeDocuments = usePermission("crm.document.view");
   const [tab, setTab] = useState<Tab>("notes");
   return (
-    <section aria-label={t("crm.activity")} className="mt-8">
+    <section
+      aria-label={t("crm.activity")}
+      className="min-w-0 rounded-xl border border-border bg-surface pt-1 pb-5 [&_[role=tablist]]:px-3 [&_[role=tabpanel]]:px-5"
+    >
       <Tabs
         label={t("crm.activity")}
         tabs={[
