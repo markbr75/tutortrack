@@ -18,6 +18,31 @@ type Provider = "stripe" | "gocardless" | "paypal";
 /** One phone-first column for the public pay and setup pages. */
 const PAGE = "mx-auto max-w-lg space-y-6 px-4 py-8 sm:px-6";
 
+/** The business the family is paying, as a ruled brand line above the page heading: the
+ * tenant's logo when it has one, otherwise its name in ink. Never a faded kicker. */
+function BrandLine({ name }: { name: string }) {
+  const brand = useQuery({
+    queryKey: ["public-branding"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/public/branding")),
+    staleTime: 10 * 60_000,
+    retry: false,
+  });
+  const logo = brand.data?.logo_url;
+  const dark = brand.data?.logo_dark_url;
+  return (
+    <div className="mb-5 border-b border-border pb-4">
+      {logo ? (
+        <picture>
+          {dark ? <source srcSet={dark} media="(prefers-color-scheme: dark)" /> : null}
+          <img src={logo} alt={name} className="h-8 w-auto" />
+        </picture>
+      ) : (
+        <p className="text-base font-semibold">{name}</p>
+      )}
+    </div>
+  );
+}
+
 /** What a provider added to our URL when the customer came back from its pages:
  * GoCardless ``intent``, PayPal ``token`` or Stripe ``payment_intent``. */
 function returned(): { provider: Provider; intent: string } | null {
@@ -186,8 +211,8 @@ export function PayPage({ token }: { token: string }) {
   return (
     <main className={PAGE}>
       <header>
-        <p className="text-sm text-muted-foreground">{data.organisation}</p>
-        <h1 className="mt-1 text-xl font-semibold">
+        <BrandLine name={data.organisation} />
+        <h1 className="text-xl font-semibold">
           {data.kind === "invoice"
             ? t("pay.invoiceTitle", { number: data.number })
             : t("pay.requestTitle", { number: data.number })}
@@ -380,8 +405,8 @@ export function SetupPage({ token }: { token: string }) {
 
   const header = (
     <header>
-      {page.data ? <p className="text-sm text-muted-foreground">{page.data.organisation}</p> : null}
-      <h1 className="mt-1 text-xl font-semibold">{t("pay.setupTitle")}</h1>
+      {page.data ? <BrandLine name={page.data.organisation} /> : null}
+      <h1 className="text-xl font-semibold">{t("pay.setupTitle")}</h1>
       {page.data ? (
         <p className="mt-1 text-sm text-muted-foreground">{page.data.client_name}</p>
       ) : null}

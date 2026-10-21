@@ -205,22 +205,8 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
             ) : null}
           </p>
         </div>
+        {/* Secondary actions first, the one primary next, destructive ghosts quietest at the end. */}
         <div className="flex flex-wrap items-center gap-2">
-          {open && canVoid ? (
-            <Button size="sm" variant="ghost" onClick={() => setMode("void")}>
-              {t("billing.void")}
-            </Button>
-          ) : null}
-          {open && canWriteOff ? (
-            <Button size="sm" variant="ghost" onClick={() => setMode("write_off")}>
-              {t("billing.writeOff")}
-            </Button>
-          ) : null}
-          {draft && canCreate ? (
-            <Button size="sm" variant="ghost" onClick={() => act.mutate("delete")}>
-              {t("billing.deleteDraft")}
-            </Button>
-          ) : null}
           <a
             className={buttonClass({ variant: "secondary", size: "sm" })}
             href={`/api/v1/invoices/${inv.id}/pdf`}
@@ -245,13 +231,43 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
             </>
           ) : null}
           {open && canCollect ? (
-            <Button size="sm" variant="secondary" onClick={() => act.mutate("collect")}>
+            <Button size="sm" onClick={() => act.mutate("collect")}>
               {t("payments.collectNow")}
             </Button>
           ) : null}
           {draft && canIssue ? (
             <Button onClick={() => act.mutate("issue")} disabled={act.isPending}>
               {t("billing.issue")}
+            </Button>
+          ) : null}
+          {open && canVoid ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground"
+              onClick={() => setMode("void")}
+            >
+              {t("billing.void")}
+            </Button>
+          ) : null}
+          {open && canWriteOff ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground"
+              onClick={() => setMode("write_off")}
+            >
+              {t("billing.writeOff")}
+            </Button>
+          ) : null}
+          {draft && canCreate ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground"
+              onClick={() => act.mutate("delete")}
+            >
+              {t("billing.deleteDraft")}
             </Button>
           ) : null}
         </div>

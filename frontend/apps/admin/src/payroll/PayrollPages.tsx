@@ -18,6 +18,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { api, usePermission } from "../api";
 import { EndHead, Figure, PanelEmpty, PanelLoading, rowClass } from "../billing/moneyUi";
 import { useIsPhone } from "../billing/useIsPhone";
+import { withoutIsoDate } from "./describe";
 import { RunItems } from "../g3/PayrollExtras";
 import { WiseConnectionCard } from "./PayPhase3";
 
@@ -64,17 +65,28 @@ function Page({
   title,
   description,
   actions,
+  back = false,
   children,
 }: {
   title: string;
   description?: ReactNode;
   actions?: ReactNode;
+  /** A record inside Payroll: a back link instead of the section tabs (none would be current). */
+  back?: boolean;
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
     <section className="max-w-6xl">
+      {back ? (
+        <p className="mb-6 text-sm">
+          <Link to="/payroll" className="font-medium text-link hover:underline">
+            {t("payroll.title")}
+          </Link>
+        </p>
+      ) : null}
       <PageHeader title={title} description={description} actions={actions} />
-      <PayrollNav />
+      {back ? null : <PayrollNav />}
       <div className="space-y-6">{children}</div>
     </section>
   );
@@ -110,19 +122,29 @@ export function PayRunsPage() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["pay-runs"] }),
   });
   const labels = useGridLabels(t("designS7.payroll.noRuns"));
+  const phone = useIsPhone();
   const columns = useMemo<ColumnDef<PayRunRow, unknown>[]>(
     () => [
       {
         id: "number",
         header: t("payroll.number"),
         cell: ({ row }) => (
-          <Link
-            to="/payroll/runs/$id"
-            params={{ id: row.original.id }}
-            className="font-medium whitespace-nowrap tabular-nums underline-offset-2 hover:underline"
-          >
-            {row.original.number}
-          </Link>
+          <>
+            <Link
+              to="/payroll/runs/$id"
+              params={{ id: row.original.id }}
+              className="font-medium whitespace-nowrap tabular-nums underline-offset-2 hover:underline"
+            >
+              {row.original.number}
+            </Link>
+            {phone ? (
+              <span className="block text-xs text-muted-foreground tabular-nums">
+                {formatDate(row.original.period_start, i18n.language)} –{" "}
+                {formatDate(row.original.period_end, i18n.language)} ·{" "}
+                {t(`payroll.runStatus.${row.original.status}`)}
+              </span>
+            ) : null}
+          </>
         ),
       },
       {
@@ -146,7 +168,7 @@ export function PayRunsPage() {
         cell: ({ row }) => <Figure strong>{totals(row.original.totals as Totals)}</Figure>,
       },
     ],
-    [t, i18n.language],
+    [t, i18n.language, phone],
   );
   return (
     <Page title={t("payroll.title")}>
@@ -185,6 +207,9 @@ export function PayRunsPage() {
           </Alert>
         ) : null}
         <DataGrid
+          // On phones the period and status fold into the number's context line.
+          key={phone ? "phone" : "wide"}
+          initialColumnVisibility={phone ? { period: false, status: false } : undefined}
           caption={t("payroll.runs")}
           rows={runs.data?.results ?? []}
           columns={columns}
@@ -247,6 +272,7 @@ export function PayRunPage({ id }: { id: string }) {
   const runTotals = Object.entries((r.totals as Totals) ?? {});
   return (
     <Page
+      back
       title={`${t("payroll.run")} ${r.number}`}
       description={
         <span className="tabular-nums">
@@ -594,6 +620,16 @@ export function PayItemsPage() {
   });
   const labels = useGridLabels(t("designS7.payroll.noItems"));
   const phone = useIsPhone();
+  const release = (item: PayItem) =>
+    canManage && item.status === "held" ? (
+      <Button
+        size="sm"
+        variant={phone ? "secondary" : "ghost"}
+        onClick={() => act.mutate({ id: item.id, kind: "release" })}
+      >
+        {t("payroll.release")}
+      </Button>
+    ) : null;
   const columns = useMemo<ColumnDef<PayItem, unknown>[]>(
     () => [
       {
@@ -607,22 +643,26 @@ export function PayItemsPage() {
       {
         id: "description",
         header: t("payroll.description"),
-        cell: ({ row }) => (
-          <>
-            {phone ? <span className="block font-medium">{row.original.tutor_name}</span> : null}
-            {row.original.description}
-            {phone ? (
-              <span className="block text-xs text-muted-foreground tabular-nums">
-                {formatDate(row.original.date, i18n.language)}
-              </span>
-            ) : null}
-            {(row.original.hold_reasons as string[]).map((r) => (
-              <span key={r} className="block text-xs text-muted-foreground">
-                {t(`pay.holdReasons.${r}`)}
-              </span>
-            ))}
-          </>
-        ),
+        cell: ({ row }) => {
+          const reasons = (row.original.hold_reasons as string[]).map((r) =>
+            t(`pay.holdReasons.${r}`),
+          );
+          return (
+            <>
+              {withoutIsoDate(row.original.description, row.original.date)}
+              {/* On phones the tutor and date fold into one caption under the description. */}
+              {phone ? (
+                <span className="block text-xs text-muted-foreground tabular-nums">
+                  {row.original.tutor_name} · {formatDate(row.original.date, i18n.language)}
+                </span>
+              ) : null}
+              {reasons.length ? (
+                <span className="block text-xs text-muted-foreground">{reasons.join(" · ")}</span>
+              ) : null}
+              {phone ? <div className="mt-1.5">{release(row.original)}</div> : null}
+            </>
+          );
+        },
       },
       {
         id: "amount",
@@ -637,16 +677,7 @@ export function PayItemsPage() {
             <span className="sr-only">{t("payroll.actions")}</span>
           </span>
         ),
-        cell: ({ row }) =>
-          canManage && row.original.status === "held" ? (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => act.mutate({ id: row.original.id, kind: "release" })}
-            >
-              {t("payroll.release")}
-            </Button>
-          ) : null,
+        cell: ({ row }) => release(row.original),
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps -- labels follow the language
@@ -671,7 +702,9 @@ export function PayItemsPage() {
         <DataGrid
           // On phones the date and tutor fold into the description.
           key={phone ? "phone" : "wide"}
-          initialColumnVisibility={phone ? { date: false, tutor: false } : undefined}
+          initialColumnVisibility={
+            phone ? { date: false, tutor: false, actions: false } : undefined
+          }
           caption={t("payroll.items")}
           rows={items.data?.results ?? []}
           columns={columns}

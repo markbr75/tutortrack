@@ -1,11 +1,12 @@
 import { unwrap, type components } from "@tutortrack/api-client";
-import { formatMoney, useTranslation } from "@tutortrack/i18n";
+import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, RuledPanel, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, usePermission } from "../api";
 import { ReauthPrompt } from "./Reauth";
+import { withoutIsoDate } from "../payroll/describe";
 import { needsReauth } from "./reauthError";
 
 /** Full bank details behind a re-authentication (E12 §6, gap G3). */
@@ -159,7 +160,7 @@ function EditItem({ runId, item, onDone }: { runId: string; item: PayItem; onDon
 /** The run's items, each editable while the run is under review (FR-12-5, gap G3): a new
  * amount becomes a linked correction in the run; the item itself never changes. */
 export function RunItems({ runId, editable }: { runId: string; editable: boolean }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const canEdit = usePermission("payroll.payrun.create");
   const [editing, setEditing] = useState("");
@@ -190,7 +191,10 @@ export function RunItems({ runId, editable }: { runId: string; editable: boolean
               <div className="flex items-start gap-4">
                 <div className="min-w-0 flex-1">
                   <p className="font-medium">{item.tutor_name}</p>
-                  <p className="text-xs text-muted-foreground">{item.description}</p>
+                  <p className="text-xs text-muted-foreground tabular-nums">
+                    {withoutIsoDate(item.description, item.date)}
+                    {item.date ? ` · ${formatDate(item.date, i18n.language)}` : ""}
+                  </p>
                   {corrections(item.id).map((c) => (
                     <p key={c.id} className="text-xs text-muted-foreground tabular-nums">
                       {c.description} ({formatMoney(c.amount)})

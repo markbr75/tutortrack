@@ -26,6 +26,16 @@ import {
 
 type Interval = "month" | "year";
 
+function capitalise(value: string): string {
+  const words = value.replace(/_/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/** "visa" → "Visa", "amex" → "American Express"; unknown brands are capitalised. */
+function cardBrand(t: (key: string, options?: Record<string, unknown>) => string, brand: string) {
+  return t(`designS7.plan.cardBrands.${brand.toLowerCase()}`, { defaultValue: capitalise(brand) });
+}
+
 function useRefresh() {
   const queryClient = useQueryClient();
   return () => {
@@ -184,7 +194,7 @@ function StatusSection({ sub }: { sub: Subscription }) {
       ) : null}
       {sub.card ? (
         <p className="text-muted-foreground tabular-nums">
-          {t("plan.card", { brand: sub.card.brand, last4: sub.card.last4 })}
+          {t("plan.card", { brand: cardBrand(t, sub.card.brand), last4: sub.card.last4 })}
         </p>
       ) : null}
       {[checkout.error, portal.error, reactivate.error].map((e, i) =>
@@ -542,12 +552,16 @@ function InvoicesSection() {
           <tbody>
             {invoices.data.map((inv) => (
               <tr key={inv.id}>
-                <td className="py-2.5 pr-4 pl-5 font-medium">{inv.number}</td>
+                <td className="py-2.5 pr-4 pl-5 font-medium whitespace-nowrap">{inv.number}</td>
                 <td className="px-4 py-2.5 whitespace-nowrap">{formatDate(inv.created)}</td>
                 <td className="px-4 py-2.5 text-right whitespace-nowrap">
                   {formatMoney(inv.total)}
                 </td>
-                <td className="px-4 py-2.5">{inv.status}</td>
+                <td className="px-4 py-2.5">
+                  {t(`designS7.plan.invoiceStatus.${inv.status}`, {
+                    defaultValue: capitalise(inv.status),
+                  })}
+                </td>
                 <td className="py-2.5 pr-5 pl-4 text-right">
                   {inv.pdf_url ? (
                     <a

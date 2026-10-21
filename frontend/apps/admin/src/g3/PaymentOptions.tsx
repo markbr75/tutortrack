@@ -29,6 +29,7 @@ export function PaymentOptions() {
             "payments.card_expiry_notices",
           ]}
           label={t("g3.paymentOptions.autopay")}
+          units={{ "payments.autopay_days_before_due": t("designS7.units.days") }}
         />
       </RuledPanel>
       <RuledPanel
@@ -55,6 +56,7 @@ export function PaymentOptions() {
               keys={["payments.enabled_methods", "payments.card_surcharge_percent"]}
               label={t("g3.paymentOptions.methods")}
               optionLabel={(_key, value) => t(`g3.paymentOptions.method.${value}`)}
+              units={{ "payments.card_surcharge_percent": t("designS7.units.percent") }}
             />
           ) : null}
         </div>

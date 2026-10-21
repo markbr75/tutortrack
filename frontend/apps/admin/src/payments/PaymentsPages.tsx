@@ -59,7 +59,14 @@ export function PaymentsSettingsPage() {
           <RuledPanel
             title="Stripe"
             aside={
-              <span className="text-muted-foreground">
+              // Setup still waiting on the business reads in margin red; other states stay quiet.
+              <span
+                className={
+                  stripe.status === "pending" || stripe.status === "restricted"
+                    ? "font-semibold text-margin"
+                    : "text-muted-foreground"
+                }
+              >
                 {t(`payments.accountStatus.${stripe.status}`)}
               </span>
             }

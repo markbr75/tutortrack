@@ -14,6 +14,7 @@ import {
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
@@ -33,6 +34,10 @@ type Option = { value: string; label: string };
 type MappingProvider = string;
 
 const RETURN_PATH = "/settings/accounting";
+// Disclosures: a 14px chevron that turns a quarter when open, instead of the browser's marker.
+const SUMMARY =
+  "flex w-fit cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-link [&::-webkit-details-marker]:hidden";
+const CHEVRON = "size-3.5 shrink-0 transition-transform duration-150 [[open]>summary>&]:rotate-90";
 const PROVIDERS = ["xero", "quickbooks", "sage", "freeagent"] as const;
 const FORMATS = ["generic", "sage50", "myob", "iif"] as const;
 
@@ -413,7 +418,8 @@ export function MappingsForm({
         )}
       </fieldset>
       <details className="border-y border-rule py-3">
-        <summary className="cursor-pointer text-sm font-medium text-link">
+        <summary className={SUMMARY}>
+          <ChevronRight aria-hidden="true" className={CHEVRON} />
           {t("accounting.specific")}
         </summary>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -758,7 +764,8 @@ function ExportSection({ connections }: { connections: Connection[] }) {
       </PanelFooter>
       {mappingSet === "export" ? (
         <details className="border-t border-border px-5 py-3.5">
-          <summary className="cursor-pointer text-sm font-medium text-link">
+          <summary className={SUMMARY}>
+            <ChevronRight aria-hidden="true" className={CHEVRON} />
             {t("accounting.exportCodes")}
           </summary>
           <div className="mt-4">

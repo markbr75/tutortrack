@@ -25,6 +25,7 @@ import { BankReconciliation } from "../payments/BankReconciliation";
 import { PaymentsList } from "../payments/PaymentsPages";
 import { LateFeesTab, PackagesTab, PlansTab, SplitsTab } from "./Phase2Tabs";
 import { EndHead, Figure, InvoiceStatus, PanelEmpty, PanelLoading, rowClass } from "./moneyUi";
+import { sumByCurrency } from "./sumMoney";
 import { useIsPhone } from "./useIsPhone";
 
 type Tab =
@@ -584,6 +585,30 @@ function Ageing() {
       </div>
     );
   const zero = (value: Money) => !/[1-9]/.test(value.amount);
+  // Margin red only for money past its due date; empty buckets fade.
+  const bucketTone = (b: (typeof BUCKETS)[number], value: Money, strong = false) =>
+    zero(value)
+      ? "text-muted-foreground"
+      : b === "current"
+        ? ""
+        : strong
+          ? "text-margin"
+          : "font-medium text-margin";
+  // One totals row per currency; each bucket is summed exactly in its own column.
+  const currencies = [...new Set(rows.data.map((row) => row.total.currency))];
+  const totals = currencies.map((currency) => {
+    const mine = rows.data.filter((row) => row.total.currency === currency);
+    const sum = (pick: (row: (typeof mine)[number]) => Money) =>
+      sumByCurrency(mine.map(pick))[0] ?? { amount: "0", currency };
+    return {
+      currency,
+      buckets: Object.fromEntries(BUCKETS.map((b) => [b, sum((row) => row[b])])) as Record<
+        (typeof BUCKETS)[number],
+        Money
+      >,
+      total: sum((row) => row.total),
+    };
+  });
   return (
     <div
       role="region"
@@ -595,7 +620,7 @@ function Ageing() {
         <caption className="sr-only">{t("billing.tabs.ageing")}</caption>
         <thead className="border-b border-border">
           <tr>
-            <th scope="col" className="px-4 py-2.5 whitespace-nowrap">
+            <th scope="col" className="min-w-44 px-4 py-2.5 whitespace-nowrap">
               {t("billing.client")}
             </th>
             {BUCKETS.map((b) => (
@@ -623,13 +648,7 @@ function Ageing() {
               {BUCKETS.map((b) => (
                 <td
                   key={b}
-                  className={`px-4 py-2.5 text-right whitespace-nowrap ${
-                    zero(row[b])
-                      ? "text-muted-foreground"
-                      : b === "current"
-                        ? ""
-                        : "font-medium text-margin"
-                  }`}
+                  className={`px-4 py-2.5 text-right whitespace-nowrap ${bucketTone(b, row[b])}`}
                 >
                   {money(row[b])}
                 </td>
@@ -640,6 +659,26 @@ function Ageing() {
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          {totals.map((group, i) => (
+            <tr key={group.currency} className={i === 0 ? "border-t border-border" : ""}>
+              <th scope="row" className="px-4 py-3 font-semibold">
+                {i === 0 ? t("billing.total") : ""}
+              </th>
+              {BUCKETS.map((b) => (
+                <td
+                  key={b}
+                  className={`px-4 py-3 text-right font-semibold whitespace-nowrap ${bucketTone(b, group.buckets[b], true)}`}
+                >
+                  {money(group.buckets[b])}
+                </td>
+              ))}
+              <td className="px-4 py-3 text-right font-semibold whitespace-nowrap">
+                {money(group.total)}
+              </td>
+            </tr>
+          ))}
+        </tfoot>
       </table>
     </div>
   );

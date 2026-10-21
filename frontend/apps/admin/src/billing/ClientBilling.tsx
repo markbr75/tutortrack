@@ -124,6 +124,10 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
     ...(canCharge ? [{ key: "charge" as const, label: t("billing.addCharge") }] : []),
   ];
 
+  const oldestOverdue = (invoices.data?.results ?? [])
+    .filter((inv) => inv.is_overdue && inv.due_date)
+    .map((inv) => inv.due_date as string)
+    .sort()[0];
   return (
     <section aria-labelledby="client-billing" className="mt-6 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -155,6 +159,14 @@ export function ClientBilling({ clientId, currency }: { clientId: string; curren
               key: "overdue",
               label: t("billing.balances.overdue"),
               value: money(b.overdue),
+              // Say how long it has waited when the oldest overdue invoice is on this page.
+              note: owing(b.overdue.amount)
+                ? oldestOverdue
+                  ? t("designS7.billing.overdueSince", {
+                      date: formatDate(oldestOverdue, i18n.language),
+                    })
+                  : undefined
+                : t("designS7.billing.nothingOverdue"),
               tone: owing(b.overdue.amount) ? "margin" : "default",
             },
             {
