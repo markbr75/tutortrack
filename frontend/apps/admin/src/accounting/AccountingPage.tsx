@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from "react";
 import { api, usePermission } from "../api";
 import { ErrorList } from "../calendar/ErrorList";
 import { KeyedSettings } from "../g3/KeyedSettings";
+import { BranchLedgers, LedgerPicker } from "./BranchLedgers";
+import { ledgerLabel, useBranches } from "./ledgers";
 import { ReadBackSection } from "./ReadBackSection";
 import { SyncBadge } from "./SyncBadge";
 import { providerName } from "./providerName";
@@ -16,7 +18,8 @@ type Connection = components["schemas"]["AccountingConnection"];
 type MappingSet = components["schemas"]["MappingSet"];
 type Chart = components["schemas"]["Chart"];
 type Option = { value: string; label: string };
-type MappingProvider = "xero" | "quickbooks" | "sage" | "freeagent" | "export";
+// A provider, "export", or "<provider>@<branch id>" for a branch's own ledger (gap G5).
+type MappingProvider = string;
 
 const RETURN_PATH = "/settings/accounting";
 const PROVIDERS = ["xero", "quickbooks", "sage", "freeagent"] as const;
@@ -97,9 +100,9 @@ function ConnectionCard({ conn, canManage }: { conn: Connection; canManage: bool
   return (
     <section
       className="space-y-2 rounded-md border border-border p-4"
-      aria-label={conn.provider_name}
+      aria-label={ledgerLabel(t, conn)}
     >
-      <h2 className="text-lg font-semibold">{conn.provider_name}</h2>
+      <h2 className="text-lg font-semibold">{ledgerLabel(t, conn)}</h2>
       <p className="text-sm">
         <span className={conn.status === "active" ? "text-success" : "text-danger"}>
           {t(`integrations.status.${conn.status}`)}
@@ -346,7 +349,9 @@ export function MappingsForm({
   return (
     <form
       className="space-y-4"
-      aria-label={t("accounting.mappingsFor", { provider: providerName(t, provider) })}
+      aria-label={t("accounting.mappingsFor", {
+        provider: providerName(t, provider.split("@")[0] ?? provider),
+      })}
       onSubmit={(e) => {
         e.preventDefault();
         save.mutate();
@@ -371,15 +376,13 @@ export function MappingsForm({
         {data.kinds
           .filter((k) => provider !== "export" || k.kind !== "expense")
           .map((k) => account(k.kind, "default", k.is_required ? `${k.name} *` : k.name))}
-        {chart
-          ? field(
-              "purchase_tax",
-              t("accounting.purchaseTax"),
-              accounts[rowKey("purchase_tax", "default")] ?? "",
-              (v) => setAccounts({ ...accounts, [rowKey("purchase_tax", "default")]: v }),
-              taxOptions,
-            )
-          : null}
+        {field(
+          "purchase_tax",
+          t("accounting.purchaseTax"),
+          accounts[rowKey("purchase_tax", "default")] ?? "",
+          (v) => setAccounts({ ...accounts, [rowKey("purchase_tax", "default")]: v }),
+          taxOptions,
+        )}
       </fieldset>
       <details className="rounded-md border border-border p-3">
         <summary className="cursor-pointer text-sm font-medium">{t("accounting.specific")}</summary>
@@ -507,15 +510,22 @@ function SyncDashboard({ conn, canManage }: { conn: Connection; canManage: boole
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const errors = useQuery({
-    queryKey: ["accounting", "records", "error"],
+    queryKey: ["accounting", "records", "error", conn.id],
     queryFn: async () =>
       unwrap(
-        await api.GET("/api/v1/accounting/records", { params: { query: { status: "error" } } }),
+        await api.GET("/api/v1/accounting/records", {
+          params: { query: { status: "error", connection: conn.id } },
+        }),
       ).results,
   });
   const recent = useQuery({
-    queryKey: ["accounting", "records", "recent"],
-    queryFn: async () => unwrap(await api.GET("/api/v1/accounting/records")).results.slice(0, 20),
+    queryKey: ["accounting", "records", "recent", conn.id],
+    queryFn: async () =>
+      unwrap(
+        await api.GET("/api/v1/accounting/records", {
+          params: { query: { connection: conn.id } },
+        }),
+      ).results.slice(0, 20),
   });
   const act = useMutation({
     mutationFn: async ({ id, kind }: { id?: string; kind: "retry" | "skip" | "all" }) => {
@@ -606,18 +616,21 @@ function SyncDashboard({ conn, canManage }: { conn: Connection; canManage: boole
 }
 
 /** General ledger exports for other packages (FR-23-5). */
-function ExportSection({ connectedProvider }: { connectedProvider?: string }) {
+function ExportSection({ connections }: { connections: Connection[] }) {
   const { t } = useTranslation();
   const canManage = usePermission("integrations.accounting.manage");
+  const branches = useBranches();
   const [fmt, setFmt] = useState<string>("generic");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
-  const [mappingSet, setMappingSet] = useState(connectedProvider ?? "export");
+  const [mappingSet, setMappingSet] = useState(connections[0]?.mapping_set ?? "export");
+  const [branch, setBranch] = useState("");
   const href = `/api/v1/accounting/export?${new URLSearchParams({
     file_format: fmt,
     start,
     end,
     mapping_set: mappingSet,
+    ...(branch ? { branch } : {}),
   }).toString()}`;
   return (
     <section className="space-y-3" aria-labelledby="export-heading">
@@ -650,16 +663,20 @@ function ExportSection({ connectedProvider }: { connectedProvider?: string }) {
           onChange={(e) => setMappingSet(e.target.value)}
           options={[
             { value: "export", label: t("accounting.exportCodes") },
-            ...(connectedProvider
-              ? [
-                  {
-                    value: connectedProvider,
-                    label: providerName(t, connectedProvider),
-                  },
-                ]
-              : []),
+            ...connections.map((c) => ({ value: c.mapping_set, label: ledgerLabel(t, c) })),
           ]}
         />
+        {(branches.data?.length ?? 0) > 1 ? (
+          <SelectField
+            label={t("accountingG5.exportBranch")}
+            value={branch}
+            onChange={(e) => setBranch(e.target.value)}
+            options={[
+              { value: "", label: t("accountingG5.allBranches") },
+              ...(branches.data ?? []).map((b) => ({ value: b.id, label: b.name })),
+            ]}
+          />
+        ) : null}
       </div>
       {start && end ? (
         <a className="inline-block font-medium underline" href={href} download>
@@ -694,7 +711,10 @@ export function AccountingPage() {
     queryKey: ["accounting", "connections"],
     queryFn: async () => unwrap(await api.GET("/api/v1/accounting/connections")).results,
   });
-  const conn = connections.data?.[0];
+  const [selected, setSelected] = useState("");
+  const all = connections.data ?? [];
+  // The organisation's ledger first; branches' own ledgers are picked above (gap G5).
+  const conn = all.find((c) => c.id === selected) ?? all.find((c) => !c.branch) ?? all[0];
   const chart = useQuery({
     queryKey: ["accounting", "chart", conn?.id],
     enabled: Boolean(conn),
@@ -731,6 +751,7 @@ export function AccountingPage() {
       ) : null}
       {conn ? (
         <>
+          <LedgerPicker connections={all} value={conn.id} onChange={setSelected} />
           <ConnectionCard conn={conn} canManage={canManage} />
           <OptionsForm key={`${conn.id}-${conn.mode}`} conn={conn} canManage={canManage} />
           <section className="space-y-3" aria-labelledby="mappings-heading">
@@ -739,7 +760,8 @@ export function AccountingPage() {
             </h2>
             {chart.data ? (
               <MappingsForm
-                provider={conn.provider as MappingProvider}
+                key={conn.mapping_set}
+                provider={conn.mapping_set}
                 chart={chart.data}
                 canManage={canManage}
               />
@@ -747,9 +769,10 @@ export function AccountingPage() {
               <Spinner label={t("grid.loading")} />
             )}
           </section>
-          <SyncSwitch conn={conn} canManage={canManage} />
+          <SyncSwitch key={`switch-${conn.id}`} conn={conn} canManage={canManage} />
           <SyncDashboard conn={conn} canManage={canManage} />
           <ReadBackSection conn={conn} canManage={canManage} />
+          {canManage ? <BranchLedgers connections={all} /> : null}
         </>
       ) : null}
       <section className="space-y-2" aria-labelledby="g3-deferred">
@@ -763,7 +786,18 @@ export function AccountingPage() {
           label={t("g3.accounting.packages")}
         />
       </section>
-      {canExport ? <ExportSection connectedProvider={conn?.provider} /> : null}
+      <section className="space-y-2" aria-labelledby="g5-bad-debt">
+        <h2 id="g5-bad-debt" className="text-lg font-semibold">
+          {t("accountingG5.badDebt")}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t("accountingG5.badDebtHelp")}</p>
+        <KeyedSettings
+          area="accounting"
+          keys={["accounting.bad_debt_vat_relief"]}
+          label={t("accountingG5.badDebt")}
+        />
+      </section>
+      {canExport ? <ExportSection connections={all} /> : null}
     </div>
   );
 }

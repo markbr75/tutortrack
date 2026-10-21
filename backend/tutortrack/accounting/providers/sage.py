@@ -13,7 +13,11 @@ Translation of our documents:
 * refund → ``/contact_payments`` of type ``CUSTOMER_REFUND``;
 * provider payout → ``/bank_transfers`` of the net amount plus an ``/other_payments``
   for the fees, both from the clearing account;
-* summary journal → ``/journals``.
+* summary journal → ``/journals``;
+* reallocation (gap G5) → the receipt's ``allocated_artefacts`` replaced (``PUT``).
+
+Read-back (E23-T09, gap G5): the customer receipts in ``/contact_payments`` of the
+invoice's contact that allocate money to it.
 
 The business is the connection's ``external_account_id`` (``X-Business``). Every call goes
 through ``core.net.safe_urlopen`` (``user_url=True``). Branch tracking (analysis types) is
@@ -40,9 +44,10 @@ from ..documents import (
     PaymentDoc,
     PayoutDoc,
     Pushed,
+    ReallocationDoc,
     RefundDoc,
 )
-from .base import Chart, LedgerAccount, LedgerInfo, LedgerTaxCode
+from .base import Chart, LedgerAccount, LedgerInfo, LedgerPayment, LedgerTaxCode
 
 API = "https://api.accounting.sage.com/v3.1"
 SCOPES = ("full_access",)
@@ -158,6 +163,60 @@ class SageClient:
         path = "/purchase_invoices" if kind == "bill" else "/sales_invoices"
         found = self._call(creds, "GET", f"{path}/{external_id}")
         return str(found.get("outstanding_amount")) if found else None
+
+    def invoice_payments(self, creds: Credentials, external_id: str) -> list[LedgerPayment]:
+        """Customer receipts allocated to the invoice, with the amount each applies to it
+        (refunds and credit note allocations are left out)."""
+        invoice = self._call(
+            creds,
+            "GET",
+            f"/sales_invoices/{external_id}",
+            params={"attributes": "contact,payments_allocations"},
+        )
+        if "payments_allocations" in invoice and not invoice.get("payments_allocations"):
+            return []  # nothing applied to it in Sage
+        contact = str((invoice.get("contact") or {}).get("id", ""))
+        if not contact:
+            return []
+        out: list[LedgerPayment] = []
+        for page in range(1, 11):
+            body = self._call(
+                creds,
+                "GET",
+                "/contact_payments",
+                params={
+                    "contact_id": contact,
+                    "attributes": "all",
+                    "items_per_page": 200,
+                    "page": page,
+                },
+            )
+            for payment in body.get("$items") or []:
+                kind = str((payment.get("transaction_type") or {}).get("id", ""))
+                if kind != "CUSTOMER_RECEIPT" or payment.get("deleted_at"):
+                    continue
+                applied = sum(
+                    (
+                        Decimal(str(a.get("amount", "0")))
+                        for a in payment.get("allocated_artefacts") or []
+                        if str((a.get("artefact") or {}).get("id", "")) == external_id
+                    ),
+                    Decimal(0),
+                )
+                if applied <= 0:
+                    continue
+                out.append(
+                    LedgerPayment(
+                        id=str(payment.get("id", "")),
+                        amount=str(applied),
+                        date=str(payment.get("date") or "")[:10],
+                        reference=str(payment.get("reference") or ""),
+                        account=str((payment.get("bank_account") or {}).get("id", "")),
+                    )
+                )
+            if not body.get("$next"):
+                break
+        return out
 
     # --- writes -----------------------------------------------------------------------------
 
@@ -352,6 +411,26 @@ class SageClient:
         return Pushed(str(created["id"]))
 
     _push_bill_payment = _push_payment
+
+    def _push_reallocation(
+        self, creds: Credentials, doc: ReallocationDoc, external_id: str, key: str
+    ) -> Pushed:
+        """Move the receipt between invoices: its allocations are replaced; what isn't
+        allocated stays on the customer's account."""
+        self._call(
+            creds,
+            "PUT",
+            f"/contact_payments/{doc.payment}",
+            {
+                "contact_payment": {
+                    "allocated_artefacts": [
+                        {"artefact_id": target, "amount": _money(amount)}
+                        for target, amount in doc.allocations
+                    ],
+                }
+            },
+        )
+        return Pushed(f"{doc.payment}:reallocated:{key[-16:]}", created=not external_id)
 
     def _push_refund(
         self, creds: Credentials, doc: RefundDoc, external_id: str, key: str

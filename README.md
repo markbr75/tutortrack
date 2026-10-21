@@ -107,7 +107,7 @@ Each app in `backend/tutortrack/` owns its models, `services.py` (writes), `sele
 | `learning` | Homework, resources, progress and assessments | E21 |
 | `integrations` | Integration framework and provider connections | E22 |
 | `calendar_sync` | Calendar sync and online lesson (video) integrations | E22 |
-| `accounting` | Xero, QuickBooks, Sage and FreeAgent sync | E23 |
+| `accounting` | Xero, QuickBooks, Sage and FreeAgent sync (per-branch ledgers, payment read-back) | E23 |
 | `sites` | Public website builder, widgets, custom domains, white-labelling | E24 |
 | `growth` | Reviews, referrals and affiliates | E25 |
 | `reporting` | Reports, dashboards, analytics and warehouse export | E26 |

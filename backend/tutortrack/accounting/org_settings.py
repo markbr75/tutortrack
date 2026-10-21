@@ -35,3 +35,14 @@ register(
     choices=EXPORT_FORMATS,
     label=_("Default general ledger export format"),
 )
+register(
+    "accounting.bad_debt_vat_relief",
+    type="bool",
+    default=False,
+    label=_("Reclaim the VAT on written-off invoices (bad debt relief)"),
+    help_text=_(
+        "Write-offs post the VAT in the amount written off back to the VAT account at the "
+        "invoice's rates, instead of the whole amount to bad debts. Check that your tax "
+        "authority's conditions for bad debt relief are met."
+    ),
+)

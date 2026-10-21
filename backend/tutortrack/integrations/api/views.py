@@ -26,7 +26,7 @@ AUTH = [IsAuthenticated, HasOrganisation]
 
 
 def _may_connect(user: Any, level: str, provider: str = "") -> None:
-    if level == "organisation":
+    if level in ("organisation", "branch"):
         if not selectors.may_manage_provider(user, provider):
             raise PermissionDenied("You can't connect integrations.")
         return
@@ -161,7 +161,11 @@ class OAuthStartView(APIView):
         data = payload.validated_data
         _may_connect(request.user, data["level"], data["provider"])
         url = services.start_oauth(
-            request.user, provider=data["provider"], level=data["level"], next_path=data["next"]
+            request.user,
+            provider=data["provider"],
+            level=data["level"],
+            next_path=data["next"],
+            branch=data.get("branch"),
         )
         return Response({"authorize_url": url})
 

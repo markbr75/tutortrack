@@ -42,7 +42,8 @@ from .models import (
     TaxMapping,
     TrackingMapping,
 )
-from .providers import PROVIDERS, client_for
+from .providers import client_for
+from .routing import enabled_connections, resolve
 
 logger = structlog.get_logger(__name__)
 Status = ExternalRecordLink.Status
@@ -59,19 +60,10 @@ def _invalid(field: str, message: str) -> BusinessRuleViolation:
 
 
 def active_connection() -> AccountingConnection | None:
-    """The organisation's live, switched-on ledger connection (one at a time)."""
-    return (
-        AccountingConnection.objects.select_related("connection")
-        .filter(
-            enabled=True,
-            connection__status__in=[
-                IntegrationConnection.Status.ACTIVE,
-                IntegrationConnection.Status.ERROR,
-            ],
-        )
-        .order_by("-enabled_at")
-        .first()
-    )
+    """The organisation's live, switched-on ledger (its whole-organisation one first; with
+    per-branch ledgers, gap G5, records are routed with ``routing.route``)."""
+    conns = enabled_connections()
+    return conns[0] if conns else None
 
 
 @transaction.atomic
@@ -80,7 +72,8 @@ def on_connected(connection_id: Any) -> AccountingConnection:
     with the chart of accounts fetched (best effort; the page can refresh it)."""
     connection = IntegrationConnection.objects.get(pk=connection_id)
     conn, created = AccountingConnection.objects.get_or_create(
-        connection=connection, defaults={"provider": connection.provider}
+        connection=connection,
+        defaults={"provider": connection.provider, "branch_id": connection.branch_id},
     )
     if created:
         audit.record_create(conn)
@@ -132,7 +125,7 @@ OPTION_FIELDS = (
 @transaction.atomic
 def update_options(conn: AccountingConnection, **values: Any) -> AccountingConnection:
     conn = AccountingConnection.objects.select_for_update().get(pk=conn.pk)
-    if values.get("import_payments"):
+    if values.get("import_payments"):  # all four ledgers since gap G5
         from .readback import supported
 
         if not supported(conn.provider):
@@ -164,7 +157,9 @@ def save_mappings(
 ) -> None:
     """Replace a mapping set (whatever part is given). For ``export`` an account is its
     code; for a provider it must be one of the fetched accounts."""
-    if provider not in (*PROVIDERS, EXPORT):
+    from .mappings import valid_set
+
+    if not valid_set(provider):
         raise _invalid("provider", _("Unknown mapping set."))
     chart = _chart_lookup(conn)
     if accounts is not None:
@@ -242,7 +237,7 @@ def enable(
     entitlements.require(FEATURE)
     if not conn.connection.is_live:
         raise BusinessRuleViolation(_("Reconnect the account first."))
-    issues = problems(conn.provider, conn)
+    issues = problems(conn.mapping_set, conn)
     if issues:
         raise BusinessRuleViolation(
             _("Finish the mappings before switching sync on."),
@@ -250,9 +245,16 @@ def enable(
         )
     with transaction.atomic():
         conn = AccountingConnection.objects.select_for_update().get(pk=conn.pk)
-        others = AccountingConnection.objects.filter(enabled=True).exclude(pk=conn.pk)
+        # One switched-on ledger for the organisation and one per branch (gap G5).
+        others = AccountingConnection.objects.filter(
+            enabled=True, branch_id=conn.branch_id
+        ).exclude(pk=conn.pk)
         if others.exists():
-            raise BusinessRuleViolation(_("Another accounting connection is already syncing."))
+            raise BusinessRuleViolation(
+                _("Another accounting connection is already syncing this branch's records.")
+                if conn.branch_id
+                else _("Another accounting connection is already syncing.")
+            )
         with audit.track(conn, action="enable"):
             conn.enabled = True
             conn.enabled_at = now()
@@ -348,9 +350,25 @@ def _log(link: ExternalRecordLink, outcome: str, message: str = "") -> None:
     SyncLogEntry.objects.create(link=link, outcome=outcome, message=message[:500])
 
 
-def plan(object_type: str, object_id: str, *, workflow_id: str = "") -> dict[str, Any]:
-    """What a sync workflow should do: prerequisites to sync first, then push (or not)."""
-    conn = active_connection()
+def _fan_out(object_type: str, connection_id: str) -> bool:
+    """A client update with no ledger named goes to every ledger the client is in."""
+    return object_type == "contact" and not connection_id
+
+
+def plan(
+    object_type: str, object_id: str, *, workflow_id: str = "", connection_id: str = ""
+) -> dict[str, Any]:
+    """What a sync workflow should do: prerequisites to sync first, then push (or not), in
+    which ledger (``connection_id``; gap G5: per-branch ledgers)."""
+    if _fan_out(object_type, connection_id):
+        ready = bool(enabled_connections())
+        return {
+            "status": "ready" if ready else "disabled",
+            "prerequisites": [],
+            "push": ready,
+            "connection_id": "",
+        }
+    conn = resolve(connection_id, object_type, str(object_id))
     if conn is None:
         return {"status": "disabled", "prerequisites": [], "push": False}
     if conn.mode == AccountingConnection.Mode.SUMMARY and object_type in builders.SALES_SIDE:
@@ -366,7 +384,12 @@ def plan(object_type: str, object_id: str, *, workflow_id: str = "") -> dict[str
         if link.status == Status.SKIPPED and link.error_code == SKIPPED_BY_USER:
             return {"status": "skipped", "prerequisites": [], "push": False}
     deps = builders.prerequisites(conn, object_type, object_id)
-    return {"status": "ready", "prerequisites": [list(d) for d in deps], "push": not container}
+    return {
+        "status": "ready",
+        "prerequisites": [list(d) for d in deps],
+        "push": not container,
+        "connection_id": str(conn.pk),
+    }
 
 
 def sync(
@@ -376,14 +399,31 @@ def sync(
     inline: bool = False,
     backfill: bool = False,
     conn: AccountingConnection | None = None,
+    connection_id: str = "",
 ) -> str:
     """Push one record: ``synced``, ``skipped`` or ``error`` (needs a person). Retryable
     provider failures raise. ``inline`` syncs prerequisites first in this process
-    (backfills); workflows run them as child workflows instead."""
-    conn = conn or active_connection()
+    (backfills); workflows run them as child workflows instead. The ledger is ``conn``,
+    else the one named by ``connection_id``, else the record's own (``routing``)."""
+    object_id = str(object_id)
+    if conn is None and _fan_out(object_type, connection_id):
+        ledgers = [
+            c
+            for c in enabled_connections()
+            if ExternalRecordLink.objects.filter(
+                connection=c, object_type=object_type, object_id=object_id, status=Status.SYNCED
+            ).exists()
+        ]
+        if not ledgers:
+            routed = resolve("", object_type, object_id)
+            ledgers = [routed] if routed is not None else []
+        results = [sync(object_type, object_id, inline=inline, conn=c) for c in ledgers]
+        if not results:
+            return "disabled"
+        return "error" if "error" in results else results[0]
+    conn = conn or resolve(connection_id, object_type, object_id)
     if conn is None:
         return "disabled"
-    object_id = str(object_id)
     if object_type in builders.CONTAINERS:
         results = [
             sync(t, i, inline=True, backfill=backfill, conn=conn)
@@ -436,6 +476,7 @@ def _sync_one(
         if built.void and link.meta.get("voided"):
             return "synced"
         outcome = _push(conn, link, built, doc, digest)
+        _keep_payment_state(conn, built, link)
         _wake_dependents(conn, object_type, object_id)
     integrations.record_success(conn.connection, synced=True)
     logger.info("accounting.synced", object_type=object_type, outcome=outcome)
@@ -509,6 +550,37 @@ def _push(
     return str(outcome)
 
 
+def _keep_payment_state(
+    conn: AccountingConnection, built: Built, pushed: ExternalRecordLink
+) -> None:
+    """After a refund, chargeback or reallocation is posted, the payment's link records
+    what the ledger now holds of it, and the provider's new parts (gap G5)."""
+    payment_id = built.meta.get("payment")
+    if not payment_id or "ledger_after" not in built.meta:
+        return
+    link = (
+        ExternalRecordLink.objects.select_for_update()
+        .filter(connection=conn, object_type="payment", object_id=str(payment_id))
+        .first()
+    )
+    if link is None:
+        return
+    meta = dict(link.meta)
+    meta["ledger"] = built.meta["ledger_after"]
+    if "total_after" in built.meta:
+        meta["total"] = built.meta["total_after"]
+    elif "total" not in meta:
+        from tutortrack.payments.models import Payment
+
+        payment = Payment.objects.filter(pk=payment_id).first()
+        if payment is not None:
+            meta["total"] = str(payment.amount.amount)
+    if pushed.meta.get("parts"):
+        meta["parts"] = pushed.meta["parts"]
+    link.meta = meta
+    link.save(update_fields=["meta", "updated_at"])
+
+
 def _attach(client: Any, creds: Any, invoice_id: str, external_id: str) -> None:
     from tutortrack.billing.models import Invoice
     from tutortrack.billing.pdf import invoice_pdf
@@ -554,7 +626,7 @@ def record_error(
     *,
     conn: AccountingConnection | None = None,
 ) -> None:
-    conn = conn or active_connection()
+    conn = conn or resolve("", object_type, str(object_id))
     if conn is None:
         return
     with transaction.atomic():
@@ -582,20 +654,21 @@ def record_error(
             )
 
 
-def record_blocked(object_type: str, object_id: str) -> None:
+def record_blocked(object_type: str, object_id: str, connection_id: str = "") -> None:
     """A prerequisite didn't sync, so neither can this."""
     record_error(
         object_type,
         object_id,
         _("Waiting for a record it depends on (see the other errors), then retry this."),
         PrerequisiteMissing.code,
+        conn=resolve(connection_id, object_type, str(object_id)),
     )
 
 
 def note_retry(
     object_type: str, object_id: str, message: str, *, conn: AccountingConnection | None = None
 ) -> None:
-    conn = conn or active_connection()
+    conn = conn or resolve("", object_type, str(object_id))
     if conn is None:
         return
     with transaction.atomic():
@@ -604,9 +677,9 @@ def note_retry(
         _log(link, Outcome.RETRYING, explain(conn.provider, ProviderError(message)).message)
 
 
-def final_failure(object_type: str, object_id: str, message: str) -> None:
+def final_failure(object_type: str, object_id: str, message: str, connection_id: str = "") -> None:
     """Temporal gave up retrying a transient failure: show it on the dashboard."""
-    conn = active_connection()
+    conn = resolve(connection_id, object_type, str(object_id))
     provider = conn.provider if conn is not None else ""
     explained = explain(provider, ProviderError(message))
     record_error(object_type, object_id, explained.message, "unavailable", conn=conn)
@@ -649,6 +722,7 @@ def retry(link: ExternalRecordLink) -> ExternalRecordLink:
                     organisation_id=str(link.organisation_id),
                     object_type=link.object_type,
                     object_id=link.object_id,
+                    connection_id=str(link.connection_id),
                 ),
                 id=wid,
                 subject=("accounting_record", str(link.pk)),
@@ -724,7 +798,7 @@ def backfill_kinds(conn: AccountingConnection) -> list[str]:
     if conn.mode == AccountingConnection.Mode.SUMMARY:
         kinds.append("journal")
     else:
-        kinds.extend(["invoice", "credit_note", "write_off", "payment", "refund"])
+        kinds.extend(["invoice", "credit_note", "write_off", "payment", "refund", "chargeback"])
     kinds.append("provider_payout")
     if conn.sync_bills:
         kinds.extend(["bill", "bill_payment"])
@@ -734,23 +808,41 @@ def backfill_kinds(conn: AccountingConnection) -> list[str]:
 def _candidates(conn: AccountingConnection, kind: str, since: date, after: str) -> list[str]:
     from tutortrack.billing.models import CreditNote, Invoice
     from tutortrack.core.time import local_date_range_to_utc
-    from tutortrack.payments.models import Payment, ProviderPayout, Refund
+    from tutortrack.payments.models import Dispute, Payment, ProviderPayout, Refund
     from tutortrack.payroll.models import Payout
 
+    from . import journals
     from .builders import Context as Ctx
+    from .builders import journal_id
+    from .routing import scope
 
-    tz = str(Ctx(conn).tz)
+    ctx = Ctx(conn)
+    tz = str(ctx.tz)
     since_utc, _until = local_date_range_to_utc(since, since, tz)
+    ledger = scope(conn)  # gap G5: only this ledger's branches
     if kind == "journal":
         from tutortrack.billing.services import org_today
 
-        day = since if not after else date.fromisoformat(after) + timedelta(days=1)
+        base = conn.base_currency or ctx.org.default_currency
+        day = since if not after else date.fromisoformat(after[:10])
+        last = org_today() - timedelta(days=1)
+        # Other currencies get a journal of their own (gap G5); look day by day only when
+        # the period has any.
+        others = day <= last and bool(journals.activity_currencies(day, last, tz, ledger) - {base})
         out: list[str] = []
         while day < org_today() and len(out) < 1000:
-            out.append(day.isoformat())
+            ids = [journal_id(day)]
+            if others:
+                ids += [
+                    journal_id(day, c)
+                    for c in sorted(journals.activity_currencies(day, day, tz, ledger))
+                    if c != base
+                ]
+            out.extend(i for i in ids if i > after)
             day += timedelta(days=1)
         return out
     qs: Any
+    field = "branch_id"
     if kind == "invoice":
         qs = Invoice.objects.filter(issue_date__gte=since).exclude(status=Invoice.Status.DRAFT)
     elif kind == "credit_note":
@@ -765,12 +857,20 @@ def _candidates(conn: AccountingConnection, kind: str, since: date, after: str) 
         )
     elif kind == "refund":
         qs = Refund.objects.filter(status=Refund.Status.SUCCEEDED, created_at__gte=since_utc)
+        field = "payment__branch_id"
+    elif kind == "chargeback":
+        qs = Dispute.objects.filter(status=Dispute.Status.LOST, closed_at__gte=since_utc)
+        field = "payment__branch_id"
     elif kind == "provider_payout":
         qs = ProviderPayout.objects.filter(created_at__gte=since_utc)
+        field = "account__branch_id"
     elif kind == "bill":
         qs = Payout.objects.filter(pay_run__approved_at__gte=since_utc)
+        field = "pay_run__branch_id"
     else:
         qs = Payout.objects.filter(status=Payout.Status.PAID, paid_at__gte=since_utc)
+        field = "pay_run__branch_id"
+    qs = ledger.filter(qs, field)
     if after:
         qs = qs.filter(pk__gt=after)
     return [str(pk) for pk in qs.order_by("pk").values_list("pk", flat=True)]
@@ -845,6 +945,19 @@ def daily(connection_id: str, day: date | None = None) -> dict[str, Any]:
     day = day or org_today() - timedelta(days=1)
     if conn.mode == AccountingConnection.Mode.SUMMARY:
         result["journal"] = sync("journal", day.isoformat(), conn=conn)
+        # Gap G5: the day's records in other currencies, each converted to the base
+        # currency in a journal of its own.
+        from . import journals
+        from .builders import Context as Ctx
+        from .builders import journal_id
+
+        ctx = Ctx(conn)
+        base = conn.base_currency or ctx.org.default_currency
+        for currency in sorted(journals.activity_currencies(day, day, str(ctx.tz), ctx.scope)):
+            if currency != base:
+                result[f"journal_{currency}"] = sync(
+                    "journal", journal_id(day, currency), conn=conn
+                )
     else:
         from .builders import defers_packages
 
@@ -929,3 +1042,27 @@ def send_digest(conn: AccountingConnection) -> bool:
             total=ExternalRecordLink.objects.filter(connection=conn, status=Status.ERROR).count(),
         )
     return True
+
+
+# --- reallocations (gap G5) ------------------------------------------------------------------
+
+
+def note_reallocated(payment_id: str) -> None:
+    """``payment.reallocated``: a payment already in a ledger needs moving there too. Its
+    reallocation is marked pending straight away, so a refund recorded next waits for it
+    (``builders.prerequisites``) instead of taking money off the old invoices."""
+    conn = resolve("", "reallocation", str(payment_id))
+    if conn is None or conn.mode != AccountingConnection.Mode.INDIVIDUAL:
+        return
+    if not ExternalRecordLink.objects.filter(
+        connection=conn, object_type="payment", object_id=str(payment_id), status=Status.SYNCED
+    ).exists():
+        return
+    with transaction.atomic():
+        link = ExternalRecordLink.objects.select_for_update().get(
+            pk=_link(conn, "reallocation", str(payment_id)).pk
+        )
+        if link.status != Status.PENDING:
+            link.status = Status.PENDING
+            link.error, link.error_code = "", ""
+            link.save(update_fields=["status", "error", "error_code", "updated_at"])

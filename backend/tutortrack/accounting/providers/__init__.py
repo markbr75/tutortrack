@@ -37,6 +37,8 @@ __all__ = [
 PROVIDERS = ("xero", "quickbooks", "sage", "freeagent")  # Sage, FreeAgent: E23-T10
 CAPABILITY = "accounting"
 MANAGE = "integrations.accounting.manage"
+# A ledger for the whole organisation, or a branch's own (gap G5: per-branch ledgers).
+LEDGER_LEVELS = ("organisation", "branch")
 
 
 def client_for(provider: str) -> AccountingClient:
@@ -102,7 +104,7 @@ registry.register(
             "Xero",
             frozenset({CAPABILITY}),
             "oauth2",
-            ("organisation",),
+            LEDGER_LEVELS,
             manage_permission=MANAGE,
         ),
         live=_live("XERO_CLIENT_ID", "XERO_CLIENT_SECRET"),
@@ -120,7 +122,7 @@ registry.register(
             "QuickBooks Online",
             frozenset({CAPABILITY}),
             "oauth2",
-            ("organisation",),
+            LEDGER_LEVELS,
             manage_permission=MANAGE,
         ),
         live=_live("QUICKBOOKS_CLIENT_ID", "QUICKBOOKS_CLIENT_SECRET"),
@@ -207,7 +209,7 @@ for _key, _label, _module, _class, _rate in (
                 _label,
                 frozenset({CAPABILITY}),
                 "oauth2",
-                ("organisation",),
+                LEDGER_LEVELS,
                 manage_permission=MANAGE,
             ),
             live=_live(f"{_key.upper()}_CLIENT_ID", f"{_key.upper()}_CLIENT_SECRET"),

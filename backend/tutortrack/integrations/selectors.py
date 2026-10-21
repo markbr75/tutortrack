@@ -54,7 +54,11 @@ def user_connection(user_id: Any, provider: str) -> IntegrationConnection | None
 
 
 def org_connection(provider: str) -> IntegrationConnection | None:
-    return live(IntegrationConnection.objects.filter(user__isnull=True, provider=provider)).first()
+    return live(
+        IntegrationConnection.objects.filter(
+            user__isnull=True, branch__isnull=True, provider=provider
+        )
+    ).first()
 
 
 def with_capability(capability: str, *, user_ids: Iterable[Any] | None = None) -> QuerySet[Any]:

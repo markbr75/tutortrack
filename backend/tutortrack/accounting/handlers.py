@@ -17,12 +17,17 @@ from .providers import CAPABILITY
 BILLS = {"bill", "bill_payment", "pay_run", "pay_statement"}
 
 
-def _wanted(object_type: str) -> bool:
+def _wanted(object_type: str, object_id: Any) -> bool:
     from .builders import SALES_SIDE
     from .models import AccountingConnection
-    from .services import active_connection
+    from .routing import route
 
-    conn = active_connection()
+    if object_type == "contact":  # a client may be in several ledgers (gap G5)
+        from .routing import enabled_connections
+
+        return any(c.mode == AccountingConnection.Mode.INDIVIDUAL for c in enabled_connections())
+    # The ledger the record goes to (gap G5: per-branch ledgers).
+    conn = route(object_type, str(object_id))
     if conn is None:
         return False
     if conn.mode == AccountingConnection.Mode.SUMMARY and object_type in SALES_SIDE:
@@ -60,7 +65,7 @@ def sync_on(
             object_id=str(object_id(e)),
         ),
         subject=lambda e: (object_type, str(object_id(e))),
-        when=lambda e: _wanted(object_type) and (when is None or when(e)),
+        when=lambda e: _wanted(object_type, object_id(e)) and (when is None or when(e)),
     )
 
 
@@ -77,13 +82,28 @@ sync_on("payout.received", "provider_payout")
 sync_on("pay_run.approved", "pay_run")
 sync_on("self_billing_statement.issued", "pay_statement")
 sync_on("payout.paid", "bill_payment")
+# Gap G5: changes after a payment is in the ledger.
+sync_on("payment.reallocated", "reallocation")
+sync_on(
+    "payment.dispute_closed",
+    "chargeback",
+    object_id=lambda e: e.data["dispute_id"],
+    when=lambda e: e.data.get("outcome") == "lost",
+)
+
+
+@subscribe("payment.reallocated", name="accounting.payment_reallocated")
+def payment_reallocated(event: EventEnvelope) -> None:
+    from . import services
+
+    services.note_reallocated(str(event.subject["id"]))
 
 
 # --- the ledger connection -----------------------------------------------------------------------
 
 
 def _accounting(e: EventEnvelope) -> bool:
-    return e.data.get("level") == "organisation" and CAPABILITY in (
+    return e.data.get("level") in ("organisation", "branch") and CAPABILITY in (
         e.data.get("capabilities") or []
     )
 

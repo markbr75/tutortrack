@@ -1,9 +1,10 @@
 """Read-back of payments recorded directly in the ledger (FR-23-4, E23-T09).
 
-Finance sometimes records a payment straight into Xero or QuickBooks (a bank transfer
-reconciled from the feed). With ``import_payments`` on, the daily run (and the "Check now"
-action) asks the ledger for the payments on each synced invoice that TutorTrack still
-shows as owed. A payment TutorTrack didn't send and hasn't seen before becomes an E11
+Finance sometimes records a payment straight into the ledger (Xero, QuickBooks, Sage or
+FreeAgent; a bank transfer reconciled from the feed). With ``import_payments`` on, the
+daily run (and the "Check now" action) asks the ledger for the payments on each synced
+invoice that TutorTrack still shows as owed. A payment TutorTrack didn't send and hasn't
+seen before becomes an E11
 manual payment through ``payments.services.record_manual_payment``, allocated to that
 invoice. Its ``ExternalRecordLink`` is created already synced (with the ledger's id), so
 the sync engine never pushes it back. Every outcome is written to ``LedgerPaymentImport``
@@ -41,8 +42,8 @@ LIMIT = 200
 OPEN_INVOICE = ("issued", "partially_paid")
 
 
-# Ledgers whose client can list an invoice's payments; Sage and FreeAgent are a follow-up.
-READ_BACK_PROVIDERS = frozenset({"xero", "quickbooks"})
+# Ledgers whose client can list an invoice's payments (Sage and FreeAgent: gap G5).
+READ_BACK_PROVIDERS = frozenset({"xero", "quickbooks", "sage", "freeagent"})
 
 
 def supported(provider: str) -> bool:
@@ -54,13 +55,15 @@ def our_payment_ids(conn: AccountingConnection) -> set[str]:
     of split payments and the replacement payments a refund creates in Xero)."""
     ids: set[str] = set()
     links = ExternalRecordLink.objects.filter(
-        connection=conn, object_type__in=["payment", "refund"]
+        connection=conn, object_type__in=["payment", "refund", "chargeback", "reallocation"]
     ).values_list("external_id", "meta")
     for external_id, meta in links:
         if external_id:
             ids.add(external_id)
         for part in (meta or {}).get("parts") or []:
-            if len(part) > 1 and part[1]:
+            if isinstance(part, str):  # FreeAgent: one explanation URL per allocation
+                ids.add(part)
+            elif len(part) > 1 and part[1]:
                 ids.add(str(part[1]))
         ids.update(str(p) for p in (meta or {}).get("payments") or [] if p)
     return ids
@@ -73,7 +76,7 @@ def _method(conn: AccountingConnection, payment: LedgerPayment) -> str:
     if payment.account:
         mapping = (
             AccountMapping.objects.filter(
-                provider=conn.provider,
+                provider=conn.mapping_set,
                 kind="clearing",
                 external_id=payment.account,
                 key__startswith="method:",
