@@ -1,13 +1,6 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import {
-  Button,
-  NamePlate,
-  PanelRow,
-  PanelRows,
-  RuledPanel,
-  TextField,
-} from "@tutortrack/ui";
+import { Button, NamePlate, PanelRow, PanelRows, RuledPanel, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -114,7 +107,13 @@ export function SubjectsSection() {
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
-              <Button type="submit" variant="secondary" size="sm" className="h-9" loading={add.isPending}>
+              <Button
+                type="submit"
+                variant="secondary"
+                size="sm"
+                className="h-9"
+                loading={add.isPending}
+              >
                 {t("catalogue.add")}
               </Button>
               {add.error ? (

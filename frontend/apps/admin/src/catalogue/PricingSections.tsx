@@ -820,9 +820,7 @@ export function DiscountsSection() {
             loading={codes.isPending}
             loadingLabel={t("grid.loading")}
             empty={
-              codes.data && !codes.data.results.length
-                ? t("designS6.catalogue.noCodes")
-                : undefined
+              codes.data && !codes.data.results.length ? t("designS6.catalogue.noCodes") : undefined
             }
             columns={[
               { header: t("pricing.discounts.code") },
@@ -956,7 +954,11 @@ export function PriceListsSection() {
   return (
     <div className="space-y-6">
       <QueryState query={lists}>
-        <RuledPanel flush title={t("pricing.priceLists.title")} description={t("pricing.priceLists.intro")}>
+        <RuledPanel
+          flush
+          title={t("pricing.priceLists.title")}
+          description={t("pricing.priceLists.intro")}
+        >
           <RuledTable
             caption={t("pricing.priceLists.title")}
             loading={lists.isPending}

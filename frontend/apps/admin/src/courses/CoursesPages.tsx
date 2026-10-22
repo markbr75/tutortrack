@@ -173,9 +173,7 @@ function ClassesSection() {
           empty={classes.data && !rows.length ? t("courses.noClasses") : undefined}
           columns={[
             { header: t("courses.class") },
-            ...(isPhone
-              ? []
-              : [{ header: t("courses.course") }, { header: t("courses.when") }]),
+            ...(isPhone ? [] : [{ header: t("courses.course") }, { header: t("courses.when") }]),
             { header: t("courses.places") },
             ...(isPhone ? [] : [{ header: t("courses.statusLabel") }]),
           ]}
@@ -203,9 +201,7 @@ function ClassesSection() {
                   {t("courses.placesTaken", { enrolled: c.enrolled, capacity: c.capacity })}
                 </span>
                 {c.waiting ? (
-                  <span className={caption}>
-                    {t("courses.waitingCount", { count: c.waiting })}
-                  </span>
+                  <span className={caption}>{t("courses.waitingCount", { count: c.waiting })}</span>
                 ) : null}
               </td>
               {isPhone ? null : (
@@ -771,7 +767,11 @@ function RolloverSection() {
   const rows = rollovers.data?.results ?? [];
   return (
     <div className="space-y-6">
-      <RuledPanel flush title={t("designS6.courses.reEnrolments")} description={t("courses.rolloverHelp")}>
+      <RuledPanel
+        flush
+        title={t("designS6.courses.reEnrolments")}
+        description={t("courses.rolloverHelp")}
+      >
         <RuledTable
           caption={t("courses.tabs.rollover")}
           loading={rollovers.isPending}
@@ -985,10 +985,7 @@ export function ClassPage({ classId }: { classId: string }) {
           </div>
         </RuledPanel>
       ) : null}
-      <RuledPanel
-        flush
-        title={t("courses.roster")}
-      >
+      <RuledPanel flush title={t("courses.roster")}>
         <RuledTable
           caption={t("courses.roster")}
           loading={roster.isPending}
@@ -1018,7 +1015,9 @@ export function ClassPage({ classId }: { classId: string }) {
           caption={t("courses.sessions")}
           loading={sessions.isPending}
           loadingLabel={t("grid.loading")}
-          empty={sessions.data && !sessions.data.length ? t("designS6.courses.noSessions") : undefined}
+          empty={
+            sessions.data && !sessions.data.length ? t("designS6.courses.noSessions") : undefined
+          }
           columns={[
             { header: t("courses.number"), end: true, width: "w-12" },
             { header: t("courses.date") },
@@ -1537,9 +1536,7 @@ export function RegisterPage({ sessionId }: { sessionId: string }) {
         description={
           <span className="tabular-nums">
             {s ? `${formatDateTime(s.start, i18n.language)} · ` : ""}
-            <span role="status">
-              {t(`courses.lessonStatus.${status}`)}
-            </span>
+            <span role="status">{t(`courses.lessonStatus.${status}`)}</span>
           </span>
         }
       />
@@ -1703,7 +1700,10 @@ export function ReEnrolPage({ token }: { token: string }) {
         </div>
         {p.open ? (
           <div className="flex flex-wrap gap-2">
-            <Button loading={answer.isPending && answer.variables === true} onClick={() => answer.mutate(true)}>
+            <Button
+              loading={answer.isPending && answer.variables === true}
+              onClick={() => answer.mutate(true)}
+            >
               {t("courses.reEnrol.keep")}
             </Button>
             <Button

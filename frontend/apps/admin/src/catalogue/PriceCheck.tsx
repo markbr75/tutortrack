@@ -213,10 +213,7 @@ function QuoteLines({
     >
       <RuledTable
         caption={title}
-        columns={[
-          { header: who },
-          { header: t("billing.amount"), end: true, width: "w-32" },
-        ]}
+        columns={[{ header: who }, { header: t("billing.amount"), end: true, width: "w-32" }]}
         footer={
           <tr>
             <th scope="row" className="py-2.5 text-right font-semibold">

@@ -94,7 +94,9 @@ export function TaxRatesSection() {
               <td className="font-medium">
                 {rate.name}
                 {isPhone && rate.exempt_reason ? (
-                  <span className="block text-xs font-normal text-muted-foreground">{rate.exempt_reason}</span>
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {rate.exempt_reason}
+                  </span>
                 ) : null}
               </td>
               <td className={figureCell}>{Number(rate.percent)}%</td>

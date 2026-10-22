@@ -802,15 +802,7 @@ function CurriculaSection() {
   );
 }
 
-function CurriculumTree({
-  id,
-  name,
-  canManage,
-}: {
-  id: string;
-  name: string;
-  canManage: boolean;
-}) {
+function CurriculumTree({ id, name, canManage }: { id: string; name: string; canManage: boolean }) {
   const { t } = useTranslation();
   const invalidate = useInvalidate();
   const tree = useQuery({
@@ -958,7 +950,10 @@ function AssessmentsSection() {
           { header: t("learning.assessments.name") },
           ...(isPhone
             ? []
-            : [{ header: t("learning.assessments.kind") }, { header: t("learning.assessments.date") }]),
+            : [
+                { header: t("learning.assessments.kind") },
+                { header: t("learning.assessments.date") },
+              ]),
           { header: t("learning.assessments.results"), end: true, width: "w-24" },
         ]}
       >
@@ -968,7 +963,8 @@ function AssessmentsSection() {
               {a.name}
               {isPhone ? (
                 <span className="block text-xs font-normal text-muted-foreground tabular-nums">
-                  {t(`learning.assessments.kinds.${a.kind}`)} · {formatDate(a.held_on, i18n.language)}
+                  {t(`learning.assessments.kinds.${a.kind}`)} ·{" "}
+                  {formatDate(a.held_on, i18n.language)}
                 </span>
               ) : null}
             </td>
@@ -1311,12 +1307,22 @@ export function ProgressEditor({ report }: { report: ProgressReport }) {
             </Button>
           ) : null}
           {canApprove && report.status === "draft" ? (
-            <Button type="button" size="sm" variant="secondary" onClick={() => act.mutate("submit")}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => act.mutate("submit")}
+            >
               {t("learning.progress.submit")}
             </Button>
           ) : null}
           {report.status === "submitted" || report.status === "approved" ? (
-            <Button type="button" size="sm" variant="secondary" onClick={() => act.mutate("reopen")}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => act.mutate("reopen")}
+            >
               {t("learning.progress.reopen")}
             </Button>
           ) : null}
