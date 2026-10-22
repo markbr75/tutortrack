@@ -778,57 +778,78 @@ function RolloverSection() {
           loading={rollovers.isPending}
           loadingLabel={t("grid.loading")}
           empty={rollovers.data && !rows.length ? t("designS6.courses.noRollovers") : undefined}
-          columns={[
-            { header: t("courses.fromTo"), width: isPhone ? undefined : "min-w-64" },
-            ...(isPhone ? [] : [{ header: t("courses.deadline") }]),
-            { header: t("courses.statusLabel") },
-            ...(isPhone ? [] : [{ header: t("courses.answers") }]),
-            ...(canRun ? [{ header: t("common.actions"), hidden: true }] : []),
-          ]}
+          columns={
+            isPhone
+              ? [{ header: t("courses.fromTo") }]
+              : [
+                  { header: t("courses.fromTo"), width: "min-w-64" },
+                  { header: t("courses.deadline") },
+                  { header: t("courses.statusLabel") },
+                  { header: t("courses.answers") },
+                  ...(canRun ? [{ header: t("common.actions"), hidden: true }] : []),
+                ]
+          }
         >
           {rows.map((r) => {
             const answers = Object.entries(r.counts)
               .map(([k, n]) => `${t(`courses.offerStatus.${k}`)}: ${n}`)
               .join(", ");
             const deadline = formatDateTime(r.deadline, i18n.language);
+            const status = t(`courses.rolloverStatus.${r.status}`);
+            const actions =
+              canRun && r.status === "running" ? (
+                <>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => act.mutate({ id: r.id, action: "finalise" })}
+                  >
+                    {t("courses.finishNow")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    onClick={() => act.mutate({ id: r.id, action: "cancel" })}
+                  >
+                    {t("courses.cancel")}
+                  </Button>
+                </>
+              ) : null;
+            // Phones: one full-width cell, the title over one caption, the actions under it.
+            if (isPhone) {
+              return (
+                <tr key={r.id}>
+                  <td>
+                    <span className="font-medium">
+                      {t("designS6.courses.fromTo", {
+                        from: r.from_term_name,
+                        to: r.to_term_name,
+                      })}
+                    </span>
+                    <span className={`${caption} tabular-nums`}>
+                      {[status, deadline, answers].filter(Boolean).join(" · ")}
+                    </span>
+                    {actions ? <div className="mt-2 flex flex-wrap gap-2">{actions}</div> : null}
+                  </td>
+                </tr>
+              );
+            }
             return (
               <tr key={r.id}>
                 <td className="font-medium">
                   {t("designS6.courses.fromTo", { from: r.from_term_name, to: r.to_term_name })}
-                  {isPhone ? (
-                    <span className={`${caption} tabular-nums`}>
-                      {[deadline, answers].filter(Boolean).join(" · ")}
-                    </span>
-                  ) : null}
                 </td>
-                {isPhone ? null : <td className="tabular-nums whitespace-nowrap">{deadline}</td>}
+                <td className="tabular-nums whitespace-nowrap">{deadline}</td>
                 <td
                   className={`whitespace-nowrap ${r.status === "running" ? "" : "text-muted-foreground"}`}
                 >
-                  {t(`courses.rolloverStatus.${r.status}`)}
+                  {status}
                 </td>
-                {isPhone ? null : <td className="tabular-nums">{answers}</td>}
+                <td className="tabular-nums">{answers}</td>
                 {canRun ? (
                   <td className="py-1.5 text-right whitespace-nowrap">
-                    {r.status === "running" ? (
-                      <span className={`inline-flex gap-2 ${isPhone ? "flex-col items-end" : ""}`}>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => act.mutate({ id: r.id, action: "finalise" })}
-                        >
-                          {t("courses.finishNow")}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-muted-foreground"
-                          onClick={() => act.mutate({ id: r.id, action: "cancel" })}
-                        >
-                          {t("courses.cancel")}
-                        </Button>
-                      </span>
-                    ) : null}
+                    {actions ? <span className="inline-flex gap-2">{actions}</span> : null}
                   </td>
                 ) : null}
               </tr>
