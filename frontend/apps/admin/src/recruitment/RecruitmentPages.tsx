@@ -60,6 +60,12 @@ export function RecruitmentPage({
 
 const Page = RecruitmentPage;
 
+/** Applications wait this long in the first two stages (Applied, Screening) before they are
+ * flagged, unless the stage sets its own reminder. */
+const EARLY_STAGE_DAYS = 7;
+
+const daysSince = (iso: string) => Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+
 const subjectList = (subjects: unknown) =>
   ((subjects as { subject: string }[] | undefined) ?? []).map((s) => s.subject).join(", ");
 
@@ -92,8 +98,9 @@ export function ApplicationsPage() {
       >
         {stages.data
           ?.filter((s) => s.kind === "open")
-          .map((stage) => {
+          .map((stage, position) => {
             const cards = applications.data?.results.filter((a) => a.stage === stage.id) ?? [];
+            const limit = stage.reminder_days ?? (position < 2 ? EARLY_STAGE_DAYS : null);
             return (
               <section
                 key={stage.id}
@@ -108,28 +115,36 @@ export function ApplicationsPage() {
                 </h2>
                 {cards.length ? (
                   <ul className="divide-y divide-rule">
-                    {cards.map((a) => (
-                      <li key={a.id} className="px-4 py-2.5 text-sm hover:bg-muted/60">
-                        <NamePlate
-                          name={
-                            <Link
-                              to="/recruitment/$id"
-                              params={{ id: a.id }}
-                              className="underline-offset-2 hover:underline"
-                            >
-                              {a.full_name}
-                            </Link>
-                          }
-                          context={[
-                            subjectList(a.subjects),
-                            a.opening_title,
-                            formatDate(a.created_at),
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        />
-                      </li>
-                    ))}
+                    {cards.map((a) => {
+                      const waited = daysSince(a.stage_entered_at);
+                      return (
+                        <li key={a.id} className="space-y-1 px-4 py-2.5 text-sm hover:bg-muted/60">
+                          <NamePlate
+                            name={
+                              <Link
+                                to="/recruitment/$id"
+                                params={{ id: a.id }}
+                                className="underline-offset-2 hover:underline"
+                              >
+                                {a.full_name}
+                              </Link>
+                            }
+                            context={[
+                              subjectList(a.subjects),
+                              a.opening_title,
+                              formatDate(a.created_at),
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          />
+                          {limit !== null && waited > limit ? (
+                            <p className="text-xs font-semibold text-margin">
+                              {t("designS8.recruitment.waited", { count: waited })}
+                            </p>
+                          ) : null}
+                        </li>
+                      );
+                    })}
                   </ul>
                 ) : (
                   <p className="px-4 py-4 text-sm text-muted-foreground">
@@ -649,12 +664,14 @@ function NextSteps(props: {
   );
 }
 
-/** How a compliance cell reads: overdue and to-check in margin red, gaps in faded ink. */
+/** How a compliance cell reads: overdue and to-check in margin red, gaps in ink at 500,
+ * requirements that do not apply in faded ink. */
 const CELL_TONE: Record<string, string> = {
   verified: "",
   submitted: "font-semibold text-margin",
   expired: "font-semibold text-margin",
-  missing: "text-muted-foreground",
+  missing: "font-medium",
+  "n/a": "text-muted-foreground",
   rejected: "font-medium",
 };
 
@@ -1120,8 +1137,21 @@ export function InterviewChoicePage({ token }: { token: string }) {
   const i = interview.data;
   const timeOf = (iso: string) =>
     formatDateTime(iso, i18n.language, undefined, { timeStyle: "short" });
+  const dayOf = (iso: string) =>
+    formatDateTime(iso, i18n.language, undefined, {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  // The times are formatted in the browser's own time zone: say which.
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const choosing = !(i.status === "booked" && i.start) && i.options.length > 0;
   return (
-    <PublicLayout title={t("recruitment.chooseTime", { organisation: i.organisation })}>
+    <PublicLayout
+      title={t("recruitment.chooseTime", { organisation: i.organisation })}
+      subtitle={choosing && zone ? t("designS8.recruitment.timesIn", { zone }) : undefined}
+    >
       {i.status === "booked" && i.start ? (
         <div role="status" className="space-y-2">
           <p>{t("recruitment.interviewBooked", { when: formatDateTime(i.start) })}</p>
@@ -1146,7 +1176,7 @@ export function InterviewChoicePage({ token }: { token: string }) {
         <div className="space-y-4">
           {Object.entries(
             i.options.reduce<Record<string, string[]>>((days, option) => {
-              const day = formatDate(option);
+              const day = dayOf(option);
               (days[day] ??= []).push(option);
               return days;
             }, {}),

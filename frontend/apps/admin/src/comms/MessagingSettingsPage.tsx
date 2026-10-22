@@ -19,6 +19,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent, type ReactNode } from "react";
 
 import { api, fieldErrors } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
 
 const PAGE = { params: { query: { page_size: 100 } } };
 type Tab = "domains" | "numbers" | "whatsapp" | "canned" | "marketing";
@@ -96,6 +97,7 @@ const DOMAIN_TONE: Record<string, string> = {
 /** Custom sending domains (FR-13-1): add, publish the DNS records, check. */
 function SenderDomains() {
   const { t, i18n } = useTranslation();
+  const phone = useIsPhone();
   const queryClient = useQueryClient();
   const [domain, setDomain] = useState("");
   const [local, setLocal] = useState("hello");
@@ -174,31 +176,47 @@ function SenderDomains() {
           ) : null}
           <RuledTable
             caption={t("messaging.domains.records")}
-            columns={[
-              { header: t("messaging.domains.type") },
-              { header: t("messaging.domains.host") },
-              { header: t("messaging.domains.value"), width: "min-w-64" },
-              { header: t("messaging.domains.verified") },
-            ]}
+            columns={
+              phone
+                ? [
+                    { header: t("designS8.comms.record") },
+                    { header: t("messaging.domains.verified"), end: true },
+                  ]
+                : [
+                    { header: t("messaging.domains.type") },
+                    { header: t("messaging.domains.host") },
+                    { header: t("messaging.domains.value"), width: "min-w-64" },
+                    { header: t("messaging.domains.verified") },
+                  ]
+            }
           >
-            {row.dns_records.map((r) => (
-              <tr key={`${r.purpose}-${r.host}`}>
-                <td className="font-medium">{r.record_type}</td>
-                <td className="break-all">{r.host}</td>
-                <td className="break-all">{r.value}</td>
-                <td className="whitespace-nowrap">
-                  {["spf", "dmarc"].includes(r.purpose) ? (
-                    <span className="text-muted-foreground">
-                      {t("messaging.domains.recommended")}
+            {row.dns_records.map((r) => {
+              const verified = ["spf", "dmarc"].includes(r.purpose) ? (
+                <span className="text-muted-foreground">{t("messaging.domains.recommended")}</span>
+              ) : r.verified ? (
+                t("messaging.yes")
+              ) : (
+                <span className="font-semibold text-margin">{t("messaging.no")}</span>
+              );
+              return phone ? (
+                <tr key={`${r.purpose}-${r.host}`}>
+                  <td className="[overflow-wrap:anywhere]">
+                    <span className="font-medium">{r.record_type}</span> {r.host}
+                    <span className="block text-xs text-muted-foreground [overflow-wrap:anywhere]">
+                      {r.value}
                     </span>
-                  ) : r.verified ? (
-                    t("messaging.yes")
-                  ) : (
-                    <span className="font-semibold text-margin">{t("messaging.no")}</span>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="text-right whitespace-nowrap">{verified}</td>
+                </tr>
+              ) : (
+                <tr key={`${r.purpose}-${r.host}`}>
+                  <td className="font-medium">{r.record_type}</td>
+                  <td className="[overflow-wrap:anywhere]">{r.host}</td>
+                  <td className="[overflow-wrap:anywhere]">{r.value}</td>
+                  <td className="whitespace-nowrap">{verified}</td>
+                </tr>
+              );
+            })}
           </RuledTable>
         </Panel>
       ))}

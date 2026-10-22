@@ -22,7 +22,10 @@
       "allVacancies": "See all vacancies",
       "askAgain": "Please ask us for a new link.",
       "noNotes": "No notes yet.",
-      "markDone": "Mark done"
+      "markDone": "Mark done",
+      "timesIn": "Times are in {{zone}}.",
+      "waited_one": "Waiting {{count}} day in this stage",
+      "waited_other": "Waiting {{count}} days in this stage"
     },
     "growth": {
       "noLinks": "No tracking links yet.",
@@ -38,7 +41,8 @@
       "noTemplates": "No WhatsApp templates yet.",
       "noCanned": "No canned replies yet.",
       "removeNamed": "Remove {{name}}",
-      "notConnected": "Not connected"
+      "notConnected": "Not connected",
+      "record": "Record"
     },
     "messageStatus": {
       "queued": "Sent",

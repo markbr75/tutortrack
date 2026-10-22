@@ -112,6 +112,7 @@ function ProfileReview({ profile }: { profile: Profile }) {
       <RuledPanel
         title={profile.tutor_name}
         level={3}
+        rule={profile.status === "pending" ? "margin" : "border"}
         description={
           <>
             <span
@@ -140,7 +141,7 @@ function ProfileReview({ profile }: { profile: Profile }) {
               <dt className="text-muted-foreground">
                 {t(`website.profiles.${key}`)}
                 {changed(key) ? (
-                  <span className="block text-xs font-semibold text-margin">
+                  <span className="block text-xs font-semibold text-muted-foreground">
                     {t("website.profiles.changed")}
                   </span>
                 ) : null}

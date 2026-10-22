@@ -39,6 +39,7 @@ function TablePanel({
   empty,
   aside,
   footer,
+  waiting = false,
   children,
 }: {
   caption: string;
@@ -46,10 +47,12 @@ function TablePanel({
   empty?: string | false;
   aside?: ReactNode;
   footer?: ReactNode;
+  /** Margin red while something in the table waits on the business. */
+  waiting?: boolean;
   children: ReactNode;
 }) {
   return (
-    <Panel title={caption} aside={aside} footer={footer} flush>
+    <Panel title={caption} aside={aside} footer={footer} rule={waiting ? "margin" : "border"} flush>
       <RuledTable caption={caption} columns={columns} empty={empty || undefined}>
         {children}
       </RuledTable>
@@ -258,6 +261,7 @@ function ReviewsSection() {
       ) : (
         <TablePanel
           caption={t("reviews.listTitle")}
+          waiting={status === "pending" && rows.length > 0}
           aside={
             summary.data ? (
               <span role="status" className="text-muted-foreground">
@@ -746,78 +750,95 @@ function ReferralsSection() {
           ) : (
             <TablePanel
               caption={t("referrals.listTitle")}
+              waiting={rows.some((r) => r.status === "blocked")}
               empty={!rows.length && t("referrals.empty")}
               columns={[
-                { header: t("referrals.referee") },
+                { header: t("referrals.referee"), width: phone ? undefined : "min-w-56" },
                 ...(phone ? [] : [{ header: t("referrals.statusLabel") }]),
-                { header: t("referrals.rewardLabel"), end: true, width: "w-32" },
-                { header: t("referrals.actions"), hidden: true },
+                {
+                  header: t("referrals.rewardLabel"),
+                  end: true,
+                  width: phone ? undefined : "w-32",
+                },
+                ...(phone ? [] : [{ header: t("referrals.actions"), hidden: true }]),
               ]}
             >
-              {rows.map((r: Referral) => (
-                <tr key={r.id}>
-                  <td>
-                    {r.referee_name}
-                    <span className="block text-xs text-muted-foreground tabular-nums">
-                      {`${t("referrals.referrer")} ${r.referrer_name} · ${formatDate(r.created_at, i18n.language)}`}
-                    </span>
-                    {phone ? (
-                      <span
-                        className={`block ${r.status === "blocked" ? "font-semibold text-margin" : ""}`}
+              {rows.map((r: Referral) => {
+                const actions = canManage ? (
+                  <div
+                    className={
+                      phone
+                        ? "mt-2 flex flex-wrap gap-1"
+                        : "flex justify-end gap-1 whitespace-nowrap"
+                    }
+                  >
+                    {r.status === "blocked" ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => act.mutate({ id: r.id, verb: "approve" })}
                       >
-                        {[
-                          t(`referrals.status.${r.status}`),
-                          ...((r.fraud_flags as string[] | null) ?? []).map((f) =>
-                            t(`referrals.flags.${f}`),
-                          ),
-                        ].join(" · ")}
-                      </span>
+                        {t("referrals.approve")}
+                      </Button>
                     ) : null}
-                  </td>
-                  {phone ? null : (
-                    <td>
-                      <span
-                        className={r.status === "blocked" ? "font-semibold text-margin" : undefined}
+                    {["pending", "converted", "blocked"].includes(r.status) ? (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className={phone && r.status !== "blocked" ? `-ml-3 ${ghost}` : ghost}
+                        onClick={() => act.mutate({ id: r.id, verb: "cancel" })}
                       >
-                        {t(`referrals.status.${r.status}`)}
+                        {t("referrals.cancel")}
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : null;
+                return (
+                  <tr key={r.id}>
+                    <td>
+                      {r.referee_name}
+                      <span className="block text-xs text-muted-foreground tabular-nums">
+                        {`${t("referrals.referrer")} ${r.referrer_name} · ${formatDate(r.created_at, i18n.language)}`}
                       </span>
-                      {Array.isArray(r.fraud_flags) && r.fraud_flags.length ? (
-                        <span className="block text-xs text-muted-foreground">
-                          {(r.fraud_flags as string[])
-                            .map((f) => t(`referrals.flags.${f}`))
-                            .join(", ")}
-                        </span>
+                      {phone ? (
+                        <>
+                          <span
+                            className={`block ${r.status === "blocked" ? "font-semibold text-margin" : ""}`}
+                          >
+                            {[
+                              t(`referrals.status.${r.status}`),
+                              ...((r.fraud_flags as string[] | null) ?? []).map((f) =>
+                                t(`referrals.flags.${f}`),
+                              ),
+                            ].join(" · ")}
+                          </span>
+                          {actions}
+                        </>
                       ) : null}
                     </td>
-                  )}
-                  <td className={figureCell}>{money(r.referrer_credit, i18n.language)}</td>
-                  <td className="text-right">
-                    {canManage ? (
-                      <div className="flex justify-end gap-1 whitespace-nowrap">
-                        {r.status === "blocked" ? (
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => act.mutate({ id: r.id, verb: "approve" })}
-                          >
-                            {t("referrals.approve")}
-                          </Button>
+                    {phone ? null : (
+                      <td>
+                        <span
+                          className={
+                            r.status === "blocked" ? "font-semibold text-margin" : undefined
+                          }
+                        >
+                          {t(`referrals.status.${r.status}`)}
+                        </span>
+                        {Array.isArray(r.fraud_flags) && r.fraud_flags.length ? (
+                          <span className="block text-xs text-muted-foreground">
+                            {(r.fraud_flags as string[])
+                              .map((f) => t(`referrals.flags.${f}`))
+                              .join(", ")}
+                          </span>
                         ) : null}
-                        {["pending", "converted", "blocked"].includes(r.status) ? (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className={ghost}
-                            onClick={() => act.mutate({ id: r.id, verb: "cancel" })}
-                          >
-                            {t("referrals.cancel")}
-                          </Button>
-                        ) : null}
-                      </div>
-                    ) : null}
-                  </td>
-                </tr>
-              ))}
+                      </td>
+                    )}
+                    <td className={figureCell}>{money(r.referrer_credit, i18n.language)}</td>
+                    {phone ? null : <td className="text-right">{actions}</td>}
+                  </tr>
+                );
+              })}
             </TablePanel>
           )}
         </>
@@ -1387,6 +1408,7 @@ function TutorReferralsSection() {
       ) : (
         <TablePanel
           caption={t("referrals.tutorTitle")}
+          waiting={list.some((r) => r.status === "pending")}
           empty={!list.length && t("referrals.noTutorReferrals")}
           columns={[
             ...(phone ? [] : [{ header: t("referrals.referrer") }]),

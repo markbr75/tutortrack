@@ -115,10 +115,7 @@ function ThreadList({
                       dateTime={thread.last_message_at}
                       className="shrink-0 text-xs whitespace-nowrap text-muted-foreground"
                     >
-                      {formatDateTime(thread.last_message_at, i18n.language, undefined, {
-                        dateStyle: "short",
-                        timeStyle: "short",
-                      })}
+                      {formatDateTime(thread.last_message_at, i18n.language)}
                     </time>
                   ) : null}
                 </span>
@@ -370,45 +367,48 @@ function Conversation({ id }: { id: string }) {
               ))}
             </select>
           </span>
-          <span className="flex flex-wrap items-center gap-2">
-            <label htmlFor={untilId} className="text-muted-foreground">
-              {t("inbox.snoozeUntil")}
-            </label>
-            <input
-              id={untilId}
-              type="datetime-local"
-              className={inlineField}
-              value={until}
-              onChange={(e) => setUntil(e.target.value)}
-            />
-            <Button
-              size="sm"
-              variant="secondary"
-              disabled={!until}
-              onClick={() => status.mutate("snooze")}
-            >
-              {t("inbox.snooze")}
-            </Button>
-          </span>
-          {th.status === "closed" ? (
-            <Button
-              size="sm"
-              variant="secondary"
-              className="sm:ml-auto"
-              onClick={() => status.mutate("reopen")}
-            >
-              {t("inbox.reopen")}
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="secondary"
-              className="sm:ml-auto"
-              onClick={() => status.mutate("close")}
-            >
-              {t("inbox.close")}
-            </Button>
-          )}
+          <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:flex-1">
+            <span className="flex min-w-0 flex-1 flex-nowrap items-center gap-2">
+              <label htmlFor={untilId} className="shrink-0 text-muted-foreground">
+                {t("inbox.snoozeUntil")}
+              </label>
+              <input
+                id={untilId}
+                type="datetime-local"
+                className={`${inlineField} w-full min-w-0 sm:max-w-56`}
+                value={until}
+                onChange={(e) => setUntil(e.target.value)}
+              />
+              <Button
+                size="sm"
+                variant="secondary"
+                className="shrink-0"
+                disabled={!until}
+                onClick={() => status.mutate("snooze")}
+              >
+                {t("inbox.snooze")}
+              </Button>
+            </span>
+            {th.status === "closed" ? (
+              <Button
+                size="sm"
+                variant="secondary"
+                className="shrink-0"
+                onClick={() => status.mutate("reopen")}
+              >
+                {t("inbox.reopen")}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="secondary"
+                className="shrink-0"
+                onClick={() => status.mutate("close")}
+              >
+                {t("inbox.close")}
+              </Button>
+            )}
+          </div>
         </div>
       ) : null}
       {(status.error ?? assign.error) ? (
