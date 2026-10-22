@@ -364,9 +364,9 @@ function DryRun({ batch }: { batch: ImportBatch }) {
     Object.entries(verbs).map(([verb, count]) => ({ target, verb, count })),
   );
   const sentence = t("dataTransfer.dryRun.rows", {
-    valid: stats.valid ?? 0,
-    invalid: stats.invalid ?? 0,
-    warnings: stats.warnings ?? 0,
+    ready: t("dataTransfer.dryRun.ready", { count: stats.valid ?? 0 }),
+    invalid: t("dataTransfer.dryRun.invalid", { count: stats.invalid ?? 0 }),
+    warnings: t("dataTransfer.dryRun.warnings", { count: stats.warnings ?? 0 }),
   });
   // With nothing to list, the sentence is the panel's body rather than a header line over an
   // empty panel.

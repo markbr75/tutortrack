@@ -14,7 +14,7 @@ import {
   Tabs,
 } from "@tutortrack/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { api } from "../api";
 import { PanelLoading } from "../billing/moneyUi";
@@ -82,6 +82,25 @@ function download(name: string, data: unknown) {
   a.download = name;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/**
+ * Headers, scopes, fields and paths in the guides' prose, set as code like the other
+ * developer tabs. They are API names, so they read the same in every language.
+ */
+const CODE_TOKENS =
+  /(Authorization: Bearer <token>|Idempotency-Key|Webhook-(?:Id|Event|Signature)|X-RateLimit-(?:Limit|Remaining|Reset)|Retry-After|\bDeprecation\b|\bSunset\b|\/api\/v1\/|\b[a-z_]+:(?:read|write)\b|\bpage_size\b|\boccurred_at\b|\bnext\b(?= link)|\bnull\b|\bv1\b(?= value))/g;
+
+function withCode(text: string): ReactNode[] {
+  return text.split(CODE_TOKENS).map((part, i) =>
+    i % 2 === 1 ? (
+      <code key={i} className="rounded-sm bg-muted px-1 font-mono text-xs">
+        {part}
+      </code>
+    ) : (
+      part
+    ),
+  );
 }
 
 /** Developer portal: guides, code samples, the public OpenAPI, Postman and the changelog. */
@@ -153,7 +172,7 @@ export function DeveloperDocsPage() {
         </RuledPanel>
         {GUIDES.map((key) => (
           <DocPanel key={key} title={t(`developer.docs.guides.${key}.title`)}>
-            <p className="max-w-prose">{t(`developer.docs.guides.${key}.body`)}</p>
+            <p className="max-w-prose">{withCode(t(`developer.docs.guides.${key}.body`))}</p>
             {key === "webhooks" ? (
               <>
                 <pre className={codeBlock} tabIndex={0}>
@@ -209,7 +228,7 @@ export function MarketplacePage() {
   const categories = Array.from(new Set((entries.data ?? []).map((e) => e.category)));
   return (
     <div>
-      <PageHeader title={t("marketplace.title")} description={t("marketplace.intro")} />
+      <PageHeader title={t("settingsNav.marketplace")} description={t("marketplace.intro")} />
       <div className="space-y-6">
         {!entries.data ? (
           <RuledPanel label={t("marketplace.title")} flush>

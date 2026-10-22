@@ -152,7 +152,11 @@ describe("integrations settings", () => {
       }),
     );
     render(<App />);
-    fireEvent.click(await screen.findByRole("button", { name: "Connect Lessonspace" }));
+    // Organisation integrations: one picker, then the provider's own Connect button.
+    fireEvent.change(await screen.findByLabelText("Connect another integration"), {
+      target: { value: "lessonspace" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Connect Lessonspace" }));
     const form = screen.getByRole("form", { name: "Connect Lessonspace" });
     fireEvent.change(within(form).getByLabelText(/API key/), { target: { value: "ls-key" } });
     fireEvent.click(within(form).getByRole("button", { name: "Connect" }));

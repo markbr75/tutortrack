@@ -189,41 +189,36 @@ function Overview() {
   return (
     <div className="space-y-4">
       {o.sandbox_of ? <Alert tone="info">{t("developer.sandboxBanner")}</Alert> : null}
-      {/* What is set up, then the last day's traffic: two ruled lines, so five labels never
-          squeeze into one row. */}
-      <div role="group" aria-label={t("developer.tabs.overview")}>
-        <FigureStrip
-          figures={[
-            { key: "keys", label: t("developer.stats.apiKeys"), value: n.format(o.api_keys) },
-            {
-              key: "apps",
-              label: t("developer.stats.connectedApps"),
-              value: n.format(o.connected_apps),
-            },
-            {
-              key: "endpoints",
-              label: t("developer.stats.endpoints"),
-              value: n.format(o.webhook_endpoints),
-            },
-          ]}
-        />
-        <FigureStrip
-          className="-mt-px"
-          figures={[
-            {
-              key: "deliveries",
-              label: t("developer.stats.deliveries"),
-              value: n.format(o.deliveries_24h),
-            },
-            {
-              key: "failing",
-              label: t("developer.stats.failing"),
-              value: n.format(o.failed_24h),
-              tone: o.failed_24h > 0 ? "danger" : "default",
-            },
-          ]}
-        />
-      </div>
+      {/* One ruled grid: what is set up, then the last day's traffic, its vertical rules
+          lining up from row to row. */}
+      <FigureStrip
+        label={t("developer.tabs.overview")}
+        columns={3}
+        figures={[
+          { key: "keys", label: t("developer.stats.apiKeys"), value: n.format(o.api_keys) },
+          {
+            key: "apps",
+            label: t("developer.stats.connectedApps"),
+            value: n.format(o.connected_apps),
+          },
+          {
+            key: "endpoints",
+            label: t("developer.stats.endpoints"),
+            value: n.format(o.webhook_endpoints),
+          },
+          {
+            key: "deliveries",
+            label: t("developer.stats.deliveries"),
+            value: n.format(o.deliveries_24h),
+          },
+          {
+            key: "failing",
+            label: t("developer.stats.failing"),
+            value: n.format(o.failed_24h),
+            tone: o.failed_24h > 0 ? "danger" : "default",
+          },
+        ]}
+      />
       <p className="text-sm text-muted-foreground">
         {t("developer.rateLimits", {
           perMinute: o.rate_limit_per_minute,
@@ -517,7 +512,10 @@ function Webhooks() {
                   onChange={(e) => setPicking(e.target.value)}
                   options={[
                     { value: "", label: t("developer.webhooks.chooseEvent") },
-                    ...options.map((o) => ({ value: o, label: o })),
+                    ...options.map((o) => ({
+                      value: o,
+                      label: o === "*" ? t("designS9a.allEvents") : o,
+                    })),
                   ]}
                 />
               </div>
@@ -538,13 +536,18 @@ function Webhooks() {
                 {events.map((ev) => (
                   <li
                     key={ev}
-                    className="flex h-8 items-center gap-1 rounded-md border border-border bg-surface pl-2.5 font-mono text-xs"
+                    className={cn(
+                      "flex h-8 items-center gap-1 rounded-md border border-border bg-surface pl-2.5 text-xs",
+                      ev !== "*" && "font-mono",
+                    )}
                   >
-                    {ev}
+                    {ev === "*" ? t("designS9a.allEvents") : ev}
                     <button
                       type="button"
                       className="grid size-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-                      aria-label={t("developer.webhooks.removeEvent", { event: ev })}
+                      aria-label={t("developer.webhooks.removeEvent", {
+                        event: ev === "*" ? t("designS9a.allEvents") : ev,
+                      })}
                       onClick={() => setEvents(events.filter((x) => x !== ev))}
                     >
                       <X aria-hidden="true" className="size-3.5" strokeWidth={1.75} />
@@ -622,7 +625,11 @@ function EndpointRow({
               {t(`developer.webhooks.status.${status}`)}
             </span>
             {" · "}
-            <code className="font-mono">{endpoint.events.join(", ")}</code>
+            {endpoint.events.includes("*") ? (
+              t("designS9a.allEvents")
+            ) : (
+              <code className="font-mono">{endpoint.events.join(", ")}</code>
+            )}
             {endpoint.failing_since ? (
               <span className="font-medium text-danger">
                 {" · "}
@@ -698,7 +705,8 @@ function DeliveryLog({ endpointId, canManage }: { endpointId: string; canManage:
   return (
     <RuledTable
       caption={t("developer.webhooks.log")}
-      className="rounded-md border border-border"
+      // Flush under the endpoint: the log's rules run the panel's full width, not a box.
+      className="-mx-5 -mb-2.5 border-t border-rule"
       loading={!deliveries.data}
       loadingLabel={t("grid.loading")}
       empty={deliveries.data && rows.length === 0 ? t("developer.deliveries.none") : undefined}

@@ -82,7 +82,15 @@ function useFormat() {
     if (type === "money" && currency && /^-?\d+(\.\d+)?$/.test(text)) {
       return formatMoney({ amount: text, currency }, locale);
     }
-    if (type === "percent") return `${text}%`;
+    if (type === "percent") {
+      return /^-?\d+(\.\d+)?$/.test(text)
+        ? new Intl.NumberFormat(locale, {
+            style: "percent",
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          }).format(Number(text) / 100)
+        : `${text}%`;
+    }
     if ((type === "date" || type === "text") && ISO_DAY.test(text)) {
       if (grain === "month" || grain === "quarter" || grain === "year") {
         return new Intl.DateTimeFormat(locale, {
@@ -180,16 +188,6 @@ function reportLink(data: WidgetData): string | null {
   if (!data.widget.report) return null;
   const search = new URLSearchParams(data.report_params as Record<string, string>);
   return `/analytics/${data.widget.report}?${search.toString()}`;
-}
-
-/** Splits figures into ruled strips of at most four, as even as possible. */
-function stripRows<T>(figures: T[]): T[][] {
-  if (figures.length <= 5) return [figures];
-  const rows = Math.ceil(figures.length / 4);
-  const per = Math.ceil(figures.length / rows);
-  const out: T[][] = [];
-  for (let i = 0; i < figures.length; i += per) out.push(figures.slice(i, i + per));
-  return out;
 }
 
 /** A list widget (outstanding, cash forecast, people counts) as a ruled panel. */
@@ -422,11 +420,15 @@ export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
       // A lone value's label is either its unit ("Lessons", said by the title already) or a
       // figure of its own ("56.4%" margin), which reads as context before the comparison.
       const context = single && v.label && /\d/.test(v.label) ? v.label : null;
+      // A value labelled "… %" (the win rate) is a percentage whatever the widget's unit:
+      // written like every other percentage, with the sign on the figure, not the label.
+      // (Not a figure that is itself a percentage, such as the margin's "56.4%".)
+      const percent = /[^\d.,\s]\s*%$/.test(v.label);
       notes.push({ context, comparison });
       figures.push({
         key: `${item.widget}-${i}`,
-        label: i === 0 ? named : v.label,
-        value: format(v.value, data.unit, v.currency),
+        label: i === 0 ? named : percent ? v.label.replace(/\s*%$/, "") : v.label,
+        value: format(v.value, percent ? "percent" : data.unit, v.currency),
       });
     });
   });
@@ -620,9 +622,9 @@ export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
         <>
           {figures.length ? (
             <div aria-label={t("designS9a.figures")} role="group">
-              {stripRows(figures).map((row, i) => (
-                <FigureStrip key={i} figures={row} className={i ? "-mt-px" : undefined} />
-              ))}
+              {/* One ruled grid of up to four columns (two on phones), so the vertical rules
+                  line up from row to row. */}
+              <FigureStrip figures={figures} columns={Math.min(figures.length, 4)} />
               {compareOnce ? (
                 <p className="mt-2 text-sm text-muted-foreground">
                   {t("designS9a.nothingToCompare")}
@@ -984,7 +986,13 @@ export function ResultTable({
             ? totals.map((row, i) => (
                 <tr key={i} className={cn("font-semibold", i > 0 && "border-t border-rule")}>
                   {cols.map((c, j) => (
-                    <td key={c.key} className={figure(c) ? figureCell : undefined}>
+                    <td
+                      key={c.key}
+                      className={cn(
+                        figure(c) && figureCell,
+                        overdue(c.key, row[c.key]) && "text-margin",
+                      )}
+                    >
                       {j === 0 && !figure(c) ? (
                         t("reporting.total")
                       ) : (
@@ -1005,7 +1013,13 @@ export function ResultTable({
         {rows.map((row, i) => (
           <tr key={i}>
             {cols.map((c) => (
-              <td key={c.key} className={figure(c) ? figureCell : undefined}>
+              <td
+                key={c.key}
+                className={cn(
+                  figure(c) && figureCell,
+                  overdue(c.key, row[c.key]) && "font-medium text-margin",
+                )}
+              >
                 {show(c, row)}
               </td>
             ))}
@@ -1014,6 +1028,12 @@ export function ResultTable({
       </RuledTable>
     </>
   );
+}
+
+/** Aged debtors' overdue buckets: a non-zero amount is overdue, in margin red (One Red). */
+const OVERDUE_BUCKETS = new Set(["1_30", "31_60", "61_90", "90_plus"]);
+function overdue(key: string, value: unknown): boolean {
+  return OVERDUE_BUCKETS.has(key) && Number(value) > 0;
 }
 
 /**

@@ -3358,7 +3358,13 @@
     },
     "dryRun": {
       "title": "What will happen",
-      "rows": "{{valid}} rows are ready, {{invalid}} have errors and will be left out, {{warnings}} have warnings.",
+      "rows": "{{ready}}, {{invalid}}, {{warnings}}.",
+      "ready_one": "{{count}} row is ready",
+      "ready_other": "{{count}} rows are ready",
+      "invalid_one": "{{count}} has errors and will be left out",
+      "invalid_other": "{{count}} have errors and will be left out",
+      "warnings_one": "{{count}} has warnings",
+      "warnings_other": "{{count}} have warnings",
       "create": "Create {{count}} {{what}}",
       "update": "Update {{count}} {{what}}"
     },
@@ -7404,6 +7410,13 @@
     "minutes": "minutes",
     "rowsCount_one": "{{n}} row",
     "rowsCount_other": "{{n}} rows",
+    "allEvents": "All events",
+    "waitingCount_one": "{{count}} waiting",
+    "waitingCount_other": "{{count}} waiting",
+    "connectAnother": "Connect another integration",
+    "chooseIntegration": "Choose an integration…",
+    "connect": "Connect",
+    "openDirectory": "Open the integrations directory",
     "nothingToCompare": "Nothing to compare with: the comparison period has no figures yet."
   },
   "designS7": {

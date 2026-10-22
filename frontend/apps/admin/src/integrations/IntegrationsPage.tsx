@@ -5,6 +5,7 @@ import {
   Button,
   cn,
   PageHeader,
+  PanelFooter,
   PanelRows,
   RuledPanel,
   SelectField,
@@ -12,6 +13,7 @@ import {
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import { api, useMe, usePermission } from "../api";
@@ -318,14 +320,18 @@ export function ConnectProviders({
   level,
   providers,
   returnPath,
+  pick = false,
 }: {
   level: Level;
   providers: Provider[];
   returnPath: string;
+  /** One compact select and a Connect button instead of a button per provider. */
+  pick?: boolean;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<string | null>(null);
+  const [chosen, setChosen] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
   const start = useMutation({
     mutationFn: async (provider: string) =>
@@ -357,21 +363,57 @@ export function ConnectProviders({
     },
   });
   const available = providers.filter((p) => p.levels.includes(level));
+  const choice = available.find((p) => p.key === chosen);
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        {available.map((p) => (
+      {pick ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-full sm:w-72">
+            <SelectField
+              label={t("designS9a.connectAnother")}
+              hideLabel
+              size="sm"
+              value={chosen}
+              onChange={(e) => {
+                setChosen(e.target.value);
+                setForm(null);
+              }}
+              options={[
+                { value: "", label: t("designS9a.chooseIntegration") },
+                ...available.map((p) => ({ value: p.key, label: p.name })),
+              ]}
+            />
+          </div>
           <Button
-            key={p.key}
             size="sm"
             variant="secondary"
-            aria-expanded={p.auth === "oauth2" ? undefined : form === p.key}
-            onClick={() => (p.auth === "oauth2" ? start.mutate(p.key) : setForm(p.key))}
+            className="h-9"
+            disabled={!choice}
+            aria-expanded={choice && choice.auth !== "oauth2" ? form === choice.key : undefined}
+            onClick={() => {
+              if (!choice) return;
+              if (choice.auth === "oauth2") start.mutate(choice.key);
+              else setForm(choice.key);
+            }}
           >
-            {t("integrations.connect", { provider: p.name })}
+            {choice ? t("integrations.connect", { provider: choice.name }) : t("designS9a.connect")}
           </Button>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {available.map((p) => (
+            <Button
+              key={p.key}
+              size="sm"
+              variant="secondary"
+              aria-expanded={p.auth === "oauth2" ? undefined : form === p.key}
+              onClick={() => (p.auth === "oauth2" ? start.mutate(p.key) : setForm(p.key))}
+            >
+              {t("integrations.connect", { provider: p.name })}
+            </Button>
+          ))}
+        </div>
+      )}
       {form ? (
         <form
           className="space-y-3 border-t border-rule pt-3"
@@ -622,9 +664,18 @@ export function IntegrationsPage() {
                   level="organisation"
                   providers={providers.data}
                   returnPath={RETURN_PATH}
+                  pick
                 />
               </div>
             ) : null}
+            <PanelFooter>
+              <Link
+                to="/settings/marketplace"
+                className="text-sm font-medium text-link hover:underline"
+              >
+                {t("designS9a.openDirectory")}
+              </Link>
+            </PanelFooter>
           </RuledPanel>
         ) : null}
 

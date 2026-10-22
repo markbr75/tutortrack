@@ -320,9 +320,25 @@ function ImportsTab() {
     queryKey: ["imports", "list"],
     queryFn: async () => unwrap(await api.GET("/api/v1/imports")),
   });
+  // Imports waiting on the business (columns to match, checked rows to confirm) take the
+  // margin rule and their count, like Needs marking.
+  const waiting = (data?.results ?? []).filter(
+    (b) => b.status === "mapping" || b.status === "validated",
+  ).length;
   return (
     <div className="space-y-6">
-      <RuledPanel title={t("dataTransfer.history")} flush>
+      <RuledPanel
+        title={t("dataTransfer.history")}
+        flush
+        rule={waiting ? "margin" : "border"}
+        aside={
+          waiting ? (
+            <span className="font-semibold text-margin tabular-nums">
+              {t("designS9a.waitingCount", { count: waiting })}
+            </span>
+          ) : undefined
+        }
+      >
         <BatchTable batches={data?.results ?? []} loading={!data} />
       </RuledPanel>
       {canImport ? <NewImportForm /> : null}
