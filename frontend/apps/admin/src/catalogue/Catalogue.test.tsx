@@ -153,9 +153,7 @@ describe("catalogue", () => {
     expect(await screen.findByText("service rate £40.00/h · 90 minutes")).toBeInTheDocument();
     const charged = screen.getByRole("region", { name: "Charged to clients" });
     expect(within(charged).getByRole("row", { name: /Arjun Patel.*£60\.00/ })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /Charged to clients/ }).textContent).toBe(
-      "Charged to clients: £60.00",
-    );
+    expect(screen.getByRole("heading", { name: "Charged to clients: £60.00" })).toBeInTheDocument();
     const paid = screen.getByRole("region", { name: "Paid to tutors" });
     expect(within(paid).getByRole("row", { name: /Nia Okafor.*£37\.50/ })).toBeInTheDocument();
     expect(calls.find((c) => c.path === "/api/v1/rates/quote")?.body).toEqual({
