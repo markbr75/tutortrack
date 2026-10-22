@@ -32,7 +32,7 @@ export function ProcessTimeline({
   const rows = processes.data?.results ?? [];
   if (!allowed || rows.length === 0) return null;
   return (
-    <Panel title={t("processes.title")} flush className="mt-8 max-w-2xl">
+    <Panel title={t("processes.title")} flush>
       <PanelRows>
         {rows.map((p) => (
           <PanelRow key={p.id}>

@@ -1,8 +1,8 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import { Alert, FormPanel, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 
 import { api, fieldErrors, useMe } from "../api";
 import { PublicLayout } from "../layout/PublicLayout";
@@ -18,56 +18,45 @@ export function EmailChangeSection() {
   });
   const errors = fieldErrors(change.error);
   return (
-    <section
-      className="mt-8 max-w-2xl rounded-md border border-border p-4 md:p-6"
-      aria-labelledby="email-change-title"
-    >
-      <h2 id="email-change-title" className="text-lg font-medium">
-        {t("emailChange.title")}
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {t("emailChange.current", { email: me.data?.user.email ?? "" })}
-      </p>
-      <form
-        className="mt-4 flex flex-col gap-4"
-        onSubmit={(e: FormEvent) => {
-          e.preventDefault();
-          change.mutate();
-        }}
-      >
-        {change.isSuccess ? (
+    <FormPanel
+      title={t("emailChange.title")}
+      description={
+        <span className="break-words">
+          {t("emailChange.current", { email: me.data?.user.email ?? "" })}
+        </span>
+      }
+      submit={t("emailChange.submit")}
+      pending={change.isPending}
+      onSubmit={() => change.mutate()}
+      error={
+        change.isSuccess ? (
           <Alert tone="success">
             {t("emailChange.sent", { email: change.data.pending_email })}
           </Alert>
-        ) : null}
-        {change.isError && Object.keys(errors).length === 0 ? (
+        ) : change.isError && Object.keys(errors).length === 0 ? (
           <Alert tone="danger">{change.error.message}</Alert>
-        ) : null}
-        <TextField
-          label={t("emailChange.newEmail")}
-          type="email"
-          autoComplete="email"
-          required
-          value={form.new_email}
-          error={errors.new_email}
-          onChange={(e) => setForm((f) => ({ ...f, new_email: e.target.value }))}
-        />
-        <TextField
-          label={t("emailChange.password")}
-          type="password"
-          autoComplete="current-password"
-          hint={t("emailChange.passwordHint")}
-          value={form.password}
-          error={errors.password}
-          onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-        />
-        <div>
-          <Button type="submit" loading={change.isPending}>
-            {t("emailChange.submit")}
-          </Button>
-        </div>
-      </form>
-    </section>
+        ) : null
+      }
+    >
+      <TextField
+        label={t("emailChange.newEmail")}
+        type="email"
+        autoComplete="email"
+        required
+        value={form.new_email}
+        error={errors.new_email}
+        onChange={(e) => setForm((f) => ({ ...f, new_email: e.target.value }))}
+      />
+      <TextField
+        label={t("emailChange.password")}
+        type="password"
+        autoComplete="current-password"
+        hint={t("emailChange.passwordHint")}
+        value={form.password}
+        error={errors.password}
+        onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+      />
+    </FormPanel>
   );
 }
 

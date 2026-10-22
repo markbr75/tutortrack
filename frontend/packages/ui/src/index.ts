@@ -11,6 +11,7 @@ export {
   type CookieChoice,
 } from "./CookieBanner";
 export { DataGrid, type DataGridLabels, type DataGridProps } from "./DataGrid";
+export { CheckboxField, TextAreaField, UnitField } from "./ExtraFields";
 export { ErrorBoundary, ErrorFallback, type ErrorFallbackProps } from "./ErrorFallback";
 export { FigureStrip, type StripFigure } from "./FigureStrip";
 export { FormPanel } from "./FormPanel";

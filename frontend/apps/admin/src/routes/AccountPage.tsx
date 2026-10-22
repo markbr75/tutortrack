@@ -1,22 +1,39 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FormPanel,
+  NamePlate,
+  PageHeader,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { api, fieldErrors, useMe } from "../api";
 import { DigestPreferences } from "../comms/DigestPreferences";
+import { SavedNote } from "../components/SavedNote";
 import { AccountDeletionSection } from "./AccountDeletionSection";
 import { EmailChangeSection } from "./EmailChange";
+import { describeAgent } from "./device";
 import { createPasskey, passkeysSupported } from "./webauthn";
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="mt-8 max-w-2xl rounded-md border border-border p-4 md:p-6">
-      <h2 className="text-lg font-medium">{title}</h2>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
+const quiet = "text-muted-foreground";
+const SESSIONS_SHOWN = 5;
+
+/** "Chrome on Windows", or the raw agent (or IP) when it can't be read. */
+function useDeviceName() {
+  const { t } = useTranslation();
+  return (agent: string, fallback: string) => {
+    const d = describeAgent(agent);
+    if (!d) return agent || fallback;
+    if (d.browser && d.os) return t("designS9b.account.device", d);
+    return d.browser || d.os;
+  };
 }
 
 function ProfileSection() {
@@ -52,28 +69,25 @@ function ProfileSection() {
     />
   );
   return (
-    <Section title={t("account.profile")}>
-      <form
-        className="grid gap-4 sm:grid-cols-2"
-        onSubmit={(e: FormEvent) => {
-          e.preventDefault();
-          save.mutate();
-        }}
-      >
-        {field("first_name", t("account.firstName"), { autoComplete: "given-name" })}
-        {field("last_name", t("account.lastName"), { autoComplete: "family-name" })}
-        {field("preferred_name", t("account.preferredName"))}
-        {field("pronouns", t("account.pronouns"))}
-        {field("phone", t("account.phone"), { type: "tel", autoComplete: "tel" })}
-        {field("timezone", t("account.timezone"))}
-        <div className="flex items-center gap-3 sm:col-span-2">
-          <Button type="submit" loading={save.isPending}>
-            {t("common.save")}
-          </Button>
-          {save.isSuccess ? <span role="status">{t("common.saved")}</span> : null}
-        </div>
-      </form>
-    </Section>
+    <FormPanel
+      title={t("account.profile")}
+      submit={t("common.save")}
+      pending={save.isPending}
+      onSubmit={() => save.mutate()}
+      error={
+        save.isError && !Object.keys(errors).length ? (
+          <Alert tone="danger">{save.error.message}</Alert>
+        ) : null
+      }
+      trail={<SavedNote show={save.isSuccess} />}
+    >
+      {field("first_name", t("account.firstName"), { autoComplete: "given-name" })}
+      {field("last_name", t("account.lastName"), { autoComplete: "family-name" })}
+      {field("preferred_name", t("account.preferredName"))}
+      {field("pronouns", t("account.pronouns"))}
+      {field("phone", t("account.phone"), { type: "tel", autoComplete: "tel" })}
+      {field("timezone", t("account.timezone"))}
+    </FormPanel>
   );
 }
 
@@ -86,48 +100,45 @@ function PasswordSection() {
   });
   const errors = fieldErrors(change.error);
   return (
-    <Section title={t("account.password")}>
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={(e: FormEvent) => {
-          e.preventDefault();
-          change.mutate();
-        }}
-      >
-        {change.isSuccess ? <Alert tone="success">{t("account.passwordChanged")}</Alert> : null}
-        {change.isError && Object.keys(errors).length === 0 ? (
+    <FormPanel
+      title={t("account.password")}
+      submit={t("account.changePassword")}
+      pending={change.isPending}
+      onSubmit={() => change.mutate()}
+      error={
+        change.isSuccess ? (
+          <Alert tone="success">{t("account.passwordChanged")}</Alert>
+        ) : change.isError && Object.keys(errors).length === 0 ? (
           <Alert tone="danger">{change.error.message}</Alert>
-        ) : null}
-        <TextField
-          label={t("account.currentPassword")}
-          type="password"
-          autoComplete="current-password"
-          value={form.current_password}
-          onChange={(e) => setForm((f) => ({ ...f, current_password: e.target.value }))}
-        />
-        <TextField
-          label={t("account.newPassword")}
-          type="password"
-          autoComplete="new-password"
-          hint={t("signup.passwordHint")}
-          value={form.new_password}
-          error={errors.new_password}
-          onChange={(e) => setForm((f) => ({ ...f, new_password: e.target.value }))}
-        />
-        <Button type="submit" loading={change.isPending}>
-          {t("account.changePassword")}
-        </Button>
-      </form>
-    </Section>
+        ) : null
+      }
+    >
+      <TextField
+        label={t("account.currentPassword")}
+        type="password"
+        autoComplete="current-password"
+        value={form.current_password}
+        onChange={(e) => setForm((f) => ({ ...f, current_password: e.target.value }))}
+      />
+      <TextField
+        label={t("account.newPassword")}
+        type="password"
+        autoComplete="new-password"
+        hint={t("signup.passwordHint")}
+        value={form.new_password}
+        error={errors.new_password}
+        onChange={(e) => setForm((f) => ({ ...f, new_password: e.target.value }))}
+      />
+    </FormPanel>
   );
 }
 
 function RecoveryCodes({ codes }: { codes: string[] }) {
   const { t } = useTranslation();
   return (
-    <Alert tone="warning" title={t("account.recoveryCodes")} className="mt-4">
+    <Alert tone="warning" title={t("account.recoveryCodes")}>
       <p>{t("account.recoveryBody")}</p>
-      <ul className="mt-2 grid grid-cols-2 gap-1 font-mono text-sm">
+      <ul className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 font-medium tracking-wide tabular-nums sm:w-fit">
         {codes.map((c) => (
           <li key={c}>{c}</li>
         ))}
@@ -176,10 +187,33 @@ function MFASection() {
 
   if (me?.user.has_mfa) {
     return (
-      <Section title={t("account.mfa")}>
-        <p className="text-sm">{t("account.mfaOn")}</p>
+      <RuledPanel
+        title={t("account.mfa")}
+        description={t("account.mfaOn")}
+        bodyClassName="space-y-3"
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              disabled={!password}
+              loading={regenerate.isPending}
+              onClick={() => regenerate.mutate()}
+            >
+              {t("account.newRecoveryCodes")}
+            </Button>
+            <Button
+              variant="danger"
+              disabled={!password}
+              loading={disable.isPending}
+              onClick={() => disable.mutate()}
+            >
+              {t("account.mfaDisable")}
+            </Button>
+          </>
+        }
+      >
         {codes ? <RecoveryCodes codes={codes} /> : null}
-        <div className="mt-4 flex flex-wrap items-end gap-3">
+        <div className="sm:max-w-sm">
           <TextField
             label={t("account.confirmPassword")}
             type="password"
@@ -188,54 +222,71 @@ function MFASection() {
             error={disable.isError ? disable.error.message : undefined}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <Button variant="secondary" disabled={!password} onClick={() => regenerate.mutate()}>
-            {t("account.newRecoveryCodes")}
-          </Button>
-          <Button variant="danger" disabled={!password} onClick={() => disable.mutate()}>
-            {t("account.mfaDisable")}
-          </Button>
         </div>
-      </Section>
+      </RuledPanel>
+    );
+  }
+  if (setup.data) {
+    return (
+      <form
+        aria-labelledby="mfa-title"
+        onSubmit={(e: FormEvent) => {
+          e.preventDefault();
+          confirm.mutate();
+        }}
+      >
+        <RuledPanel
+          titleId="mfa-title"
+          title={t("account.mfa")}
+          description={t("account.mfaScan")}
+          bodyClassName="space-y-4"
+          footer={
+            <Button type="submit" loading={confirm.isPending}>
+              {t("account.mfaEnable")}
+            </Button>
+          }
+        >
+          <div className="flex flex-wrap items-center gap-4">
+            {/* A QR code must stay dark on light to scan, in either colour scheme. */}
+            <div
+              className="w-fit rounded-md border border-border bg-[#fff] p-2"
+              role="img"
+              aria-label={setup.data.otpauth_uri}
+              // Server-generated SVG (segno) for the otpauth URI; no user input is embedded.
+              dangerouslySetInnerHTML={{ __html: setup.data.qr_svg }}
+            />
+            <p className="min-w-0 text-sm font-medium tracking-wide break-all select-all tabular-nums">
+              {setup.data.secret}
+            </p>
+          </div>
+          <div className="sm:max-w-sm">
+            <TextField
+              label={t("account.mfaConfirm")}
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              className="tabular-nums"
+              value={code}
+              error={confirm.isError ? confirm.error.message : undefined}
+              onChange={(e) => setCode(e.target.value)}
+            />
+          </div>
+        </RuledPanel>
+      </form>
     );
   }
   return (
-    <Section title={t("account.mfa")}>
-      {codes ? <RecoveryCodes codes={codes} /> : <p className="text-sm">{t("account.mfaOff")}</p>}
-      {setup.data ? (
-        <form
-          className="mt-4 flex flex-col gap-4"
-          onSubmit={(e: FormEvent) => {
-            e.preventDefault();
-            confirm.mutate();
-          }}
-        >
-          <p className="text-sm">{t("account.mfaScan")}</p>
-          <div
-            className="w-fit rounded-md bg-white p-2"
-            role="img"
-            aria-label={setup.data.otpauth_uri}
-            // Server-generated SVG (segno) for the otpauth URI; no user input is embedded.
-            dangerouslySetInnerHTML={{ __html: setup.data.qr_svg }}
-          />
-          <code className="text-sm break-all">{setup.data.secret}</code>
-          <TextField
-            label={t("account.mfaConfirm")}
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            value={code}
-            error={confirm.isError ? confirm.error.message : undefined}
-            onChange={(e) => setCode(e.target.value)}
-          />
-          <Button type="submit" loading={confirm.isPending}>
-            {t("account.mfaEnable")}
-          </Button>
-        </form>
-      ) : (
-        <Button className="mt-4" loading={setup.isPending} onClick={() => setup.mutate()}>
+    <RuledPanel
+      title={t("account.mfa")}
+      description={codes ? undefined : t("account.mfaOff")}
+      flush={!codes}
+      footer={
+        <Button variant="secondary" loading={setup.isPending} onClick={() => setup.mutate()}>
           {t("account.mfaSetup")}
         </Button>
-      )}
-    </Section>
+      }
+    >
+      {codes ? <RecoveryCodes codes={codes} /> : null}
+    </RuledPanel>
   );
 }
 
@@ -256,33 +307,88 @@ function SessionsSection() {
     mutationFn: async () => unwrap(await api.POST("/api/v1/me/sessions/revoke-all")),
     onSuccess: refresh,
   });
+  const [all, setAll] = useState(false);
+  const deviceName = useDeviceName();
+  // This device first, then the most recently active; long lists show the first few.
+  const sorted = [...(sessions.data ?? [])].sort(
+    (a, b) =>
+      Number(b.is_current) - Number(a.is_current) ||
+      (b.last_seen_at ?? "").localeCompare(a.last_seen_at ?? ""),
+  );
+  const visible = all ? sorted : sorted.slice(0, SESSIONS_SHOWN);
   return (
-    <Section title={t("account.sessions")}>
-      <ul className="divide-y divide-border">
-        {sessions.data?.map((s) => (
-          <li key={s.id} className="flex items-center justify-between gap-4 py-2 text-sm">
-            <span>
-              <span className="block">{s.user_agent || s.ip}</span>
-              <span className="text-muted-foreground">
-                {s.is_current
-                  ? t("account.thisDevice")
-                  : t("account.lastSeen", {
-                      when: s.last_seen_at ? formatDateTime(s.last_seen_at, i18n.language) : "",
-                    })}
-              </span>
-            </span>
-            {!s.is_current ? (
-              <Button size="sm" variant="ghost" onClick={() => revoke.mutate(s.id)}>
-                {t("account.signOutSession")}
-              </Button>
-            ) : null}
-          </li>
+    <RuledPanel
+      flush
+      title={t("account.sessions")}
+      aside={
+        sessions.data ? (
+          <span className="text-muted-foreground tabular-nums">
+            {t("designS9b.account.sessionCount", { count: sorted.length })}
+          </span>
+        ) : null
+      }
+      footer={
+        <>
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={revokeAll.isPending}
+            onClick={() => revokeAll.mutate()}
+          >
+            {t("account.signOutOthers")}
+          </Button>
+          {sorted.length > SESSIONS_SHOWN ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-expanded={all}
+              className="text-link"
+              onClick={() => setAll((v) => !v)}
+            >
+              {all
+                ? t("designS9b.account.showFewer")
+                : t("designS9b.account.showAll", { count: sorted.length })}
+            </Button>
+          ) : null}
+        </>
+      }
+    >
+      <PanelRows>
+        {visible.map((s) => (
+          <PanelRow key={s.id}>
+            <NamePlate
+              name={<span title={s.user_agent}>{deviceName(s.user_agent ?? "", s.ip ?? "")}</span>}
+              context={
+                <span className="tabular-nums">
+                  {[
+                    s.is_current
+                      ? t("account.thisDevice")
+                      : t("account.lastSeen", {
+                          when: s.last_seen_at ? formatDateTime(s.last_seen_at, i18n.language) : "",
+                        }),
+                    s.ip,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              }
+              aside={
+                !s.is_current ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className={quiet}
+                    onClick={() => revoke.mutate(s.id)}
+                  >
+                    {t("account.signOutSession")}
+                  </Button>
+                ) : null
+              }
+            />
+          </PanelRow>
         ))}
-      </ul>
-      <Button className="mt-4" variant="secondary" onClick={() => revokeAll.mutate()}>
-        {t("account.signOutOthers")}
-      </Button>
-    </Section>
+      </PanelRows>
+    </RuledPanel>
   );
 }
 
@@ -292,24 +398,35 @@ function LoginHistorySection() {
     queryKey: ["me-logins"],
     queryFn: async () => unwrap(await api.GET("/api/v1/me/logins")),
   });
+  const rows = logins.data?.slice(0, 10) ?? [];
+  const deviceName = useDeviceName();
   return (
-    <Section title={t("account.logins")}>
-      <ul className="divide-y divide-border text-sm">
-        {logins.data?.slice(0, 10).map((e) => (
-          <li key={e.id} className="py-2">
-            <span className={e.success ? "" : "text-danger"}>
-              {e.success ? t("account.loginOk") : t("account.loginFailed")}
-            </span>
-            {" · "}
-            {formatDateTime(e.created_at, i18n.language)}
-            <span className="block text-muted-foreground">
-              {e.ip}
-              {e.country ? ` (${e.country})` : ""} · {e.user_agent}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </Section>
+    <RuledPanel flush title={t("account.logins")}>
+      {logins.data && !rows.length ? (
+        <p className="px-5 py-4 text-sm text-muted-foreground">{t("designS9b.account.noLogins")}</p>
+      ) : (
+        <PanelRows>
+          {rows.map((e) => (
+            <PanelRow key={e.id}>
+              <p>
+                <span className={e.success ? "font-medium" : "font-medium text-danger"}>
+                  {e.success ? t("account.loginOk") : t("account.loginFailed")}
+                </span>
+                {" · "}
+                <time dateTime={e.created_at} className="tabular-nums">
+                  {formatDateTime(e.created_at, i18n.language)}
+                </time>
+              </p>
+              <p className="text-xs break-words text-muted-foreground tabular-nums">
+                {[`${e.ip}${e.country ? ` (${e.country})` : ""}`, deviceName(e.user_agent, "")]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </PanelRow>
+          ))}
+        </PanelRows>
+      )}
+    </RuledPanel>
   );
 }
 
@@ -340,81 +457,88 @@ function PasskeysSection() {
       unwrap(await api.DELETE("/api/v1/me/passkeys/{id}", { params: { path: { id } } })),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["me"] }),
   });
+  const list = keys.data ?? [];
   return (
-    <Section title={t("passkeys.title")}>
-      <p className="mt-1 text-sm text-muted-foreground">{t("passkeys.intro")}</p>
-      <ul className="mt-3 space-y-2">
-        {(keys.data ?? []).map((key) => (
-          <li key={key.id} className="flex items-center justify-between gap-2 text-sm">
-            <span>
-              {key.name}
-              <span className="block text-muted-foreground">
-                {key.last_used_at
-                  ? t("passkeys.lastUsed", {
-                      when: formatDateTime(key.last_used_at, i18n.language),
-                    })
-                  : t("passkeys.neverUsed")}
-              </span>
-            </span>
-            <Button
-              size="sm"
-              variant="secondary"
-              aria-label={t("passkeys.removeNamed", { name: key.name })}
-              onClick={() => remove.mutate(key.id)}
-            >
-              {t("passkeys.remove")}
-            </Button>
-          </li>
-        ))}
-      </ul>
-      {passkeysSupported() ? (
-        <form
-          className="mt-4 flex flex-wrap items-end gap-3"
-          onSubmit={(e: FormEvent) => {
-            e.preventDefault();
-            add.mutate();
-          }}
-        >
-          <TextField
-            label={t("passkeys.name")}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Button type="submit" loading={add.isPending}>
-            {t("passkeys.add")}
-          </Button>
-        </form>
-      ) : (
-        <Alert tone="info" className="mt-3">
-          {t("passkeys.unsupported")}
-        </Alert>
-      )}
-      {add.isError ? (
-        <Alert tone="danger" className="mt-3">
-          {t("passkeys.failed")}
-        </Alert>
+    <RuledPanel flush title={t("passkeys.title")} description={t("passkeys.intro")}>
+      {list.length ? (
+        <PanelRows>
+          {list.map((key) => (
+            <PanelRow key={key.id}>
+              <NamePlate
+                name={key.name}
+                context={
+                  <span className="tabular-nums">
+                    {key.last_used_at
+                      ? t("passkeys.lastUsed", {
+                          when: formatDateTime(key.last_used_at, i18n.language),
+                        })
+                      : t("passkeys.neverUsed")}
+                  </span>
+                }
+                aside={
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className={quiet}
+                    aria-label={t("passkeys.removeNamed", { name: key.name })}
+                    onClick={() => remove.mutate(key.id)}
+                  >
+                    {t("passkeys.remove")}
+                  </Button>
+                }
+              />
+            </PanelRow>
+          ))}
+        </PanelRows>
       ) : null}
-      {codes.length ? <RecoveryCodes codes={codes} /> : null}
-    </Section>
+      <div
+        className={list.length ? "space-y-3 border-t border-rule px-5 py-4" : "space-y-3 px-5 py-4"}
+      >
+        {passkeysSupported() ? (
+          <form
+            className="flex flex-wrap items-end gap-3"
+            onSubmit={(e: FormEvent) => {
+              e.preventDefault();
+              add.mutate();
+            }}
+          >
+            <div className="min-w-56 flex-1 sm:max-w-sm">
+              <TextField
+                label={t("passkeys.name")}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <Button type="submit" variant="secondary" loading={add.isPending}>
+              {t("passkeys.add")}
+            </Button>
+          </form>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("passkeys.unsupported")}</p>
+        )}
+        {add.isError ? <Alert tone="danger">{t("passkeys.failed")}</Alert> : null}
+        {codes.length ? <RecoveryCodes codes={codes} /> : null}
+      </div>
+    </RuledPanel>
   );
 }
 
 export function AccountPage() {
   const { t } = useTranslation();
   return (
-    <div>
-      <h1 className="text-2xl font-semibold">{t("account.title")}</h1>
-      <ProfileSection />
-      <EmailChangeSection />
-      <PasswordSection />
-      <MFASection />
-      <PasskeysSection />
-      <SessionsSection />
-      <LoginHistorySection />
-      <div className="mt-8 max-w-xl">
+    <div className="max-w-3xl">
+      <PageHeader title={t("account.title")} description={t("designS9b.account.description")} />
+      <div className="space-y-6">
+        <ProfileSection />
+        <EmailChangeSection />
+        <PasswordSection />
+        <MFASection />
+        <PasskeysSection />
+        <SessionsSection />
+        <LoginHistorySection />
         <DigestPreferences />
+        <AccountDeletionSection />
       </div>
-      <AccountDeletionSection />
     </div>
   );
 }

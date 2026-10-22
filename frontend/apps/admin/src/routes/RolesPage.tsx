@@ -1,10 +1,23 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, ErrorFallback, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  ErrorFallback,
+  FormPanel,
+  PageHeader,
+  PanelFooter,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
+import { SavedNote } from "../components/SavedNote";
 
 type CustomRole = components["schemas"]["CustomRole"];
 const STAFF_BASES = ["admin", "branch_manager", "coordinator", "finance", "tutor"] as const;
@@ -44,55 +57,72 @@ export function RolesPage() {
   if (roles.isPending) return <Spinner label={t("grid.loading")} />;
   const current = roles.data.find((r) => r.id === selected) ?? null;
   return (
-    <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">{t("customRoles.title")}</h1>
-      <p className="max-w-3xl text-sm text-muted-foreground">{t("customRoles.intro")}</p>
-      <ul className="flex flex-wrap gap-2" aria-label={t("customRoles.list")}>
-        {roles.data.map((role) => (
-          <li key={role.id}>
-            <Button
-              size="sm"
-              variant={role.id === selected ? "primary" : "secondary"}
-              aria-pressed={role.id === selected}
-              onClick={() => setSelected(role.id)}
+    <div className="max-w-4xl">
+      <PageHeader title={t("customRoles.title")} description={t("customRoles.intro")} />
+      <div className="space-y-6">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-2">
+          <RuledPanel
+            flush
+            title={t("customRoles.list")}
+            description={roles.data.length && !current ? t("designS9b.roles.choose") : undefined}
+          >
+            {roles.data.length ? (
+              <ul aria-label={t("customRoles.list")} className="divide-y divide-rule">
+                {roles.data.map((role) => (
+                  <li key={role.id}>
+                    <button
+                      type="button"
+                      aria-pressed={role.id === selected}
+                      onClick={() => setSelected(role.id)}
+                      className="block w-full px-5 py-2.5 text-left text-sm hover:bg-muted/60 aria-pressed:bg-muted"
+                    >
+                      <span className="block font-medium">{role.name}</span>
+                      <span className="block text-xs text-muted-foreground tabular-nums">
+                        {t("designS9b.roles.memberCount", { count: role.members })}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-5 py-4 text-sm text-muted-foreground">
+                {canManage ? t("designS9b.roles.emptyCanCreate") : t("designS9b.roles.empty")}
+              </p>
+            )}
+          </RuledPanel>
+          {canManage ? (
+            <FormPanel
+              title={t("designS9b.roles.newRole")}
+              submit={t("customRoles.create")}
+              pending={create.isPending}
+              onSubmit={() => create.mutate()}
+              columns={1}
+              error={
+                create.error ? (
+                  <Alert tone="danger">
+                    {Object.values(fieldErrors(create.error)).join(" ") || t("errors.generic")}
+                  </Alert>
+                ) : null
+              }
             >
-              {role.name} ({role.members})
-            </Button>
-          </li>
-        ))}
-      </ul>
-      {canManage ? (
-        <form
-          className="flex flex-wrap items-end gap-3 rounded-lg border border-border p-4"
-          onSubmit={(e: FormEvent) => {
-            e.preventDefault();
-            create.mutate();
-          }}
-        >
-          <TextField
-            label={t("customRoles.name")}
-            value={draft.name}
-            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-            required
-          />
-          <SelectField
-            label={t("customRoles.cloneFrom")}
-            value={draft.clone_from}
-            onChange={(e) => setDraft({ ...draft, clone_from: e.target.value })}
-            options={STAFF_BASES.map((key) => ({ value: key, label: t(`roles.${key}`) }))}
-          />
-          <Button type="submit" disabled={create.isPending}>
-            {t("customRoles.create")}
-          </Button>
-          {create.error ? (
-            <Alert tone="danger">
-              {Object.values(fieldErrors(create.error)).join(" ") || t("errors.generic")}
-            </Alert>
+              <TextField
+                label={t("customRoles.name")}
+                value={draft.name}
+                onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                required
+              />
+              <SelectField
+                label={t("customRoles.cloneFrom")}
+                value={draft.clone_from}
+                onChange={(e) => setDraft({ ...draft, clone_from: e.target.value })}
+                options={STAFF_BASES.map((key) => ({ value: key, label: t(`roles.${key}`) }))}
+              />
+            </FormPanel>
           ) : null}
-        </form>
-      ) : null}
-      {current ? <RoleEditor key={current.id} role={current} canManage={canManage} /> : null}
-    </section>
+        </div>
+        {current ? <RoleEditor key={current.id} role={current} canManage={canManage} /> : null}
+      </div>
+    </div>
   );
 }
 
@@ -147,103 +177,129 @@ function RoleEditor({ role, canManage }: { role: CustomRole; canManage: boolean 
     return Object.entries(out);
   }, [permissions.data]);
   const scopeOf = (codename: string) => changes[codename] ?? role.grants[codename] ?? "none";
+  const staff = (members.data?.results ?? []).filter((m) => STAFF_MEMBERS.has(m.role));
+  const changed = Object.keys(changes).length;
   return (
-    <section className="space-y-4" aria-labelledby="role-heading">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="role-heading" className="text-xl font-semibold">
-          {role.name}
-        </h2>
-        {canManage ? (
-          <div className="flex gap-2">
-            <Button onClick={() => save.mutate()} disabled={!Object.keys(changes).length}>
-              {t("customRoles.save")}
-            </Button>
-            <Button variant="secondary" onClick={() => archive.mutate()}>
-              {t("customRoles.archive")}
-            </Button>
+    <section className="space-y-6" aria-labelledby="role-heading">
+      <RuledPanel
+        flush
+        titleId="role-heading"
+        title={role.name}
+        aside={
+          <span className="text-muted-foreground tabular-nums">
+            {t("designS9b.roles.memberCount", { count: role.members })}
+          </span>
+        }
+      >
+        {permissions.isPending ? (
+          <div className="px-5 py-4">
+            <Spinner label={t("grid.loading")} />
           </div>
         ) : null}
-      </div>
-      {save.isSuccess ? <Alert tone="success">{t("customRoles.saved")}</Alert> : null}
-      <div className="space-y-4">
-        {grouped.map(([category, perms]) => (
-          <fieldset key={category} className="rounded-lg border border-border p-3">
-            <legend className="px-1 font-medium">{category}</legend>
-            <table className="w-full text-sm">
-              <caption className="sr-only">{t("customRoles.matrixFor", { category })}</caption>
-              <thead>
-                <tr>
-                  <th scope="col" className="text-left">
-                    {t("customRoles.permission")}
-                  </th>
-                  <th scope="col" className="w-40 text-left">
-                    {t("customRoles.scope")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {perms.map((p) => (
-                  <tr key={p.codename} className="border-t border-border">
-                    <td className="py-1">
-                      {p.description} <code className="text-xs">{p.codename}</code>
-                    </td>
-                    <td className="py-1">
-                      <select
-                        aria-label={t("customRoles.scopeFor", { permission: p.description })}
-                        className="rounded border border-border bg-background px-2 py-1"
-                        value={scopeOf(p.codename)}
-                        disabled={!canManage}
-                        onChange={(e) => setChanges({ ...changes, [p.codename]: e.target.value })}
-                      >
-                        {SCOPES.map((scope) => (
-                          <option key={scope} value={scope}>
-                            {t(`customRoles.scopes.${scope}`)}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
+        {grouped.map(([category, perms]) => {
+          const name = t(`designS9b.roles.categories.${category}`, category);
+          return (
+            <div key={category} className="border-t border-rule first:border-t-0">
+              <h3 className="px-5 pt-4 pb-1 text-sm font-semibold">{name}</h3>
+              <table className="w-full text-sm">
+                <caption className="sr-only">
+                  {t("customRoles.matrixFor", { category: name })}
+                </caption>
+                <thead className="sr-only">
+                  <tr>
+                    <th scope="col">{t("customRoles.permission")}</th>
+                    <th scope="col">{t("customRoles.scope")}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </fieldset>
-        ))}
-      </div>
-      <fieldset className="rounded-lg border border-border p-3">
-        <legend className="px-1 font-medium">{t("customRoles.members")}</legend>
-        <ul className="space-y-1">
-          {(members.data?.results ?? [])
-            .filter((m) => STAFF_MEMBERS.has(m.role))
-            .map((m) => {
+                </thead>
+                <tbody>
+                  {perms.map((p) => (
+                    <tr key={p.codename}>
+                      <td className="py-1.5 pr-4 pl-5 align-middle">
+                        {p.description}
+                        <span className="block text-xs break-all text-muted-foreground">
+                          {p.codename}
+                        </span>
+                      </td>
+                      <td className="w-40 py-1.5 pr-5 align-middle sm:w-48">
+                        <select
+                          aria-label={t("customRoles.scopeFor", { permission: p.description })}
+                          className="h-9 w-full rounded-md border border-field bg-surface px-2 text-sm"
+                          value={scopeOf(p.codename)}
+                          disabled={!canManage}
+                          onChange={(e) => setChanges({ ...changes, [p.codename]: e.target.value })}
+                        >
+                          {SCOPES.map((scope) => (
+                            <option key={scope} value={scope}>
+                              {t(`customRoles.scopes.${scope}`)}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
+        {canManage ? (
+          <PanelFooter className="sticky bottom-0 rounded-b-xl bg-surface">
+            <Button onClick={() => save.mutate()} disabled={!changed} loading={save.isPending}>
+              {t("customRoles.save")}
+            </Button>
+            <SavedNote show={save.isSuccess && !changed} text={t("customRoles.saved")} />
+            {changed ? (
+              <span className="text-muted-foreground tabular-nums" aria-live="polite">
+                {t("designS9b.roles.unsaved", { count: changed })}
+              </span>
+            ) : null}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto text-muted-foreground"
+              loading={archive.isPending}
+              onClick={() => archive.mutate()}
+            >
+              {t("customRoles.archive")}
+            </Button>
+          </PanelFooter>
+        ) : null}
+      </RuledPanel>
+      <RuledPanel flush title={t("customRoles.members")}>
+        {staff.length ? (
+          <ul className="divide-y divide-rule">
+            {staff.map((m) => {
               const has = m.custom_roles.includes(role.id);
               return (
-                <li key={m.id}>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={has}
-                      disabled={!canManage}
-                      onChange={() =>
-                        assign.mutate({
-                          id: m.id,
-                          roles: has
-                            ? m.custom_roles.filter((r) => r !== role.id)
-                            : [...m.custom_roles, role.id],
-                        })
-                      }
-                    />
-                    {m.user.email} · {t(`roles.${m.role}`)}
-                  </label>
+                <li key={m.id} className="px-5 py-2.5">
+                  <CheckboxField
+                    checked={has}
+                    disabled={!canManage}
+                    label={`${m.user.email} · ${t(`roles.${m.role}`)}`}
+                    onChange={() =>
+                      assign.mutate({
+                        id: m.id,
+                        roles: has
+                          ? m.custom_roles.filter((r) => r !== role.id)
+                          : [...m.custom_roles, role.id],
+                      })
+                    }
+                  />
                 </li>
               );
             })}
-        </ul>
+          </ul>
+        ) : (
+          <p className="px-5 py-4 text-sm text-muted-foreground">{t("designS9b.roles.noStaff")}</p>
+        )}
         {assign.error ? (
-          <Alert tone="danger">
-            {Object.values(fieldErrors(assign.error)).join(" ") || t("errors.generic")}
-          </Alert>
+          <div className="px-5 pb-4">
+            <Alert tone="danger">
+              {Object.values(fieldErrors(assign.error)).join(" ") || t("errors.generic")}
+            </Alert>
+          </div>
         ) : null}
-      </fieldset>
+      </RuledPanel>
     </section>
   );
 }
