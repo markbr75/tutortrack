@@ -7361,9 +7361,7 @@
   },
   "designS9b": {
     "units": {
-      "days": "days",
-      "hours": "hours",
-      "minutes": "minutes"
+      "days": "days"
     },
     "settings": {
       "description": "Your organisation's profile, the words the app uses, and who can look after your account.",
@@ -7489,8 +7487,7 @@
         "paid": "Paid",
         "write_off": "Written off",
         "login": "Signed in"
-      },
-      "objects": {}
+      }
     },
     "privacy": {
       "description": "Requests from people about their data, legal holds, how long data is kept, and your data processing agreement.",
