@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
+import { BackTrail } from "../components/RecordHeader";
 import { ErrorList } from "../calendar/ErrorList";
 
 const RETURN_PATH = "/settings/accounting/payroll";
@@ -104,11 +105,9 @@ export function XeroPayrollPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <p className="mb-2 text-sm">
-          <Link to="/settings/accounting" className="font-medium text-link hover:underline">
-            {t("accounting.title")}
-          </Link>
-        </p>
+        <BackTrail>
+          <Link to="/settings/accounting">{t("accounting.title")}</Link>
+        </BackTrail>
         <PageHeader
           title={t("accountingPhase3.payrollTitle")}
           description={t("accountingPhase3.payrollHelp")}

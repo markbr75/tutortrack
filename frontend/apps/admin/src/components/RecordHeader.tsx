@@ -18,20 +18,29 @@ export function RecordHeader({
   description?: ReactNode;
   actions?: ReactNode;
 }) {
-  const { t } = useTranslation();
   return (
     <>
-      {back ? (
-        <nav
-          aria-label={t("designS5.back")}
-          className="mb-1.5 flex flex-wrap items-center gap-x-1.5 text-sm text-muted-foreground [&_a]:hover:text-foreground [&_a]:hover:underline"
-        >
-          <ChevronLeft aria-hidden="true" className="size-4 shrink-0" strokeWidth={1.75} />
-          {back}
-        </nav>
-      ) : null}
+      {back ? <BackTrail>{back}</BackTrail> : null}
       <PageHeader title={title} description={description} actions={actions} />
     </>
+  );
+}
+
+/**
+ * The way back above a page's title, 6px above it: a 16px chevron and the links in faded ink
+ * at body size, turning ink and underlined on hover (two links are joined by `BackSeparator`).
+ * Every record, and every page reached from a section, uses this one style.
+ */
+export function BackTrail({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
+  return (
+    <nav
+      aria-label={t("designS5.back")}
+      className="mb-1.5 flex flex-wrap items-center gap-x-1.5 text-sm text-muted-foreground [&_a]:hover:text-foreground [&_a]:hover:underline"
+    >
+      <ChevronLeft aria-hidden="true" className="size-4 shrink-0" strokeWidth={1.75} />
+      {children}
+    </nav>
   );
 }
 

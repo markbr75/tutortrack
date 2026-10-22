@@ -7,6 +7,7 @@ import {
   PanelFooter,
   PanelRow,
   PanelRows,
+  RegisterMark,
   RuledPanel,
   Spinner,
   Tabs,
@@ -16,7 +17,7 @@ import {
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Check, Circle } from "lucide-react";
+import { Check } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { api, uploadFile } from "../api";
@@ -454,11 +455,11 @@ function Goals() {
                           strokeWidth={2.2}
                         />
                       ) : (
-                        <Circle
-                          aria-hidden="true"
-                          className="mt-0.5 size-4 shrink-0 text-field"
-                          strokeWidth={1.75}
-                        />
+                        // Still to come: the register's pale dashed ring, never the solid
+                        // "missed" ring. The words after the title say it for screen readers.
+                        <span aria-hidden="true" className="mt-0.5 shrink-0">
+                          <RegisterMark kind="upcoming" label="" className="size-4" />
+                        </span>
                       )}
                       <span className={m.done ? "" : "text-muted-foreground"}>
                         {m.title}
