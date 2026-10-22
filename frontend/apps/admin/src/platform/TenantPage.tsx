@@ -562,7 +562,11 @@ function Members({ detail }: { detail: Detail }) {
               <td className="min-w-60">
                 <EmailAddress email={m.email} />
                 <span className="block text-xs text-muted-foreground tabular-nums">
-                  {phone ? [role, lastActive, security].join(" · ") : role}
+                  {phone
+                    ? [role, m.last_active_at ? lastActive : "", security]
+                        .filter(Boolean)
+                        .join(" · ")
+                    : role}
                 </span>
               </td>
               {phone ? null : (
