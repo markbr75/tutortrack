@@ -51,38 +51,6 @@ export function AnnouncementsPage() {
         description={t("designS9b.announcements.description")}
       />
       <div className="space-y-6">
-        <FormPanel
-          title={t("announcements.new")}
-          submit={t("announcements.publish")}
-          pending={create.isPending}
-          onSubmit={() => create.mutate()}
-          error={create.error ? <ErrorList error={create.error} /> : null}
-        >
-          <TextField
-            label={t("announcements.heading")}
-            required
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-          />
-          <SelectField
-            label={t("announcements.audience")}
-            value={form.audience}
-            onChange={(e) => setForm({ ...form, audience: e.target.value as Audience })}
-            options={(["everyone", "clients", "tutors"] as const).map((a) => ({
-              value: a,
-              label: t(`announcements.audiences.${a}`),
-            }))}
-          />
-          <div className="sm:col-span-2">
-            <TextAreaField
-              label={t("announcements.body")}
-              required
-              rows={4}
-              value={form.body}
-              onChange={(e) => setForm({ ...form, body: e.target.value })}
-            />
-          </div>
-        </FormPanel>
         <RuledPanel
           flush
           title={t("designS9b.announcements.published")}
@@ -134,6 +102,38 @@ export function AnnouncementsPage() {
             </p>
           )}
         </RuledPanel>
+        <FormPanel
+          title={t("announcements.new")}
+          submit={t("announcements.publish")}
+          pending={create.isPending}
+          onSubmit={() => create.mutate()}
+          error={create.error ? <ErrorList error={create.error} /> : null}
+        >
+          <TextField
+            label={t("announcements.heading")}
+            required
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
+          <SelectField
+            label={t("announcements.audience")}
+            value={form.audience}
+            onChange={(e) => setForm({ ...form, audience: e.target.value as Audience })}
+            options={(["everyone", "clients", "tutors"] as const).map((a) => ({
+              value: a,
+              label: t(`announcements.audiences.${a}`),
+            }))}
+          />
+          <div className="sm:col-span-2">
+            <TextAreaField
+              label={t("announcements.body")}
+              required
+              rows={4}
+              value={form.body}
+              onChange={(e) => setForm({ ...form, body: e.target.value })}
+            />
+          </div>
+        </FormPanel>
       </div>
     </div>
   );

@@ -50,8 +50,8 @@ function FeatureRows({ canManage }: { canManage: boolean }) {
         columns={[
           { key: "feature", header: t("ai.settings.feature") },
           { key: "on", header: t("ai.settings.enabled"), center: true, width: "w-20" },
-          { key: "tone", header: t("ai.settings.tone"), width: "w-40" },
-          { key: "language", header: t("ai.settings.language"), width: "w-40" },
+          { key: "tone", header: t("ai.settings.tone"), width: "w-52" },
+          { key: "language", header: t("ai.settings.language"), width: "w-52" },
         ]}
       >
         {(features.data ?? []).map((row) => (
@@ -62,7 +62,7 @@ function FeatureRows({ canManage }: { canManage: boolean }) {
             <td className="py-1.5 text-center align-middle">
               <input
                 type="checkbox"
-                className="size-4"
+                className="size-4 align-middle"
                 aria-label={t("ai.settings.turnOn", { feature: row.title })}
                 checked={row.enabled}
                 disabled={!canManage || update.isPending}

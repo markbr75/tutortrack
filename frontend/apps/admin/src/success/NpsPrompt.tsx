@@ -65,9 +65,9 @@ export function NpsPrompt({ onClose }: { onClose: () => void }) {
           <legend id={titleId} className="text-base font-semibold">
             {t("nps.question")}
           </legend>
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className="mt-2 grid grid-cols-11 gap-1">
             {Array.from({ length: 11 }, (_, n) => (
-              <label key={n} className="cursor-pointer">
+              <label key={n} className="min-w-0 cursor-pointer">
                 <input
                   type="radio"
                   name="nps-score"
@@ -76,7 +76,7 @@ export function NpsPrompt({ onClose }: { onClose: () => void }) {
                   onChange={() => setScore(n)}
                   className="peer sr-only"
                 />
-                <span className="grid size-8 place-items-center rounded-md border border-field bg-surface text-sm tabular-nums hover:bg-muted peer-checked:border-foreground peer-checked:bg-muted peer-checked:font-semibold peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-link">
+                <span className="grid h-8 w-full place-items-center rounded-md border border-field bg-surface text-sm tabular-nums hover:bg-muted peer-checked:border-foreground peer-checked:bg-muted peer-checked:font-semibold peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-link">
                   {n}
                 </span>
               </label>
