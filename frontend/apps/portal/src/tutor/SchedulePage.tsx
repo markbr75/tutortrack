@@ -1,15 +1,18 @@
 import { unwrap } from "@tutortrack/api-client";
-import { useTranslation } from "@tutortrack/i18n";
-import { Button, Spinner } from "@tutortrack/ui";
+import { formatDateTime, useTranslation } from "@tutortrack/i18n";
+import { Button, cn, RegisterMark, registerMarkFor, Spinner } from "@tutortrack/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api } from "../api";
+import { PortalHeader } from "../layout/PortalPage";
 import { PlanLessonForm } from "./Planning";
 import { useTutorMe } from "./useTutorMe";
 
-/** The next two weeks (and yesterday) as an agenda (E16-T02). */
+/** The next two weeks (and yesterday) as an agenda (E16-T02): one ruled register panel per
+ * day under its date (today's in margin red), each lesson a row with its time, title, one
+ * line of context and its register mark; lessons over and still to mark carry the red mark. */
 export function TutorSchedulePage() {
   const { t, i18n } = useTranslation();
   const me = useTutorMe();
@@ -39,58 +42,91 @@ export function TutorSchedulePage() {
     const key = new Date(lesson.start).toDateString();
     days.set(key, [...(days.get(key) ?? []), lesson]);
   }
+  const today = new Date().toDateString();
+  const clock = (iso: string) =>
+    formatDateTime(iso, i18n.language, undefined, { hour: "2-digit", minute: "2-digit" });
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">{t("tutor.nav.schedule")}</h1>
-      {me.data?.can_create_lessons && !planning ? (
-        <Button size="sm" onClick={() => setPlanning(true)}>
-          {t("tutorPlan.newLesson")}
-        </Button>
-      ) : null}
-      {planning ? <PlanLessonForm onDone={() => setPlanning(false)} /> : null}
-      {!lessons.length ? (
-        <p className="text-sm text-muted-foreground">{t("portal.noLessons")}</p>
-      ) : null}
-      {[...days.entries()].map(([day, rows]) => (
-        <section
-          key={day}
-          aria-label={new Date(rows[0]!.start).toLocaleDateString(i18n.language, {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-          })}
-        >
-          <h2 className="font-semibold">
-            {new Date(rows[0]!.start).toLocaleDateString(i18n.language, {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-            })}
-          </h2>
-          <ul className="mt-1 space-y-1">
-            {rows.map((lesson) => (
-              <li key={lesson.id}>
-                <Link
-                  to="/tutor/lessons/$lessonId"
-                  params={{ lessonId: lesson.id }}
-                  className="flex justify-between rounded-md border border-border p-3 text-sm"
-                >
-                  <span>
-                    {new Date(lesson.start).toLocaleTimeString(i18n.language, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}{" "}
-                    · {lesson.title}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {t(`portal.status.${lesson.status}`)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+    <div>
+      <PortalHeader
+        title={t("tutor.nav.schedule")}
+        actions={
+          me.data?.can_create_lessons && !planning ? (
+            <Button size="sm" onClick={() => setPlanning(true)}>
+              {t("tutorPlan.newLesson")}
+            </Button>
+          ) : null
+        }
+      />
+      <div className="space-y-6">
+        {planning ? <PlanLessonForm onDone={() => setPlanning(false)} /> : null}
+        {!lessons.length ? (
+          <p className="text-sm text-muted-foreground">{t("portal.noLessons")}</p>
+        ) : null}
+        {[...days.entries()].map(([day, rows]) => {
+          const isToday = day === today;
+          const headingId = `day-${rows[0]!.id}`;
+          return (
+            <section key={day} aria-labelledby={headingId} className="space-y-2">
+              <h2
+                id={headingId}
+                aria-current={isToday ? "date" : undefined}
+                className={cn("text-base font-semibold", isToday && "text-margin")}
+              >
+                {new Date(rows[0]!.start).toLocaleDateString(i18n.language, {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                })}
+              </h2>
+              <ul className="divide-y divide-rule overflow-hidden rounded-xl border border-border bg-surface">
+                {rows.map((lesson) => {
+                  const kind = registerMarkFor(lesson.status, lesson.end);
+                  const place = lesson.online
+                    ? t("portal.online")
+                    : lesson.room_name || lesson.location;
+                  return (
+                    <li key={lesson.id}>
+                      <Link
+                        to="/tutor/lessons/$lessonId"
+                        params={{ lessonId: lesson.id }}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-muted/60"
+                      >
+                        <span className="w-14 shrink-0 tabular-nums">
+                          <time dateTime={lesson.start} className="block font-semibold">
+                            {clock(lesson.start)}
+                          </time>
+                          <time
+                            dateTime={lesson.end}
+                            className="block text-xs text-muted-foreground"
+                          >
+                            {clock(lesson.end)}
+                          </time>
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-medium">{lesson.title}</span>
+                          {place ? (
+                            <span className="block text-xs text-muted-foreground">{place}</span>
+                          ) : null}
+                        </span>
+                        <RegisterMark
+                          kind={kind}
+                          label={
+                            kind === "due"
+                              ? t("designS10.toMark")
+                              : t(`portal.status.${lesson.status}`, {
+                                  defaultValue: lesson.status,
+                                })
+                          }
+                        />
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
     </div>
   );
 }

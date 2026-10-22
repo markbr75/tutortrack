@@ -104,7 +104,7 @@ export function DictationButton({
       <Button
         type="button"
         size="sm"
-        variant={listening ? "danger" : "ghost"}
+        variant={listening ? "secondary" : "ghost"}
         aria-pressed={listening}
         disabled={disabled}
         onClick={toggle}

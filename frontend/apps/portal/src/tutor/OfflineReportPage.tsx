@@ -1,14 +1,15 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner } from "@tutortrack/ui";
+import { Alert, Spinner } from "@tutortrack/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api } from "../api";
+import { PortalHeader } from "../layout/PortalPage";
 import { flushNow, isOffline, queueChange, useOutbox } from "../offline/client";
 import type { ReportBody } from "../offline/outbox";
-import { ReportFieldInput, type Answers } from "./ReportPage";
+import { ReportForm, type Answers } from "./ReportPage";
 
 /** A lesson report written without a signal (E16-T08, FR-16-3): the form comes from the
  * offline pack the phone keeps for the next week; the save waits in the outbox and opens
@@ -48,7 +49,11 @@ export function OfflineReportPage({ lessonId }: { lessonId: string }) {
   if (!lesson) {
     return (
       <Alert tone="warning" title={t("pwa.notOnPhone")}>
-        <Link to="/tutor/lessons/$lessonId" params={{ lessonId }} className="underline">
+        <Link
+          to="/tutor/lessons/$lessonId"
+          params={{ lessonId }}
+          className="font-medium text-link underline-offset-2 hover:underline"
+        >
           {t("pwa.backToLesson")}
         </Link>
       </Alert>
@@ -56,46 +61,33 @@ export function OfflineReportPage({ lessonId }: { lessonId: string }) {
   }
   const written = lesson.report?.status === "submitted" || lesson.report?.status === "approved";
   return (
-    <form
-      className="space-y-4"
-      aria-label={lesson.title}
-      onSubmit={(e) => {
-        e.preventDefault();
-        save.mutate(true);
-      }}
-    >
-      <h1 className="text-xl font-semibold">{t("tutor.reportFor", { title: lesson.title })}</h1>
-      <Alert>{t("pwa.reportOnPhone")}</Alert>
-      {lesson.report_fields.map((field) => (
-        <ReportFieldInput
-          key={field.key}
-          field={field}
-          value={current[field.key]}
-          disabled={written}
-          onChange={(v) => setAnswers({ ...current, [field.key]: v })}
-        />
-      ))}
-      {written ? (
-        <Alert tone="success">{t("tutor.reportSubmitted")}</Alert>
-      ) : (
-        <div className="flex gap-2">
-          <Button type="submit" disabled={save.isPending}>
-            {t("tutor.submitReport")}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={save.isPending}
-            onClick={() => save.mutate(false)}
-          >
-            {t("tutor.saveDraft")}
-          </Button>
-        </div>
-      )}
-      {save.isSuccess ? (
-        <Alert tone="success">{t(save.data ? "pwa.reportQueuedSubmit" : "pwa.reportQueued")}</Alert>
-      ) : null}
-      {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
-    </form>
+    <div>
+      <PortalHeader
+        back={
+          <Link to="/tutor/lessons/$lessonId" params={{ lessonId }}>
+            {lesson.title}
+          </Link>
+        }
+        title={t("tutor.reportFor", { title: lesson.title })}
+      />
+      <ReportForm
+        label={lesson.title}
+        fields={lesson.report_fields}
+        answers={current}
+        written={written}
+        pending={save.isPending}
+        lead={<Alert>{t("pwa.reportOnPhone")}</Alert>}
+        onChange={(key, v) => setAnswers({ ...current, [key]: v })}
+        onSubmit={() => save.mutate(true)}
+        onDraft={() => save.mutate(false)}
+      >
+        {save.isSuccess ? (
+          <Alert tone="success">
+            {t(save.data ? "pwa.reportQueuedSubmit" : "pwa.reportQueued")}
+          </Alert>
+        ) : null}
+        {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
+      </ReportForm>
+    </div>
   );
 }

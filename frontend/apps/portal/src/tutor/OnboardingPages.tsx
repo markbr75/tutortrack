@@ -1,15 +1,27 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check } from "lucide-react";
 import { useState } from "react";
 
 import { api, uploadFile } from "../api";
 import { SignForm } from "../esign/SignForm";
+import { FileField, PortalHeader, Word } from "../layout/PortalPage";
 import { DocumentList } from "../pages/DocumentsPage";
 import { MyBackgroundChecks } from "./Phase3";
 
-/** The onboarding checklist (FR-18-5). */
+/** The onboarding checklist (FR-18-5): one ruled row per step, its state or action on the
+ * right; signing opens in place under the step. */
 export function OnboardingPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -37,83 +49,105 @@ export function OnboardingPage() {
     },
   });
   if (!state.data) return <Spinner label={t("grid.loading")} />;
+  const items = state.data.items;
+  const done = items.filter((item) => item.done).length;
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">{t("onboard.title")}</h1>
-      {state.data.completed_at ? <Alert tone="success">{t("onboard.complete")}</Alert> : null}
-      <ul className="divide-y divide-border rounded-lg border border-border text-sm">
-        {state.data.items.map((item) => (
-          <li key={item.key} className="flex flex-wrap items-center justify-between gap-2 p-3">
-            <span>
-              {item.label}
-              {item.mandatory ? " *" : ""}
+    <div>
+      <PortalHeader title={t("onboard.title")} />
+      <div className="space-y-6">
+        {state.data.completed_at ? <Alert tone="success">{t("onboard.complete")}</Alert> : null}
+        <RuledPanel
+          title={t("designS10.steps")}
+          aside={
+            <span className="text-muted-foreground tabular-nums">
+              {t("designS10.doneOf", { done, total: items.length })}
             </span>
-            {item.done ? (
-              <span className="font-medium">
-                {item.signature_id ? t("esign.signedDone") : t("onboard.done")}
-              </span>
-            ) : item.needs_signature ? (
-              signing === item.key ? null : (
-                <Button size="sm" onClick={() => setSigning(item.key)}>
-                  {t("esign.signButton", { title: item.label })}
-                </Button>
-              )
-            ) : ["agreement", "training", "custom"].includes(item.kind) ? (
-              <Button size="sm" variant="secondary" onClick={() => tick.mutate(item.key)}>
-                {t("onboard.markDone")}
-              </Button>
-            ) : (
-              <span className="text-xs text-muted-foreground">{t("onboard.auto")}</span>
-            )}
-            {signing === item.key ? (
-              <div className="w-full">
-                {item.link ? (
-                  <a
-                    className="text-sm underline"
-                    href={item.link}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {t("esign.read", { title: item.label })}
-                  </a>
+          }
+          flush
+        >
+          <PanelRows>
+            {items.map((item) => (
+              <PanelRow key={item.key}>
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                  <span className="min-w-0">
+                    <span className="font-medium">{item.label}</span>
+                    {item.mandatory ? (
+                      <span className="block text-xs text-muted-foreground">
+                        {t("designS10.required")}
+                      </span>
+                    ) : null}
+                  </span>
+                  {item.done ? (
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <Check aria-hidden="true" className="size-4" strokeWidth={2.2} />
+                      {item.signature_id ? t("esign.signedDone") : t("onboard.done")}
+                    </span>
+                  ) : item.needs_signature ? (
+                    signing === item.key ? null : (
+                      <Button size="sm" onClick={() => setSigning(item.key)}>
+                        {t("esign.signButton", { title: item.label })}
+                      </Button>
+                    )
+                  ) : ["agreement", "training", "custom"].includes(item.kind) ? (
+                    <Button size="sm" variant="secondary" onClick={() => tick.mutate(item.key)}>
+                      {t("onboard.markDone")}
+                    </Button>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">{t("onboard.auto")}</span>
+                  )}
+                </div>
+                {signing === item.key ? (
+                  <div className="mt-2">
+                    {item.link ? (
+                      <a
+                        className="text-sm font-medium text-link underline-offset-2 hover:underline"
+                        href={item.link}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {t("esign.read", { title: item.label })}
+                      </a>
+                    ) : null}
+                    <SignForm
+                      title={item.label}
+                      pending={sign.isPending}
+                      error={sign.error?.message}
+                      onSign={(name) => sign.mutate({ key: item.key, name })}
+                      onCancel={() => setSigning(null)}
+                    />
+                  </div>
                 ) : null}
-                <SignForm
-                  title={item.label}
-                  pending={sign.isPending}
-                  error={sign.error?.message}
-                  onSign={(name) => sign.mutate({ key: item.key, name })}
-                  onCancel={() => setSigning(null)}
-                />
-              </div>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-      {tick.error ? <Alert tone="danger">{tick.error.message}</Alert> : null}
-      <section aria-labelledby="tutor-documents" className="space-y-2">
-        <h2 id="tutor-documents" className="text-lg font-medium">
-          {t("esign.tutorTitle")}
-        </h2>
-        <DocumentList
-          queryKey={["tutor", "documents"]}
-          list={async () => unwrap(await api.GET("/api/v1/tutor/documents"))}
-          download={async (id) =>
-            unwrap(
-              await api.GET("/api/v1/tutor/documents/{document_id}/download", {
-                params: { path: { document_id: id } },
-              }),
-            )
-          }
-          sign={async (id, fullName) =>
-            unwrap(
-              await api.POST("/api/v1/tutor/documents/{document_id}/sign", {
-                params: { path: { document_id: id } },
-                body: { full_name: fullName, agree: true },
-              }),
-            )
-          }
-        />
-      </section>
+              </PanelRow>
+            ))}
+          </PanelRows>
+          {tick.error ? (
+            <div className="px-5 pb-4">
+              <Alert tone="danger">{tick.error.message}</Alert>
+            </div>
+          ) : null}
+        </RuledPanel>
+        <RuledPanel title={t("esign.tutorTitle")} titleId="tutor-documents" flush>
+          <DocumentList
+            queryKey={["tutor", "documents"]}
+            list={async () => unwrap(await api.GET("/api/v1/tutor/documents"))}
+            download={async (id) =>
+              unwrap(
+                await api.GET("/api/v1/tutor/documents/{document_id}/download", {
+                  params: { path: { document_id: id } },
+                }),
+              )
+            }
+            sign={async (id, fullName) =>
+              unwrap(
+                await api.POST("/api/v1/tutor/documents/{document_id}/sign", {
+                  params: { path: { document_id: id } },
+                  body: { full_name: fullName, agree: true },
+                }),
+              )
+            }
+          />
+        </RuledPanel>
+      </div>
     </div>
   );
 }
@@ -130,15 +164,15 @@ export function ChecksPage() {
   if (!data.data) return <Spinner label={t("grid.loading")} />;
   const records = new Map(data.data.records.map((r) => [r.requirement, r]));
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">{t("onboard.checksTitle")}</h1>
-      {data.data.restricted ? <Alert tone="warning">{t("onboard.restricted")}</Alert> : null}
-      <MyBackgroundChecks />
-      <ul className="space-y-3">
+    <div>
+      <PortalHeader title={t("onboard.checksTitle")} />
+      <div className="space-y-6">
+        {data.data.restricted ? <Alert tone="warning">{t("onboard.restricted")}</Alert> : null}
+        <MyBackgroundChecks />
         {data.data.requirements.map((req) => (
           <CheckItem key={req.id} requirement={req} record={records.get(req.id)} />
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
@@ -175,59 +209,81 @@ function CheckItem({
     },
     onSuccess: (data) => queryClient.setQueryData(["tutor", "compliance"], data),
   });
+  const needsUpload = status !== "verified" || !record?.valid;
   return (
-    <li className="space-y-2 rounded-lg border border-border p-3 text-sm">
-      <p className="font-medium">
-        {requirement.name}: {t(`onboard.status.${status}`)}
-        {record?.expiry_date ? ` · ${formatDate(record.expiry_date, i18n.language)}` : ""}
-      </p>
-      {record?.rejection_reason ? <p className="text-danger">{record.rejection_reason}</p> : null}
-      {status !== "verified" || !record?.valid ? (
+    <RuledPanel
+      title={requirement.name}
+      description={
+        record?.expiry_date ? (
+          <span className="tabular-nums">
+            {t("onboard.expiryDate")}: {formatDate(record.expiry_date, i18n.language)}
+          </span>
+        ) : undefined
+      }
+      aside={
+        <Word
+          tone={status === "submitted" ? "muted" : "ink"}
+          className={status === "verified" ? "" : "font-medium"}
+        >
+          {t(`onboard.status.${status}`)}
+        </Word>
+      }
+      flush
+    >
+      {record?.rejection_reason ? (
+        <p className="px-5 pt-3 text-sm text-danger">{record.rejection_reason}</p>
+      ) : null}
+      {needsUpload ? (
         <form
-          className="grid gap-2 sm:grid-cols-2"
           aria-label={requirement.name}
           onSubmit={(e) => {
             e.preventDefault();
             submit.mutate();
           }}
         >
-          {requirement.has_number ? (
+          <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
+            {requirement.has_number ? (
+              <TextField
+                label={t("onboard.number")}
+                className="tabular-nums"
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+              />
+            ) : null}
             <TextField
-              label={t("onboard.number")}
-              value={number}
-              onChange={(e) => setNumber(e.target.value)}
-            />
-          ) : null}
-          <TextField
-            label={t("onboard.issueDate")}
-            type="date"
-            value={issue}
-            onChange={(e) => setIssue(e.target.value)}
-          />
-          {requirement.has_expiry ? (
-            <TextField
-              label={t("onboard.expiryDate")}
+              label={t("onboard.issueDate")}
+              className="tabular-nums"
               type="date"
-              value={expiry}
-              onChange={(e) => setExpiry(e.target.value)}
+              value={issue}
+              onChange={(e) => setIssue(e.target.value)}
             />
-          ) : null}
-          <label className="flex flex-col gap-1">
-            <span className="font-medium">{t("onboard.file")}</span>
-            <input
-              type="file"
+            {requirement.has_expiry ? (
+              <TextField
+                label={t("onboard.expiryDate")}
+                className="tabular-nums"
+                type="date"
+                value={expiry}
+                onChange={(e) => setExpiry(e.target.value)}
+              />
+            ) : null}
+            <FileField
+              label={t("onboard.file")}
               accept="image/*,application/pdf"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
-          </label>
-          <div className="sm:col-span-2">
+          </div>
+          {submit.error ? (
+            <div className="px-5 pb-4">
+              <Alert tone="danger">{submit.error.message}</Alert>
+            </div>
+          ) : null}
+          <PanelFooter>
             <Button type="submit" size="sm" disabled={submit.isPending}>
               {t("onboard.upload")}
             </Button>
-          </div>
-          {submit.error ? <Alert tone="danger">{submit.error.message}</Alert> : null}
+          </PanelFooter>
         </form>
       ) : null}
-    </li>
+    </RuledPanel>
   );
 }

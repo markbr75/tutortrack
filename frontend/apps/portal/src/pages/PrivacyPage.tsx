@@ -1,17 +1,25 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { useState } from "react";
 
 import { api } from "../api";
+import { PortalHeader, TextAreaField } from "../layout/PortalPage";
 
 /** "Your data" (E29-T05): ask for a copy of your (or your child's) data, or for it to be
  * erased, and follow the request. The copy arrives as an expiring link by email. */
 export function PrivacyPage() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
-  const id = useId();
   const requests = useQuery({
     queryKey: ["portal", "data-requests"],
     queryFn: async () => unwrap(await api.GET("/api/v1/me/data-requests")),
@@ -42,92 +50,101 @@ export function PrivacyPage() {
   });
   const children = profile.data?.students ?? [];
   return (
-    <section className="space-y-6 p-4">
-      <h1 className="text-2xl font-semibold">{t("privacyCentre.portal.title")}</h1>
-      <p className="text-sm text-muted-foreground">{t("privacyCentre.portal.intro")}</p>
-      <form
-        className="space-y-3 rounded-md border border-border p-4"
-        aria-label={t("privacyCentre.portal.newRequest")}
-        onSubmit={(e) => {
-          e.preventDefault();
-          create.mutate();
-        }}
-      >
-        <h2 className="font-semibold">{t("privacyCentre.portal.newRequest")}</h2>
-        <SelectField
-          label={t("privacyCentre.portal.what")}
-          value={kind}
-          onChange={(e) => setKind(e.target.value)}
-          options={["access", "portability", "erasure"].map((k) => ({
-            value: k,
-            label: t(`privacyCentre.portal.kinds.${k}`),
-          }))}
-        />
-        {children.length ? (
-          <SelectField
-            label={t("privacyCentre.portal.about")}
-            value={who}
-            onChange={(e) => setWho(e.target.value)}
-            options={[
-              { value: "", label: t("privacyCentre.portal.me") },
-              ...children.map((c) => ({
-                value: c.id,
-                label: `${c.preferred_name || c.first_name} ${c.last_name}`,
-              })),
-            ]}
-          />
-        ) : null}
-        <div className="flex flex-col gap-1">
-          <label htmlFor={`${id}-details`} className="text-sm font-medium">
-            {t("privacyCentre.portal.details")}
-          </label>
-          <textarea
-            id={`${id}-details`}
-            rows={3}
-            className="rounded-md border border-border bg-background p-2 text-sm"
-            value={details}
-            onChange={(e) => setDetails(e.target.value)}
-          />
-        </div>
-        {kind === "erasure" ? (
-          <Alert tone="warning">{t("privacyCentre.portal.erasureWarning")}</Alert>
-        ) : null}
-        {create.error ? <Alert tone="danger">{create.error.message}</Alert> : null}
-        {create.isSuccess ? (
-          <Alert tone="success">
-            {t("privacyCentre.portal.sent", {
-              reference: create.data.reference,
-              date: formatDate(create.data.due_at, i18n.language),
-            })}
-          </Alert>
-        ) : null}
-        <Button type="submit" disabled={create.isPending}>
-          {t("privacyCentre.portal.send")}
-        </Button>
-      </form>
-      {requests.data?.length ? (
-        <section aria-labelledby={`${id}-mine`}>
-          <h2 id={`${id}-mine`} className="mb-2 font-semibold">
-            {t("privacyCentre.portal.yourRequests")}
-          </h2>
-          <ul className="space-y-2 text-sm">
-            {requests.data.map((r) => (
-              <li key={r.id} className="rounded-md border border-border p-3">
-                <p className="font-medium">
-                  {r.reference} · {t(`privacyCentre.portal.kinds.${r.kind}`)}
-                </p>
-                <p>
-                  {t(`privacyCentre.statuses.${r.status}`)} ·{" "}
-                  {t("privacyCentre.portal.answerBy", {
-                    date: formatDate(r.due_at, i18n.language),
+    <div>
+      <PortalHeader
+        title={t("privacyCentre.portal.title")}
+        description={t("privacyCentre.portal.intro")}
+      />
+      <div className="space-y-6">
+        <form
+          aria-label={t("privacyCentre.portal.newRequest")}
+          onSubmit={(e) => {
+            e.preventDefault();
+            create.mutate();
+          }}
+        >
+          <RuledPanel title={t("privacyCentre.portal.newRequest")} flush>
+            <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
+              <SelectField
+                label={t("privacyCentre.portal.what")}
+                value={kind}
+                onChange={(e) => setKind(e.target.value)}
+                options={["access", "portability", "erasure"].map((k) => ({
+                  value: k,
+                  label: t(`privacyCentre.portal.kinds.${k}`),
+                }))}
+              />
+              {children.length ? (
+                <SelectField
+                  label={t("privacyCentre.portal.about")}
+                  value={who}
+                  onChange={(e) => setWho(e.target.value)}
+                  options={[
+                    { value: "", label: t("privacyCentre.portal.me") },
+                    ...children.map((c) => ({
+                      value: c.id,
+                      label: `${c.preferred_name || c.first_name} ${c.last_name}`,
+                    })),
+                  ]}
+                />
+              ) : null}
+              <TextAreaField
+                className="sm:col-span-2"
+                label={t("privacyCentre.portal.details")}
+                value={details}
+                onChange={(e) => setDetails(e.target.value)}
+              />
+              {kind === "erasure" ? (
+                <Alert tone="warning" className="sm:col-span-2">
+                  {t("privacyCentre.portal.erasureWarning")}
+                </Alert>
+              ) : null}
+              {create.error ? (
+                <Alert tone="danger" className="sm:col-span-2">
+                  {create.error.message}
+                </Alert>
+              ) : null}
+              {create.isSuccess ? (
+                <Alert tone="success" className="sm:col-span-2">
+                  {t("privacyCentre.portal.sent", {
+                    reference: create.data.reference,
+                    date: formatDate(create.data.due_at, i18n.language),
                   })}
-                </p>
-                {r.close_reason ? <p className="text-muted-foreground">{r.close_reason}</p> : null}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-    </section>
+                </Alert>
+              ) : null}
+            </div>
+            <PanelFooter>
+              <Button type="submit" disabled={create.isPending}>
+                {t("privacyCentre.portal.send")}
+              </Button>
+            </PanelFooter>
+          </RuledPanel>
+        </form>
+        {requests.data?.length ? (
+          <RuledPanel title={t("privacyCentre.portal.yourRequests")} flush>
+            <PanelRows>
+              {requests.data.map((r) => (
+                <PanelRow key={r.id}>
+                  <p className="font-medium">
+                    <span className="tabular-nums">{r.reference}</span> ·{" "}
+                    {t(`privacyCentre.portal.kinds.${r.kind}`)}
+                  </p>
+                  <p className="text-xs text-muted-foreground tabular-nums">
+                    <span className="text-foreground">
+                      {t(`privacyCentre.statuses.${r.status}`)}
+                    </span>{" "}
+                    ·{" "}
+                    {t("privacyCentre.portal.answerBy", {
+                      date: formatDate(r.due_at, i18n.language),
+                    })}
+                    {r.close_reason ? ` · ${r.close_reason}` : ""}
+                  </p>
+                </PanelRow>
+              ))}
+            </PanelRows>
+          </RuledPanel>
+        ) : null}
+      </div>
+    </div>
   );
 }

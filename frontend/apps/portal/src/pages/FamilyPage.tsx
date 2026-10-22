@@ -1,13 +1,26 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  NamePlate,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { useState } from "react";
 
 import { api, usePortalMe } from "../api";
+import { CheckField, PanelEmpty, PanelLoading, PortalHeader } from "../layout/PortalPage";
 
 type Relationship = components["schemas"]["GuardianInviteRequest"]["relationship"];
 type StudentLogin = components["schemas"]["StudentLogin"];
+
+const quiet = "text-muted-foreground hover:text-foreground";
 
 function errorsOf(error: unknown): Record<string, string> {
   const extra = (error as { problem?: { errors?: Record<string, string[]> } } | null)?.problem;
@@ -16,11 +29,10 @@ function errorsOf(error: unknown): Record<string, string> {
   );
 }
 
-/** Invite another guardian (FR-15-8). */
+/** The household's guardians as ruled rows, then the invite form in the same panel (FR-15-8). */
 function Guardians() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const confirmId = useId();
   const blank = {
     first_name: "",
     last_name: "",
@@ -44,85 +56,105 @@ function Guardians() {
   });
   const errors = errorsOf(invite.error);
   return (
-    <section aria-labelledby="guardians-title" className="space-y-3">
-      <h2 id="guardians-title" className="text-lg font-medium">
-        {t("family.guardiansTitle")}
-      </h2>
-      {guardians.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      <ul className="divide-y divide-border rounded-lg border border-border text-sm">
-        {(guardians.data ?? []).map((g) => (
-          <li key={g.id} className="flex flex-wrap justify-between gap-2 p-3">
-            <span>{g.name}</span>
-            <span className="text-muted-foreground">{t(`family.portal.${g.portal}`)}</span>
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-6">
+      <RuledPanel title={t("family.guardiansTitle")} flush>
+        {guardians.isPending ? (
+          <PanelLoading label={t("grid.loading")} />
+        ) : guardians.data?.length ? (
+          <PanelRows>
+            {guardians.data.map((g) => (
+              <PanelRow key={g.id}>
+                <NamePlate
+                  name={g.name}
+                  aside={
+                    <span className="text-sm text-muted-foreground">
+                      {t(`family.portal.${g.portal}`)}
+                    </span>
+                  }
+                />
+              </PanelRow>
+            ))}
+          </PanelRows>
+        ) : (
+          <PanelEmpty>{t("designS10.noGuardians")}</PanelEmpty>
+        )}
+      </RuledPanel>
       <form
-        className="grid gap-3 sm:grid-cols-2"
         aria-label={t("family.inviteTitle")}
         onSubmit={(e) => {
           e.preventDefault();
           invite.mutate();
         }}
       >
-        <TextField
-          label={t("family.firstName")}
-          required
-          value={form.first_name}
-          error={errors.first_name}
-          onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))}
-        />
-        <TextField
-          label={t("family.lastName")}
-          value={form.last_name}
-          onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))}
-        />
-        <TextField
-          label={t("family.email")}
-          type="email"
-          required
-          value={form.email}
-          error={errors.email}
-          onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-        />
-        <SelectField
-          label={t("family.relationship")}
-          value={form.relationship}
-          options={(["parent", "guardian", "carer", "other"] as const).map((r) => ({
-            value: r,
-            label: t(`family.relationships.${r}`),
-          }))}
-          onChange={(e) => setForm((f) => ({ ...f, relationship: e.target.value as Relationship }))}
-        />
-        <div className="flex items-start gap-2 text-sm sm:col-span-2">
-          <input
-            id={confirmId}
-            type="checkbox"
-            className="mt-1"
-            checked={confirm}
-            onChange={(e) => setConfirm(e.target.checked)}
-          />
-          <label htmlFor={confirmId}>{t("family.confirm")}</label>
-        </div>
-        {invite.isError && !Object.keys(errors).length ? (
-          <Alert tone="danger">{invite.error.message}</Alert>
-        ) : null}
-        {errors.confirm ? <Alert tone="danger">{errors.confirm}</Alert> : null}
-        {invite.isSuccess ? <Alert tone="success">{t("family.invited")}</Alert> : null}
-        <div className="sm:col-span-2">
-          <Button type="submit" loading={invite.isPending} disabled={!confirm}>
-            {t("family.invite")}
-          </Button>
-        </div>
+        <RuledPanel title={t("family.inviteTitle")} flush>
+          <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
+            <TextField
+              label={t("family.firstName")}
+              required
+              value={form.first_name}
+              error={errors.first_name}
+              onChange={(e) => setForm((f) => ({ ...f, first_name: e.target.value }))}
+            />
+            <TextField
+              label={t("family.lastName")}
+              value={form.last_name}
+              onChange={(e) => setForm((f) => ({ ...f, last_name: e.target.value }))}
+            />
+            <TextField
+              label={t("family.email")}
+              type="email"
+              required
+              value={form.email}
+              error={errors.email}
+              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+            />
+            <SelectField
+              label={t("family.relationship")}
+              value={form.relationship}
+              options={(["parent", "guardian", "carer", "other"] as const).map((r) => ({
+                value: r,
+                label: t(`family.relationships.${r}`),
+              }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, relationship: e.target.value as Relationship }))
+              }
+            />
+            <CheckField
+              className="sm:col-span-2"
+              label={t("family.confirm")}
+              checked={confirm}
+              onChange={(e) => setConfirm(e.target.checked)}
+            />
+            {invite.isError && !Object.keys(errors).length ? (
+              <Alert tone="danger" className="sm:col-span-2">
+                {invite.error.message}
+              </Alert>
+            ) : null}
+            {errors.confirm ? (
+              <Alert tone="danger" className="sm:col-span-2">
+                {errors.confirm}
+              </Alert>
+            ) : null}
+            {invite.isSuccess ? (
+              <Alert tone="success" className="sm:col-span-2">
+                {t("family.invited")}
+              </Alert>
+            ) : null}
+          </div>
+          <PanelFooter>
+            <Button type="submit" loading={invite.isPending} disabled={!confirm}>
+              {t("family.invite")}
+            </Button>
+          </PanelFooter>
+        </RuledPanel>
       </form>
-    </section>
+    </div>
   );
 }
 
 function LoginRow({ row }: { row: StudentLogin }) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
-  const consentId = useId();
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
   const [consent, setConsent] = useState(false);
@@ -161,17 +193,21 @@ function LoginRow({ row }: { row: StudentLogin }) {
   });
   const errors = { ...errorsOf(create.error), ...errorsOf(changePin.error) };
   const failure = create.error ?? changePin.error;
+  const context = row.username
+    ? t("family.loginActive", {
+        username: row.username,
+        when: row.pin_changed_at ? formatDateTime(row.pin_changed_at, i18n.language) : "",
+      })
+    : row.has_email_login
+      ? t("family.hasEmailLogin")
+      : !row.eligible
+        ? t("family.notEligible")
+        : undefined;
   return (
-    <li className="space-y-3 p-3">
-      <p className="font-medium">{row.student_name}</p>
+    <li className="space-y-3 px-5 py-3.5">
+      <NamePlate name={row.student_name} context={context} />
       {row.username ? (
         <>
-          <p className="text-sm">
-            {t("family.loginActive", {
-              username: row.username,
-              when: row.pin_changed_at ? formatDateTime(row.pin_changed_at, i18n.language) : "",
-            })}
-          </p>
           <form
             className="flex flex-wrap items-end gap-2"
             aria-label={t("family.changePinFor", { name: row.student_name })}
@@ -181,6 +217,7 @@ function LoginRow({ row }: { row: StudentLogin }) {
             }}
           >
             <TextField
+              size="sm"
               label={t("family.newPin")}
               type="password"
               autoComplete="new-password"
@@ -189,13 +226,14 @@ function LoginRow({ row }: { row: StudentLogin }) {
               error={errors.pin}
               onChange={(e) => setPin(e.target.value)}
             />
-            <Button type="submit" size="sm" loading={changePin.isPending}>
+            <Button type="submit" size="sm" variant="secondary" loading={changePin.isPending}>
               {t("family.changePin")}
             </Button>
             <Button
               type="button"
               size="sm"
-              variant="danger"
+              variant="ghost"
+              className={quiet}
               loading={remove.isPending}
               onClick={() => remove.mutate()}
             >
@@ -204,13 +242,9 @@ function LoginRow({ row }: { row: StudentLogin }) {
           </form>
           {changePin.isSuccess ? <Alert tone="success">{t("family.pinChanged")}</Alert> : null}
         </>
-      ) : row.has_email_login ? (
-        <p className="text-sm text-muted-foreground">{t("family.hasEmailLogin")}</p>
-      ) : !row.eligible ? (
-        <p className="text-sm text-muted-foreground">{t("family.notEligible")}</p>
-      ) : (
+      ) : row.has_email_login || !row.eligible ? null : (
         <form
-          className="grid gap-3 sm:grid-cols-2"
+          className="grid items-start gap-x-4 gap-y-3 sm:grid-cols-2"
           aria-label={t("family.createFor", { name: row.student_name })}
           onSubmit={(e) => {
             e.preventDefault();
@@ -236,16 +270,12 @@ function LoginRow({ row }: { row: StudentLogin }) {
             error={errors.pin}
             onChange={(e) => setPin(e.target.value)}
           />
-          <div className="flex items-start gap-2 text-sm sm:col-span-2">
-            <input
-              id={consentId}
-              type="checkbox"
-              className="mt-1"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-            />
-            <label htmlFor={consentId}>{t("family.consent", { name: row.student_name })}</label>
-          </div>
+          <CheckField
+            className="sm:col-span-2"
+            label={t("family.consent", { name: row.student_name })}
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+          />
           <div className="sm:col-span-2">
             <Button type="submit" size="sm" loading={create.isPending} disabled={!consent}>
               {t("family.createLogin")}
@@ -268,18 +298,17 @@ function StudentLogins() {
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/student-logins")),
   });
   return (
-    <section aria-labelledby="logins-title" className="space-y-3">
-      <h2 id="logins-title" className="text-lg font-medium">
-        {t("family.loginsTitle")}
-      </h2>
-      <p className="text-sm text-muted-foreground">{t("family.loginsIntro")}</p>
-      {logins.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      <ul className="divide-y divide-border rounded-lg border border-border">
-        {(logins.data ?? []).map((row) => (
-          <LoginRow key={row.student_id} row={row} />
-        ))}
-      </ul>
-    </section>
+    <RuledPanel title={t("family.loginsTitle")} description={t("family.loginsIntro")} flush>
+      {logins.isPending ? (
+        <PanelLoading label={t("grid.loading")} />
+      ) : (
+        <ul className="divide-y divide-rule">
+          {(logins.data ?? []).map((row) => (
+            <LoginRow key={row.student_id} row={row} />
+          ))}
+        </ul>
+      )}
+    </RuledPanel>
   );
 }
 
@@ -288,10 +317,12 @@ export function FamilyPage() {
   const me = usePortalMe();
   const f = me.data?.features;
   return (
-    <div className="space-y-8">
-      <h1 className="text-xl font-semibold">{t("family.title")}</h1>
-      {f?.guardian_invites ? <Guardians /> : null}
-      {f?.student_logins ? <StudentLogins /> : null}
+    <div>
+      <PortalHeader title={t("family.title")} />
+      <div className="space-y-6">
+        {f?.guardian_invites ? <Guardians /> : null}
+        {f?.student_logins ? <StudentLogins /> : null}
+      </div>
     </div>
   );
 }

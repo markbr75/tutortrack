@@ -4,12 +4,16 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Ellipsis, LogOut, X, type LucideIcon } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
+import { CountPill } from "./PortalPage";
+
 export interface PortalNavItem {
   to: string;
   label: string;
   icon: LucideIcon;
   /** Heading key in `groups`; items without one are listed first. */
   group?: string;
+  /** Waiting items (unread messages, lessons to mark): a margin-red count pill. */
+  count?: number;
 }
 
 export interface PortalFrameProps {
@@ -166,6 +170,7 @@ function Rail({
                     <Link
                       to={item.to}
                       aria-current={current ? "page" : undefined}
+                      aria-describedby={waitingId("rail", item)}
                       className={cn(
                         "flex items-center gap-3 rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted",
                         current && "bg-brand/10 font-semibold hover:bg-brand/10",
@@ -176,6 +181,7 @@ function Rail({
                         className="size-[18px] shrink-0 text-muted-foreground"
                       />
                       {item.label}
+                      <Waiting place="rail" item={item} className="ml-auto" />
                     </Link>
                   </li>
                 );
@@ -208,8 +214,12 @@ function TabBar({
   const moreCurrent = rest.some((item) => isCurrent(pathname, item.to, root));
   useEffect(() => setOpen(false), [pathname]);
   const slot =
-    "flex min-h-16 flex-col items-center justify-center gap-0.5 px-1 pt-1.5 pb-1 text-xs";
+    "relative flex min-h-16 flex-col items-center justify-center gap-0.5 px-1 pt-1.5 pb-1 text-xs";
   const pill = "grid h-7 w-14 place-items-center rounded-full transition-colors";
+  // A waiting count sits on the icon pill's upper-right corner, ringed off in the leaf.
+  const badge = "absolute top-0.5 left-[calc(50%+0.5rem)] ring-2 ring-surface";
+  // More shows what waits among its destinations, like a closed rail group.
+  const more = { to: "more", count: rest.reduce((sum, item) => sum + (item.count ?? 0), 0) };
   return (
     <>
       <nav
@@ -230,6 +240,7 @@ function TabBar({
                 <Link
                   to={item.to}
                   aria-current={current ? "page" : undefined}
+                  aria-describedby={waitingId("tab", item)}
                   className={cn(
                     slot,
                     current ? "font-semibold text-foreground" : "text-muted-foreground",
@@ -239,6 +250,7 @@ function TabBar({
                     <Icon className="size-5" />
                   </span>
                   <span className="max-w-full truncate">{item.label}</span>
+                  <Waiting place="tab" item={item} className={badge} />
                 </Link>
               </li>
             );
@@ -249,6 +261,7 @@ function TabBar({
                 type="button"
                 aria-haspopup="dialog"
                 aria-expanded={open}
+                aria-describedby={waitingId("tab", more)}
                 onClick={() => setOpen(true)}
                 className={cn(
                   slot,
@@ -260,6 +273,7 @@ function TabBar({
                   <Ellipsis className="size-5" />
                 </span>
                 {t("portalFrame.more")}
+                <Waiting place="tab" item={more} className={badge} />
               </button>
             </li>
           ) : null}
@@ -340,6 +354,7 @@ function MoreSheet({
                     <Link
                       to={item.to}
                       aria-current={current ? "page" : undefined}
+                      aria-describedby={waitingId("sheet", item)}
                       onClick={onClose}
                       className={cn(
                         "flex min-h-12 items-center gap-3 px-5 text-sm hover:bg-muted",
@@ -348,6 +363,7 @@ function MoreSheet({
                     >
                       <Icon aria-hidden="true" className="size-5 shrink-0 text-muted-foreground" />
                       {item.label}
+                      <Waiting place="sheet" item={item} className="ml-auto" />
                     </Link>
                   </li>
                 );
@@ -357,6 +373,34 @@ function MoreSheet({
         ))}
       </div>
     </dialog>
+  );
+}
+
+function waitingId(place: string, item: { to: string; count?: number }): string | undefined {
+  return item.count ? `waiting-${place}-${item.to.replace(/\W+/g, "-")}` : undefined;
+}
+
+/** A destination's waiting count: the margin-red pill for the eye, and the same count in
+ * words as the link's description (hidden, so the destination's name stays its label). */
+function Waiting({
+  place,
+  item,
+  className,
+}: {
+  place: string;
+  item: { to: string; count?: number };
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  const id = waitingId(place, item);
+  if (!id || !item.count) return null;
+  return (
+    <>
+      <CountPill count={item.count} className={className} />
+      <span id={id} hidden>
+        {t("nav.waiting", { count: item.count })}
+      </span>
+    </>
   );
 }
 

@@ -1,11 +1,12 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import { Button, PanelFooter, RuledPanel, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { useState } from "react";
 
 import { api } from "../api";
 import { DigestPreferences } from "../digests/DigestPreferences";
+import { CheckField, PortalHeader, SavedNote, TextAreaField } from "../layout/PortalPage";
 
 type Contact = components["schemas"]["PortalContact"];
 type Student = components["schemas"]["PortalStudent"];
@@ -41,63 +42,63 @@ function ContactForm({ contact }: { contact: Contact }) {
   });
   return (
     <form
-      className="space-y-3 rounded-lg border border-border p-4"
       aria-label={t("portal.yourDetails")}
       onSubmit={(e) => {
         e.preventDefault();
         save.mutate();
       }}
     >
-      <h2 className="font-semibold">{t("portal.yourDetails")}</h2>
-      <p className="text-sm text-muted-foreground">{form.email}</p>
-      <div className="grid gap-2 sm:grid-cols-2">
-        <TextField
-          label={t("portal.firstName")}
-          value={form.first_name}
-          onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-        />
-        <TextField
-          label={t("portal.lastName")}
-          value={form.last_name ?? ""}
-          onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-        />
-        <TextField
-          label={t("portal.phone")}
-          value={form.phone ?? ""}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        />
-        <TextField
-          label={t("portal.mobile")}
-          value={form.mobile ?? ""}
-          onChange={(e) => setForm({ ...form, mobile: e.target.value })}
-        />
-      </div>
-      <fieldset className="space-y-1 text-sm">
-        <legend className="font-medium">{t("portal.whatToReceive")}</legend>
-        {FLAGS.map((flag) => (
-          <label key={flag} className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              className="size-4"
-              checked={Boolean(form[flag])}
-              onChange={(e) => setForm({ ...form, [flag]: e.target.checked })}
-            />
-            {t(`portal.flags.${flag}`)}
-          </label>
-        ))}
-      </fieldset>
-      {save.isSuccess ? <Alert tone="success">{t("portal.saved")}</Alert> : null}
-      <Button type="submit" disabled={save.isPending}>
-        {t("portal.save")}
-      </Button>
+      <RuledPanel title={t("portal.yourDetails")} description={form.email} flush>
+        <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
+          <TextField
+            label={t("portal.firstName")}
+            value={form.first_name}
+            onChange={(e) => setForm({ ...form, first_name: e.target.value })}
+          />
+          <TextField
+            label={t("portal.lastName")}
+            value={form.last_name ?? ""}
+            onChange={(e) => setForm({ ...form, last_name: e.target.value })}
+          />
+          <TextField
+            label={t("portal.phone")}
+            value={form.phone ?? ""}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          />
+          <TextField
+            label={t("portal.mobile")}
+            value={form.mobile ?? ""}
+            onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+          />
+        </div>
+        <div className="border-t border-rule px-5 py-4">
+          <fieldset className="space-y-2">
+            <legend className="mb-2 text-sm font-medium">{t("portal.whatToReceive")}</legend>
+            {FLAGS.map((flag) => (
+              <CheckField
+                key={flag}
+                label={t(`portal.flags.${flag}`)}
+                checked={Boolean(form[flag])}
+                onChange={(e) => setForm({ ...form, [flag]: e.target.checked })}
+              />
+            ))}
+          </fieldset>
+        </div>
+        <PanelFooter>
+          <Button type="submit" disabled={save.isPending}>
+            {t("portal.save")}
+          </Button>
+          <SavedNote show={save.isSuccess} />
+        </PanelFooter>
+      </RuledPanel>
     </form>
   );
 }
 
 function StudentForm({ student }: { student: Student }) {
   const { t } = useTranslation();
-  const needsId = useId();
   const [form, setForm] = useState(student);
+  const name = `${student.first_name} ${student.last_name ?? ""}`.trim();
   const save = useMutation({
     mutationFn: async () =>
       unwrap(
@@ -114,49 +115,44 @@ function StudentForm({ student }: { student: Student }) {
   });
   return (
     <form
-      className="space-y-3 rounded-lg border border-border p-4"
-      aria-label={`${student.first_name} ${student.last_name ?? ""}`.trim()}
+      aria-label={name}
       onSubmit={(e) => {
         e.preventDefault();
         save.mutate();
       }}
     >
-      <h2 className="font-semibold">
-        {student.first_name} {student.last_name}
-      </h2>
-      <div className="grid gap-2 sm:grid-cols-3">
-        <TextField
-          label={t("portal.preferredName")}
-          value={form.preferred_name ?? ""}
-          onChange={(e) => setForm({ ...form, preferred_name: e.target.value })}
-        />
-        <TextField
-          label={t("portal.school")}
-          value={form.school ?? ""}
-          onChange={(e) => setForm({ ...form, school: e.target.value })}
-        />
-        <TextField
-          label={t("portal.yearGroup")}
-          value={form.year_group ?? ""}
-          onChange={(e) => setForm({ ...form, year_group: e.target.value })}
-        />
-      </div>
-      <div className="space-y-1">
-        <label htmlFor={needsId} className="text-sm font-medium">
-          {t("portal.learningNeeds")}
-        </label>
-        <textarea
-          id={needsId}
-          className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          value={form.learning_needs ?? ""}
-          onChange={(e) => setForm({ ...form, learning_needs: e.target.value })}
-        />
-        <p className="text-xs text-muted-foreground">{t("portal.learningNeedsHelp")}</p>
-      </div>
-      {save.isSuccess ? <Alert tone="success">{t("portal.saved")}</Alert> : null}
-      <Button type="submit" disabled={save.isPending}>
-        {t("portal.save")}
-      </Button>
+      <RuledPanel title={name} flush>
+        <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-3">
+          <TextField
+            label={t("portal.preferredName")}
+            value={form.preferred_name ?? ""}
+            onChange={(e) => setForm({ ...form, preferred_name: e.target.value })}
+          />
+          <TextField
+            label={t("portal.school")}
+            value={form.school ?? ""}
+            onChange={(e) => setForm({ ...form, school: e.target.value })}
+          />
+          <TextField
+            label={t("portal.yearGroup")}
+            value={form.year_group ?? ""}
+            onChange={(e) => setForm({ ...form, year_group: e.target.value })}
+          />
+          <TextAreaField
+            className="sm:col-span-3"
+            label={t("portal.learningNeeds")}
+            hint={t("portal.learningNeedsHelp")}
+            value={form.learning_needs ?? ""}
+            onChange={(e) => setForm({ ...form, learning_needs: e.target.value })}
+          />
+        </div>
+        <PanelFooter>
+          <Button type="submit" disabled={save.isPending}>
+            {t("portal.save")}
+          </Button>
+          <SavedNote show={save.isSuccess} />
+        </PanelFooter>
+      </RuledPanel>
     </form>
   );
 }
@@ -170,15 +166,17 @@ export function ProfilePage() {
   });
   if (profile.isPending) return <Spinner label={t("grid.loading")} />;
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">{t("portal.nav.profile")}</h1>
-      {profile.data?.contacts.map((c) => (
-        <ContactForm key={c.id} contact={c} />
-      ))}
-      {profile.data?.students.map((s) => (
-        <StudentForm key={s.id} student={s} />
-      ))}
-      <DigestPreferences />
+    <div>
+      <PortalHeader title={t("portal.nav.profile")} />
+      <div className="space-y-6">
+        {profile.data?.contacts.map((c) => (
+          <ContactForm key={c.id} contact={c} />
+        ))}
+        {profile.data?.students.map((s) => (
+          <StudentForm key={s.id} student={s} />
+        ))}
+        <DigestPreferences />
+      </div>
     </div>
   );
 }

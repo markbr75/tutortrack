@@ -1,9 +1,10 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Spinner } from "@tutortrack/ui";
+import { Alert, PanelRow, PanelRows, RuledPanel, Spinner } from "@tutortrack/ui";
 import { useQuery } from "@tanstack/react-query";
 
 import { api } from "../api";
+import { PanelEmpty, PortalHeader, Word } from "../layout/PortalPage";
 import { CopyLink } from "../pages/ReferralsPage";
 
 /** FR-25-4: a tutor's referral links (families and tutors) and bonuses earned. */
@@ -14,33 +15,53 @@ export function TutorReferralsPage() {
     queryFn: async () => unwrap(await api.GET("/api/v1/portal/tutor/referrals")),
   });
   if (page.isPending) return <Spinner label={t("grid.loading")} />;
-  if (!page.data) return <p>{t("referrals.portal.unavailable")}</p>;
+  if (!page.data) return <Alert>{t("referrals.portal.unavailable")}</Alert>;
   const p = page.data;
   return (
-    <section className="space-y-4" aria-labelledby="tutor-referrals">
-      <h1 id="tutor-referrals" className="text-xl font-semibold">
-        {t("referrals.tutorPortal.title")}
-      </h1>
-      <p>{t("referrals.tutorPortal.intro")}</p>
-      <CopyLink label={t("referrals.tutorPortal.families")} url={p.client_link} />
-      <CopyLink label={t("referrals.tutorPortal.tutors")} url={p.tutor_link} />
-      {p.referrals.length ? (
-        <ul className="space-y-2">
-          {p.referrals.map((r) => (
-            <li key={r.id} className="rounded-md border border-border p-3 text-sm">
-              <p className="font-medium">
-                {r.referred_name} · {t(`referrals.tutorKinds.${r.kind}`)}
-              </p>
-              <p>
-                {t(`referrals.tutorStatus.${r.status}`)} · {formatDate(r.created_at, i18n.language)}
-                {r.bonus ? ` · ${formatMoney(r.bonus, i18n.language)}` : ""}
-              </p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>{t("referrals.portal.none")}</p>
-      )}
-    </section>
+    <div>
+      <PortalHeader
+        title={t("referrals.tutorPortal.title")}
+        description={t("referrals.tutorPortal.intro")}
+      />
+      <div className="space-y-6">
+        <RuledPanel label={t("referrals.tutorPortal.title")}>
+          <div className="space-y-4">
+            <CopyLink label={t("referrals.tutorPortal.families")} url={p.client_link} />
+            <CopyLink label={t("referrals.tutorPortal.tutors")} url={p.tutor_link} />
+          </div>
+        </RuledPanel>
+        <RuledPanel title={t("designS10.peopleYouReferred")} flush>
+          {p.referrals.length ? (
+            <PanelRows>
+              {p.referrals.map((r) => (
+                <PanelRow key={r.id} className="flex items-baseline justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="font-medium">
+                      {r.referred_name} · {t(`referrals.tutorKinds.${r.kind}`)}
+                    </p>
+                    <p className="text-xs text-muted-foreground tabular-nums">
+                      <Word
+                        tone={r.status === "pending" ? "margin" : "ink"}
+                        className={r.status === "pending" ? "" : "text-foreground"}
+                      >
+                        {t(`referrals.tutorStatus.${r.status}`)}
+                      </Word>{" "}
+                      · {formatDate(r.created_at, i18n.language)}
+                    </p>
+                  </div>
+                  {r.bonus ? (
+                    <p className="w-28 shrink-0 text-right font-semibold tabular-nums">
+                      {formatMoney(r.bonus, i18n.language)}
+                    </p>
+                  ) : null}
+                </PanelRow>
+              ))}
+            </PanelRows>
+          ) : (
+            <PanelEmpty>{t("referrals.portal.none")}</PanelEmpty>
+          )}
+        </RuledPanel>
+      </div>
+    </div>
   );
 }

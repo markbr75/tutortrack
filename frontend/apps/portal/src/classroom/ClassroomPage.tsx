@@ -1,11 +1,21 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
 import { JoinButton } from "../JoinButton";
+import { PanelEmpty, PortalHeader } from "../layout/PortalPage";
 
 /** The in-app classroom (E22-T10, FR-22-5): the built-in or Lessonspace room embedded for
  * the lesson's tutor and family, the safeguarding banner, the recording consent prompt and
@@ -37,58 +47,77 @@ export function ClassroomPage({ lessonId }: { lessonId: string }) {
   if (!room.data) return <Alert tone="danger">{t("classroom.unavailable")}</Alert>;
   const c = room.data;
   return (
-    <article className="space-y-4" aria-labelledby="classroom-title">
-      <header>
-        <h1 id="classroom-title" className="text-xl font-semibold">
-          {c.title}
-        </h1>
-        <p className="text-sm text-muted-foreground">{formatDateTime(c.start, i18n.language)}</p>
-      </header>
-      <div
-        role="note"
-        className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950"
-      >
-        <strong>{t("classroom.safeguarding")}</strong> {c.safeguarding_banner}
-      </div>
-      {c.recording ? (
-        <p className="text-sm">
-          {t(c.role === "tutor" ? "classroom.recordingTutor" : "classroom.recordingFamily")}
-        </p>
-      ) : null}
-      {c.consent_needed.length ? (
-        <div className="space-y-2 rounded-md border border-border p-3 text-sm">
-          <p>{t("classroom.consentPrompt")}</p>
-          <Button size="sm" onClick={() => consent.mutate()} loading={consent.isPending}>
-            {t("classroom.giveConsent")}
-          </Button>
-          {consent.error ? <Alert tone="danger">{consent.error.message}</Alert> : null}
-        </div>
-      ) : null}
-      {c.embeddable && c.open ? (
-        <div className="aspect-video w-full overflow-hidden rounded-lg border border-border">
-          <iframe
-            title={t("classroom.roomTitle", { title: c.title })}
-            src={c.join_url}
-            className="size-full"
-            allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
-            referrerPolicy="no-referrer"
-          />
-        </div>
-      ) : c.join_url ? (
-        <JoinButton url={c.join_url} start={c.start} end={c.end} opensAt={c.opens_at ?? c.start} />
-      ) : (
-        <p className="text-sm text-muted-foreground">{t("classroom.noRoom")}</p>
-      )}
-      {c.embeddable && !c.open && c.opens_at ? (
-        <p className="text-sm">
-          {t("classroom.opensAt", { when: formatDateTime(c.opens_at, i18n.language) })}
-        </p>
-      ) : null}
-      <ClassroomResources
-        lessonId={lessonId}
-        resources={c.resources}
-        canShare={c.role === "tutor"}
+    <article aria-labelledby="classroom-title">
+      <PortalHeader
+        titleId="classroom-title"
+        title={c.title}
+        description={
+          <span className="tabular-nums">
+            {formatDateTime(c.start, i18n.language)}
+            {c.recording
+              ? ` · ${t(c.role === "tutor" ? "classroom.recordingTutor" : "classroom.recordingFamily")}`
+              : ""}
+          </span>
+        }
       />
+      <div className="space-y-6">
+        <div
+          role="note"
+          className="rounded-md border border-warning/40 bg-warning/10 px-4 py-3 text-sm"
+        >
+          <strong className="font-semibold">{t("classroom.safeguarding")}</strong>{" "}
+          {c.safeguarding_banner}
+        </div>
+        {c.consent_needed.length ? (
+          <RuledPanel
+            label={t("classroom.giveConsent")}
+            footer={
+              <Button size="sm" onClick={() => consent.mutate()} loading={consent.isPending}>
+                {t("classroom.giveConsent")}
+              </Button>
+            }
+          >
+            <p className="text-sm">{t("classroom.consentPrompt")}</p>
+            {consent.error ? (
+              <Alert tone="danger" className="mt-3">
+                {consent.error.message}
+              </Alert>
+            ) : null}
+          </RuledPanel>
+        ) : null}
+        {c.embeddable && c.open ? (
+          <div className="aspect-video w-full overflow-hidden rounded-xl border border-border bg-surface">
+            <iframe
+              title={t("classroom.roomTitle", { title: c.title })}
+              src={c.join_url}
+              className="size-full"
+              allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        ) : c.join_url ? (
+          <div className="space-y-2">
+            <JoinButton
+              url={c.join_url}
+              start={c.start}
+              end={c.end}
+              opensAt={c.opens_at ?? c.start}
+            />
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("classroom.noRoom")}</p>
+        )}
+        {c.embeddable && !c.open && c.opens_at ? (
+          <p className="text-sm text-muted-foreground tabular-nums">
+            {t("classroom.opensAt", { when: formatDateTime(c.opens_at, i18n.language) })}
+          </p>
+        ) : null}
+        <ClassroomResources
+          lessonId={lessonId}
+          resources={c.resources}
+          canShare={c.role === "tutor"}
+        />
+      </div>
     </article>
   );
 }
@@ -148,16 +177,13 @@ function ClassroomResources({
   const options = (library.data?.results ?? []).filter((r) => !inRoom.has(r.id));
   if (!resources.length && !canShare) return null;
   return (
-    <section aria-labelledby="classroom-resources" className="space-y-3 text-sm">
-      <h2 id="classroom-resources" className="font-semibold">
-        {t("classroom.resources")}
-      </h2>
+    <RuledPanel title={t("classroom.resources")} titleId="classroom-resources" flush>
       {resources.length ? (
-        <ul className="divide-y divide-rule rounded-xl border border-border bg-surface">
+        <PanelRows>
           {resources.map((r) => (
-            <li
+            <PanelRow
               key={r.id}
-              className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5"
+              className="flex flex-wrap items-center justify-between gap-2"
             >
               <span>
                 <span className="font-medium">{r.title}</span>
@@ -174,44 +200,65 @@ function ClassroomResources({
               >
                 {t("g5c.classroom.open")}
               </Button>
-            </li>
+            </PanelRow>
           ))}
-        </ul>
+        </PanelRows>
       ) : (
-        <p className="text-muted-foreground">{t("g5c.classroom.none")}</p>
+        <PanelEmpty>{t("g5c.classroom.none")}</PanelEmpty>
       )}
-      {open.error ? <Alert tone="danger">{open.error.message}</Alert> : null}
+      {open.error ? (
+        <div className="px-5 pb-4">
+          <Alert tone="danger">{open.error.message}</Alert>
+        </div>
+      ) : null}
       {canShare ? (
         <form
           aria-label={t("g5c.classroom.share")}
-          className="flex flex-wrap items-end gap-2"
+          className="flex flex-wrap items-end gap-2 border-t border-border px-5 py-3"
           onSubmit={(e) => {
             e.preventDefault();
             if (chosen) share.mutate();
           }}
         >
-          <SelectField
-            label={t("g5c.classroom.choose")}
-            value={chosen}
-            onChange={(e) => setChosen(e.target.value)}
-            options={[
-              { value: "", label: t("g5c.classroom.pick") },
-              ...options.map((r) => ({ value: r.id, label: r.title })),
-            ]}
-          />
-          <TextField
-            label={t("g5c.classroom.message")}
-            value={message}
-            maxLength={500}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          <Button type="submit" disabled={!chosen} loading={share.isPending}>
+          <div className="min-w-44 flex-1">
+            <SelectField
+              size="sm"
+              label={t("g5c.classroom.choose")}
+              value={chosen}
+              onChange={(e) => setChosen(e.target.value)}
+              options={[
+                { value: "", label: t("g5c.classroom.pick") },
+                ...options.map((r) => ({ value: r.id, label: r.title })),
+              ]}
+            />
+          </div>
+          <div className="min-w-44 flex-1">
+            <TextField
+              size="sm"
+              label={t("g5c.classroom.message")}
+              value={message}
+              maxLength={500}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+          </div>
+          <Button
+            type="submit"
+            size="sm"
+            variant="secondary"
+            className="h-9"
+            disabled={!chosen}
+            loading={share.isPending}
+          >
             {t("g5c.classroom.share")}
           </Button>
-          {share.error ? <Alert tone="danger">{share.error.message}</Alert> : null}
+          {share.error ? (
+            <Alert tone="danger" className="w-full">
+              {share.error.message}
+            </Alert>
+          ) : null}
         </form>
       ) : null}
-    </section>
+    </RuledPanel>
   );
 }
 
@@ -230,28 +277,33 @@ export function RecordingsPage() {
   if (recordings.isPending) return <Spinner label={t("grid.loading")} />;
   const rows = recordings.data ?? [];
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">{t("classroom.recordingsTitle")}</h1>
-      {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("classroom.noRecordings")}</p>
-      ) : (
-        <ul className="space-y-2">
-          {rows.map((r) => (
-            <li
-              key={r.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-3 text-sm"
-            >
-              <span>
-                {r.lesson_title} · {formatDateTime(r.lesson_start, i18n.language)}
-              </span>
-              <Button size="sm" variant="secondary" onClick={() => play.mutate(r.id)}>
-                {t("classroom.watch")}
-              </Button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {play.error ? <Alert tone="danger">{play.error.message}</Alert> : null}
+    <div>
+      <PortalHeader title={t("classroom.recordingsTitle")} />
+      <div className="space-y-4">
+        <RuledPanel label={t("classroom.recordingsTitle")} flush>
+          {rows.length ? (
+            <PanelRows>
+              {rows.map((r) => (
+                <PanelRow key={r.id} className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="min-w-0">
+                    <span className="block font-medium">{r.lesson_title}</span>
+                    <span className="block text-xs text-muted-foreground tabular-nums">
+                      {formatDateTime(r.lesson_start, i18n.language)}
+                    </span>
+                  </span>
+                  <Button size="sm" variant="secondary" onClick={() => play.mutate(r.id)}>
+                    {t("classroom.watch")}
+                    <span className="sr-only"> {r.lesson_title}</span>
+                  </Button>
+                </PanelRow>
+              ))}
+            </PanelRows>
+          ) : (
+            <PanelEmpty>{t("classroom.noRecordings")}</PanelEmpty>
+          )}
+        </RuledPanel>
+        {play.error ? <Alert tone="danger">{play.error.message}</Alert> : null}
+      </div>
     </div>
   );
 }

@@ -1,15 +1,17 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner } from "@tutortrack/ui";
+import { Alert, Button, NamePlate, PanelRow, PanelRows, RuledPanel } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
 import { SignForm } from "../esign/SignForm";
+import { PanelEmpty, PanelLoading, PortalHeader } from "../layout/PortalPage";
 
 type PortalDocument = components["schemas"]["PortalDocument"];
 
-/** Documents shared with the family, and those waiting for a signature (FR-15-8). */
+/** Documents shared with the family, and those waiting for a signature (FR-15-8): ruled rows
+ * inside a flush panel; signing opens in place under the document. */
 export function DocumentList({
   queryKey,
   list,
@@ -36,77 +38,81 @@ export function DocumentList({
       void queryClient.invalidateQueries({ queryKey });
     },
   });
-  if (documents.isPending) return <Spinner label={t("grid.loading")} />;
+  if (documents.isPending) return <PanelLoading label={t("grid.loading")} />;
   const rows = documents.data ?? [];
-  if (rows.length === 0) return <p className="text-sm text-muted-foreground">{t("esign.none")}</p>;
+  if (rows.length === 0) return <PanelEmpty>{t("esign.none")}</PanelEmpty>;
   return (
-    <ul className="space-y-3">
-      {rows.map((d) => (
-        <li key={d.id} className="rounded-lg border border-border p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <p className="font-medium">{d.title}</p>
-              <p className="text-sm text-muted-foreground">
-                {d.signature_status === "signed" && d.signed_at
-                  ? t("esign.signedOn", { when: formatDateTime(d.signed_at, i18n.language) })
-                  : t(`esign.status.${d.signature_status}`)}
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button size="sm" variant="secondary" onClick={() => open.mutate(d.id)}>
-                {t("esign.download", { title: d.title })}
-              </Button>
-              {d.signature_status === "awaiting" && signing !== d.id ? (
-                <Button size="sm" onClick={() => setSigning(d.id)}>
-                  {t("esign.signButton", { title: d.title })}
-                </Button>
-              ) : null}
-            </div>
-          </div>
-          {signing === d.id ? (
-            <SignForm
-              title={d.title}
-              pending={signIt.isPending}
-              error={signIt.error?.message}
-              onSign={(name) => signIt.mutate({ id: d.id, name })}
-              onCancel={() => setSigning(null)}
-            />
-          ) : null}
-        </li>
-      ))}
+    <>
       {signIt.isSuccess ? (
-        <li>
+        <div className="px-5 pt-4">
           <Alert tone="success">{t("esign.thanks")}</Alert>
-        </li>
+        </div>
       ) : null}
-    </ul>
+      <PanelRows>
+        {rows.map((d) => (
+          <PanelRow key={d.id}>
+            <NamePlate
+              name={d.title}
+              context={
+                d.signature_status === "signed" && d.signed_at
+                  ? t("esign.signedOn", { when: formatDateTime(d.signed_at, i18n.language) })
+                  : t(`esign.status.${d.signature_status}`)
+              }
+              aside={
+                <>
+                  <Button size="sm" variant="secondary" onClick={() => open.mutate(d.id)}>
+                    {t("esign.download", { title: d.title })}
+                  </Button>
+                  {d.signature_status === "awaiting" && signing !== d.id ? (
+                    <Button size="sm" onClick={() => setSigning(d.id)}>
+                      {t("esign.signButton", { title: d.title })}
+                    </Button>
+                  ) : null}
+                </>
+              }
+            />
+            {signing === d.id ? (
+              <SignForm
+                title={d.title}
+                pending={signIt.isPending}
+                error={signIt.error?.message}
+                onSign={(name) => signIt.mutate({ id: d.id, name })}
+                onCancel={() => setSigning(null)}
+              />
+            ) : null}
+          </PanelRow>
+        ))}
+      </PanelRows>
+    </>
   );
 }
 
 export function DocumentsPage() {
   const { t } = useTranslation();
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">{t("esign.portalTitle")}</h1>
-      <DocumentList
-        queryKey={["portal", "documents"]}
-        list={async () => unwrap(await api.GET("/api/v1/portal/documents"))}
-        download={async (id) =>
-          unwrap(
-            await api.GET("/api/v1/portal/documents/{document_id}/download", {
-              params: { path: { document_id: id } },
-            }),
-          )
-        }
-        sign={async (id, fullName) =>
-          unwrap(
-            await api.POST("/api/v1/portal/documents/{document_id}/sign", {
-              params: { path: { document_id: id } },
-              body: { full_name: fullName, agree: true },
-            }),
-          )
-        }
-      />
+    <div>
+      <PortalHeader title={t("esign.portalTitle")} />
+      <RuledPanel label={t("esign.portalTitle")} flush>
+        <DocumentList
+          queryKey={["portal", "documents"]}
+          list={async () => unwrap(await api.GET("/api/v1/portal/documents"))}
+          download={async (id) =>
+            unwrap(
+              await api.GET("/api/v1/portal/documents/{document_id}/download", {
+                params: { path: { document_id: id } },
+              }),
+            )
+          }
+          sign={async (id, fullName) =>
+            unwrap(
+              await api.POST("/api/v1/portal/documents/{document_id}/sign", {
+                params: { path: { document_id: id } },
+                body: { full_name: fullName, agree: true },
+              }),
+            )
+          }
+        />
+      </RuledPanel>
     </div>
   );
 }

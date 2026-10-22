@@ -1,16 +1,30 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  FactList,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, usePortalMe } from "../api";
+import { PanelEmpty, PanelLoading, PortalHeader } from "../layout/PortalPage";
 
 type Hold = components["schemas"]["BookingHold"];
+type Slot = { tutor: string; tutor_name: string; start: string };
 
 function isoDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
+
+const quiet = "text-muted-foreground hover:text-foreground";
 
 /** Self-booking for families (FR-08-9 on the E08-T14 engine): service → tutor (or any) →
  * free time → hold (the slot is kept for a few minutes) → book (and pay, when the
@@ -98,154 +112,216 @@ export function BookingPage() {
       : "";
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-semibold">{t("portalBooking.title")}</h1>
-      <RescheduleRequests />
-      {hold ? (
-        <section className="space-y-3 rounded-lg border border-border p-4" aria-live="polite">
-          <h2 className="font-semibold">
-            {hold.service_name} · {formatDateTime(hold.start, i18n.language)}
-          </h2>
-          <p className="text-sm">
-            {hold.tutor_name} · {hold.student_name}
-          </p>
-          {hold.quote ? (
-            <p className="text-sm">
-              {t("portalBooking.price", { price: price(hold.quote.amount) })}
-              {hold.quote.discounts.length ? ` (${hold.quote.trace.slice(-1)[0] ?? ""})` : ""}
-            </p>
-          ) : null}
-          {hold.status === "held" ? (
-            <>
-              <p className="text-xs text-muted-foreground">
-                {t("portalBooking.heldUntil", {
-                  when: formatDateTime(hold.expires_at, i18n.language),
-                })}
-              </p>
-              <div className="flex gap-2">
-                <Button onClick={() => submit.mutate(hold.id)} disabled={submit.isPending}>
-                  {t("portalBooking.book")}
-                </Button>
-                <Button variant="ghost" onClick={() => cancel.mutate(hold.id)}>
-                  {t("portalBooking.changeTime")}
-                </Button>
-              </div>
-            </>
-          ) : (
-            <Alert tone={hold.status === "confirmed" ? "success" : "info"}>
-              {t(`portalBooking.status.${hold.status}`)}
-            </Alert>
-          )}
-          {submit.data?.pay_url ? (
-            <a
-              className="inline-block rounded-md bg-primary px-3 py-2 text-primary-foreground"
-              href={submit.data.pay_url}
+    <div>
+      <PortalHeader title={t("portalBooking.title")} />
+      <div className="space-y-6">
+        <RescheduleRequests />
+        {hold ? (
+          <section aria-live="polite">
+            <RuledPanel
+              title={`${hold.service_name} · ${formatDateTime(hold.start, i18n.language)}`}
+              flush
+              footer={
+                hold.status === "held" ? (
+                  <>
+                    <Button onClick={() => submit.mutate(hold.id)} disabled={submit.isPending}>
+                      {t("portalBooking.book")}
+                    </Button>
+                    <Button variant="ghost" className={quiet} onClick={() => cancel.mutate(hold.id)}>
+                      {t("portalBooking.changeTime")}
+                    </Button>
+                  </>
+                ) : submit.data?.pay_url ? (
+                  <a className={buttonClass()} href={submit.data.pay_url}>
+                    {t("portalBooking.payNow")}
+                  </a>
+                ) : undefined
+              }
             >
-              {t("portalBooking.payNow")}
-            </a>
-          ) : null}
-        </section>
+              <FactList
+                items={[
+                  [t("portalBooking.tutor"), hold.tutor_name],
+                  [t("portal.student"), hold.student_name],
+                ]}
+              />
+              {hold.quote ? (
+                <p className="border-t border-rule px-5 py-2.5 text-sm font-semibold tabular-nums">
+                  {t("portalBooking.price", { price: price(hold.quote.amount) })}
+                  {hold.quote.discounts.length ? ` (${hold.quote.trace.slice(-1)[0] ?? ""})` : ""}
+                </p>
+              ) : null}
+              <div className="border-t border-rule px-5 py-3">
+                {hold.status === "held" ? (
+                  <p className="text-xs text-muted-foreground tabular-nums">
+                    {t("portalBooking.heldUntil", {
+                      when: formatDateTime(hold.expires_at, i18n.language),
+                    })}
+                  </p>
+                ) : (
+                  <Alert tone={hold.status === "confirmed" ? "success" : "info"}>
+                    {t(`portalBooking.status.${hold.status}`)}
+                  </Alert>
+                )}
+              </div>
+            </RuledPanel>
+          </section>
+        ) : (
+          <RuledPanel title={t("designS10.findATime")} flush>
+            {services.isPending ? (
+              <PanelLoading label={t("grid.loading")} />
+            ) : !services.data?.length ? (
+              <PanelEmpty>{t("portalBooking.noServices")}</PanelEmpty>
+            ) : (
+              <>
+                <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
+                  <SelectField
+                    label={t("portalBooking.service")}
+                    value={service}
+                    onChange={(e) => {
+                      setService(e.target.value);
+                      setTutor("");
+                    }}
+                    options={[
+                      { value: "", label: t("portalBooking.choose") },
+                      ...services.data.map((s) => ({
+                        value: s.id,
+                        label: s.price ? `${s.name} · ${price(s.price)}` : s.name,
+                      })),
+                    ]}
+                  />
+                  <SelectField
+                    label={t("portalBooking.tutor")}
+                    value={tutor}
+                    onChange={(e) => setTutor(e.target.value)}
+                    options={[
+                      { value: "", label: t("portalBooking.anyTutor") },
+                      ...(chosen?.tutors ?? []).map((p) => ({ value: p.id, label: p.name })),
+                    ]}
+                  />
+                  {students.length > 1 ? (
+                    <SelectField
+                      label={t("portal.student")}
+                      value={who}
+                      onChange={(e) => setStudent(e.target.value)}
+                      options={students.map((s) => ({ value: s.id, label: s.name }))}
+                    />
+                  ) : null}
+                  <TextField
+                    label={t("portalBooking.weekFrom")}
+                    type="date"
+                    value={from}
+                    onChange={(e) => setFrom(e.target.value)}
+                  />
+                  <TextField
+                    label={t("portalBooking.promo")}
+                    value={promo}
+                    onChange={(e) => setPromo(e.target.value)}
+                  />
+                  {usable.length ? (
+                    <SelectField
+                      label={t("portalMakeups.label")}
+                      hint={t("portalMakeups.hint")}
+                      value={credit}
+                      onChange={(e) => setCredit(e.target.value)}
+                      options={[
+                        { value: "", label: t("portalMakeups.none") },
+                        ...usable.map((c) => ({
+                          value: c.id,
+                          label: t("portalMakeups.option", {
+                            lesson: c.source_lesson,
+                            expires: formatDateTime(c.expires_at, i18n.language, undefined, {
+                              dateStyle: "medium",
+                            }),
+                          }),
+                        })),
+                      ]}
+                    />
+                  ) : null}
+                </div>
+                {service ? (
+                  <Times
+                    loading={slots.isPending}
+                    slots={slots.data ?? []}
+                    disabled={take.isPending}
+                    onTake={(slot) => take.mutate(slot)}
+                  />
+                ) : null}
+              </>
+            )}
+          </RuledPanel>
+        )}
+        {take.error || submit.error ? (
+          <Alert tone="danger">{(take.error ?? submit.error)?.message}</Alert>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/** Free times for the week, one row per day: the day as a caption, its times as secondary
+ * buttons in tabular figures (each names its day and tutor for screen readers). */
+function Times({
+  loading,
+  slots,
+  disabled,
+  onTake,
+}: {
+  loading: boolean;
+  slots: ReadonlyArray<Slot>;
+  disabled: boolean;
+  onTake: (slot: Slot) => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const day = (iso: string) =>
+    formatDateTime(iso, i18n.language, undefined, {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+  const days = new Map<string, Slot[]>();
+  for (const slot of slots) {
+    const key = day(slot.start);
+    days.set(key, [...(days.get(key) ?? []), slot]);
+  }
+  return (
+    <section aria-labelledby="free-times" className="border-t border-border">
+      <h3 id="free-times" className="px-5 pt-3.5 pb-1 text-sm font-semibold">
+        {t("portalBooking.times")}
+      </h3>
+      {loading ? (
+        <PanelLoading label={t("grid.loading")} />
+      ) : !slots.length ? (
+        <p className="px-5 pt-1 pb-4 text-sm text-muted-foreground">{t("portalBooking.noTimes")}</p>
       ) : (
-        <section className="space-y-3">
-          {services.isPending ? (
-            <Spinner label={t("grid.loading")} />
-          ) : !services.data?.length ? (
-            <p className="text-sm text-muted-foreground">{t("portalBooking.noServices")}</p>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <SelectField
-                label={t("portalBooking.service")}
-                value={service}
-                onChange={(e) => {
-                  setService(e.target.value);
-                  setTutor("");
-                }}
-                options={[
-                  { value: "", label: t("portalBooking.choose") },
-                  ...services.data.map((s) => ({
-                    value: s.id,
-                    label: s.price ? `${s.name} · ${price(s.price)}` : s.name,
-                  })),
-                ]}
-              />
-              <SelectField
-                label={t("portalBooking.tutor")}
-                value={tutor}
-                onChange={(e) => setTutor(e.target.value)}
-                options={[
-                  { value: "", label: t("portalBooking.anyTutor") },
-                  ...(chosen?.tutors ?? []).map((p) => ({ value: p.id, label: p.name })),
-                ]}
-              />
-              {students.length > 1 ? (
-                <SelectField
-                  label={t("portal.student")}
-                  value={who}
-                  onChange={(e) => setStudent(e.target.value)}
-                  options={students.map((s) => ({ value: s.id, label: s.name }))}
-                />
-              ) : null}
-              <TextField
-                label={t("portalBooking.weekFrom")}
-                type="date"
-                value={from}
-                onChange={(e) => setFrom(e.target.value)}
-              />
-              <TextField
-                label={t("portalBooking.promo")}
-                value={promo}
-                onChange={(e) => setPromo(e.target.value)}
-              />
-              {usable.length ? (
-                <SelectField
-                  label={t("portalMakeups.label")}
-                  hint={t("portalMakeups.hint")}
-                  value={credit}
-                  onChange={(e) => setCredit(e.target.value)}
-                  options={[
-                    { value: "", label: t("portalMakeups.none") },
-                    ...usable.map((c) => ({
-                      value: c.id,
-                      label: t("portalMakeups.option", {
-                        lesson: c.source_lesson,
-                        expires: formatDateTime(c.expires_at, i18n.language, undefined, {
-                          dateStyle: "medium",
-                        }),
-                      }),
-                    })),
-                  ]}
-                />
-              ) : null}
-            </div>
-          )}
-          {service ? (
-            slots.isPending ? (
-              <Spinner label={t("grid.loading")} />
-            ) : slots.data?.length ? (
-              <ul className="flex flex-wrap gap-2" aria-label={t("portalBooking.times")}>
-                {slots.data.map((slot) => (
+        <ul className="divide-y divide-rule" aria-label={t("portalBooking.times")}>
+          {[...days.entries()].map(([label, list]) => (
+            <li key={label} className="space-y-2 px-5 py-3">
+              <p className="text-xs text-muted-foreground">{label}</p>
+              <ul className="flex flex-wrap gap-2">
+                {list.map((slot) => (
                   <li key={`${slot.tutor}-${slot.start}`}>
                     <Button
                       size="sm"
                       variant="secondary"
-                      disabled={take.isPending}
-                      onClick={() => take.mutate(slot)}
+                      className="tabular-nums"
+                      disabled={disabled}
+                      onClick={() => onTake(slot)}
                     >
-                      {formatDateTime(slot.start, i18n.language)} · {slot.tutor_name}
+                      <span className="sr-only">{label} </span>
+                      {formatDateTime(slot.start, i18n.language, undefined, {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
+                      · {slot.tutor_name}
                     </Button>
                   </li>
                 ))}
               </ul>
-            ) : (
-              <p className="text-sm text-muted-foreground">{t("portalBooking.noTimes")}</p>
-            )
-          ) : null}
-        </section>
+            </li>
+          ))}
+        </ul>
       )}
-      {take.error || submit.error ? (
-        <Alert tone="danger">{(take.error ?? submit.error)?.message}</Alert>
-      ) : null}
-    </div>
+    </section>
   );
 }
 
@@ -275,31 +351,34 @@ export function RescheduleRequests() {
   );
   if (!waiting.length) return null;
   return (
-    <section className="space-y-2" aria-label={t("portalBooking.requests")}>
-      <h2 className="font-semibold">{t("portalBooking.requests")}</h2>
-      {waiting.map((r) => (
-        <article key={r.id} className="rounded-lg border border-border p-3 text-sm">
-          <p>
-            {t("portalBooking.tutorAsks", {
-              lesson: r.lesson_title,
-              from: formatDateTime(r.original_start, i18n.language),
-              to: formatDateTime(r.proposed[0]?.start ?? r.original_start, i18n.language),
-            })}
-          </p>
-          <div className="mt-2 flex gap-2">
-            <Button size="sm" onClick={() => decide.mutate({ id: r.id, approve: true })}>
-              {t("portalBooking.accept")}
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => decide.mutate({ id: r.id, approve: false })}
-            >
-              {t("portalBooking.decline")}
-            </Button>
-          </div>
-        </article>
-      ))}
-    </section>
+    <RuledPanel title={t("portalBooking.requests")} flush>
+      <PanelRows>
+        {waiting.map((r) => (
+          <PanelRow key={r.id} className="space-y-2">
+            <article>
+              <p>
+                {t("portalBooking.tutorAsks", {
+                  lesson: r.lesson_title,
+                  from: formatDateTime(r.original_start, i18n.language),
+                  to: formatDateTime(r.proposed[0]?.start ?? r.original_start, i18n.language),
+                })}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => decide.mutate({ id: r.id, approve: false })}
+                >
+                  {t("portalBooking.decline")}
+                </Button>
+                <Button size="sm" onClick={() => decide.mutate({ id: r.id, approve: true })}>
+                  {t("portalBooking.accept")}
+                </Button>
+              </div>
+            </article>
+          </PanelRow>
+        ))}
+      </PanelRows>
+    </RuledPanel>
   );
 }

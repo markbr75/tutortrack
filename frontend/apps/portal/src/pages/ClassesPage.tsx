@@ -1,10 +1,21 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  Disclosure,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+  Spinner,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, usePortalMe } from "../api";
+import { CheckField, PanelEmpty, PortalHeader, Word } from "../layout/PortalPage";
 
 type PublicClass = components["schemas"]["PublicClass"];
 
@@ -19,6 +30,8 @@ function weekdayNames(days: number[], locale: string): string {
     )
     .join(", ");
 }
+
+const quiet = "text-muted-foreground hover:text-foreground";
 
 /** Group classes for families (E20 on the portal): their classes (with payment for a held
  * place), waitlist positions, next term's re-enrolment questions and classes to join. */
@@ -60,116 +73,138 @@ export function ClassesPage() {
   const current = enrolments.filter((e) =>
     ["pending_payment", "enrolled", "trial"].includes(e.status),
   );
+  const when = (days: number[], time: string) => `${weekdayNames(days, i18n.language)} ${time}`;
   return (
-    <section className="space-y-8 p-4">
-      <h1 className="text-2xl font-semibold">{t("portalCourses.title")}</h1>
-      {offers.length ? (
-        <section aria-labelledby="next-term" className="space-y-2">
-          <h2 id="next-term" className="text-lg font-semibold">
-            {t("portalCourses.nextTerm")}
-          </h2>
-          <ul className="space-y-2">
-            {offers.map((o) => (
-              <li key={o.id} className="rounded-md border border-border p-3 text-sm">
-                <p className="font-medium">
-                  {o.student_name}: {o.course_name} · {o.class_name} · {o.term}
-                </p>
-                <p>{t("portalCourses.answerBy", { date: formatDateTime(o.deadline) })}</p>
-                <p role="status">{t(`portalCourses.offerStatus.${o.status}`)}</p>
-                <div className="mt-2 flex gap-2">
-                  <Button size="sm" onClick={() => answer.mutate({ id: o.id, confirm: true })}>
-                    {t("portalCourses.keep")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => answer.mutate({ id: o.id, confirm: false })}
-                  >
-                    {t("portalCourses.leave")}
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
-          {answer.error ? <Alert tone="danger">{answer.error.message}</Alert> : null}
-        </section>
-      ) : null}
-      <section aria-labelledby="my-classes" className="space-y-2">
-        <h2 id="my-classes" className="text-lg font-semibold">
-          {t("portalCourses.myClasses")}
-        </h2>
-        {!current.length ? <p className="text-sm">{t("portalCourses.none")}</p> : null}
-        <ul className="space-y-2">
-          {current.map((e) => (
-            <li key={e.id} className="rounded-md border border-border p-3 text-sm">
-              <p className="font-medium">
-                {e.student_name}: {e.course_name} · {e.class_name}
-              </p>
-              <p>
-                {weekdayNames(e.weekdays, i18n.language)} {e.start_time} · {e.term} ·{" "}
-                {formatDate(e.start_date)}
-              </p>
-              <p role="status">{t(`portalCourses.status.${e.status}`)}</p>
-              {e.status === "pending_payment" ? (
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  {e.hold_expires_at ? (
-                    <span>
-                      {t("portalCourses.heldUntil", { date: formatDateTime(e.hold_expires_at) })}
-                    </span>
-                  ) : null}
-                  {e.pay_url ? (
-                    <a className="underline" href={e.pay_url}>
-                      {t("portalCourses.pay")}
-                    </a>
-                  ) : null}
-                  <Button size="sm" variant="secondary" onClick={() => giveUp.mutate(e.id)}>
-                    {t("portalCourses.giveUp")}
-                  </Button>
-                </div>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      </section>
-      {waitlist.length ? (
-        <section aria-labelledby="waitlist" className="space-y-2">
-          <h2 id="waitlist" className="text-lg font-semibold">
-            {t("portalCourses.waitlist")}
-          </h2>
-          <ul className="space-y-2">
-            {waitlist.map((w) => (
-              <li key={w.id} className="rounded-md border border-border p-3 text-sm">
-                <p className="font-medium">
-                  {w.student_name}: {w.course_name} · {w.class_name}
-                </p>
-                <p>
-                  {w.status === "offered"
-                    ? t("portalCourses.offered")
-                    : t("portalCourses.position", { position: w.position })}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-      <section aria-labelledby="browse" className="space-y-2">
-        <h2 id="browse" className="text-lg font-semibold">
-          {t("portalCourses.browse")}
-        </h2>
-        {!catalogue.data.classes.length ? (
-          <p className="text-sm">{t("portalCourses.noneOpen")}</p>
+    <div>
+      <PortalHeader title={t("portalCourses.title")} />
+      <div className="space-y-6">
+        {offers.length ? (
+          <RuledPanel title={t("portalCourses.nextTerm")} flush>
+            <PanelRows>
+              {offers.map((o) => (
+                <PanelRow key={o.id} className="space-y-2">
+                  <div>
+                    <p className="font-medium">
+                      {o.student_name}: {o.course_name} · {o.class_name} · {o.term}
+                    </p>
+                    <p className="text-xs text-muted-foreground tabular-nums">
+                      {t("portalCourses.answerBy", {
+                        date: formatDateTime(o.deadline, i18n.language),
+                      })}{" "}
+                      <span role="status" className="text-foreground">
+                        {t(`portalCourses.offerStatus.${o.status}`)}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => answer.mutate({ id: o.id, confirm: false })}
+                    >
+                      {t("portalCourses.leave")}
+                    </Button>
+                    <Button size="sm" onClick={() => answer.mutate({ id: o.id, confirm: true })}>
+                      {t("portalCourses.keep")}
+                    </Button>
+                  </div>
+                </PanelRow>
+              ))}
+            </PanelRows>
+            {answer.error ? (
+              <div className="px-5 pb-4">
+                <Alert tone="danger">{answer.error.message}</Alert>
+              </div>
+            ) : null}
+          </RuledPanel>
         ) : null}
-        <ul className="space-y-3">
-          {catalogue.data.classes.map((c) => (
-            <ClassCard key={c.id} item={c} terms={catalogue.data.terms} onDone={refresh} />
-          ))}
-        </ul>
-      </section>
-    </section>
+        <RuledPanel title={t("portalCourses.myClasses")} flush>
+          {current.length ? (
+            <PanelRows>
+              {current.map((e) => (
+                <PanelRow key={e.id} className="space-y-2">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                    <div className="min-w-0">
+                      <p className="font-medium">
+                        {e.student_name}: {e.course_name} · {e.class_name}
+                      </p>
+                      <p className="text-xs text-muted-foreground tabular-nums">
+                        {when(e.weekdays, e.start_time)} · {e.term} ·{" "}
+                        {formatDate(e.start_date, i18n.language)}
+                      </p>
+                    </div>
+                    <p role="status" className="text-sm">
+                      {t(`portalCourses.status.${e.status}`)}
+                    </p>
+                  </div>
+                  {e.status === "pending_payment" ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {e.pay_url ? (
+                        <a className={buttonClass({ size: "sm" })} href={e.pay_url}>
+                          {t("portalCourses.pay")}
+                        </a>
+                      ) : null}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className={quiet}
+                        onClick={() => giveUp.mutate(e.id)}
+                      >
+                        {t("portalCourses.giveUp")}
+                      </Button>
+                      {e.hold_expires_at ? (
+                        <span className="basis-full text-xs text-muted-foreground tabular-nums">
+                          {t("portalCourses.heldUntil", {
+                            date: formatDateTime(e.hold_expires_at, i18n.language),
+                          })}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </PanelRow>
+              ))}
+            </PanelRows>
+          ) : (
+            <PanelEmpty>{t("portalCourses.none")}</PanelEmpty>
+          )}
+        </RuledPanel>
+        {waitlist.length ? (
+          <RuledPanel title={t("portalCourses.waitlist")} flush>
+            <PanelRows>
+              {waitlist.map((w) => (
+                <PanelRow key={w.id}>
+                  <p className="font-medium">
+                    {w.student_name}: {w.course_name} · {w.class_name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {w.status === "offered"
+                      ? t("portalCourses.offered")
+                      : t("portalCourses.position", { position: w.position })}
+                  </p>
+                </PanelRow>
+              ))}
+            </PanelRows>
+          </RuledPanel>
+        ) : null}
+        <RuledPanel title={t("portalCourses.browse")} flush>
+          {catalogue.data.classes.length ? (
+            <ul className="divide-y divide-rule">
+              {catalogue.data.classes.map((c) => (
+                <ClassRow key={c.id} item={c} terms={catalogue.data.terms} onDone={refresh} />
+              ))}
+            </ul>
+          ) : (
+            <PanelEmpty>{t("portalCourses.noneOpen")}</PanelEmpty>
+          )}
+        </RuledPanel>
+      </div>
+    </div>
   );
 }
 
-function ClassCard({
+/** A class to join: what, when and where, the price and places in words, then who joins and
+ * the one action (enrol, or join the waitlist when full), with the terms folded away. */
+function ClassRow({
   item,
   terms,
   onDone,
@@ -209,36 +244,50 @@ function ClassCard({
     },
   });
   const headingId = `class-${item.id}`;
+  const facts = [
+    item.min_age !== null && item.max_age !== null
+      ? t("portalCourses.ages", { min: item.min_age, max: item.max_age })
+      : "",
+    item.year_groups.length ? t("portalCourses.years", { years: item.year_groups.join(", ") }) : "",
+  ].filter(Boolean);
   return (
-    <li className="rounded-md border border-border p-3 text-sm">
-      <article aria-labelledby={headingId} className="space-y-1">
-        <h3 id={headingId} className="font-semibold">
-          {item.course.name}: {item.name}
-        </h3>
-        {item.course.description ? <p>{item.course.description}</p> : null}
-        <p>
-          {weekdayNames(item.weekdays, i18n.language)} {item.start_time} · {item.term} ·{" "}
-          {formatDate(item.start_date)}
-          {item.location ? ` · ${item.location}` : ""}
-        </p>
-        <p>
-          {item.price} ({item.pricing_label}) ·{" "}
-          {item.full
-            ? t("portalCourses.full")
-            : t("portalCourses.placesLeft", { count: item.places_left })}
-        </p>
-        {item.min_age !== null && item.max_age !== null ? (
-          <p>{t("portalCourses.ages", { min: item.min_age, max: item.max_age })}</p>
-        ) : null}
-        {item.year_groups.length ? (
-          <p>{t("portalCourses.years", { years: item.year_groups.join(", ") })}</p>
-        ) : null}
+    <li className="px-5 py-3.5">
+      <article aria-labelledby={headingId} className="space-y-3 text-sm">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+            <h3 id={headingId} className="font-semibold">
+              {item.course.name}: {item.name}
+            </h3>
+            <p className="font-semibold tabular-nums">
+              {item.price} <span className="font-normal text-muted-foreground">({item.pricing_label})</span>
+            </p>
+          </div>
+          <p className="text-xs text-muted-foreground tabular-nums">
+            {weekdayNames(item.weekdays, i18n.language)} {item.start_time} · {item.term} ·{" "}
+            {formatDate(item.start_date, i18n.language)}
+            {item.location ? ` · ${item.location}` : ""}
+          </p>
+          <p>
+            {item.full ? (
+              <Word tone="muted">{t("portalCourses.full")}</Word>
+            ) : (
+              t("portalCourses.placesLeft", { count: item.places_left })
+            )}
+            {facts.length ? ` · ${facts.join(" · ")}` : ""}
+          </p>
+          {item.course.description ? (
+            <p className="text-muted-foreground">{item.course.description}</p>
+          ) : null}
+        </div>
         {done ? (
-          <p role="status">{done}</p>
+          <p role="status" className="font-medium">
+            {done}
+          </p>
         ) : (
-          <div className="flex flex-wrap items-end gap-2 pt-2">
+          <div className="flex flex-wrap items-end gap-3">
             {students.length > 1 ? (
               <SelectField
+                size="sm"
                 label={t("portalCourses.who")}
                 value={who}
                 onChange={(e) => setStudent(e.target.value)}
@@ -246,14 +295,12 @@ function ClassCard({
               />
             ) : null}
             {terms ? (
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={accepted}
-                  onChange={(e) => setAccepted(e.target.checked)}
-                />
-                {t("portalCourses.acceptTerms")}
-              </label>
+              <CheckField
+                className="min-h-9 items-center"
+                label={t("portalCourses.acceptTerms")}
+                checked={accepted}
+                onChange={(e) => setAccepted(e.target.checked)}
+              />
             ) : null}
             {item.full ? (
               item.waitlist ? (
@@ -273,10 +320,9 @@ function ClassCard({
           </div>
         )}
         {terms ? (
-          <details className="text-xs text-muted-foreground">
-            <summary>{t("portalCourses.terms")}</summary>
-            <p className="whitespace-pre-line">{terms}</p>
-          </details>
+          <Disclosure summary={t("portalCourses.terms")}>
+            <p className="text-xs whitespace-pre-line text-muted-foreground">{terms}</p>
+          </Disclosure>
         ) : null}
         {enrol.error ? <Alert tone="danger">{enrol.error.message}</Alert> : null}
       </article>

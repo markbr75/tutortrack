@@ -1,10 +1,11 @@
 import { ApiError, unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField } from "@tutortrack/ui";
+import { Alert, Button, PanelFooter, RuledPanel, SelectField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { useState } from "react";
 
 import { api } from "../api";
+import { CheckField, TextAreaField } from "../layout/PortalPage";
 
 const CATEGORIES = [
   "physical", "emotional", "sexual", "neglect", "online", "self_harm", "bullying",
@@ -44,16 +45,24 @@ export function CheckInButtons({ lessonId, online }: { lessonId: string; online:
     return <p className="text-sm text-muted-foreground">{act.error.message}</p>;
   }
   return (
-    <div
-      role="group"
-      aria-labelledby="lone-working"
-      className="space-y-2 rounded-md border border-border p-3"
+    <RuledPanel
+      title={t("safeguarding.tutor.loneWorking")}
+      titleId="lone-working"
+      flush
+      footer={
+        !visit ? (
+          <Button variant="secondary" onClick={() => act.mutate("in")} disabled={act.isPending}>
+            {t("safeguarding.tutor.arrived")}
+          </Button>
+        ) : !visit.checked_out_at ? (
+          <Button variant="secondary" onClick={() => act.mutate("out")} disabled={act.isPending}>
+            {t("safeguarding.tutor.left")}
+          </Button>
+        ) : undefined
+      }
     >
-      <h2 id="lone-working" className="font-semibold">
-        {t("safeguarding.tutor.loneWorking")}
-      </h2>
       {visit ? (
-        <p role="status" className="text-sm">
+        <p role="status" className="px-5 py-2.5 text-sm tabular-nums">
           {visit.checked_out_at
             ? t("safeguarding.tutor.checkedOutAt", {
                 time: formatDateTime(visit.checked_out_at, i18n.language),
@@ -63,23 +72,17 @@ export function CheckInButtons({ lessonId, online }: { lessonId: string; online:
               })}
         </p>
       ) : null}
-      {!visit ? (
-        <Button onClick={() => act.mutate("in")} disabled={act.isPending}>
-          {t("safeguarding.tutor.arrived")}
-        </Button>
-      ) : !visit.checked_out_at ? (
-        <Button onClick={() => act.mutate("out")} disabled={act.isPending}>
-          {t("safeguarding.tutor.left")}
-        </Button>
-      ) : null}
       {act.error && !(act.error instanceof ApiError && act.error.status === 422) ? (
-        <Alert tone="danger">{act.error.message}</Alert>
+        <div className="px-5 py-3">
+          <Alert tone="danger">{act.error.message}</Alert>
+        </div>
       ) : null}
-    </div>
+    </RuledPanel>
   );
 }
 
-/** Raise a safeguarding concern from a lesson: it goes only to the safeguarding leads. */
+/** Raise a safeguarding concern from a lesson: it goes only to the safeguarding leads. A
+ * secondary button that opens the form in place as a ruled panel. */
 export function TutorRaiseConcern({
   lessonId,
   studentId,
@@ -88,7 +91,6 @@ export function TutorRaiseConcern({
   studentId?: string | null;
 }) {
   const { t } = useTranslation();
-  const id = useId();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState("other");
   const [description, setDescription] = useState("");
@@ -112,10 +114,7 @@ export function TutorRaiseConcern({
     },
   });
   return (
-    <div role="group" aria-labelledby={`${id}-title`} className="space-y-2">
-      <h2 id={`${id}-title`} className="sr-only">
-        {t("safeguarding.raiseTitle")}
-      </h2>
+    <div className="space-y-3">
       {raise.isSuccess ? (
         <Alert tone="success">
           {t("safeguarding.raised", { reference: raise.data.reference })}
@@ -127,50 +126,56 @@ export function TutorRaiseConcern({
         </Button>
       ) : (
         <form
-          className="space-y-3 rounded-md border border-border p-3"
           aria-label={t("safeguarding.raiseTitle")}
           onSubmit={(e) => {
             e.preventDefault();
             raise.mutate();
           }}
         >
-          <p className="text-sm text-muted-foreground">{t("safeguarding.raiseHint")}</p>
-          <SelectField
-            label={t("safeguarding.category")}
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            options={CATEGORIES.map((c) => ({
-              value: c,
-              label: t(`safeguarding.categories.${c}`),
-            }))}
-          />
-          <div className="flex flex-col gap-1">
-            <label htmlFor={`${id}-description`} className="text-sm font-medium">
-              {t("safeguarding.description")}
-            </label>
-            <textarea
-              id={`${id}-description`}
-              required
-              rows={6}
-              className="rounded-md border border-border bg-background p-2 text-sm"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={risk} onChange={(e) => setRisk(e.target.checked)} />
-            {t("safeguarding.immediateRiskQuestion")}
-          </label>
-          {risk ? <Alert tone="warning">{t("safeguarding.emergency")}</Alert> : null}
-          {raise.error ? <Alert tone="danger">{raise.error.message}</Alert> : null}
-          <div className="flex gap-2">
-            <Button type="submit" disabled={raise.isPending}>
-              {t("safeguarding.raiseSubmit")}
-            </Button>
-            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-              {t("common.cancel")}
-            </Button>
-          </div>
+          <RuledPanel
+            title={t("safeguarding.raiseTitle")}
+            description={t("safeguarding.raiseHint")}
+            flush
+          >
+            <div className="space-y-3 px-5 py-4">
+              <SelectField
+                label={t("safeguarding.category")}
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                options={CATEGORIES.map((c) => ({
+                  value: c,
+                  label: t(`safeguarding.categories.${c}`),
+                }))}
+              />
+              <TextAreaField
+                label={t("safeguarding.description")}
+                required
+                rows={6}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+              <CheckField
+                label={t("safeguarding.immediateRiskQuestion")}
+                checked={risk}
+                onChange={(e) => setRisk(e.target.checked)}
+              />
+              {risk ? <Alert tone="warning">{t("safeguarding.emergency")}</Alert> : null}
+              {raise.error ? <Alert tone="danger">{raise.error.message}</Alert> : null}
+            </div>
+            <PanelFooter>
+              <Button type="submit" disabled={raise.isPending}>
+                {t("safeguarding.raiseSubmit")}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => setOpen(false)}
+              >
+                {t("common.cancel")}
+              </Button>
+            </PanelFooter>
+          </RuledPanel>
         </form>
       )}
     </div>

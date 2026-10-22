@@ -7165,6 +7165,37 @@
     "waiting": "Waiting for you",
     "nothingWaiting": "Nothing waiting for you."
   },
+  "designS10": {
+    "overdueOfIt": "{{amount}} of it is overdue.",
+    "nothingOverdue": "Nothing overdue.",
+    "issuedOn": "Issued {{date}}",
+    "dueOn": "Due {{date}}",
+    "forInvoice": "For {{number}}",
+    "allStudents": "All students",
+    "instructions": "Instructions",
+    "replies": "Replies",
+    "noGuardians": "No one else is linked to this household yet.",
+    "findATime": "Find a time",
+    "toMark": "Still to mark",
+    "chooseJob": "Choose a job…",
+    "noAvailability": "No weekly times yet. Add one below.",
+    "aboutYou": "About you",
+    "nothingToCome": "Nothing to pay yet.",
+    "payout": "Payout",
+    "noPayouts": "No payouts or statements yet.",
+    "yourClaims": "Your claims",
+    "noClaims": "No claims yet.",
+    "steps": "Steps",
+    "doneOf": "{{done}} of {{total}} done",
+    "required": "Required",
+    "noResources": "No resources yet. Add a link below.",
+    "connections": "Your connected accounts",
+    "noConnections": "Nothing connected yet.",
+    "addConnection": "Add a calendar or video account",
+    "onlineLessons": "Online lessons",
+    "peopleYouReferred": "People you referred",
+    "total": "Total"
+  },
   "hiring": {
     "upload": {
       "hint": {
