@@ -120,7 +120,11 @@ describe("tutor calendar and video", () => {
       }),
     );
     render(<App />);
-    fireEvent.click(await screen.findByRole("button", { name: "Connect iCloud" }));
+    // One select names the account to add; its Connect button follows the choice.
+    fireEvent.change(await screen.findByLabelText("Add a calendar or video account"), {
+      target: { value: "caldav" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Connect iCloud" }));
     fireEvent.change(screen.getByLabelText(/Username or email/), {
       target: { value: "nia@icloud.com" },
     });

@@ -21,10 +21,12 @@ export function HouseholdSwitcher({ me }: { me: PortalMe }) {
   if (households.length < 2) return null;
   return (
     <div className="flex items-center gap-2 text-sm">
-      <label htmlFor={id}>{t("family.household")}</label>
+      <label htmlFor={id} className="max-sm:sr-only">
+        {t("family.household")}
+      </label>
       <select
         id={id}
-        className="rounded-md border border-border bg-background px-2 py-1"
+        className="h-9 max-w-44 min-w-0 rounded-md border border-field bg-surface px-2 text-sm"
         value={me.household ?? ""}
         disabled={choose.isPending}
         onChange={(e) => choose.mutate(e.target.value)}

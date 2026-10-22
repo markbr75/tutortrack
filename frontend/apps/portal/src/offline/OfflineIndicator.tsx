@@ -1,5 +1,5 @@
 import { useTranslation } from "@tutortrack/i18n";
-import { Button } from "@tutortrack/ui";
+import { Button, buttonClass } from "@tutortrack/ui";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -30,12 +30,12 @@ export function OfflineIndicator() {
   return (
     <div aria-live="polite" role="status" aria-label={t("pwa.syncStatus")}>
       {!online ? (
-        <p className="bg-amber-100 px-4 py-2 text-sm text-amber-950">
+        <p className="border-b border-warning/40 bg-warning/10 px-4 py-2 text-sm">
           <span className="font-semibold">{t("pwa.offline")}</span> {t("pwa.offlineTutor")}
         </p>
       ) : null}
       {pending.length || auth.length ? (
-        <div className="flex flex-wrap items-center gap-2 bg-muted px-4 py-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border bg-surface px-4 py-2 text-sm">
           <p>
             {auth.length
               ? t("pwa.signInToSync", { count: auth.length + pending.length })
@@ -47,7 +47,7 @@ export function OfflineIndicator() {
             </Button>
           ) : null}
           {auth.length ? (
-            <a className="underline" href="/portal/">
+            <a className="font-medium text-link underline-offset-2 hover:underline" href="/portal/">
               {t("pwa.signIn")}
             </a>
           ) : null}
@@ -56,7 +56,7 @@ export function OfflineIndicator() {
       {review.length ? (
         <section
           aria-labelledby="needs-review"
-          className="space-y-2 border-y border-amber-500/40 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+          className="space-y-2 border-b border-warning/40 bg-warning/10 px-4 py-3 text-sm"
         >
           <h2 id="needs-review" className="font-semibold">
             {t("pwa.needsReview", { count: review.length })}
@@ -76,7 +76,7 @@ export function OfflineIndicator() {
                   <Link
                     to="/tutor/lessons/$lessonId"
                     params={{ lessonId: item.lessonId }}
-                    className="rounded-md border border-amber-900/40 px-3 py-1.5 underline-offset-2 hover:underline"
+                    className={buttonClass({ variant: "secondary", size: "sm" })}
                   >
                     {t("pwa.openLesson")}
                     <span className="sr-only"> {item.label}</span>
@@ -106,7 +106,7 @@ export function OfflineBanner() {
   return (
     <div aria-live="polite" role="status">
       {!online ? (
-        <p className="bg-amber-100 px-4 py-2 text-sm text-amber-950">
+        <p className="border-b border-warning/40 bg-warning/10 px-4 py-2 text-sm">
           <span className="font-semibold">{t("pwa.offline")}</span> {t("pwa.offlineFamily")}
         </p>
       ) : null}

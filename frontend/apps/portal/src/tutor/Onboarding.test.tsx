@@ -77,6 +77,8 @@ describe("tutor onboarding", () => {
     });
     render(<App />);
     expect(await screen.findByText(/can't take new lessons/)).toBeInTheDocument();
+    // Each check is a row; its form opens in place.
+    fireEvent.click(screen.getByRole("button", { name: "Add details Enhanced DBS check" }));
     fireEvent.change(screen.getByLabelText("Reference number"), { target: { value: "0012345" } });
     fireEvent.click(screen.getByRole("button", { name: "Send" }));
     expect(await screen.findByText(/Being checked/)).toBeInTheDocument();

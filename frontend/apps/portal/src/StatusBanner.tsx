@@ -15,21 +15,24 @@ export function StatusBanner() {
   });
   if (!data?.notices.length) return null;
   return (
-    <div role="status" className="space-y-1">
+    <div role="status">
       {data.notices.map((notice) => (
         <p
           key={notice.id}
           className={
             notice.severity === "info"
-              ? "bg-muted px-4 py-2 text-sm"
-              : "bg-amber-100 px-4 py-2 text-sm text-amber-950"
+              ? "border-b border-border bg-surface px-4 py-2 text-sm"
+              : "border-b border-warning/40 bg-warning/10 px-4 py-2 text-sm"
           }
         >
           <span className="font-medium">{t(`status.${notice.severity}`)}:</span> {notice.message}
           {data.status_page_url ? (
             <>
               {" "}
-              <a className="underline" href={data.status_page_url}>
+              <a
+                className="font-medium text-link underline-offset-2 hover:underline"
+                href={data.status_page_url}
+              >
                 {t("status.more")}
               </a>
             </>
