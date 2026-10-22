@@ -51,9 +51,9 @@ describe("TeamPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Send invitation" }));
     expect(await screen.findByText("Invitation sent to new@example.com.")).toBeInTheDocument();
     await waitFor(() =>
-      expect(
-        calls.find((c) => c.method === "POST" && c.path === "/api/v1/invitations")?.body,
-      ).toEqual({ email: "new@example.com", role: "tutor" }),
+      expect(calls.find((c) => c.method === "POST" && c.path === "/api/v1/invitations")?.body).toEqual(
+        { email: "new@example.com", role: "tutor" },
+      ),
     );
   });
 

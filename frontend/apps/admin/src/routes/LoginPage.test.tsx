@@ -31,10 +31,9 @@ describe("LoginPage", () => {
       "POST /api/v1/auth/login": { body: { mfa_required: false, user: { id: "u1" } } },
     });
     render(<App />);
-    expect(await screen.findByRole("link", { name: "Continue with Google" })).toHaveAttribute(
-      "href",
-      "https://app.x/api/v1/auth/sso/google/start?next=%2Fteam",
-    );
+    expect(
+      await screen.findByRole("link", { name: "Continue with Google" }),
+    ).toHaveAttribute("href", "https://app.x/api/v1/auth/sso/google/start?next=%2Fteam");
     fill();
     await waitFor(() => expect(assign).toHaveBeenCalledWith("/team"));
     expect(calls.find((c) => c.path === "/api/v1/auth/login")?.body).toEqual({
