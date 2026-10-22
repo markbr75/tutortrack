@@ -194,7 +194,9 @@ describe("calendar", () => {
     fireEvent.change(within(dialog).getByLabelText("Date"), { target: { value: "2026-11-02" } });
     fireEvent.change(within(dialog).getByLabelText("From"), { target: { value: "16:30" } });
     fireEvent.click(within(dialog).getByLabelText("Repeat weekly"));
-    fireEvent.click(within(dialog).getByLabelText("Thursday"));
+    // The form pre-selects today's weekday; on a Thursday a blind click would untick it.
+    const thursday = within(dialog).getByLabelText("Thursday") as HTMLInputElement;
+    if (!thursday.checked) fireEvent.click(thursday);
     fireEvent.click(within(dialog).getByRole("button", { name: "Schedule series", hidden: true }));
     await waitFor(() =>
       expect(calls.find((c) => c.path === "/api/v1/lesson-series")?.body).toMatchObject({
