@@ -811,6 +811,7 @@
 <p><span class="ui">Today</span> is your start page. <span class="ui">Your lessons</span> lists today's lessons in time order with the time, students and place, and shows how many you have marked ("Marked 1 of 3"). Each lesson carries a mark: a tick once it is completed, a red dashed ring once it has ended and still needs completing, and a pale ring while it is still to come. A red line marks the time now.</p>
 <p>Online lessons have a <span class="ui">Join the lesson</span> button that opens shortly before the start. Select <span class="ui">Open and complete</span> to go to the lesson page; it is highlighted on lessons that have ended and still need completing.</p>
 <p><span class="ui">Waiting for you</span> lists <span class="ui">Reports to write</span>, <span class="ui">Job offers</span> and <span class="ui">New notifications</span> when there are any; select one to go to it. If you can see your pay, <span class="ui">Earned this month</span> is at the bottom.</p>
+<p>A small red number on a tab or menu item shows what is waiting: on <span class="ui">Today</span>, lessons that are over and still to mark plus reports to write; on <span class="ui">Jobs</span>, job offers; on <span class="ui">Messages</span> and <span class="ui">Notifications</span>, what you haven't read. On a phone, <span class="ui">More</span> shows the total for the items inside it.</p>
 </section>
 
 <section id="tutor-lesson" aria-labelledby="tutor-lesson-h">
@@ -853,7 +854,7 @@ A moved lesson tells the family. A request waits for the office or the family to
 
 <section id="tutor-schedule" data-route="portal:/tutor/schedule" aria-labelledby="tutor-schedule-h">
 <h3 id="tutor-schedule-h">Lessons</h3>
-<p><span class="ui">Lessons</span> lists your lessons from yesterday to two weeks ahead, by day. Select a lesson to open it.</p>
+<p><span class="ui">Lessons</span> lists your lessons from yesterday to two weeks ahead, by day (today's date in red). Each lesson shows its start and end time and its register mark; a red dashed ring means it is over and still to mark. Select a lesson to open it.</p>
 <p>If your organisation lets tutors book lessons, select <span class="ui">Plan a lesson</span>, choose the <span class="ui">Job</span>, the start time and the length in <span class="ui">Minutes</span>, then <span class="ui">Check for clashes</span> and <span class="ui">Book lesson</span>. You can only book lessons on your own active jobs.</p>
 </section>
 
@@ -875,12 +876,12 @@ A moved lesson tells the family. A request waits for the office or the family to
 <h3 id="tutor-calendar-h">Calendar and video</h3>
 <p>Connect your own calendar so that TutorTrack knows when you are busy and puts your lessons in your calendar.</p>
 <ul>
-<li>Select <span class="ui">Connect Google</span>, <span class="ui">Connect Microsoft 365</span> (this covers Outlook) or <span class="ui">Connect iCloud</span>. For iCloud you need an app-specific password from appleid.apple.com.</li>
+<li>Under your connected accounts, choose Google, Microsoft 365 (this covers Outlook), iCloud or Zoom in the list, then select the button next to it (for example <span class="ui">Connect Google</span>). For iCloud you need an app-specific password from appleid.apple.com.</li>
 <li>Under <span class="ui">Calendars that make you busy</span>, choose which calendars block lesson times. Only the times are copied, never titles or details.</li>
 <li>Under <span class="ui">Calendar for lessons</span>, choose where your lessons go, for example a separate "TutorTrack" calendar.</li>
 <li>With <span class="ui">Two-way sync</span>, moving a lesson in your calendar asks the office to reschedule it. Deleting it there never cancels it.</li>
 </ul>
-<p>Under <span class="ui">My video provider for online lessons</span>, choose the organisation default, the built-in room, Zoom, Microsoft Teams or Google Meet. <span class="ui">Connect Zoom</span> links your own Zoom account.</p>
+<p>Under <span class="ui">Online lessons</span>, <span class="ui">My video provider for online lessons</span> chooses the organisation default, the built-in room, Zoom, Microsoft Teams or Google Meet. Choose Zoom in the list and select <span class="ui">Connect Zoom</span> to link your own Zoom account.</p>
 </section>
 
 <section id="tutor-jobs" data-route="portal:/tutor/jobs" aria-labelledby="tutor-jobs-h">
@@ -983,7 +984,7 @@ A moved lesson tells the family. A request waits for the office or the family to
 <li><strong>Parents, guardians and students with an email address:</strong> enter your <span class="ui">Email</span> and select <span class="ui">Email me a sign-in link</span>. Open the link in the email. There is no password to remember.</li>
 <li><strong>Children under 13 with a login made by a parent:</strong> under <span class="ui">Child sign-in</span>, enter the <span class="ui">Username</span> and <span class="ui">PIN or password</span> and select <span class="ui">Sign in with username</span>. After several wrong attempts, sign-in slows down for a while.</li>
 </ul>
-<p>On a phone, the tabs along the bottom take you to <span class="ui">Home</span>, <span class="ui">Lessons</span>, <span class="ui">Payments</span> and <span class="ui">Messages</span> (for students, the last two tabs are the first two of <span class="ui">Messages</span>, <span class="ui">Learning</span> and <span class="ui">Reports</span> that are turned on). <span class="ui">More</span> opens everything else, grouped under <span class="ui">Lessons and learning</span> and <span class="ui">Payments and your family</span>. On a larger screen the same items are listed down the left. To sign out, select your initials at the top right, then <span class="ui">Sign out</span>.</p>
+<p>On a phone, the tabs along the bottom take you to <span class="ui">Home</span>, <span class="ui">Lessons</span>, <span class="ui">Payments</span> and <span class="ui">Messages</span> (for students, the last two tabs are the first two of <span class="ui">Messages</span>, <span class="ui">Learning</span> and <span class="ui">Reports</span> that are turned on). <span class="ui">More</span> opens everything else, grouped under <span class="ui">Lessons and learning</span> and <span class="ui">Payments and your family</span>. A small red number on a tab shows what is waiting for you: unread messages on <span class="ui">Messages</span>, and invoices past their due date on <span class="ui">Payments</span>. On a larger screen the same items are listed down the left. To sign out, select your initials at the top right, then <span class="ui">Sign out</span>.</p>
 <p>Some menu items only appear when your tutoring organisation turns them on, so your menu may be shorter than the one described here. When an item is turned off, the next one moves up into the tabs. (Office staff: see <a href="admin-guide.html#portal-config-h">portal configuration in the admin guide</a>.)</p>
 <div class="table-wrap">
 <table>
@@ -1002,7 +1003,7 @@ A moved lesson tells the family. A request waits for the office or the family to
 
 <section id="portal-home" data-route="portal:/" aria-labelledby="portal-home-h">
 <h3 id="portal-home-h">Home and switching households</h3>
-<p><span class="ui">Home</span> shows any amount you owe (with <span class="ui">Pay now</span>), then your <span class="ui">Next lesson</span>: the day, the time, the tutor and place, and its buttons (<span class="ui">Join the lesson</span> for online lessons, <span class="ui">Add to calendar</span>, and, if your organisation allows them, <span class="ui">Cancel lesson</span>, <span class="ui">Ask to move</span> and <span class="ui">Can't make it</span>). Below are the lessons <span class="ui">This week</span> (with <span class="ui">All lessons</span>), the <span class="ui">Latest reports</span> and <span class="ui">News</span> from your tutoring organisation.</p>
+<p><span class="ui">Home</span> shows any amount you owe (with <span class="ui">Pay now</span>, and in red how much of it is overdue, if any), then your <span class="ui">Next lesson</span>: the day, the time, the tutor and place, and its buttons (<span class="ui">Join the lesson</span> for online lessons, <span class="ui">Add to calendar</span>, and, if your organisation allows them, <span class="ui">Cancel lesson</span>, <span class="ui">Ask to move</span> and <span class="ui">Can't make it</span>). Below are the lessons <span class="ui">This week</span> (with <span class="ui">All lessons</span>), the <span class="ui">Latest reports</span> and <span class="ui">News</span> from your tutoring organisation.</p>
 <p>If you belong to more than one household (for example, separated parents with children in two accounts), a household selector appears in the bar at the top. Choose one household or <span class="ui">All households</span>.</p>
 <p>The family portal needs an internet connection. When you are offline it says so; reconnect to see the latest lessons, reports and invoices.</p>
 </section>
@@ -1061,7 +1062,7 @@ A moved lesson tells the family. A request waits for the office or the family to
 
 <section id="portal-billing" data-route="portal:/billing" aria-labelledby="portal-billing-h">
 <h3 id="portal-billing-h">Payments</h3>
-<p><span class="ui">Payments</span> shows, for each account, what is <span class="ui">Owed</span>, <span class="ui">Overdue</span> and in <span class="ui">Credit</span>, with <span class="ui">Download a statement (PDF)</span>.</p>
+<p><span class="ui">Payments</span> shows, for each account, what is <span class="ui">Owed</span> (with how much of it is overdue in red, or "Nothing overdue.") and in <span class="ui">Credit</span>, with <span class="ui">Download a statement (PDF)</span>. Each invoice shows its issue and due dates and its status in words; an invoice past its due date says <span class="ui">Overdue</span> in red.</p>
 <ul>
 <li><strong>Pay an invoice:</strong> under <span class="ui">Invoices</span>, select <span class="ui">Pay …</span>. A secure pay page opens. Depending on your organisation you can pay by card, direct debit or PayPal. Each invoice also has a <span class="ui">PDF</span>.</li>
 <li><strong>Pay automatically:</strong> under <span class="ui">Payment methods</span>, select <span class="ui">Add a card or direct debit</span> and agree to automatic payments. Invoices are then paid on their due date. <span class="ui">Stop paying automatically</span> turns this off. You can also <span class="ui">Make default</span> or <span class="ui">Remove</span> a method.</li>
@@ -1109,7 +1110,7 @@ A moved lesson tells the family. A request waits for the office or the family to
 
 <section id="portal-messages" data-route="portal:/messages" aria-labelledby="portal-messages-h">
 <h3 id="portal-messages-h">Messages</h3>
-<p>Select <span class="ui">New message</span>, choose who it is <span class="ui">To</span> (<span class="ui">The office</span>, or a tutor if your organisation allows it), write a <span class="ui">Subject</span> and <span class="ui">Your message</span>, attach files if needed and select <span class="ui">Send</span>. Replies appear under <span class="ui">Conversations</span>; the list refreshes every 30 seconds.</p>
+<p>Select <span class="ui">New message</span>, choose who it is <span class="ui">To</span> (<span class="ui">The office</span>, or a tutor if your organisation allows it), write a <span class="ui">Subject</span> and <span class="ui">Your message</span>, attach files if needed and select <span class="ui">Send</span>. Your conversations are listed newest first, unread ones in bold with a red dot; the list refreshes every 30 seconds. Select a conversation to read and reply to it, and <span class="ui">Conversations</span> to go back to the list.</p>
 <p>To keep children safe, messages are checked by safeguarding filters and staff can read all conversations. A student under 18 can only start a conversation that includes a parent, unless the organisation has changed this.</p>
 </section>
 
