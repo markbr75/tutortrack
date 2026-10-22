@@ -171,7 +171,7 @@ export function TodayPage() {
         {waiting.length ? (
           <ul className="divide-y divide-rule">
             {waiting.map((item) => (
-              <li key={item.to}>
+              <li key={item.label}>
                 <Link
                   to={item.to}
                   className="flex min-h-12 items-center gap-3 px-4 hover:bg-muted/60"

@@ -97,6 +97,50 @@ describe("tutor portal", () => {
     );
   });
 
+  it("counts lessons still to mark on earlier days in the Today pill", async () => {
+    window.history.pushState(null, "", "/portal/");
+    const today = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    mockApi(
+      routes({
+        "GET /api/v1/tutor/today": {
+          body: {
+            date: `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`,
+            lessons: [
+              {
+                id: "l1",
+                title: "GCSE Maths – Arjun",
+                start: started,
+                end: ended,
+                status: "planned",
+                online: false,
+                meeting_url: "",
+                location: "Centre",
+                students: ["Arjun Patel"],
+              },
+            ],
+            // Today's lesson plus two from earlier days.
+            unmarked_lessons: 3,
+            reports_due: 1,
+            offers: 0,
+            unread: 0,
+            earnings_this_month: { amount: "0.00", currency: "GBP" },
+          },
+        },
+      }),
+    );
+    render(<App />);
+    const earlier = await screen.findByRole("link", { name: /Earlier lessons to mark/ });
+    expect(earlier).toHaveTextContent("2");
+    expect(earlier).toHaveAttribute("href", "/portal/tutor/schedule");
+    expect(screen.getByRole("link", { name: /Reports to write/ })).toHaveTextContent("1");
+    const nav = screen.getByRole("navigation", { name: "Tutor menu" });
+    // The pill: three lessons to mark plus one report.
+    expect(within(nav).getAllByRole("link", { description: "4 waiting" }).length).toBeGreaterThan(
+      0,
+    );
+  });
+
   it("completes a lesson with the register, then writes and submits the report", async () => {
     window.history.pushState(null, "", "/portal/tutor/lessons/l1");
     const report = {
