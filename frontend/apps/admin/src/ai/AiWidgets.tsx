@@ -304,7 +304,7 @@ export function AiExplainToParent({
   });
   if (!enabled) return null;
   return (
-    <div className="space-y-2 rounded-md border border-violet-200 p-2 text-sm">
+    <div className="space-y-2 text-sm">
       <div className="flex flex-wrap items-end gap-2">
         <LanguageSelect value={language} onChange={setLanguage} />
         <Button
