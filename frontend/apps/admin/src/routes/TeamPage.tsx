@@ -3,6 +3,7 @@ import { formatDateTime, useTranslation } from "@tutortrack/i18n";
 import {
   Alert,
   Button,
+  cn,
   FormPanel,
   NamePlate,
   PageHeader,
@@ -17,6 +18,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, fieldErrors, useMe, usePermission } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
 
 const ROLES = [
   "owner",
@@ -98,11 +100,37 @@ export function TeamPage() {
   const errors = fieldErrors(send.error);
   const actionError = changeRole.error ?? remove.error;
 
+  const quiet = "text-muted-foreground";
+  const phone = useIsPhone();
   const memberRows = members.data?.results ?? [];
+  // On phones the row's actions fold under the name instead of a third column.
+  const actions = (m: (typeof memberRows)[number], isMe: boolean, folded: boolean) => (
+    <>
+      {canImpersonate && VIEWABLE.has(m.role) ? (
+        <Button
+          size="sm"
+          variant="ghost"
+          className={folded ? "-ml-3" : undefined}
+          onClick={() => viewAs.mutate(m.id)}
+        >
+          {t("team.viewAs")}
+        </Button>
+      ) : null}
+      {canManage && !isMe ? (
+        <Button
+          size="sm"
+          variant="ghost"
+          className={cn(quiet, folded && !(canImpersonate && VIEWABLE.has(m.role)) && "-ml-3")}
+          onClick={() => remove.mutate(m.id)}
+        >
+          {t("team.remove")}
+        </Button>
+      ) : null}
+    </>
+  );
   const [allPending, setAllPending] = useState(false);
   const pendingAll = invitations.data?.results ?? [];
   const pending = allPending ? pendingAll : pendingAll.slice(0, PENDING_SHOWN);
-  const quiet = "text-muted-foreground";
 
   return (
     <div>
@@ -132,7 +160,9 @@ export function TeamPage() {
             columns={[
               { key: "name", header: t("team.name") },
               { key: "role", header: t("team.role"), width: "w-48" },
-              { key: "actions", header: t("common.actions", "Actions"), hidden: true },
+              ...(phone
+                ? []
+                : [{ key: "actions", header: t("common.actions", "Actions"), hidden: true }]),
             ]}
           >
             {memberRows.map((m) => {
@@ -144,6 +174,11 @@ export function TeamPage() {
                       name={m.user.name}
                       context={<span className="break-all">{m.user.email}</span>}
                     />
+                    {phone ? (
+                      <div className="mt-1 flex flex-wrap gap-1 empty:hidden">
+                        {actions(m, isMe, true)}
+                      </div>
+                    ) : null}
                   </td>
                   <td className="py-1.5 align-middle">
                     {canManage && !isMe ? (
@@ -167,23 +202,11 @@ export function TeamPage() {
                       t(`roles.${m.role}`)
                     )}
                   </td>
-                  <td className="py-1.5 text-right align-middle whitespace-nowrap">
-                    {canImpersonate && VIEWABLE.has(m.role) ? (
-                      <Button size="sm" variant="ghost" onClick={() => viewAs.mutate(m.id)}>
-                        {t("team.viewAs")}
-                      </Button>
-                    ) : null}
-                    {canManage && !isMe ? (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className={quiet}
-                        onClick={() => remove.mutate(m.id)}
-                      >
-                        {t("team.remove")}
-                      </Button>
-                    ) : null}
-                  </td>
+                  {phone ? null : (
+                    <td className="py-1.5 text-right align-middle whitespace-nowrap">
+                      {actions(m, isMe, false)}
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -256,7 +279,12 @@ export function TeamPage() {
                         }
                         aside={
                           <>
-                            <Button size="sm" variant="ghost" onClick={() => resend.mutate(inv.id)}>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="max-sm:-ml-3"
+                              onClick={() => resend.mutate(inv.id)}
+                            >
                               {t("team.resend")}
                             </Button>
                             <Button

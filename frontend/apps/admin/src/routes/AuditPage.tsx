@@ -142,8 +142,9 @@ export function AuditPage() {
             <span className="block font-medium whitespace-nowrap">
               {action(row.original.action)}
             </span>
-            <span className="block text-xs break-words text-muted-foreground">
+            <span className="block text-xs break-words text-muted-foreground tabular-nums">
               {[
+                phone ? formatDateTime(row.original.created_at, i18n.language) : "",
                 row.original.actor_email || t("designS9b.audit.system"),
                 phone ? row.original.object_repr : "",
               ]
@@ -228,7 +229,9 @@ export function AuditPage() {
           hasMore={query.hasNextPage}
           isFetchingMore={query.isFetchingNextPage}
           onLoadMore={() => void query.fetchNextPage()}
-          initialColumnVisibility={phone ? { object: false, changes: false } : undefined}
+          initialColumnVisibility={
+            phone ? { when: false, object: false, changes: false } : undefined
+          }
           labels={{
             loading: t("grid.loading"),
             empty: t("designS9b.audit.empty"),

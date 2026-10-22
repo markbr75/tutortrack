@@ -377,7 +377,7 @@ function SessionsSection() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className={quiet}
+                    className={`${quiet} max-sm:-ml-3`}
                     onClick={() => revoke.mutate(s.id)}
                   >
                     {t("account.signOutSession")}
@@ -479,7 +479,7 @@ function PasskeysSection() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className={quiet}
+                    className={`${quiet} max-sm:-ml-3`}
                     aria-label={t("passkeys.removeNamed", { name: key.name })}
                     onClick={() => remove.mutate(key.id)}
                   >

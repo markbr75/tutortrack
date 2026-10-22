@@ -241,7 +241,7 @@
 <li><span class="ui">Needs marking</span> (<code>scheduling.lesson.complete</code>): past lessons nobody has marked, with how many days ago each one was. See <a href="#unconfirmed">unconfirmed lessons</a>.</li>
 <li><span class="ui">Overdue invoices</span> (<code>billing.invoice.view</code>): the oldest unpaid invoices past their due date, with the amount still owed.</li>
 </ul>
-<p>New organisations see a <span class="ui">Get started</span> checklist (set up a service, add a student, schedule a lesson, connect Stripe, send your first invoice). Each step ticks itself when you do it anywhere in the app. Owners and admins can select <span class="ui">Hide checklist</span>.</p>
+<p>New organisations see a <span class="ui">Get started</span> checklist (set up a service, add a student, schedule a lesson, connect Stripe, send your first invoice). It says how many steps are done ("2 of 5 done"), and each step ticks itself when you do it anywhere in the app. Owners and admins can select <span class="ui">Hide checklist</span>.</p>
 <p>Below these, if you can see reports (<code>reporting.dashboard.view</code>), the <span class="ui">Dashboard</span> shows the figures you choose, with a default layout for your role:</p>
 <ul>
 <li>Choose the <span class="ui">Period</span> (this month by default) and what to <span class="ui">Compare with</span>: <span class="ui">Previous period</span>, <span class="ui">Same period last year</span> or <span class="ui">No comparison</span>.</li>
@@ -482,7 +482,7 @@
 <li><span class="ui">Share with client</span> makes it visible in the portal. If approval isn't required, reports are shared automatically when submitted.</li>
 <li>Use <span class="ui">Add a comment</span> in the <span class="ui">Comments</span> column beside the report to discuss it. Choose <span class="ui">Staff and tutor only</span> or <span class="ui">Client too</span>.</li>
 </ul>
-<p>Reports have a deadline. Tutors get a reminder, then the report becomes overdue, and finally a task is created for the office. Your organisation can hold the tutor's pay for the lesson until the report is in. A report drafted with AI shows an <span class="ui">AI-assisted</span> badge.</p>
+<p>Reports have a deadline. Tutors get a reminder, then the report becomes overdue, and finally a task is created for the office. Your organisation can hold the tutor's pay for the lesson until the report is in. A report drafted with AI says <span class="ui">AI-assisted</span> after the line under its title.</p>
 </section>
 
 <section id="lesson-feedback" data-route="admin:/lesson-feedback" aria-labelledby="lesson-feedback-h">
@@ -717,7 +717,7 @@
 
 <section id="announcements" data-route="admin:/announcements" aria-labelledby="announcements-h">
 <h4 id="announcements-h">News</h4>
-<p><span class="ui">News</span> (<code>comms.announcement.manage</code>) posts short announcements to the portals, for example a holiday closure. Select <span class="ui">New post</span>, enter a <span class="ui">Title</span> and <span class="ui">Message</span>, choose <span class="ui">Who sees it</span> (<span class="ui">Everyone</span>, <span class="ui">Families</span> or <span class="ui">Tutors</span>) and select <span class="ui">Publish</span>. Posts can't be edited; delete and post again to correct one.</p>
+<p><span class="ui">News</span> (<code>comms.announcement.manage</code>) posts short announcements to the portals, for example a holiday closure. Posts already out are listed under <span class="ui">Published</span>, newest first, with <span class="ui">Delete</span> on each. Below them, in <span class="ui">New post</span>, enter a <span class="ui">Title</span> and <span class="ui">Message</span>, choose <span class="ui">Who sees it</span> (<span class="ui">Everyone</span>, <span class="ui">Families</span> or <span class="ui">Tutors</span>) and select <span class="ui">Publish</span>. Posts can't be edited; delete and post again to correct one.</p>
 </section>
 
 <section id="notifications" aria-labelledby="notifications-h">
@@ -766,7 +766,7 @@
 <tr><td><span class="ui">Password</span></td><td>Change your password. Other devices are signed out.</td></tr>
 <tr><td><span class="ui">Two-factor authentication</span></td><td>Turn on an authenticator app (see <a href="#sign-in">signing in</a>). Keep the 10 recovery codes safe. <span class="ui">New recovery codes</span> replaces them.</td></tr>
 <tr><td><span class="ui">Passkeys</span></td><td>Name the device and select <span class="ui">Add a passkey</span>.</td></tr>
-<tr><td><span class="ui">Where you're signed in</span></td><td>Your sessions. <span class="ui">Sign out</span> one, or <span class="ui">Sign out of all other devices</span>.</td></tr>
+<tr><td><span class="ui">Where you're signed in</span></td><td>Your sessions, this device first, each named by its browser and system (for example "Chrome on Windows") with its IP address. The five most recent are shown; <span class="ui">Show all</span> lists the rest. <span class="ui">Sign out</span> one, or <span class="ui">Sign out of all other devices</span>.</td></tr>
 <tr><td><span class="ui">Recent sign-ins</span></td><td>Successful and failed sign-ins. Tell your admin about any you don't recognise.</td></tr>
 <tr><td><span class="ui">Digest emails</span></td><td><span class="ui">Daily agenda</span>, <span class="ui">Weekly schedule</span> and <span class="ui">Unread messages</span>, if your organisation offers them.</td></tr>
 <tr><td><span class="ui">Delete your account</span></td><td>Deletes your login for good, in every organisation. Not possible if you are the last owner of an organisation.</td></tr>

@@ -84,7 +84,7 @@ export function AnnouncementsPage() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="text-muted-foreground"
+                        className="text-muted-foreground max-sm:-ml-3"
                         onClick={() => remove.mutate(a.id)}
                       >
                         {t("announcements.delete")}

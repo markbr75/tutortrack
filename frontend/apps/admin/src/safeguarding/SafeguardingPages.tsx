@@ -22,6 +22,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api, usePermission } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
 import { RecordHeader } from "../components/RecordHeader";
 import { AreaSettings, Cell, FormCard, Table, TextArea } from "../privacy/shared";
 import { PAGE } from "../privacy/util";
@@ -78,6 +79,7 @@ export function SafeguardingPage() {
 
 function ConcernsSection() {
   const { t, i18n } = useTranslation();
+  const phone = useIsPhone();
   const [status, setStatus] = useState("");
   const concerns = useQuery({
     queryKey: ["safeguarding", "concerns", status],
@@ -109,10 +111,14 @@ function ConcernsSection() {
       }
       columns={[
         { key: "ref", header: t("safeguarding.reference") },
-        { key: "student", header: t("safeguarding.student") },
-        { key: "category", header: t("safeguarding.category") },
+        ...(phone
+          ? []
+          : [
+              { key: "student", header: t("safeguarding.student") },
+              { key: "category", header: t("safeguarding.category") },
+            ]),
         { key: "status", header: t("safeguarding.status") },
-        { key: "raised", header: t("designS9b.safeguarding.raisedOn") },
+        ...(phone ? [] : [{ key: "raised", header: t("designS9b.safeguarding.raisedOn") }]),
       ]}
     >
       {rows.map((c) => (
@@ -121,20 +127,37 @@ function ConcernsSection() {
             <Link to="/safeguarding/$concernId" params={{ concernId: c.id }} className={link}>
               {c.reference}
             </Link>
+            {phone ? (
+              <span className="block text-xs text-muted-foreground tabular-nums">
+                {[
+                  c.student_name,
+                  t(`safeguarding.categories.${c.category}`),
+                  formatDateTime(c.raised_at, i18n.language),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+            ) : null}
             {c.immediate_risk ? (
               <span className="block text-xs font-semibold text-margin">
                 {t("safeguarding.immediateRisk")}
               </span>
             ) : null}
           </Cell>
-          <Cell className="min-w-32">{c.student_name}</Cell>
-          <Cell className="min-w-36">{t(`safeguarding.categories.${c.category}`)}</Cell>
+          {phone ? null : (
+            <>
+              <Cell className="min-w-32">{c.student_name}</Cell>
+              <Cell className="min-w-36">{t(`safeguarding.categories.${c.category}`)}</Cell>
+            </>
+          )}
           <Cell className={c.status === "closed" ? quiet : undefined}>
             {t(`safeguarding.statuses.${c.status}`)}
           </Cell>
-          <Cell className="whitespace-nowrap tabular-nums">
-            {formatDateTime(c.raised_at, i18n.language)}
-          </Cell>
+          {phone ? null : (
+            <Cell className="whitespace-nowrap tabular-nums">
+              {formatDateTime(c.raised_at, i18n.language)}
+            </Cell>
+          )}
         </tr>
       ))}
     </Table>
@@ -406,6 +429,7 @@ function FlagsSection() {
 
 function LoneWorkingSection() {
   const { t, i18n } = useTranslation();
+  const phone = useIsPhone();
   const queryClient = useQueryClient();
   const [resolving, setResolving] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -444,24 +468,72 @@ function LoneWorkingSection() {
         }
         columns={[
           { key: "tutor", header: t("safeguarding.tutorName") },
-          { key: "lesson", header: t("safeguarding.lesson") },
-          { key: "in", header: t("safeguarding.checkedIn") },
+          ...(phone
+            ? []
+            : [
+                { key: "lesson", header: t("safeguarding.lesson") },
+                { key: "in", header: t("safeguarding.checkedIn") },
+              ]),
           { key: "status", header: t("safeguarding.status") },
-          { key: "actions", header: t("common.actions", "Actions"), hidden: true },
+          ...(phone
+            ? []
+            : [{ key: "actions", header: t("common.actions", "Actions"), hidden: true }]),
         ]}
       >
-        {rows.map((v) => (
-          <tr key={v.id}>
-            <Cell className="min-w-32 font-medium">{v.tutor_name}</Cell>
-            <Cell className="min-w-40">{v.lesson_title}</Cell>
-            <Cell className="whitespace-nowrap tabular-nums">
-              {formatDateTime(v.checked_in_at, i18n.language)}
-              <span className="block text-xs text-muted-foreground">
-                {t("safeguarding.expectedEnd")}{" "}
-                {formatDateTime(v.expected_end, i18n.language, undefined, { timeStyle: "short" })}
-              </span>
-            </Cell>
-            <Cell
+        {rows.map((v) => {
+          const open = v.status === "overdue" || v.status === "checked_in";
+          const form = (
+            <form
+              className="flex flex-wrap items-center justify-end gap-2 max-md:justify-start"
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setResolving(null);
+              }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (note.trim()) resolve.mutate({ id: v.id, note: note.trim() });
+              }}
+            >
+              <div className="min-w-0 flex-1 md:min-w-64">
+                <TextField
+                  label={t("safeguarding.resolvePrompt")}
+                  hideLabel
+                  size="sm"
+                  placeholder={t("safeguarding.resolvePrompt")}
+                  autoFocus
+                  required
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                />
+              </div>
+              <Button type="submit" size="sm" loading={resolve.isPending}>
+                {t("safeguarding.markSafe")}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className={quiet}
+                onClick={() => setResolving(null)}
+              >
+                {t("common.cancel")}
+              </Button>
+            </form>
+          );
+          const button = (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="whitespace-nowrap"
+              onClick={() => {
+                setNote("");
+                setResolving(v.id);
+              }}
+            >
+              {t("safeguarding.markSafe")}
+            </Button>
+          );
+          const status = (
+            <span
               className={
                 v.status === "overdue"
                   ? "font-semibold text-margin"
@@ -471,61 +543,52 @@ function LoneWorkingSection() {
               }
             >
               {t(`safeguarding.visitStatuses.${v.status}`)}
-            </Cell>
-            <Cell className="py-1.5 text-right align-middle">
-              {v.status === "overdue" || v.status === "checked_in" ? (
-                resolving === v.id ? (
-                  <form
-                    className="flex flex-wrap items-center justify-end gap-2"
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape") setResolving(null);
-                    }}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      if (note.trim()) resolve.mutate({ id: v.id, note: note.trim() });
-                    }}
-                  >
-                    <TextField
-                      label={t("safeguarding.resolvePrompt")}
-                      hideLabel
-                      size="sm"
-                      placeholder={t("safeguarding.resolvePrompt")}
-                      className="min-w-64"
-                      autoFocus
-                      required
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                    />
-                    <Button type="submit" size="sm" loading={resolve.isPending}>
-                      {t("safeguarding.markSafe")}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      className={quiet}
-                      onClick={() => setResolving(null)}
-                    >
-                      {t("common.cancel")}
-                    </Button>
-                  </form>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="whitespace-nowrap"
-                    onClick={() => {
-                      setNote("");
-                      setResolving(v.id);
-                    }}
-                  >
-                    {t("safeguarding.markSafe")}
-                  </Button>
-                )
-              ) : null}
-            </Cell>
-          </tr>
-        ))}
+            </span>
+          );
+          const arrived = formatDateTime(v.checked_in_at, i18n.language);
+          const ends = formatDateTime(v.expected_end, i18n.language, undefined, {
+            timeStyle: "short",
+          });
+          if (phone) {
+            return [
+              <tr key={v.id}>
+                <Cell className="min-w-40">
+                  <span className="font-medium">{v.tutor_name}</span>
+                  <span className="block text-xs text-muted-foreground tabular-nums">
+                    {[v.lesson_title, arrived].join(" · ")}
+                  </span>
+                </Cell>
+                <Cell>
+                  {status}
+                  {open && resolving !== v.id ? <div className="mt-1.5">{button}</div> : null}
+                </Cell>
+              </tr>,
+              open && resolving === v.id ? (
+                <tr key={`${v.id}-form`}>
+                  <td colSpan={2} className="pt-0">
+                    {form}
+                  </td>
+                </tr>
+              ) : null,
+            ];
+          }
+          return (
+            <tr key={v.id}>
+              <Cell className="min-w-32 font-medium">{v.tutor_name}</Cell>
+              <Cell className="min-w-40">{v.lesson_title}</Cell>
+              <Cell className="whitespace-nowrap tabular-nums">
+                {arrived}
+                <span className="block text-xs text-muted-foreground">
+                  {t("safeguarding.expectedEnd")} {ends}
+                </span>
+              </Cell>
+              <Cell>{status}</Cell>
+              <Cell className="py-1.5 text-right align-middle">
+                {open ? (resolving === v.id ? form : button) : null}
+              </Cell>
+            </tr>
+          );
+        })}
       </Table>
       {resolve.error ? <Alert tone="danger">{resolve.error.message}</Alert> : null}
     </div>

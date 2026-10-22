@@ -758,6 +758,7 @@ function HoldsSection() {
   const [person, setPerson] = useState<PersonRef | null>(null);
   const [reason, setReason] = useState("");
   const [releasing, setReleasing] = useState<string | null>(null);
+  const phone = useIsPhone();
   const [why, setWhy] = useState("");
   const place = useMutation({
     mutationFn: async () =>
@@ -799,78 +800,108 @@ function HoldsSection() {
         empty={holds.data && !rows.length ? t("designS9b.privacy.noHolds") : undefined}
         columns={[
           { key: "person", header: t("privacyCentre.person") },
-          { key: "reason", header: t("privacyCentre.reason") },
-          { key: "placed", header: t("privacyCentre.placed") },
+          ...(phone
+            ? []
+            : [
+                { key: "reason", header: t("privacyCentre.reason") },
+                { key: "placed", header: t("privacyCentre.placed") },
+              ]),
           { key: "status", header: t("privacyCentre.status") },
-          { key: "actions", header: t("common.actions", "Actions"), hidden: true },
+          ...(phone
+            ? []
+            : [{ key: "actions", header: t("common.actions", "Actions"), hidden: true }]),
         ]}
       >
-        {rows.map((h: Hold) => (
-          <tr key={h.id}>
-            <Cell className="min-w-32 font-medium">{h.subject_label || h.subject_id}</Cell>
-            <Cell className="min-w-40">{h.reason}</Cell>
-            <Cell className="whitespace-nowrap tabular-nums">
-              {formatDate(h.placed_at, i18n.language)}
-            </Cell>
-            <Cell className={h.active ? undefined : "text-muted-foreground"}>
-              {h.active
-                ? t("privacyCentre.holdActive")
-                : t("privacyCentre.holdReleased", { reason: h.release_reason })}
-            </Cell>
-            <Cell className="py-1.5 text-right align-middle">
-              {h.active ? (
-                releasing === h.id ? (
-                  <form
-                    className="flex flex-wrap items-center justify-end gap-2"
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape") setReleasing(null);
-                    }}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      if (why.trim()) release.mutate({ id: h.id, why: why.trim() });
-                    }}
-                  >
-                    <TextField
-                      label={t("privacyCentre.releaseReason")}
-                      hideLabel
-                      size="sm"
-                      placeholder={t("privacyCentre.releaseReason")}
-                      className="min-w-56"
-                      autoFocus
-                      required
-                      value={why}
-                      onChange={(e) => setWhy(e.target.value)}
-                    />
-                    <Button type="submit" size="sm" loading={release.isPending}>
-                      {t("privacyCentre.release")}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      className="text-muted-foreground"
-                      onClick={() => setReleasing(null)}
-                    >
-                      {t("common.cancel")}
-                    </Button>
-                  </form>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="whitespace-nowrap"
-                    onClick={() => {
-                      setWhy("");
-                      setReleasing(h.id);
-                    }}
-                  >
-                    {t("privacyCentre.release")}
-                  </Button>
-                )
-              ) : null}
-            </Cell>
-          </tr>
-        ))}
+        {rows.map((h: Hold) => {
+          const form = (
+            <form
+              className="flex flex-wrap items-center justify-end gap-2 max-md:justify-start"
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setReleasing(null);
+              }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (why.trim()) release.mutate({ id: h.id, why: why.trim() });
+              }}
+            >
+              <div className="min-w-0 flex-1 md:min-w-56">
+                <TextField
+                  label={t("privacyCentre.releaseReason")}
+                  hideLabel
+                  size="sm"
+                  placeholder={t("privacyCentre.releaseReason")}
+                  autoFocus
+                  required
+                  value={why}
+                  onChange={(e) => setWhy(e.target.value)}
+                />
+              </div>
+              <Button type="submit" size="sm" loading={release.isPending}>
+                {t("privacyCentre.release")}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={() => setReleasing(null)}
+              >
+                {t("common.cancel")}
+              </Button>
+            </form>
+          );
+          const button = (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="whitespace-nowrap"
+              onClick={() => {
+                setWhy("");
+                setReleasing(h.id);
+              }}
+            >
+              {t("privacyCentre.release")}
+            </Button>
+          );
+          const status = h.active
+            ? t("privacyCentre.holdActive")
+            : t("privacyCentre.holdReleased", { reason: h.release_reason });
+          const placed = formatDate(h.placed_at, i18n.language);
+          if (phone) {
+            return [
+              <tr key={h.id}>
+                <Cell className="min-w-40">
+                  <span className="font-medium">{h.subject_label || h.subject_id}</span>
+                  <span className="block text-xs text-muted-foreground tabular-nums">
+                    {[h.reason, placed].filter(Boolean).join(" · ")}
+                  </span>
+                </Cell>
+                <Cell className={h.active ? undefined : "text-muted-foreground"}>
+                  {status}
+                  {h.active && releasing !== h.id ? <div className="mt-1.5">{button}</div> : null}
+                </Cell>
+              </tr>,
+              h.active && releasing === h.id ? (
+                <tr key={`${h.id}-form`}>
+                  <td colSpan={2} className="pt-0">
+                    {form}
+                  </td>
+                </tr>
+              ) : null,
+            ];
+          }
+          return (
+            <tr key={h.id}>
+              <Cell className="min-w-32 font-medium">{h.subject_label || h.subject_id}</Cell>
+              <Cell className="min-w-40">{h.reason}</Cell>
+              <Cell className="whitespace-nowrap tabular-nums">{placed}</Cell>
+              <Cell className={h.active ? undefined : "text-muted-foreground"}>{status}</Cell>
+              <Cell className="py-1.5 text-right align-middle">
+                {h.active ? (releasing === h.id ? form : button) : null}
+              </Cell>
+            </tr>
+          );
+        })}
       </Table>
       {release.error ? <Alert tone="danger">{release.error.message}</Alert> : null}
       <FormCard

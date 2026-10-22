@@ -236,7 +236,7 @@ function BranchesSection() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-muted-foreground"
+                    className="text-muted-foreground max-sm:-ml-3"
                     onClick={() => archive.mutate(b.id)}
                   >
                     {t("settings.archive")}
