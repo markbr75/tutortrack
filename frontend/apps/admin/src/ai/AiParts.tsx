@@ -2,6 +2,7 @@ import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, SelectField } from "@tutortrack/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Sparkles, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useId, useState } from "react";
 
 import { api, usePermission } from "../api";
@@ -40,7 +41,7 @@ export function AiFeedback({
     <div
       role="group"
       aria-label={t("ai.feedback.label")}
-      className="flex items-center gap-1 text-xs"
+      className="flex items-center gap-1.5 text-xs"
     >
       <span className="text-muted-foreground">{t("ai.feedback.label")}</span>
       {(["up", "down"] as const).map((value) => (
@@ -50,9 +51,13 @@ export function AiFeedback({
           aria-pressed={rating === value}
           disabled={send.isPending}
           onClick={() => send.mutate(value)}
-          className="rounded-md border border-border px-2 py-0.5 hover:bg-muted aria-pressed:bg-muted aria-pressed:font-medium"
+          className="grid size-7 place-items-center rounded-md border border-border bg-surface text-muted-foreground hover:bg-muted hover:text-foreground aria-pressed:border-foreground aria-pressed:bg-muted aria-pressed:text-foreground"
         >
-          <span aria-hidden="true">{value === "up" ? "👍" : "👎"}</span>
+          {value === "up" ? (
+            <ThumbsUp aria-hidden="true" className="size-3.5" strokeWidth={1.75} />
+          ) : (
+            <ThumbsDown aria-hidden="true" className="size-3.5" strokeWidth={1.75} />
+          )}
           <span className="sr-only">{t(`ai.feedback.${value}`)}</span>
         </button>
       ))}
@@ -87,7 +92,9 @@ export function AiAssistedBadge({
   });
   if (!assists.data?.results.length) return null;
   return (
-    <span className="ml-2 rounded bg-violet-100 px-1.5 py-0.5 text-xs font-medium text-violet-900">
+    // A word, not a badge: AI help is stated in faded ink beside the record's own context.
+    <span className="ml-2 inline-flex items-center gap-1 text-muted-foreground">
+      <Sparkles aria-hidden="true" className="size-3.5 shrink-0" strokeWidth={1.75} />
       {t("ai.badge")}
     </span>
   );
@@ -134,7 +141,7 @@ export function ProposalList({
         {proposals.map((original) => {
           const p = state[original.id] ?? original;
           return (
-            <li key={p.id} className="rounded-md border border-border p-2 text-sm">
+            <li key={p.id} className="rounded-md border border-border bg-surface px-3 py-2 text-sm">
               <p>{p.summary}</p>
               {p.status === "proposed" ? (
                 <div className="mt-1 flex gap-2">
@@ -229,7 +236,7 @@ export function AiContentHelper({
   return (
     <section
       aria-label={t("ai.content.title")}
-      className="space-y-2 rounded-md border border-violet-200 p-3"
+      className="space-y-2 rounded-md border border-border bg-surface p-3"
     >
       <label htmlFor={briefId} className="text-sm font-medium">
         {t("ai.content.brief")}
@@ -239,13 +246,19 @@ export function AiContentHelper({
         rows={3}
         value={brief}
         onChange={(e) => setBrief(e.target.value)}
-        className="w-full rounded-md border border-border bg-background p-2 text-sm"
+        className="w-full rounded-md border border-field bg-surface px-3 py-2 text-sm"
       />
       <div className="flex gap-2">
         <Button type="button" size="sm" loading={write.isPending} onClick={() => write.mutate()}>
           {t("ai.content.write")}
         </Button>
-        <Button type="button" size="sm" variant="ghost" onClick={() => setOpen(false)}>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="text-muted-foreground"
+          onClick={() => setOpen(false)}
+        >
           {t("common.cancel")}
         </Button>
       </div>
@@ -258,7 +271,9 @@ export function AiContentHelper({
               {t("ai.content.subject")}: {draft.subject}
             </p>
           ) : null}
-          <p className="whitespace-pre-wrap rounded-md bg-muted p-2 text-sm">{draft.body}</p>
+          <p className="rounded-md border border-border px-3 py-2 text-sm whitespace-pre-wrap">
+            {draft.body}
+          </p>
           {draft.warnings.map((w) => (
             <Alert key={w} tone="warning">
               {w}

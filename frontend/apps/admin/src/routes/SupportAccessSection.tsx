@@ -1,6 +1,14 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  UnitField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -8,7 +16,7 @@ import { api, usePermission } from "../api";
 
 /** When TutorTrack support viewed the account, and grants for them to do so (E30 FR-30-2). */
 export function SupportAccessSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const canView = usePermission("support.access.view");
   const canManage = usePermission("support.access.manage");
@@ -39,72 +47,89 @@ export function SupportAccessSection() {
   if (!canView || !access.data) return null;
   const active = access.data.grants.filter((g) => g.active);
   return (
-    <section aria-labelledby="support-access" className="mt-8 space-y-3">
-      <h2 id="support-access" className="text-lg font-semibold">
-        {t("support.title")}
-      </h2>
-      <p className="text-sm text-muted-foreground">
-        {access.data.requires_grant ? t("support.requiresGrant") : t("support.readOnlyDefault")}
-      </p>
-      {active.map((g) => (
-        <p key={g.id} className="flex flex-wrap items-center gap-2 text-sm">
-          {t(g.allow_write ? "support.grantWrite" : "support.grantRead", {
-            date: formatDate(g.expires_at),
-          })}
-          {canManage ? (
-            <Button size="sm" variant="ghost" onClick={() => revoke.mutate(g.id)}>
-              {t("support.revoke")}
-            </Button>
-          ) : null}
+    <RuledPanel
+      flush
+      titleId="support-access"
+      title={t("support.title")}
+      description={
+        access.data.requires_grant ? t("support.requiresGrant") : t("support.readOnlyDefault")
+      }
+    >
+      {active.length || access.data.sessions.length ? (
+        <PanelRows>
+          {active.map((g) => (
+            <PanelRow key={g.id} className="flex flex-wrap items-center justify-between gap-2">
+              <span className="font-medium tabular-nums">
+                {t(g.allow_write ? "support.grantWrite" : "support.grantRead", {
+                  date: formatDate(g.expires_at, i18n.language),
+                })}
+              </span>
+              {canManage ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-muted-foreground"
+                  onClick={() => revoke.mutate(g.id)}
+                >
+                  {t("support.revoke")}
+                </Button>
+              ) : null}
+            </PanelRow>
+          ))}
+          {access.data.sessions.map((s) => (
+            <PanelRow key={s.id} className="tabular-nums">
+              {t("support.session", {
+                date: formatDateTime(s.created_at, i18n.language),
+                name: s.staff_name,
+                email: s.viewed_as,
+                reason: s.reason,
+              })}
+            </PanelRow>
+          ))}
+        </PanelRows>
+      ) : null}
+      {!access.data.sessions.length ? (
+        <p
+          className={`px-5 py-4 text-sm text-muted-foreground ${active.length ? "border-t border-rule" : ""}`}
+        >
+          {t("support.noSessions")}
         </p>
-      ))}
+      ) : null}
       {canManage ? (
         <form
-          className="flex flex-wrap items-end gap-3"
+          aria-label={t("support.grant")}
+          className="flex flex-wrap items-end gap-x-4 gap-y-3 border-t border-rule px-5 py-3"
           onSubmit={(e) => {
             e.preventDefault();
             grant.mutate();
           }}
         >
-          <TextField
+          <UnitField
             label={t("support.days")}
-            type="number"
+            hideLabel
+            size="sm"
+            unit={t("designS9b.units.days")}
             min={1}
             max={30}
             value={days}
             onChange={(e) => setDays(e.target.value)}
-            className="w-24"
           />
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={allowWrite}
-              onChange={(e) => setAllowWrite(e.target.checked)}
-            />
-            {t("support.allowWrite")}
-          </label>
-          <Button type="submit" size="sm" loading={grant.isPending}>
+          <CheckboxField
+            className="h-9 justify-center"
+            label={t("support.allowWrite")}
+            checked={allowWrite}
+            onChange={(e) => setAllowWrite(e.target.checked)}
+          />
+          <Button type="submit" size="sm" className="h-9" loading={grant.isPending}>
             {t("support.grant")}
           </Button>
+          {grant.error ? (
+            <Alert tone="danger" className="basis-full">
+              {grant.error.message}
+            </Alert>
+          ) : null}
         </form>
       ) : null}
-      {grant.error ? <Alert tone="danger">{grant.error.message}</Alert> : null}
-      {access.data.sessions.length ? (
-        <ul className="space-y-1 text-sm">
-          {access.data.sessions.map((s) => (
-            <li key={s.id}>
-              {t("support.session", {
-                date: formatDateTime(s.created_at),
-                name: s.staff_name,
-                email: s.viewed_as,
-                reason: s.reason,
-              })}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-sm">{t("support.noSessions")}</p>
-      )}
-    </section>
+    </RuledPanel>
   );
 }

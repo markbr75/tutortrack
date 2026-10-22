@@ -1,8 +1,9 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import { Alert, Button, Spinner, TextAreaField, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { ChevronLeft } from "lucide-react";
+import { useState } from "react";
 
 import { api } from "../api";
 import { routePattern, track } from "./analytics";
@@ -17,21 +18,14 @@ function MessageBox({
   value: string;
   onChange: (value: string) => void;
 }) {
-  const id = useId();
   return (
-    <div className="space-y-1">
-      <label htmlFor={id} className="text-sm font-medium">
-        {label}
-      </label>
-      <textarea
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        rows={3}
-        maxLength={5000}
-        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-      />
-    </div>
+    <TextAreaField
+      label={label}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      rows={3}
+      maxLength={5000}
+    />
   );
 }
 
@@ -109,23 +103,25 @@ function Conversation({ id, onBack }: { id: string; onBack: () => void }) {
   if (!data) return <Spinner label={t("grid.loading")} />;
   return (
     <div className="space-y-3">
-      <Button size="sm" variant="ghost" onClick={onBack}>
+      <Button size="sm" variant="ghost" className="-ml-3 text-muted-foreground" onClick={onBack}>
+        <ChevronLeft aria-hidden="true" className="size-4" strokeWidth={1.75} />
         {t("supportChat.back")}
       </Button>
-      <h3 className="font-semibold">{data.subject}</h3>
-      <p className="text-xs text-muted-foreground">{t(`supportChat.status.${data.status}`)}</p>
-      <ol className="space-y-2" aria-label={t("supportChat.messages")}>
+      <div>
+        <h3 className="text-base font-semibold">{data.subject}</h3>
+        <p className="text-xs text-muted-foreground">{t(`supportChat.status.${data.status}`)}</p>
+      </div>
+      <ol
+        className="divide-y divide-rule rounded-xl border border-border bg-surface"
+        aria-label={t("supportChat.messages")}
+      >
         {data.messages.map((message) => (
-          <li
-            key={message.id}
-            className={
-              message.from_support
-                ? "rounded-md border border-border bg-muted p-2"
-                : "rounded-md border border-border p-2"
-            }
-          >
-            <p className="text-xs text-muted-foreground">
-              {message.author_name} ·{" "}
+          <li key={message.id} className="space-y-0.5 px-4 py-2.5">
+            <p className="text-xs text-muted-foreground tabular-nums">
+              <span className={message.from_support ? "font-semibold text-foreground" : undefined}>
+                {message.author_name}
+              </span>{" "}
+              ·{" "}
               {formatDateTime(message.created_at, i18n.language, undefined, {
                 dateStyle: "medium",
                 timeStyle: "short",
@@ -151,7 +147,8 @@ function Conversation({ id, onBack }: { id: string; onBack: () => void }) {
             <Button
               type="button"
               size="sm"
-              variant="secondary"
+              variant="ghost"
+              className="text-muted-foreground"
               loading={close.isPending}
               onClick={() => close.mutate()}
             >
@@ -205,7 +202,7 @@ export function SupportChat() {
           if (body.trim()) start.mutate();
         }}
       >
-        <h3 className="font-semibold">{t("supportChat.newTitle")}</h3>
+        <h3 className="text-base font-semibold">{t("supportChat.newTitle")}</h3>
         <p className="text-xs text-muted-foreground">{t("supportChat.privacyHint")}</p>
         <TextField
           label={t("supportChat.subject")}
@@ -221,22 +218,22 @@ export function SupportChat() {
       </form>
       {conversations.length > 0 ? (
         <section className="space-y-2">
-          <h3 className="font-semibold">{t("supportChat.yourChats")}</h3>
-          <ul className="space-y-1">
+          <h3 className="text-base font-semibold">{t("supportChat.yourChats")}</h3>
+          <ul className="divide-y divide-rule rounded-xl border border-border bg-surface">
             {conversations.map((c) => (
               <li key={c.id}>
                 <button
                   type="button"
                   onClick={() => setOpenId(c.id)}
-                  className="w-full rounded-md border border-border p-2 text-left text-sm hover:bg-muted"
+                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-muted/60"
                 >
                   <span className="font-medium">{c.subject}</span>
                   {c.customer_unread ? (
-                    <span className="ml-2 rounded bg-brand px-1 text-xs text-brand-foreground">
+                    <span className="ml-2 text-xs font-semibold text-margin">
                       {t("supportChat.newReply")}
                     </span>
                   ) : null}
-                  <span className="block text-xs text-muted-foreground">
+                  <span className="block text-xs text-muted-foreground tabular-nums">
                     {t(`supportChat.status.${c.status}`)} ·{" "}
                     {formatDateTime(c.last_message_at, i18n.language, undefined, {
                       dateStyle: "medium",

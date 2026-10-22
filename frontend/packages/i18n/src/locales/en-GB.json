@@ -7483,6 +7483,183 @@
     "openDirectory": "Open the integrations directory",
     "nothingToCompare": "Nothing to compare with: the comparison period has no figures yet."
   },
+  "designS9b": {
+    "units": {
+      "days": "days"
+    },
+    "settings": {
+      "description": "Your organisation's profile, the words the app uses, and who can look after your account.",
+      "colourHint": "Used on buttons in the app and the portal.",
+      "branchCount_one": "{{count}} branch",
+      "branchCount_other": "{{count}} branches"
+    },
+    "account": {
+      "description": "Your own profile, how you sign in, and where you're signed in.",
+      "noLogins": "No sign-ins recorded yet.",
+      "sessionCount_one": "{{count}} device",
+      "sessionCount_other": "{{count}} devices",
+      "showAll": "Show all {{count}}",
+      "showFewer": "Show fewer",
+      "device": "{{browser}} on {{os}}"
+    },
+    "team": {
+      "description": "Who works in this organisation, and the role each person has.",
+      "memberCount_one": "{{count}} person",
+      "memberCount_other": "{{count}} people",
+      "noMembers": "Nobody has joined yet."
+    },
+    "roles": {
+      "choose": "Choose a custom role to see and change what it can do.",
+      "empty": "There are no custom roles yet.",
+      "emptyCanCreate": "There are no custom roles yet. Make one from a built-in role with New role.",
+      "newRole": "New role",
+      "memberCount_one": "{{count}} team member",
+      "memberCount_other": "{{count}} team members",
+      "noStaff": "No staff members to give this role to yet.",
+      "unsaved_one": "{{count}} unsaved change",
+      "unsaved_other": "{{count}} unsaved changes",
+      "categories": {
+        "ai": "AI assistant",
+        "audit": "Audit log",
+        "automation": "Automations",
+        "billing": "Billing",
+        "catalogue": "Catalogue",
+        "comms": "Messages",
+        "compliance": "Compliance",
+        "courses": "Courses and classes",
+        "crm": "Notes and tasks",
+        "delivery": "Lessons and reports",
+        "developer": "Developer",
+        "growth": "Growth",
+        "impersonation": "View as",
+        "integrations": "Integrations",
+        "jobs": "Jobs",
+        "leads": "Enquiries",
+        "learning": "Learning",
+        "matching": "Matching",
+        "membership": "Membership",
+        "migration": "Import and export",
+        "org": "Organisation",
+        "payments": "Payments",
+        "payroll": "Payroll",
+        "people": "People",
+        "portal": "Portal",
+        "privacy": "Privacy",
+        "processes": "Processes",
+        "rates": "Rates",
+        "recruitment": "Recruitment",
+        "reporting": "Reports",
+        "safeguarding": "Safeguarding",
+        "scheduling": "Scheduling",
+        "security": "Security",
+        "sites": "Website",
+        "subscription": "Billing and plan",
+        "success": "Help and setup",
+        "support": "TutorTrack support",
+        "team": "Team",
+        "video": "Video lessons"
+      },
+      "allowed": "{{allowed}} of {{total}} allowed",
+      "openArea": "Open an area to choose who each permission applies to."
+    },
+    "sso": {
+      "connection": "Connection",
+      "callback": "Redirect URL"
+    },
+    "booking": {
+      "panel": "Booking rules"
+    },
+    "audit": {
+      "description": "Every change made in the organisation: who made it, when, and what changed.",
+      "empty": "Nothing matches these filters.",
+      "system": "System",
+      "more_one": "and {{count}} more change",
+      "more_other": "and {{count}} more changes",
+      "actions": {
+        "create": "Created",
+        "created": "Created",
+        "update": "Updated",
+        "updated": "Updated",
+        "edit": "Edited",
+        "delete": "Deleted",
+        "archive": "Archived",
+        "status": "Status changed",
+        "status_change": "Status changed",
+        "message": "Message",
+        "convert": "Converted",
+        "issue": "Issued",
+        "approve": "Approved",
+        "reject": "Rejected",
+        "complete": "Completed",
+        "cancel": "Cancelled",
+        "void": "Voided",
+        "submit": "Submitted",
+        "share": "Shared",
+        "export": "Exported",
+        "read": "Viewed",
+        "connect": "Connected",
+        "disconnect": "Disconnected",
+        "refresh": "Refreshed",
+        "escalate": "Escalated",
+        "overdue": "Became overdue",
+        "set_subjects": "Subjects changed",
+        "set_availability": "Availability changed",
+        "revoke": "Revoked",
+        "release": "Released",
+        "extend": "Extended",
+        "verify": "Verified",
+        "assign": "Assigned",
+        "pay": "Paid",
+        "paid": "Paid",
+        "write_off": "Written off",
+        "login": "Signed in"
+      }
+    },
+    "privacy": {
+      "description": "Requests from people about their data, legal holds, how long data is kept, and your data processing agreement.",
+      "details": "Details",
+      "noRequests": "No requests in this view.",
+      "noErasures": "Nothing has been erased yet.",
+      "noHolds": "No legal holds.",
+      "noRuns": "No purge runs yet.",
+      "accepted": "Accepted",
+      "inDays_one": "in {{count}} day",
+      "inDays_other": "in {{count}} days",
+      "overdueBy_one": "{{count}} day overdue",
+      "overdueBy_other": "{{count}} days overdue"
+    },
+    "safeguarding": {
+      "anyStatus": "Any status",
+      "noCases": "No cases in this view.",
+      "raisedOn": "Raised",
+      "noActions": "No actions recorded yet.",
+      "noVisits": "No lone-working visits yet.",
+      "waiting_one": "{{count}} waiting",
+      "waiting_other": "{{count}} waiting",
+      "overdueCount_one": "{{count}} overdue",
+      "overdueCount_other": "{{count}} overdue"
+    },
+    "ai": {
+      "askTitle": "Ask a question",
+      "autosave": "Changes are saved as you make them.",
+      "saving": "Saving…",
+      "credits": "credits",
+      "byFeature": "Usage by feature",
+      "noUsage": "No AI requests this month.",
+      "requests": "Requests",
+      "creditsHeading": "Credits"
+    },
+    "announcements": {
+      "description": "News you post here is shown to families and tutors in their portals.",
+      "published": "Published",
+      "count_one": "{{count}} post",
+      "count_other": "{{count}} posts",
+      "empty": "Nothing published yet. Posts you publish appear here and in the portals."
+    },
+    "checklist": {
+      "otherStep": "Setup step"
+    }
+  },
   "designS7": {
     "billing": {
       "description": "Invoices, payments and charges, from the lesson register to money in the bank.",

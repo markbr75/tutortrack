@@ -1,41 +1,67 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  FormPanel,
+  PanelFooter,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  Spinner,
+  TextAreaField,
+  TextField,
+  type RuledColumn,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
+import { SavedNote } from "../components/SavedNote";
 
+/**
+ * A register table in a ruled panel titled by what it lists: skeleton rows while it loads and
+ * one faded-ink sentence when it is empty.
+ */
 export function Table({
   caption,
-  headers,
+  columns,
+  loading,
+  empty,
+  aside,
+  description,
+  footer,
   children,
 }: {
   caption: string;
-  headers: string[];
-  children: ReactNode;
+  columns: ReadonlyArray<RuledColumn>;
+  loading?: boolean;
+  /** The sentence shown instead of rows; pass it only when there are none. */
+  empty?: string;
+  aside?: ReactNode;
+  description?: ReactNode;
+  footer?: ReactNode;
+  children?: ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <caption className="mb-2 text-left font-semibold">{caption}</caption>
-        <thead>
-          <tr className="text-left">
-            {headers.map((h) => (
-              <th key={h} scope="col" className="px-2 py-1">
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>{children}</tbody>
-      </table>
-    </div>
+    <RuledPanel flush title={caption} aside={aside} description={description} footer={footer}>
+      <RuledTable
+        caption={caption}
+        columns={columns}
+        loading={loading}
+        loadingLabel={t("grid.loading")}
+        empty={empty}
+      >
+        {children}
+      </RuledTable>
+    </RuledPanel>
   );
 }
 
-export function Cell({ children }: { children?: ReactNode }) {
-  return <td className="border-t border-border px-2 py-1 align-top">{children}</td>;
+export function Cell({ children, className }: { children?: ReactNode; className?: string }) {
+  return <td className={className}>{children}</td>;
 }
 
 export function FormCard({
@@ -44,6 +70,7 @@ export function FormCard({
   pending,
   error,
   onSubmit,
+  description,
   children,
 }: {
   title: string;
@@ -51,24 +78,20 @@ export function FormCard({
   pending?: boolean;
   error?: Error | null;
   onSubmit: () => void;
+  description?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <form
-      className="space-y-3 rounded-md border border-border p-4"
-      aria-label={title}
-      onSubmit={(e: FormEvent) => {
-        e.preventDefault();
-        onSubmit();
-      }}
+    <FormPanel
+      title={title}
+      description={description}
+      submit={submit}
+      pending={pending}
+      onSubmit={onSubmit}
+      error={error ? <Alert tone="danger">{error.message}</Alert> : null}
     >
-      <h2 className="font-semibold">{title}</h2>
-      <div className="grid gap-3 sm:grid-cols-2">{children}</div>
-      {error ? <Alert tone="danger">{error.message}</Alert> : null}
-      <Button type="submit" disabled={pending}>
-        {submit}
-      </Button>
-    </form>
+      {children}
+    </FormPanel>
   );
 }
 
@@ -87,27 +110,16 @@ export function TextArea({
   error?: string;
   rows?: number;
 }) {
-  const id = useId();
   return (
-    <div className="flex flex-col gap-1 sm:col-span-2">
-      <label htmlFor={id} className="text-sm font-medium">
-        {label}
-      </label>
-      <textarea
-        id={id}
+    <div className="sm:col-span-full">
+      <TextAreaField
+        label={label}
         rows={rows}
         required={required}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-error` : undefined}
-        className="rounded-md border border-border bg-background p-2 text-sm"
+        error={error}
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
-      {error ? (
-        <p id={`${id}-error`} className="text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -142,10 +154,13 @@ export function PersonPicker({
   });
   if (value) {
     return (
-      <div className="flex items-center gap-2 text-sm sm:col-span-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border px-3 py-2 text-sm sm:col-span-full">
         <span>
-          {t("privacyCentre.person")}: <strong>{value.label}</strong> (
-          {t(`privacyCentre.subjectTypes.${value.subject_type}`)})
+          <span className="text-muted-foreground">{t("privacyCentre.person")}: </span>
+          <span className="font-medium">{value.label}</span>{" "}
+          <span className="text-muted-foreground">
+            ({t(`privacyCentre.subjectTypes.${value.subject_type}`)})
+          </span>
         </span>
         <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)}>
           {t("privacyCentre.change")}
@@ -155,20 +170,21 @@ export function PersonPicker({
   }
   const list = (hits.data ?? []).filter((h) => HIT_TYPES[h.type]);
   return (
-    <div className="sm:col-span-2">
+    <div className="sm:col-span-full">
       <TextField
         label={t("privacyCentre.findPerson")}
         hint={t("privacyCentre.findPersonHint")}
+        type="search"
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
       {list.length ? (
-        <ul className="mt-2 divide-y divide-border rounded-md border border-border">
+        <ul className="mt-2 divide-y divide-rule rounded-md border border-border bg-surface">
           {list.map((h) => (
             <li key={`${h.type}:${h.id}`}>
               <button
                 type="button"
-                className="w-full px-3 py-2 text-left text-sm hover:bg-muted focus-visible:outline focus-visible:outline-2"
+                className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
                 onClick={() =>
                   onChange({
                     subject_type: HIT_TYPES[h.type] as string,
@@ -177,7 +193,7 @@ export function PersonPicker({
                   })
                 }
               >
-                {h.title}{" "}
+                <span className="font-medium">{h.title}</span>{" "}
                 <span className="text-muted-foreground">
                   ({t(`privacyCentre.subjectTypes.${HIT_TYPES[h.type]}`)})
                 </span>
@@ -190,7 +206,8 @@ export function PersonPicker({
   );
 }
 
-/** Edit one settings area (``/settings/{area}``) from its registered schema. */
+/** Edit one settings area (``/settings/{area}``) from its registered schema, in a ruled panel
+ * with Save in its footer. */
 export function AreaSettings({ area, label }: { area: string; label: string }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -218,73 +235,79 @@ export function AreaSettings({ area, label }: { area: string; label: string }) {
   if (!query.data) return <Spinner label={t("grid.loading")} />;
   return (
     <form
-      className="max-w-2xl space-y-3"
+      className="max-w-3xl"
       aria-label={label}
       onSubmit={(e) => {
         e.preventDefault();
         save.mutate();
       }}
     >
-      {query.data.schema
-        .filter((d) => d.key.startsWith(`${area}.`))
-        .map((d) => {
-          const value = values[d.key];
-          if (d.type === "bool") {
-            return (
-              <label key={d.key} className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  disabled={!canManage}
-                  checked={Boolean(value)}
-                  onChange={(e) => setValues({ ...values, [d.key]: e.target.checked })}
-                />
-                {d.label}
-              </label>
-            );
-          }
-          if (d.type === "choice") {
-            return (
-              <SelectField
-                key={d.key}
-                label={d.label}
-                hint={d.help_text || undefined}
-                disabled={!canManage}
-                value={String(value ?? "")}
-                onChange={(e) => setValues({ ...values, [d.key]: e.target.value })}
-                options={(d.choices ?? []).map((c) => ({
-                  value: String(c.value),
-                  label: String(c.label),
-                }))}
-              />
-            );
-          }
-          return (
-            <TextField
-              key={d.key}
-              label={d.label}
-              hint={d.help_text || undefined}
-              disabled={!canManage}
-              type={d.type === "int" ? "number" : "text"}
-              min={d.min_value}
-              max={d.max_value}
-              value={String(value ?? "")}
-              error={errors[d.key]}
-              onChange={(e) =>
-                setValues({
-                  ...values,
-                  [d.key]: d.type === "int" ? Number(e.target.value) : e.target.value,
-                })
+      <RuledPanel flush title={label}>
+        <div className="max-w-2xl space-y-3 px-5 py-4">
+          {query.data.schema
+            .filter((d) => d.key.startsWith(`${area}.`))
+            .map((d) => {
+              const value = values[d.key];
+              if (d.type === "bool") {
+                return (
+                  <CheckboxField
+                    key={d.key}
+                    label={d.label}
+                    hint={d.help_text || undefined}
+                    disabled={!canManage}
+                    checked={Boolean(value)}
+                    onChange={(e) => setValues({ ...values, [d.key]: e.target.checked })}
+                  />
+                );
               }
-            />
-          );
-        })}
-      {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
-      {save.isSuccess ? <p role="status">{t("privacyCentre.saved")}</p> : null}
-      {canManage ? (
-        <Button type="submit" disabled={save.isPending}>
-          {t("privacyCentre.saveSettings")}
-        </Button>
-      ) : null}
+              if (d.type === "choice") {
+                return (
+                  <SelectField
+                    key={d.key}
+                    label={d.label}
+                    hint={d.help_text || undefined}
+                    disabled={!canManage}
+                    value={String(value ?? "")}
+                    onChange={(e) => setValues({ ...values, [d.key]: e.target.value })}
+                    options={(d.choices ?? []).map((c) => ({
+                      value: String(c.value),
+                      label: String(c.label),
+                    }))}
+                  />
+                );
+              }
+              return (
+                <TextField
+                  key={d.key}
+                  label={d.label}
+                  hint={d.help_text || undefined}
+                  disabled={!canManage}
+                  type={d.type === "int" ? "number" : "text"}
+                  className={d.type === "int" ? "w-24 text-right tabular-nums" : undefined}
+                  min={d.min_value}
+                  max={d.max_value}
+                  value={String(value ?? "")}
+                  error={errors[d.key]}
+                  onChange={(e) =>
+                    setValues({
+                      ...values,
+                      [d.key]: d.type === "int" ? Number(e.target.value) : e.target.value,
+                    })
+                  }
+                />
+              );
+            })}
+          {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
+        </div>
+        {canManage ? (
+          <PanelFooter>
+            <Button type="submit" loading={save.isPending}>
+              {t("privacyCentre.saveSettings")}
+            </Button>
+            <SavedNote show={save.isSuccess} text={t("privacyCentre.saved")} />
+          </PanelFooter>
+        ) : null}
+      </RuledPanel>
     </form>
   );
 }

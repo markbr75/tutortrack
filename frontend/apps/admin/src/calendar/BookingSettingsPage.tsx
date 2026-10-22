@@ -1,10 +1,20 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, ErrorFallback, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Button,
+  CheckboxField,
+  ErrorFallback,
+  PageHeader,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  UnitField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { api } from "../api";
+import { SavedNote } from "../components/SavedNote";
 import { ErrorList } from "./ErrorList";
 
 type Settings = components["schemas"]["BookingSettings"];
@@ -47,69 +57,77 @@ export function BookingSettingsPage() {
   }
   if (!draft) return <Spinner label={t("grid.loading")} />;
   return (
-    <section className="max-w-3xl space-y-4">
-      <h1 className="text-2xl font-semibold">{t("booking.title")}</h1>
-      <p className="text-sm text-muted-foreground">{t("booking.intro")}</p>
+    <div className="max-w-3xl">
+      <PageHeader title={t("booking.title")} description={t("booking.intro")} />
       <form
-        className="space-y-4"
+        aria-labelledby="booking-settings"
         onSubmit={(e: FormEvent) => {
           e.preventDefault();
           save.mutate(draft);
         }}
       >
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={draft.enabled ?? false}
-            onChange={(e) => setDraft({ ...draft, enabled: e.target.checked })}
-          />
-          {t("booking.enabled")}
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={draft.allow_new_clients ?? false}
-            onChange={(e) => setDraft({ ...draft, allow_new_clients: e.target.checked })}
-          />
-          {t("booking.allowNew")}
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={draft.approval_required ?? false}
-            onChange={(e) => setDraft({ ...draft, approval_required: e.target.checked })}
-          />
-          {t("booking.approval")}
-        </label>
-        <SelectField
-          label={t("booking.payment")}
-          value={draft.payment ?? "none"}
-          onChange={(e) =>
-            setDraft({ ...draft, payment: e.target.value as NonNullable<Settings["payment"]> })
+        <RuledPanel
+          flush
+          titleId="booking-settings"
+          title={t("designS9b.booking.panel")}
+          footer={
+            <>
+              <Button type="submit" loading={save.isPending}>
+                {t("booking.save")}
+              </Button>
+              <SavedNote show={save.isSuccess} text={t("booking.saved")} />
+            </>
           }
-          options={[
-            { value: "none", label: t("booking.paymentNone") },
-            { value: "at_booking", label: t("booking.paymentAtBooking") },
-          ]}
-        />
-        <div className="grid gap-3 sm:grid-cols-3">
-          {NUMBERS.map((key) => (
-            <TextField
-              key={key}
-              label={t(`booking.fields.${key}`)}
-              type="number"
-              min={0}
-              value={String(draft[key] ?? "")}
-              onChange={(e) => setDraft({ ...draft, [key]: Number(e.target.value) })}
+        >
+          <div className="space-y-2 px-5 py-4">
+            <CheckboxField
+              label={t("booking.enabled")}
+              checked={draft.enabled ?? false}
+              onChange={(e) => setDraft({ ...draft, enabled: e.target.checked })}
             />
-          ))}
-        </div>
-        <Button type="submit" disabled={save.isPending}>
-          {t("booking.save")}
-        </Button>
-        {save.isSuccess ? <Alert tone="success">{t("booking.saved")}</Alert> : null}
-        <ErrorList error={save.error} />
+            <CheckboxField
+              label={t("booking.allowNew")}
+              checked={draft.allow_new_clients ?? false}
+              onChange={(e) => setDraft({ ...draft, allow_new_clients: e.target.checked })}
+            />
+            <CheckboxField
+              label={t("booking.approval")}
+              checked={draft.approval_required ?? false}
+              onChange={(e) => setDraft({ ...draft, approval_required: e.target.checked })}
+            />
+          </div>
+          <div className="border-t border-rule px-5 py-4">
+            <SelectField
+              className="sm:max-w-sm"
+              label={t("booking.payment")}
+              value={draft.payment ?? "none"}
+              onChange={(e) =>
+                setDraft({ ...draft, payment: e.target.value as NonNullable<Settings["payment"]> })
+              }
+              options={[
+                { value: "none", label: t("booking.paymentNone") },
+                { value: "at_booking", label: t("booking.paymentAtBooking") },
+              ]}
+            />
+          </div>
+          <div className="grid gap-x-4 gap-y-3 border-t border-rule px-5 py-4 sm:grid-cols-2 lg:grid-cols-3">
+            {NUMBERS.map((key) => (
+              <UnitField
+                key={key}
+                label={t(`booking.fields.${key}`)}
+                min={0}
+                value={String(draft[key] ?? "")}
+                onChange={(e) => setDraft({ ...draft, [key]: Number(e.target.value) })}
+              />
+            ))}
+          </div>
+          {save.error ? (
+            <div className="px-5 pb-4">
+              <ErrorList error={save.error} />
+            </div>
+          ) : null}
+        </RuledPanel>
       </form>
-    </section>
+    </div>
   );
 }

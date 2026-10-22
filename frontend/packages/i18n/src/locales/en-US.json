@@ -1,4 +1,11 @@
 {
+  "designS9b": {
+    "audit": {
+      "actions": {
+        "cancel": "Canceled"
+      }
+    }
+  },
   "businessTypes": {
     "centre": "Tutoring center"
   },

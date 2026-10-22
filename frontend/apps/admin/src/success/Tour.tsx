@@ -4,7 +4,8 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 
 import type { TourDefinition } from "./tours";
 
-const HIGHLIGHT = ["outline", "outline-2", "outline-offset-4", "outline-brand"];
+// The highlight is link ink, never the tenant colour (the Tenant Fills, the Register Inks Rule).
+const HIGHLIGHT = ["outline", "outline-2", "outline-offset-4", "outline-link"];
 
 function prefersReducedMotion(): boolean {
   return (
@@ -82,24 +83,34 @@ export function Tour({ tour, onFinish }: TourProps) {
       aria-modal="false"
       aria-labelledby={titleId}
       aria-describedby={bodyId}
-      className="fixed z-50 w-[min(360px,calc(100vw-2rem))] rounded-lg border border-border bg-background p-4 shadow-xl motion-safe:transition-[top,left]"
+      className="fixed z-50 w-[min(360px,calc(100vw-2rem))] rounded-xl border border-border bg-surface px-5 py-4 text-foreground shadow-[0_8px_24px_-8px_rgb(15_23_42/0.25)] motion-safe:transition-[top,left]"
       style={
         position
           ? { top: position.top, left: position.left }
           : { bottom: 24, left: "50%", transform: "translateX(-50%)" }
       }
     >
-      <p className="text-xs text-muted-foreground" aria-live="polite">
+      <p className="text-xs text-muted-foreground tabular-nums" aria-live="polite">
         {t("tours.progress", { current: index + 1, total: tour.steps.length })}
       </p>
-      <h2 id={titleId} ref={headingRef} tabIndex={-1} className="mt-1 font-semibold outline-none">
+      <h2
+        id={titleId}
+        ref={headingRef}
+        tabIndex={-1}
+        className="mt-1 text-base font-semibold outline-none"
+      >
         {t(`${base}.title`)}
       </h2>
       <p id={bodyId} className="mt-2 text-sm">
         {t(`${base}.body`)}
       </p>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-        <Button size="sm" variant="ghost" onClick={() => onFinish("dismissed")}>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="-ml-3 text-muted-foreground"
+          onClick={() => onFinish("dismissed")}
+        >
           {t("tours.skip")}
         </Button>
         <div className="flex gap-2">

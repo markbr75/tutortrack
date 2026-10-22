@@ -1,25 +1,29 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FormPanel,
+  NamePlate,
+  PageHeader,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+  TextField,
+  UnitField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 import { api, fieldErrors, useFeature, useOrganisation, type Term } from "../api";
 import { ProcessTimeline } from "../components/ProcessTimeline";
+import { SavedNote } from "../components/SavedNote";
 import { Locked } from "../subscription/UpgradePrompts";
 import { SupportAccessSection } from "./SupportAccessSection";
 
 const TERMS = ["tutor", "student", "client", "lesson", "job"] as const;
 const BUSINESS_TYPES = ["sole_trader", "team", "agency", "centre", "online"] as const;
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="mt-8 max-w-2xl rounded-md border border-border p-4 md:p-6">
-      <h2 className="text-lg font-medium">{title}</h2>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
 
 function ProfileSection() {
   const { t } = useTranslation();
@@ -58,38 +62,41 @@ function ProfileSection() {
       {...extra}
     />
   );
-  function submit(event: FormEvent) {
-    event.preventDefault();
-    save.mutate();
-  }
   return (
-    <Section title={t("settings.profile")}>
-      <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
-        {field("name", t("settings.name"))}
-        {field("legal_name", t("settings.legalName"))}
-        {field("slug", t("settings.subdomain"), { hint: t("settings.subdomainHint") })}
-        {field("timezone", t("settings.timezone"))}
-        {field("contact_email", t("settings.contactEmail"), { type: "email" })}
-        {field("contact_phone", t("settings.contactPhone"), { type: "tel" })}
-        {field("primary_colour", t("settings.primaryColour"), { type: "color" })}
-        <div className="sm:col-span-2">
-          <SelectField
-            label={t("settings.businessType")}
-            hint={t("settings.businessTypeHint")}
-            value={form.business_type ?? "sole_trader"}
-            error={errors.business_type}
-            onChange={(e) => setForm((f) => ({ ...f, business_type: e.target.value }))}
-            options={BUSINESS_TYPES.map((b) => ({ value: b, label: t(`businessTypes.${b}`) }))}
-          />
-        </div>
-        <div className="flex items-end gap-3 sm:col-span-2">
-          <Button type="submit" loading={save.isPending}>
-            {t("common.save")}
-          </Button>
-          {save.isSuccess ? <span role="status">{t("common.saved")}</span> : null}
-        </div>
-      </form>
-    </Section>
+    <FormPanel
+      title={t("settings.profile")}
+      submit={t("common.save")}
+      pending={save.isPending}
+      onSubmit={() => save.mutate()}
+      error={
+        save.isError && !Object.keys(errors).length ? (
+          <Alert tone="danger">{save.error.message}</Alert>
+        ) : null
+      }
+      trail={<SavedNote show={save.isSuccess} />}
+    >
+      {field("name", t("settings.name"))}
+      {field("legal_name", t("settings.legalName"))}
+      {field("slug", t("settings.subdomain"), { hint: t("settings.subdomainHint") })}
+      {field("timezone", t("settings.timezone"))}
+      {field("contact_email", t("settings.contactEmail"), { type: "email" })}
+      {field("contact_phone", t("settings.contactPhone"), { type: "tel" })}
+      {field("primary_colour", t("settings.primaryColour"), {
+        type: "color",
+        className: "w-24 cursor-pointer px-1",
+        hint: t("designS9b.settings.colourHint"),
+      })}
+      <div className="sm:col-span-2">
+        <SelectField
+          label={t("settings.businessType")}
+          hint={t("settings.businessTypeHint")}
+          value={form.business_type ?? "sole_trader"}
+          error={errors.business_type}
+          onChange={(e) => setForm((f) => ({ ...f, business_type: e.target.value }))}
+          options={BUSINESS_TYPES.map((b) => ({ value: b, label: t(`businessTypes.${b}`) }))}
+        />
+      </div>
+    </FormPanel>
   );
 }
 
@@ -125,57 +132,60 @@ function GeneralSection() {
     onSuccess: (data) => queryClient.setQueryData(["settings", "general"], data),
   });
   const errors = fieldErrors(save.error);
-  function submit(event: FormEvent) {
-    event.preventDefault();
-    save.mutate();
-  }
   return (
-    <Section title={t("settings.general")}>
-      <form onSubmit={submit} className="flex flex-col gap-4">
-        <TextField
+    <FormPanel
+      title={t("settings.general")}
+      submit={t("common.save")}
+      pending={save.isPending}
+      onSubmit={() => save.mutate()}
+      error={
+        save.isError && !Object.keys(errors).length ? (
+          <Alert tone="danger">{save.error.message}</Alert>
+        ) : null
+      }
+      trail={<SavedNote show={save.isSuccess} />}
+    >
+      <div className="sm:col-span-2">
+        <UnitField
           label={t("settings.lessonDuration")}
-          type="number"
+          min={1}
           value={duration}
           error={errors["general.default_lesson_duration"]}
           onChange={(e) => setDuration(e.target.value)}
         />
-        <fieldset className="grid gap-3 sm:grid-cols-2">
-          <legend className="mb-2 text-sm font-medium">{t("settings.terminology")}</legend>
-          <p className="text-xs text-muted-foreground sm:col-span-2">
-            {t("settings.terminologyHint")}
+      </div>
+      <fieldset className="grid gap-x-4 gap-y-3 border-t border-rule pt-3 sm:col-span-2 sm:grid-cols-2">
+        <legend className="float-left w-full text-sm font-semibold">
+          {t("settings.terminology")}
+        </legend>
+        <p className="-mt-2 text-xs text-muted-foreground sm:col-span-2">
+          {t("settings.terminologyHint")}
+        </p>
+        {TERMS.map((term) =>
+          (["singular", "plural"] as const).map((form) => (
+            <TextField
+              key={`${term}-${form}`}
+              label={t(`settings.${form}`, { term: t(`terms.${term}`) })}
+              value={terms[term]?.[form] ?? ""}
+              onChange={(e) =>
+                setTerms((all) => ({
+                  ...all,
+                  [term]: {
+                    ...(all[term] ?? { singular: "", plural: "" }),
+                    [form]: e.target.value,
+                  },
+                }))
+              }
+            />
+          )),
+        )}
+        {errors["general.terminology"] ? (
+          <p className="text-xs text-danger sm:col-span-2" role="alert">
+            {errors["general.terminology"]}
           </p>
-          {TERMS.map((term) =>
-            (["singular", "plural"] as const).map((form) => (
-              <TextField
-                key={`${term}-${form}`}
-                label={t(`settings.${form}`, { term: t(`terms.${term}`) })}
-                value={terms[term]?.[form] ?? ""}
-                onChange={(e) =>
-                  setTerms((all) => ({
-                    ...all,
-                    [term]: {
-                      ...(all[term] ?? { singular: "", plural: "" }),
-                      [form]: e.target.value,
-                    },
-                  }))
-                }
-              />
-            )),
-          )}
-          {errors["general.terminology"] ? (
-            <p className="text-xs text-danger sm:col-span-2" role="alert">
-              {errors["general.terminology"]}
-            </p>
-          ) : null}
-        </fieldset>
-        <div className="flex items-center gap-3">
-          <Button type="submit" loading={save.isPending}>
-            {t("common.save")}
-          </Button>
-          {save.isSuccess ? <span role="status">{t("common.saved")}</span> : null}
-        </div>
-      </form>
-    </Section>
+        ) : null}
+      </fieldset>
+    </FormPanel>
   );
 }
 
@@ -200,49 +210,71 @@ function BranchesSection() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["branches"] }),
   });
   const errors = fieldErrors(create.error);
+  const rows = branches.data?.results ?? [];
   return (
-    <Section title={t("settings.branches")}>
-      <ul className="divide-y divide-border">
-        {branches.data?.results.map((b) => (
-          <li key={b.id} className="flex items-center justify-between py-2 text-sm">
-            <span>
-              {b.name} <span className="text-muted-foreground">({b.code})</span>
-              {b.is_default ? ` · ${t("settings.default")}` : ""}
-            </span>
-            {!b.is_default ? (
-              <Button size="sm" variant="ghost" onClick={() => archive.mutate(b.id)}>
-                {t("settings.archive")}
-              </Button>
-            ) : null}
-          </li>
+    <RuledPanel
+      flush
+      title={t("settings.branches")}
+      aside={
+        branches.data ? (
+          <span className="text-muted-foreground tabular-nums">
+            {t("designS9b.settings.branchCount", { count: rows.length })}
+          </span>
+        ) : null
+      }
+    >
+      <PanelRows>
+        {rows.map((b) => (
+          <PanelRow key={b.id}>
+            <NamePlate
+              name={b.name}
+              context={[b.code, b.is_default ? t("settings.default") : ""]
+                .filter(Boolean)
+                .join(" · ")}
+              aside={
+                !b.is_default ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-muted-foreground max-sm:-ml-3"
+                    onClick={() => archive.mutate(b.id)}
+                  >
+                    {t("settings.archive")}
+                  </Button>
+                ) : null
+              }
+            />
+          </PanelRow>
         ))}
-      </ul>
-      <Locked feature="multi_branch">
-        <form
-          className="mt-4 grid gap-3 sm:grid-cols-[1fr_8rem_auto] sm:items-end"
-          onSubmit={(e) => {
-            e.preventDefault();
-            create.mutate();
-          }}
-        >
-          <TextField
-            label={t("settings.branchName")}
-            value={form.name}
-            error={errors.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          />
-          <TextField
-            label={t("settings.branchCode")}
-            value={form.code}
-            error={errors.code}
-            onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
-          />
-          <Button type="submit" loading={create.isPending}>
-            {t("settings.addBranch")}
-          </Button>
-        </form>
-      </Locked>
-    </Section>
+      </PanelRows>
+      <div className="border-t border-rule px-5 py-4">
+        <Locked feature="multi_branch">
+          <form
+            className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_8rem_auto] sm:items-end"
+            onSubmit={(e) => {
+              e.preventDefault();
+              create.mutate();
+            }}
+          >
+            <TextField
+              label={t("settings.branchName")}
+              value={form.name}
+              error={errors.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            />
+            <TextField
+              label={t("settings.branchCode")}
+              value={form.code}
+              error={errors.code}
+              onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
+            />
+            <Button type="submit" variant="secondary" loading={create.isPending}>
+              {t("settings.addBranch")}
+            </Button>
+          </form>
+        </Locked>
+      </div>
+    </RuledPanel>
   );
 }
 
@@ -254,17 +286,21 @@ function DemoDataSection() {
     onSuccess: () => void queryClient.invalidateQueries(),
   });
   return (
-    <Section title={t("settings.demo")}>
-      <p className="text-sm">{t("settings.demoBody")}</p>
-      <Button
-        className="mt-3"
-        variant="secondary"
-        loading={wipe.isPending}
-        onClick={() => wipe.mutate()}
-      >
-        {t("settings.wipeDemo")}
-      </Button>
-    </Section>
+    <RuledPanel
+      title={t("settings.demo")}
+      description={t("settings.demoBody")}
+      footer={
+        <Button
+          variant="secondary"
+          size="sm"
+          loading={wipe.isPending}
+          onClick={() => wipe.mutate()}
+        >
+          {t("settings.wipeDemo")}
+        </Button>
+      }
+      flush
+    />
   );
 }
 
@@ -280,53 +316,65 @@ function CloseAccountSection({ slug }: { slug: string }) {
   const errors = fieldErrors(close.error);
   if (close.isSuccess) {
     return (
-      <Section title={t("settings.close")}>
+      <RuledPanel title={t("settings.close")}>
         <Alert tone="info">{t("settings.closed")}</Alert>
-      </Section>
+      </RuledPanel>
     );
   }
   return (
-    <Section title={t("settings.close")}>
-      <p className="text-sm">{t("settings.closeBody")}</p>
-      <form
-        className="mt-4 flex flex-col gap-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          close.mutate();
-        }}
+    <form
+      aria-labelledby="close-account-title"
+      onSubmit={(e) => {
+        e.preventDefault();
+        close.mutate();
+      }}
+    >
+      <RuledPanel
+        flush
+        titleId="close-account-title"
+        title={t("settings.close")}
+        description={t("settings.closeBody")}
+        footer={
+          <Button
+            type="submit"
+            variant="danger"
+            disabled={form.confirm_slug !== slug || !form.password}
+            loading={close.isPending}
+          >
+            {t("settings.closeAction")}
+          </Button>
+        }
       >
-        {close.isError && Object.keys(errors).length === 0 ? (
-          <Alert tone="danger">{close.error.message}</Alert>
-        ) : null}
-        <TextField
-          label={t("settings.closeReason")}
-          value={form.reason}
-          onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))}
-        />
-        <TextField
-          label={t("settings.closeConfirmSlug", { slug })}
-          value={form.confirm_slug}
-          error={errors.confirm_slug}
-          onChange={(e) => setForm((f) => ({ ...f, confirm_slug: e.target.value }))}
-        />
-        <TextField
-          label={t("settings.closePassword")}
-          type="password"
-          autoComplete="current-password"
-          value={form.password}
-          error={errors.password}
-          onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-        />
-        <Button
-          type="submit"
-          variant="danger"
-          disabled={form.confirm_slug !== slug || !form.password}
-          loading={close.isPending}
-        >
-          {t("settings.closeAction")}
-        </Button>
-      </form>
-    </Section>
+        <div className="grid gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
+          {close.isError && Object.keys(errors).length === 0 ? (
+            <Alert tone="danger" className="sm:col-span-2">
+              {close.error.message}
+            </Alert>
+          ) : null}
+          <div className="sm:col-span-2">
+            <TextField
+              label={t("settings.closeReason")}
+              value={form.reason}
+              onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))}
+            />
+          </div>
+          <TextField
+            label={t("settings.closeConfirmSlug", { slug })}
+            value={form.confirm_slug}
+            error={errors.confirm_slug}
+            onChange={(e) => setForm((f) => ({ ...f, confirm_slug: e.target.value }))}
+          />
+          <TextField
+            label={t("settings.closePassword")}
+            type="password"
+            autoComplete="current-password"
+            value={form.password}
+            error={errors.password}
+            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+          />
+        </div>
+      </RuledPanel>
+    </form>
   );
 }
 
@@ -335,15 +383,17 @@ export function SettingsPage() {
   const { data: org } = useOrganisation();
   const multiBranch = useFeature("multi_branch");
   return (
-    <div>
-      <h1 className="text-2xl font-semibold">{t("settings.title")}</h1>
-      <ProfileSection />
-      <GeneralSection />
-      {multiBranch ? <BranchesSection /> : null}
-      {org?.has_demo_data ? <DemoDataSection /> : null}
-      <SupportAccessSection />
-      {org ? <ProcessTimeline subjectType="organisation" subjectId={org.id} /> : null}
-      {org ? <CloseAccountSection slug={org.slug} /> : null}
+    <div className="max-w-3xl">
+      <PageHeader title={t("settings.title")} description={t("designS9b.settings.description")} />
+      <div className="space-y-6">
+        <ProfileSection />
+        <GeneralSection />
+        {multiBranch ? <BranchesSection /> : null}
+        {org?.has_demo_data ? <DemoDataSection /> : null}
+        <SupportAccessSection />
+        {org ? <ProcessTimeline subjectType="organisation" subjectId={org.id} /> : null}
+        {org ? <CloseAccountSection slug={org.slug} /> : null}
+      </div>
     </div>
   );
 }

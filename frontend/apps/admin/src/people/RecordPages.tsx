@@ -16,7 +16,7 @@ import {
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 
 import { PayProfileCard } from "../payroll/PayProfileCard";
 import { BackgroundChecksCard } from "../recruitment/BackgroundChecksCard";
@@ -98,15 +98,6 @@ function Loading({
     );
   }
   return <Spinner label={t("grid.loading")} />;
-}
-
-/** A component from another module that draws its own heading, set on a ruled leaf. */
-function Leaf({ children }: { children: ReactNode }) {
-  return (
-    <div className="rounded-xl border border-border bg-surface px-5 py-4 [&>section]:mt-0 [&>section>h2]:text-base [&>section]:rounded-none [&>section]:border-0 [&>section]:p-0">
-      {children}
-    </div>
-  );
 }
 
 /** The family page: household, contacts, students, billing and activity (E05-T11). */
@@ -347,9 +338,7 @@ export function StudentPage({ studentId }: { studentId: string }) {
         main={
           <>
             <StudentJobs studentId={s.id} />
-            <Leaf>
-              <StudentPrivacyPanel studentId={s.id} />
-            </Leaf>
+            <StudentPrivacyPanel studentId={s.id} />
             <RecordActivity target={{ target_type: "people.student", target_id: s.id }} />
           </>
         }
