@@ -93,16 +93,17 @@ export function PrivacyPage() {
 
 // --- requests (T05) -----------------------------------------------------------------------------
 
-function DueBadge({ request }: { request: DataRequest }) {
+function DueBadge({ request, short = false }: { request: DataRequest; short?: boolean }) {
   const { t } = useTranslation();
   if (request.closed_at) return null;
   const days = daysUntil(request.due_at);
   // Overdue is margin red (the One Red Rule); a deadline still to come is a faded caption.
+  // The short form follows "Due 13 Nov 2026 · " in a record's context line.
   return (
     <span className={days < 0 ? "font-semibold text-margin" : "text-muted-foreground"}>
       {days < 0
-        ? t("privacyCentre.overdueBy", { count: -days })
-        : t("privacyCentre.dueIn", { count: days })}
+        ? t(short ? "designS9b.privacy.overdueBy" : "privacyCentre.overdueBy", { count: -days })
+        : t(short ? "designS9b.privacy.inDays" : "privacyCentre.dueIn", { count: days })}
     </span>
   );
 }
@@ -338,8 +339,13 @@ export function DataRequestPage({ requestId }: { requestId: string }) {
         description={
           <span className="tabular-nums">
             {t(`privacyCentre.statuses.${r.status}`)} ·{" "}
-            {t("privacyCentre.dueOn", { date: formatDate(r.due_at, i18n.language) })}{" "}
-            <DueBadge request={r} />
+            {t("privacyCentre.dueOn", { date: formatDate(r.due_at, i18n.language) })}
+            {r.closed_at ? null : (
+              <>
+                {" · "}
+                <DueBadge request={r} short />
+              </>
+            )}
           </span>
         }
       />

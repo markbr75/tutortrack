@@ -398,30 +398,55 @@ function LoginHistorySection() {
     queryKey: ["me-logins"],
     queryFn: async () => unwrap(await api.GET("/api/v1/me/logins")),
   });
-  const rows = logins.data?.slice(0, 10) ?? [];
+  const [all, setAll] = useState(false);
   const deviceName = useDeviceName();
+  const list = logins.data ?? [];
+  const rows = all ? list : list.slice(0, SESSIONS_SHOWN);
   return (
-    <RuledPanel flush title={t("account.logins")}>
-      {logins.data && !rows.length ? (
+    <RuledPanel
+      flush
+      title={t("account.logins")}
+      footer={
+        list.length > SESSIONS_SHOWN ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-expanded={all}
+            className="-ml-3 text-link"
+            onClick={() => setAll((v) => !v)}
+          >
+            {all
+              ? t("designS9b.account.showFewer")
+              : t("designS9b.account.showAll", { count: list.length })}
+          </Button>
+        ) : undefined
+      }
+    >
+      {logins.data && !list.length ? (
         <p className="px-5 py-4 text-sm text-muted-foreground">{t("designS9b.account.noLogins")}</p>
       ) : (
         <PanelRows>
           {rows.map((e) => (
             <PanelRow key={e.id}>
-              <p>
-                <span className={e.success ? "font-medium" : "font-medium text-danger"}>
-                  {e.success ? t("account.loginOk") : t("account.loginFailed")}
-                </span>
-                {" · "}
-                <time dateTime={e.created_at} className="tabular-nums">
-                  {formatDateTime(e.created_at, i18n.language)}
-                </time>
-              </p>
-              <p className="text-xs break-words text-muted-foreground tabular-nums">
-                {[`${e.ip}${e.country ? ` (${e.country})` : ""}`, deviceName(e.user_agent, "")]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
+              {/* Like Sessions: the device leads, with when and where in the caption. */}
+              <NamePlate
+                name={
+                  <span title={e.user_agent}>{deviceName(e.user_agent ?? "", e.ip ?? "")}</span>
+                }
+                context={
+                  <span className="tabular-nums">
+                    <time dateTime={e.created_at}>
+                      {formatDateTime(e.created_at, i18n.language)}
+                    </time>
+                    {e.ip ? ` · ${e.ip}${e.country ? ` (${e.country})` : ""}` : ""}
+                  </span>
+                }
+                aside={
+                  <span className={e.success ? "text-muted-foreground" : "font-medium text-danger"}>
+                    {e.success ? t("account.loginOk") : t("account.loginFailed")}
+                  </span>
+                }
+              />
             </PanelRow>
           ))}
         </PanelRows>

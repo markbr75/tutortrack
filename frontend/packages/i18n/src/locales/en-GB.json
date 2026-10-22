@@ -7434,7 +7434,9 @@
         "support": "TutorTrack support",
         "team": "Team",
         "video": "Video lessons"
-      }
+      },
+      "allowed": "{{allowed}} of {{total}} allowed",
+      "openArea": "Open an area to choose who each permission applies to."
     },
     "sso": {
       "connection": "Connection",
@@ -7496,7 +7498,11 @@
       "noErasures": "Nothing has been erased yet.",
       "noHolds": "No legal holds.",
       "noRuns": "No purge runs yet.",
-      "accepted": "Accepted"
+      "accepted": "Accepted",
+      "inDays_one": "in {{count}} day",
+      "inDays_other": "in {{count}} days",
+      "overdueBy_one": "{{count}} day overdue",
+      "overdueBy_other": "{{count}} days overdue"
     },
     "safeguarding": {
       "anyStatus": "Any status",
@@ -7525,6 +7531,9 @@
       "count_one": "{{count}} post",
       "count_other": "{{count}} posts",
       "empty": "Nothing published yet. Posts you publish appear here and in the portals."
+    },
+    "checklist": {
+      "otherStep": "Setup step"
     }
   },
   "designS7": {

@@ -35,6 +35,9 @@ export function SetupChecklist() {
     },
   });
   const data = checklist.data;
+  // A step the app doesn't know yet reads as a plain "Setup step", never as its key.
+  const stepName = (key: string) =>
+    t(`setupChecklist.steps.${key}`, { defaultValue: t("designS9b.checklist.otherStep") });
   if (!data || data.dismissed_at || data.completed_at) return null;
   return (
     <section
@@ -63,7 +66,7 @@ export function SetupChecklist() {
             )}
             {step.done ? (
               <span className="text-muted-foreground line-through">
-                {t(`setupChecklist.steps.${step.key}`)}
+                {stepName(step.key)}
                 <span className="sr-only"> ({t("setupChecklist.done")})</span>
               </span>
             ) : (
@@ -71,7 +74,7 @@ export function SetupChecklist() {
                 to={step.link as "/"}
                 className="font-medium text-link underline-offset-2 hover:underline"
               >
-                {t(`setupChecklist.steps.${step.key}`)}
+                {stepName(step.key)}
               </Link>
             )}
           </li>

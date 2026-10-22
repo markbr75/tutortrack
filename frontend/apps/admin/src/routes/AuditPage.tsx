@@ -63,7 +63,7 @@ function Changes({ changes }: { changes: unknown }) {
   const entries = Object.entries(changes as Record<string, unknown>);
   if (!entries.length) return null;
   return (
-    <ul className="space-y-0.5 text-xs break-words text-muted-foreground">
+    <ul className="space-y-0.5 text-xs text-muted-foreground [overflow-wrap:anywhere]">
       {entries.slice(0, 6).map(([field, pair]) => (
         <li key={field}>
           <span className="text-foreground">{field}</span>{" "}
@@ -126,15 +126,6 @@ export function AuditPage() {
   const columns = useMemo<ColumnDef<AuditEntry, unknown>[]>(
     () => [
       {
-        id: "when",
-        header: t("audit.when"),
-        cell: ({ row }) => (
-          <time dateTime={row.original.created_at} className="whitespace-nowrap tabular-nums">
-            {formatDateTime(row.original.created_at, i18n.language)}
-          </time>
-        ),
-      },
-      {
         id: "action",
         header: t("audit.action"),
         cell: ({ row }) => (
@@ -142,10 +133,11 @@ export function AuditPage() {
             <span className="block font-medium whitespace-nowrap">
               {action(row.original.action)}
             </span>
-            <span className="block text-xs break-words text-muted-foreground tabular-nums">
+            {/* Who and when fold into one caption under the action (and, on phones, the record). */}
+            <span className="block text-xs text-muted-foreground tabular-nums [overflow-wrap:anywhere]">
               {[
-                phone ? formatDateTime(row.original.created_at, i18n.language) : "",
                 row.original.actor_email || t("designS9b.audit.system"),
+                formatDateTime(row.original.created_at, i18n.language),
                 phone ? row.original.object_repr : "",
               ]
                 .filter(Boolean)
@@ -158,8 +150,8 @@ export function AuditPage() {
         id: "object",
         header: t("audit.object"),
         cell: ({ row }) => (
-          <div className="min-w-40">
-            <span className="block break-words">{row.original.object_repr}</span>
+          <div className="min-w-28">
+            <span className="block [overflow-wrap:anywhere]">{row.original.object_repr}</span>
             <span className="block text-xs text-muted-foreground">
               {objectType(row.original.object_type)}
             </span>
@@ -170,7 +162,7 @@ export function AuditPage() {
         id: "changes",
         header: t("audit.changes"),
         cell: ({ row }) => (
-          <div className="max-w-sm min-w-48">
+          <div className="max-w-sm min-w-40">
             <Changes changes={row.original.changes} />
           </div>
         ),

@@ -1,5 +1,5 @@
 import { unwrap, type components } from "@tutortrack/api-client";
-import { useTranslation } from "@tutortrack/i18n";
+import { formatDate, useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, PageHeader, RuledPanel, TextAreaField } from "@tutortrack/ui";
 import { useMutation } from "@tanstack/react-query";
 import { useId, useState, type FormEvent } from "react";
@@ -17,7 +17,7 @@ interface Turn {
 /** The business copilot (FR-31-7): questions answered from the standard reports the person
  * may run, each answer citing the reports and filters used, with links to open them. */
 export function CopilotPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const enabled = useAiFeature("copilot");
   const allowed = usePermission("ai.copilot");
   const questionId = useId();
@@ -82,7 +82,9 @@ export function CopilotPage() {
                               {t("ai.copilot.openReport", { title: c.title })}
                             </a>{" "}
                             <span className="text-muted-foreground tabular-nums">
-                              {c.period.from} – {c.period.to}
+                              {[c.period.from, c.period.to]
+                                .map((d) => (d ? formatDate(d, i18n.language) : ""))
+                                .join(" – ")}
                             </span>
                           </li>
                         ))}

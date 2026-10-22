@@ -4,6 +4,7 @@ import {
   Alert,
   Button,
   CheckboxField,
+  Disclosure,
   ErrorFallback,
   FormPanel,
   PageHeader,
@@ -130,6 +131,8 @@ function RoleEditor({ role, canManage }: { role: CustomRole; canManage: boolean 
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [changes, setChanges] = useState<Record<string, string>>({});
+  // Areas changed in this visit stay open, also after saving.
+  const [touched, setTouched] = useState<Set<string>>(() => new Set());
   const permissions = useQuery({
     queryKey: ["permissions"],
     queryFn: async () => unwrap(await api.GET("/api/v1/permissions")),
@@ -185,6 +188,7 @@ function RoleEditor({ role, canManage }: { role: CustomRole; canManage: boolean 
         flush
         titleId="role-heading"
         title={role.name}
+        description={t("designS9b.roles.openArea")}
         aside={
           <span className="text-muted-foreground tabular-nums">
             {t("designS9b.roles.memberCount", { count: role.members })}
@@ -196,54 +200,74 @@ function RoleEditor({ role, canManage }: { role: CustomRole; canManage: boolean 
             <Spinner label={t("grid.loading")} />
           </div>
         ) : null}
-        {grouped.map(([category, perms]) => {
-          const name = t(`designS9b.roles.categories.${category}`, category);
-          return (
-            <div key={category} className="border-t border-rule first:border-t-0">
-              <h3 className="px-5 pt-4 pb-1 text-sm font-semibold">{name}</h3>
-              <table className="w-full text-sm">
-                <caption className="sr-only">
-                  {t("customRoles.matrixFor", { category: name })}
-                </caption>
-                <thead className="sr-only">
-                  <tr>
-                    <th scope="col">{t("customRoles.permission")}</th>
-                    <th scope="col">{t("customRoles.scope")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {perms.map((p) => (
-                    <tr key={p.codename}>
-                      <td className="py-1.5 pr-4 pl-5 align-middle">
-                        {p.description}
-                        <span className="block text-xs break-all text-muted-foreground">
-                          {p.codename}
-                        </span>
-                      </td>
-                      <td className="w-40 py-1.5 pr-5 align-middle sm:w-48">
-                        <select
-                          aria-label={t("customRoles.scopeFor", { permission: p.description })}
-                          className="h-9 w-full rounded-md border border-field bg-surface px-2 text-sm"
-                          value={scopeOf(p.codename)}
-                          disabled={!canManage}
-                          onChange={(e) => setChanges({ ...changes, [p.codename]: e.target.value })}
-                        >
-                          {SCOPES.map((scope) => (
-                            <option key={scope} value={scope}>
-                              {t(`customRoles.scopes.${scope}`)}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          );
-        })}
+        <ul className="divide-y divide-rule">
+          {grouped.map(([category, perms]) => {
+            const name = t(`designS9b.roles.categories.${category}`, category);
+            const allowed = perms.filter((p) => scopeOf(p.codename) !== "none").length;
+            const pending = perms.some((p) => p.codename in changes) || touched.has(category);
+            return (
+              <li key={category}>
+                {/* Closed by default; an area with unsaved changes is kept open. */}
+                <Disclosure
+                  open={pending || undefined}
+                  summaryClassName="w-full px-5 py-3"
+                  summary={
+                    <>
+                      <span className="min-w-0 flex-1">{name}</span>
+                      <span className="font-normal text-muted-foreground tabular-nums">
+                        {t("designS9b.roles.allowed", { allowed, total: perms.length })}
+                      </span>
+                    </>
+                  }
+                >
+                  <table className="mb-2 w-full text-sm">
+                    <caption className="sr-only">
+                      {t("customRoles.matrixFor", { category: name })}
+                    </caption>
+                    <thead className="sr-only">
+                      <tr>
+                        <th scope="col">{t("customRoles.permission")}</th>
+                        <th scope="col">{t("customRoles.scope")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {perms.map((p) => (
+                        <tr key={p.codename}>
+                          <td className="py-1.5 pr-4 pl-10 align-middle">
+                            {/* The permission's code name is kept as a tooltip, for the guides. */}
+                            <span title={p.codename}>{p.description}</span>
+                          </td>
+                          <td className="w-40 py-1.5 pr-5 align-middle sm:w-48">
+                            <select
+                              aria-label={t("customRoles.scopeFor", {
+                                permission: p.description,
+                              })}
+                              className="h-9 w-full rounded-md border border-field bg-surface px-2 text-sm"
+                              value={scopeOf(p.codename)}
+                              disabled={!canManage}
+                              onChange={(e) => {
+                                setChanges({ ...changes, [p.codename]: e.target.value });
+                                setTouched((all) => new Set(all).add(category));
+                              }}
+                            >
+                              {SCOPES.map((scope) => (
+                                <option key={scope} value={scope}>
+                                  {t(`customRoles.scopes.${scope}`)}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Disclosure>
+              </li>
+            );
+          })}
+        </ul>
         {canManage ? (
-          <PanelFooter className="sticky bottom-0 rounded-b-xl bg-surface">
+          <PanelFooter className="border-border">
             <Button onClick={() => save.mutate()} disabled={!changed} loading={save.isPending}>
               {t("customRoles.save")}
             </Button>

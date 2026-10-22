@@ -233,10 +233,26 @@ export function ConcernPage({ concernId }: { concernId: string }) {
         }
       />
       <div className="space-y-6">
-        {c.immediate_risk ? (
-          <Alert tone="danger">{t("safeguarding.immediateRiskAlert")}</Alert>
-        ) : null}
-        <RuledPanel flush titleId="what" title={t("safeguarding.whatHappened")}>
+        {/* Immediate risk reads as on the list: margin red at 600, with a margin header rule
+            while the case is still open. */}
+        <RuledPanel
+          flush
+          titleId="what"
+          title={t("safeguarding.whatHappened")}
+          rule={c.immediate_risk && c.status !== "closed" ? "margin" : "border"}
+          description={c.immediate_risk ? t("safeguarding.immediateRiskAlert") : undefined}
+          aside={
+            c.immediate_risk ? (
+              <span
+                className={
+                  c.status === "closed" ? "text-muted-foreground" : "font-semibold text-margin"
+                }
+              >
+                {t("safeguarding.immediateRisk")}
+              </span>
+            ) : null
+          }
+        >
           <FactList items={[[t("safeguarding.student"), c.student_name ?? ""]]} />
           <p
             className={`px-5 py-4 text-sm whitespace-pre-wrap ${c.student_name ? "border-t border-rule" : ""}`}

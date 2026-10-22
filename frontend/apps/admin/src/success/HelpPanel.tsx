@@ -235,7 +235,15 @@ export function HelpPanel({ open, onClose, onStartTour, initialTab = "articles" 
             </Button>
           </header>
           <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
-            <Tabs label={t("help.title")} tabs={tabs} value={tab} onChange={setTab}>
+            {/* The sheet is narrow: its five tabs wrap onto a second line rather than hide
+                under the row's fade. */}
+            <Tabs
+              label={t("help.title")}
+              tabs={tabs}
+              value={tab}
+              onChange={setTab}
+              className="[&>[role=tablist]]:flex-wrap [&>[role=tablist]]:gap-y-1 [&>[role=tablist]]:pr-0 [&>[role=tablist]]:[mask-image:none]"
+            >
               {tab === "articles" ? <Articles /> : null}
               {tab === "whatsNew" ? <WhatsNew /> : null}
               {tab === "tours" ? <Tours onStart={onStartTour} /> : null}
