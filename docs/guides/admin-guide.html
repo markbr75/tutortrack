@@ -563,7 +563,7 @@
         <h3 id="roles-custom">Custom roles</h3>
         <ol class="steps">
           <li>Under <span class="ui">New role</span>, enter a <span class="ui">Role name</span> and choose what to <span class="ui">Start from</span> (Admin, Branch manager, Coordinator, Finance or Tutor), then select <span class="ui">Create role</span>.</li>
-          <li>Choose the role under <span class="ui">Custom roles</span> to open its permissions, grouped by area. Set each permission to <span class="ui">No</span>, <span class="ui">Their own</span>, <span class="ui">Their branches</span> or <span class="ui">Everyone</span>, and select <span class="ui">Save changes</span>, which stays in view at the foot of the list and counts your unsaved changes.</li>
+          <li>Choose the role under <span class="ui">Custom roles</span>. Its permissions are grouped by area, each saying how many are allowed (for example "2 of 4 allowed"); open an area to change it. Set each permission to <span class="ui">No</span>, <span class="ui">Their own</span>, <span class="ui">Their branches</span> or <span class="ui">Everyone</span>, and select <span class="ui">Save changes</span> at the foot of the list, which counts your unsaved changes. Areas you changed stay open. Hover a permission to see its code name (for example <code>people.client.view</code>).</li>
           <li>Under <span class="ui">Team members with this role</span>, tick the staff and tutors who should have it.</li>
         </ol>
         <ul>
@@ -640,7 +640,7 @@
           staff, can edit or delete entries. Needs <code>audit.view</code> (owner and admin).</p>
         <ul>
           <li><strong>Filter</strong> by <span class="ui">Search</span> (record description), <span class="ui">Who</span> (email), <span class="ui">Action</span>, <span class="ui">From</span> and <span class="ui">To</span>, then <span class="ui">Apply</span>, in the filter row above the log.</li>
-          <li><strong>Reading an entry:</strong> each row shows when, the action with who made it beneath, the record (with its type) and the changes, one "field before → after" line each (the first six). On phones the time, person and record fold into one line under the action.</li>
+          <li><strong>Reading an entry:</strong> each row shows the action with who made it and when beneath, the record (with its type) and the changes, one "field before → after" line each (the first six). On phones the record joins that line too.</li>
           <li><strong>Export</strong> with <span class="ui">Export CSV</span> at the top right (needs <code>audit.export</code>; up to 50,000 rows). Exports are audited too, and five exports by one person in an hour sends the owners a security alert.</li>
           <li><strong>Sensitive values</strong> such as bank details are shown as <code>[REDACTED]</code>.</li>
           <li><strong>Reads</strong> of sensitive data are logged with the action <code>read</code>: tax IDs, login history, student sensitive data, tutor bank and tax details, payment files, background-check results, data-request exports, safeguarding cases, data exports, webhook secrets and lesson recordings.</li>

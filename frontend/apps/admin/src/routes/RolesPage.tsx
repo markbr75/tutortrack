@@ -177,8 +177,10 @@ function RoleEditor({ role, canManage }: { role: CustomRole; canManage: boolean 
   const grouped = useMemo(() => {
     const out: Record<string, { codename: string; description: string }[]> = {};
     for (const p of permissions.data ?? []) (out[p.category] ??= []).push(p);
-    return Object.entries(out);
-  }, [permissions.data]);
+    // Areas in the order of their names, as people read them.
+    const name = (key: string) => t(`designS9b.roles.categories.${key}`, key);
+    return Object.entries(out).sort(([a], [b]) => name(a).localeCompare(name(b)));
+  }, [permissions.data, t]);
   const scopeOf = (codename: string) => changes[codename] ?? role.grants[codename] ?? "none";
   const staff = (members.data?.results ?? []).filter((m) => STAFF_MEMBERS.has(m.role));
   const changed = Object.keys(changes).length;
