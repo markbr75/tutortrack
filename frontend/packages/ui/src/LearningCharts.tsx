@@ -146,7 +146,7 @@ export function TrendChart({
         {shown ? (
           <div
             role="status"
-            className="pointer-events-none absolute left-2 top-2 rounded-md border border-border bg-surface px-2 py-1 text-xs shadow"
+            className="pointer-events-none absolute left-2 top-2 rounded-md border border-border bg-surface px-2 py-1 text-xs"
           >
             <p className="font-medium">{shown.name}</p>
             <p>
