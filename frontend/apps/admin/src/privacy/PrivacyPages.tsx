@@ -18,7 +18,7 @@ import {
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
 import { useIsPhone } from "../billing/useIsPhone";
@@ -953,6 +953,17 @@ function RetentionSection() {
       unwrap(await api.POST("/api/v1/retention-runs", { body: { dry_run: dryRun } })),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["retention-runs"] }),
   });
+  const [purging, setPurging] = useState(false);
+  const purgeButton = useRef<HTMLButtonElement>(null);
+  const confirmPurge = useRef<HTMLButtonElement>(null);
+  const opened = useRef(false);
+  useEffect(() => {
+    // Focus follows the confirmation in, and back to the footer's ghost when it closes.
+    if (purging) confirmPurge.current?.focus();
+    else if (opened.current) purgeButton.current?.focus();
+    opened.current = purging;
+  }, [purging]);
+  const closePurge = () => setPurging(false);
   const runRows = runs.data?.results ?? [];
   return (
     <div className="space-y-6">
@@ -969,16 +980,49 @@ function RetentionSection() {
             <Button variant="secondary" onClick={() => run.mutate(true)} disabled={run.isPending}>
               {t("privacyCentre.dryRun")}
             </Button>
-            <Button
-              variant="ghost"
-              className="text-muted-foreground"
-              onClick={() => {
-                if (window.confirm(t("privacyCentre.purgeConfirm"))) run.mutate(false);
-              }}
-              disabled={run.isPending}
-            >
-              {t("privacyCentre.purgeNow")}
-            </Button>
+            {purging ? (
+              // Confirm in place, never in a browser prompt: the warning, the danger button
+              // that confirms and a ghost Cancel; Escape backs out to the footer's ghost.
+              <div
+                role="group"
+                aria-labelledby="purge-confirm"
+                className="flex basis-full flex-wrap items-center gap-2"
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") closePurge();
+                }}
+              >
+                <p id="purge-confirm" className="basis-full text-sm">
+                  {t("privacyCentre.purgeConfirm")}
+                </p>
+                <Button
+                  ref={confirmPurge}
+                  variant="danger"
+                  size="sm"
+                  loading={run.isPending && !run.variables}
+                  onClick={() => run.mutate(false, { onSuccess: () => setPurging(false) })}
+                >
+                  {t("privacyCentre.purgeNow")}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-muted-foreground"
+                  onClick={closePurge}
+                >
+                  {t("common.cancel")}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                ref={purgeButton}
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={() => setPurging(true)}
+                disabled={run.isPending}
+              >
+                {t("privacyCentre.purgeNow")}
+              </Button>
+            )}
             {run.isSuccess ? (
               <p role="status" className="basis-full text-success">
                 {t("privacyCentre.runStarted")}

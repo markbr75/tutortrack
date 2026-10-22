@@ -116,7 +116,7 @@ describe("G6: platform console", () => {
       row.temporal_url,
     );
     fireEvent.change(screen.getByLabelText("Reason"), { target: { value: "INC-7" } });
-    fireEvent.click(screen.getByRole("button", { name: "Apply" }));
+    fireEvent.click(screen.getByRole("button", { name: "Terminate" }));
     await waitFor(() =>
       expect(
         calls.some((c) => c.method === "POST" && c.path.includes("/platform/workflows/")),

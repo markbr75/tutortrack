@@ -1,27 +1,46 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FactList,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  RuledTable,
+  Spinner,
+  TextField,
+  UnitField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
+import { useState, type FormEvent } from "react";
 
 import { api } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
+import { RecordHeader, RecordLayout } from "../components/RecordHeader";
 import { TenantHealthCard } from "./HealthPage";
+import { orgStatusClass } from "./TenantsPage";
 
 type Detail = components["schemas"]["TenantDetail"];
+
+/** A broken connection is a failure; one to reconnect waits on the customer (margin red). */
+const INTEGRATION_CLASS: Record<string, string> = {
+  error: "font-medium text-danger",
+  needs_reconnect: "font-semibold text-margin",
+};
+
+/** Usage limits are lower-case nouns ("tutors"); as fact labels they open with a capital. */
+function capitalise(text: string): string {
+  return text.charAt(0).toLocaleUpperCase() + text.slice(1);
+}
 type Member = components["schemas"]["Member"];
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="space-y-2 rounded-md border border-border p-4">
-      <h2 className="font-semibold">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-/** One organisation: subscription, usage, members, errors, audit and support actions. */
+/** One organisation as a record: health, members, overrides, errors and activity lead; the
+ * subscription, integrations and support actions stand in the side column. */
 export function TenantPage({ id }: { id: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const detail = useQuery({
     queryKey: ["platform", "tenant", id],
     queryFn: async () =>
@@ -32,101 +51,174 @@ export function TenantPage({ id }: { id: string }) {
   const d = detail.data;
   const org = d.organisation;
   return (
-    <div className="max-w-5xl space-y-4">
-      <h1 className="text-2xl font-semibold">
-        {org.name} <span className="text-base text-muted-foreground">{org.slug}</span>
-      </h1>
-      <p className="text-sm">
-        {t(`platform.orgStatus.${org.status}`)} · {org.country} · {org.default_currency} ·{" "}
-        {t("platform.createdOn", { date: formatDate(org.created_at) })}
-        {org.suspension_reason ? ` · ${org.suspension_reason}` : ""}
-      </p>
-      <div className="rounded-md border border-border p-4">
-        <TenantHealthCard id={id} />
-      </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Section title={t("platform.subscription")}>
-          {d.subscription ? (
-            <dl className="grid grid-cols-2 gap-1 text-sm">
-              <dt>{t("platform.plan")}</dt>
-              <dd>
-                {d.subscription.plan} ({d.subscription.interval})
-              </dd>
-              <dt>{t("platform.status")}</dt>
-              <dd>{d.subscription.status}</dd>
-              {d.subscription.trial_ends_at ? (
-                <>
-                  <dt>{t("platform.trialEnds")}</dt>
-                  <dd>{formatDate(d.subscription.trial_ends_at)}</dd>
-                </>
+    <div>
+      <RecordHeader
+        back={<Link to="/platform">{t("platform.tenants")}</Link>}
+        title={org.name}
+        description={
+          <span className="tabular-nums">
+            <span className={orgStatusClass(org.status)}>
+              {t(`platform.orgStatus.${org.status}`)}
+            </span>
+            {[
+              org.slug,
+              org.country,
+              org.default_currency,
+              t("platform.createdOn", { date: formatDate(org.created_at, i18n.language) }),
+              org.suspension_reason,
+            ]
+              .filter(Boolean)
+              .map((part) => ` · ${part}`)
+              .join("")}
+          </span>
+        }
+      />
+      <RecordLayout
+        main={
+          <>
+            <TenantHealthCard id={id} />
+            <Members detail={d} />
+            <Overrides detail={d} />
+            {d.recent_errors.length || d.dead_letters ? (
+              <RuledPanel
+                title={t("platform.errors")}
+                aside={
+                  d.dead_letters ? (
+                    <span className="font-medium text-danger">
+                      {t("platform.deadLetterCount", { count: d.dead_letters })}
+                    </span>
+                  ) : null
+                }
+                flush
+              >
+                <PanelRows>
+                  {d.recent_errors.map((e, i) => (
+                    <PanelRow key={i}>
+                      <span className="font-medium">{e.kind}</span>
+                      <span className="block text-xs text-muted-foreground tabular-nums">
+                        {formatDateTime(e.at, i18n.language)} · {e.origin}
+                      </span>
+                      <span className="block break-words text-danger">{e.detail}</span>
+                    </PanelRow>
+                  ))}
+                </PanelRows>
+              </RuledPanel>
+            ) : null}
+            <RuledPanel title={t("platform.audit")} flush>
+              {d.audit.length ? (
+                <PanelRows>
+                  {d.audit.map((a) => (
+                    <PanelRow key={a.id}>
+                      <span className="font-medium">{a.action}</span>
+                      <span className="block text-xs text-muted-foreground tabular-nums">
+                        {[formatDateTime(a.created_at, i18n.language), a.object_type, a.object_repr]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                    </PanelRow>
+                  ))}
+                </PanelRows>
+              ) : (
+                <p className="px-5 py-4 text-sm text-muted-foreground">
+                  {t("designS11.platform.noActivity")}
+                </p>
+              )}
+            </RuledPanel>
+          </>
+        }
+        side={
+          <>
+            <RuledPanel title={t("platform.subscription")} flush>
+              {d.subscription ? (
+                <FactList
+                  items={[
+                    [
+                      t("platform.plan"),
+                      `${d.subscription.plan} (${t(`platformPlans.intervals.${d.subscription.interval}`, { defaultValue: d.subscription.interval })})`,
+                    ],
+                    [
+                      t("platform.status"),
+                      t(`platform.orgStatus.${d.subscription.status}`, {
+                        defaultValue: d.subscription.status,
+                      }),
+                    ],
+                    [
+                      t("platform.trialEnds"),
+                      d.subscription.trial_ends_at
+                        ? formatDate(d.subscription.trial_ends_at, i18n.language)
+                        : "",
+                    ],
+                    [
+                      t("designS11.platform.stripeCustomer"),
+                      d.subscription.stripe_customer_id ? (
+                        <span className="font-mono break-all">
+                          {d.subscription.stripe_customer_id}
+                        </span>
+                      ) : (
+                        ""
+                      ),
+                    ],
+                  ]}
+                />
+              ) : (
+                <p className="px-5 py-4 text-sm text-muted-foreground">
+                  {t("platform.noSubscription")}
+                </p>
+              )}
+              {Object.keys(d.usage).length ? (
+                <div className="border-t border-border">
+                  <FactList
+                    items={Object.entries(d.usage).map(
+                      ([key, value]) =>
+                        [
+                          capitalise(t(`plan.limits.${key}`)),
+                          <span key={key} className="tabular-nums">
+                            {String(value)}
+                          </span>,
+                        ] as const,
+                    )}
+                  />
+                </div>
               ) : null}
-              <dt>Stripe</dt>
-              <dd className="break-all">{d.subscription.stripe_customer_id || "–"}</dd>
-            </dl>
-          ) : (
-            <p className="text-sm">{t("platform.noSubscription")}</p>
-          )}
-          <ul className="text-sm">
-            {Object.entries(d.usage).map(([key, value]) => (
-              <li key={key}>
-                {t(`plan.limits.${key}`)}: {value}
-              </li>
-            ))}
-          </ul>
-        </Section>
-        <Actions detail={d} />
-      </div>
-      <Section title={t("gapG6.integrations")}>
-        {d.addons?.length ? (
-          <p className="text-sm">
-            {t("gapG6.addons")}: {d.addons.map((a) => t(`addons.names.${a}`)).join(", ")}
-          </p>
-        ) : null}
-        {d.integrations?.length ? (
-          <ul className="space-y-1 text-sm">
-            {d.integrations.map((row) => (
-              <li key={`${row.provider}-${row.level}-${row.status}`}>
-                <span className="font-medium">{row.provider}</span> ·{" "}
-                {t(`gapG6.integrationStatus.${row.status}`)} ·{" "}
-                {t("gapG6.connections", { count: row.connections })}
-                {row.last_sync_at
-                  ? ` · ${t("gapG6.lastSync", { date: formatDateTime(row.last_sync_at) })}`
-                  : ""}
-                {row.failed_syncs
-                  ? ` · ${t("gapG6.failedSyncs", { count: row.failed_syncs })}`
-                  : ""}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-muted-foreground">{t("gapG6.noIntegrations")}</p>
-        )}
-      </Section>
-      <Overrides detail={d} />
-      <Members detail={d} />
-      {d.recent_errors.length || d.dead_letters ? (
-        <Section title={t("platform.errors")}>
-          {d.dead_letters ? (
-            <p className="text-sm">{t("platform.deadLetterCount", { count: d.dead_letters })}</p>
-          ) : null}
-          <ul className="space-y-1 text-sm">
-            {d.recent_errors.map((e, i) => (
-              <li key={i}>
-                {formatDateTime(e.at)} · {e.origin} · {e.kind}: {e.detail}
-              </li>
-            ))}
-          </ul>
-        </Section>
-      ) : null}
-      <Section title={t("platform.audit")}>
-        <ul className="space-y-1 text-sm">
-          {d.audit.map((a) => (
-            <li key={a.id}>
-              {formatDateTime(a.created_at)} · {a.action} · {a.object_type} {a.object_repr}
-            </li>
-          ))}
-        </ul>
-      </Section>
+            </RuledPanel>
+            <RuledPanel title={t("gapG6.integrations")} flush>
+              {d.addons?.length ? (
+                <p className="px-5 pt-3 text-sm">
+                  {t("gapG6.addons")}: {d.addons.map((a) => t(`addons.names.${a}`)).join(", ")}
+                </p>
+              ) : null}
+              {d.integrations?.length ? (
+                <PanelRows>
+                  {d.integrations.map((row) => (
+                    <PanelRow key={`${row.provider}-${row.level}-${row.status}`}>
+                      <span className="font-medium">{row.provider}</span>
+                      <span className="block text-xs text-muted-foreground tabular-nums">
+                        <span className={INTEGRATION_CLASS[row.status] ?? ""}>
+                          {t(`gapG6.integrationStatus.${row.status}`, { defaultValue: row.status })}
+                        </span>{" "}
+                        · {t("gapG6.connections", { count: row.connections })}
+                        {row.last_sync_at
+                          ? ` · ${t("gapG6.lastSync", { date: formatDateTime(row.last_sync_at, i18n.language) })}`
+                          : ""}
+                      </span>
+                      {row.failed_syncs ? (
+                        <span className="block text-xs font-medium text-danger">
+                          {t("gapG6.failedSyncs", { count: row.failed_syncs })}
+                        </span>
+                      ) : null}
+                    </PanelRow>
+                  ))}
+                </PanelRows>
+              ) : (
+                <p className="px-5 py-4 text-sm text-muted-foreground">
+                  {t("gapG6.noIntegrations")}
+                </p>
+              )}
+            </RuledPanel>
+            <Actions detail={d} />
+          </>
+        }
+      />
     </div>
   );
 }
@@ -139,6 +231,7 @@ function useTenantAction<T>(id: string, fn: (body: T) => Promise<unknown>) {
   });
 }
 
+/** Support actions: one reason for all of them, then one ruled row per action. */
 function Actions({ detail }: { detail: Detail }) {
   const { t } = useTranslation();
   const id = detail.organisation.id;
@@ -187,73 +280,113 @@ function Actions({ detail }: { detail: Detail }) {
   });
   const act = (action: string) =>
     run.mutate(action, { onSuccess: () => setDone(t(`platform.done.${action}`)) });
+  const pending = (action: string) => run.isPending && run.variables === action;
   const suspended = detail.organisation.status === "suspended";
+  const row = "border-t border-rule px-5 py-3";
   return (
-    <Section title={t("platform.actions")}>
-      <TextField
-        label={t("platform.reason")}
-        hint={t("platform.reasonHint")}
-        value={reason}
-        onChange={(e) => setReason(e.target.value)}
-      />
-      <div className="flex flex-wrap items-end gap-2">
+    <RuledPanel title={t("platform.actions")} flush>
+      <div className="px-5 py-4">
         <TextField
+          label={t("platform.reason")}
+          hint={t("platform.reasonHint")}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
+      </div>
+      <div className={`${row} flex flex-wrap items-end gap-2`}>
+        <UnitField
           label={t("platform.days")}
-          type="number"
+          size="sm"
+          unit={t("designS11.platform.daysUnit")}
           min={1}
           max={90}
           value={days}
           onChange={(e) => setDays(e.target.value)}
-          className="w-24"
         />
-        <Button size="sm" variant="secondary" onClick={() => act("extend")}>
-          {t("platform.extendTrial")}
-        </Button>
-      </div>
-      <div className="flex flex-wrap items-end gap-2">
-        <TextField
-          label={t("platform.plan")}
-          value={plan}
-          onChange={(e) => setPlan(e.target.value)}
-          className="w-40"
-        />
-        <Button size="sm" variant="secondary" onClick={() => act("plan")}>
-          {t("platform.changePlan")}
-        </Button>
-      </div>
-      <div className="flex flex-wrap gap-2">
         <Button
           size="sm"
           variant="secondary"
+          className="h-9"
+          loading={pending("extend")}
+          onClick={() => act("extend")}
+        >
+          {t("platform.extendTrial")}
+        </Button>
+      </div>
+      <div className={`${row} flex flex-wrap items-end gap-2`}>
+        <div className="w-40">
+          <TextField
+            label={t("platform.plan")}
+            size="sm"
+            value={plan}
+            onChange={(e) => setPlan(e.target.value)}
+          />
+        </div>
+        <Button
+          size="sm"
+          variant="secondary"
+          className="h-9"
+          loading={pending("plan")}
+          onClick={() => act("plan")}
+        >
+          {t("platform.changePlan")}
+        </Button>
+      </div>
+      <div className={`${row} flex flex-wrap gap-2`}>
+        <Button
+          size="sm"
+          variant="secondary"
+          loading={pending(suspended ? "unsuspend" : "suspend")}
           onClick={() => act(suspended ? "unsuspend" : "suspend")}
         >
           {suspended ? t("platform.unsuspend") : t("platform.suspend")}
         </Button>
-        <Button size="sm" variant="secondary" onClick={() => act("verify")}>
+        <Button
+          size="sm"
+          variant="secondary"
+          loading={pending("verify")}
+          onClick={() => act("verify")}
+        >
           {t("platform.resendVerification")}
         </Button>
-        <Button size="sm" variant="secondary" onClick={() => act("export")}>
+        <Button
+          size="sm"
+          variant="secondary"
+          loading={pending("export")}
+          onClick={() => act("export")}
+        >
           {t("platform.export")}
         </Button>
       </div>
-      <div className="flex flex-wrap items-end gap-2">
+      <div className={`${row} space-y-2`}>
         <TextField
           label={t("platform.confirmSlug", { slug: detail.organisation.slug })}
+          size="sm"
           value={confirmSlug}
           onChange={(e) => setConfirmSlug(e.target.value)}
         />
-        <Button size="sm" variant="danger" onClick={() => act("delete")}>
+        <Button
+          size="sm"
+          variant="danger"
+          disabled={confirmSlug !== detail.organisation.slug}
+          loading={pending("delete")}
+          onClick={() => act("delete")}
+        >
           {t("platform.scheduleDeletion")}
         </Button>
       </div>
-      {run.error ? <Alert tone="danger">{run.error.message}</Alert> : null}
-      {done && run.isSuccess ? <Alert tone="success">{done}</Alert> : null}
-    </Section>
+      {run.error || (done && run.isSuccess) ? (
+        <div className="border-t border-rule px-5 py-3">
+          {run.error ? <Alert tone="danger">{run.error.message}</Alert> : null}
+          {done && run.isSuccess ? <Alert tone="success">{done}</Alert> : null}
+        </div>
+      ) : null}
+    </RuledPanel>
   );
 }
 
 function Overrides({ detail }: { detail: Detail }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const id = detail.organisation.id;
   const [key, setKey] = useState("");
   const [value, setValue] = useState("on");
@@ -287,57 +420,105 @@ function Overrides({ detail }: { detail: Detail }) {
     save.mutate(undefined);
   };
   return (
-    <Section title={t("platform.overrides")}>
-      <ul className="text-sm">
-        {detail.overrides.map((o) => (
-          <li key={o.key} className="flex items-center justify-between gap-2 py-1">
-            <span>
-              {o.key}:{" "}
-              {o.bool_value !== null
-                ? String(o.bool_value)
-                : o.unlimited
-                  ? t("platform.unlimited")
-                  : o.int_value}
-              {o.expires_at ? ` · ${t("platform.until", { date: formatDate(o.expires_at) })}` : ""}
-              {" · "}
-              {o.reason}
-            </span>
-            <Button size="sm" variant="ghost" onClick={() => remove.mutate(o.key)}>
-              {t("platform.remove")}
-            </Button>
-          </li>
-        ))}
-      </ul>
-      <form className="flex flex-wrap items-end gap-2" onSubmit={submit}>
-        <TextField label={t("platform.key")} value={key} onChange={(e) => setKey(e.target.value)} />
-        <TextField
-          label={t("platform.value")}
-          hint={t("platform.valueHint")}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-        />
-        <TextField
-          label={t("platform.expires")}
-          type="date"
-          value={expires}
-          onChange={(e) => setExpires(e.target.value)}
-        />
-        <TextField
-          label={t("platform.reason")}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-        />
-        <Button type="submit" size="sm" loading={save.isPending}>
-          {t("platform.grant")}
-        </Button>
+    <RuledPanel title={t("platform.overrides")} flush>
+      {detail.overrides.length ? (
+        <PanelRows>
+          {detail.overrides.map((o) => (
+            <PanelRow key={o.key} className="flex flex-wrap items-center justify-between gap-2">
+              <span className="min-w-0">
+                <span className="font-mono">{o.key}</span>
+                {": "}
+                <span className="font-medium">
+                  {o.bool_value !== null
+                    ? o.bool_value
+                      ? t("platform.on")
+                      : t("platform.off")
+                    : o.unlimited
+                      ? t("platform.unlimited")
+                      : o.int_value}
+                </span>
+                <span className="block text-xs text-muted-foreground tabular-nums">
+                  {[
+                    o.expires_at
+                      ? t("platform.until", { date: formatDate(o.expires_at, i18n.language) })
+                      : "",
+                    o.reason,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              </span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={() => remove.mutate(o.key)}
+              >
+                {t("platform.remove")}
+              </Button>
+            </PanelRow>
+          ))}
+        </PanelRows>
+      ) : null}
+      <form
+        onSubmit={submit}
+        className={detail.overrides.length ? "border-t border-border" : undefined}
+      >
+        <div className="grid gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
+          <TextField
+            label={t("platform.key")}
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+          />
+          <TextField
+            label={t("platform.value")}
+            hint={t("platform.valueHint")}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+          />
+          <TextField
+            label={t("platform.expires")}
+            type="date"
+            value={expires}
+            onChange={(e) => setExpires(e.target.value)}
+          />
+          <TextField
+            label={t("platform.reason")}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+        </div>
+        {save.error ? (
+          <div className="px-5 pb-4">
+            <Alert tone="danger">{save.error.message}</Alert>
+          </div>
+        ) : null}
+        <PanelFooter>
+          <Button type="submit" size="sm" loading={save.isPending}>
+            {t("platform.grant")}
+          </Button>
+        </PanelFooter>
       </form>
-      {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
-    </Section>
+    </RuledPanel>
+  );
+}
+
+/** An email address that may break only after the "@", never mid-word. */
+function EmailAddress({ email }: { email: string }) {
+  const at = email.indexOf("@");
+  if (at < 0) return <span className="font-medium">{email}</span>;
+  return (
+    <span className="font-medium">
+      {email.slice(0, at + 1)}
+      <wbr />
+      {email.slice(at + 1)}
+    </span>
   );
 }
 
 function Members({ detail }: { detail: Detail }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const phone = useIsPhone();
   const [target, setTarget] = useState<Member | null>(null);
   const [reason, setReason] = useState("");
   const [ticket, setTicket] = useState("");
@@ -352,74 +533,113 @@ function Members({ detail }: { detail: Detail }) {
     onSuccess: (r) => window.open(r.url, "_blank", "noopener"),
   });
   return (
-    <Section title={t("platform.members")}>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left">
-              <th scope="col">{t("platform.email")}</th>
-              <th scope="col">{t("platform.role")}</th>
-              <th scope="col">{t("platform.lastActivity")}</th>
-              <th scope="col">{t("platform.security")}</th>
-              <th scope="col">
-                <span className="sr-only">{t("platform.actions")}</span>
-              </th>
+    <RuledPanel
+      title={t("platform.members")}
+      aside={<span className="text-muted-foreground tabular-nums">{detail.members.length}</span>}
+      flush
+    >
+      <RuledTable
+        caption={t("platform.members")}
+        columns={
+          phone
+            ? [{ header: t("platform.email") }, { header: t("platform.actions"), hidden: true }]
+            : [
+                { header: t("platform.email") },
+                { header: t("platform.lastActivity") },
+                { header: t("platform.security") },
+                { header: t("platform.actions"), hidden: true },
+              ]
+        }
+      >
+        {detail.members.map((m) => {
+          const lastActive = m.last_active_at ? formatDate(m.last_active_at, i18n.language) : "–";
+          const security = `${m.email_verified ? t("platform.verified") : t("platform.unverified")}${
+            m.has_mfa ? ` · ${t("designS11.platform.twoStep")}` : ""
+          }`;
+          const role = t(`roles.${m.role}`, { defaultValue: m.role });
+          return (
+            <tr key={m.id}>
+              <td className="min-w-60">
+                <EmailAddress email={m.email} />
+                <span className="block text-xs text-muted-foreground tabular-nums">
+                  {phone
+                    ? [role, m.last_active_at ? lastActive : "", security]
+                        .filter(Boolean)
+                        .join(" · ")
+                    : role}
+                </span>
+              </td>
+              {phone ? null : (
+                <>
+                  <td className="whitespace-nowrap tabular-nums">{lastActive}</td>
+                  <td className={m.email_verified ? undefined : "text-muted-foreground"}>
+                    {security}
+                  </td>
+                </>
+              )}
+              <td className="py-1.5 text-right align-middle whitespace-nowrap">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  aria-expanded={target?.id === m.id}
+                  onClick={() => setTarget(m)}
+                >
+                  {t("platform.viewAs")}
+                </Button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {detail.members.map((m) => (
-              <tr key={m.id} className="border-t border-border">
-                <td>{m.email}</td>
-                <td>{m.role}</td>
-                <td>{m.last_active_at ? formatDate(m.last_active_at) : "–"}</td>
-                <td>
-                  {m.email_verified ? t("platform.verified") : t("platform.unverified")}
-                  {m.has_mfa ? " · 2FA" : ""}
-                </td>
-                <td>
-                  <Button size="sm" variant="ghost" onClick={() => setTarget(m)}>
-                    {t("platform.viewAs")}
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          );
+        })}
+      </RuledTable>
       {target ? (
         <form
-          className="space-y-2"
+          className="border-t border-border"
           aria-label={t("platform.viewAsTitle", { email: target.email })}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setTarget(null);
+          }}
           onSubmit={(e) => {
             e.preventDefault();
             start.mutate();
           }}
         >
-          <p className="text-sm font-medium">
-            {t("platform.viewAsTitle", { email: target.email })}
-          </p>
-          <p className="text-sm text-muted-foreground">{t("platform.viewAsHelp")}</p>
-          <TextField
-            label={t("platform.reason")}
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-          />
-          <TextField
-            label={t("platform.ticket")}
-            value={ticket}
-            onChange={(e) => setTicket(e.target.value)}
-          />
-          <div className="flex gap-2">
+          <div className="space-y-3 px-5 py-4">
+            <div>
+              <p className="font-medium break-all">
+                {t("platform.viewAsTitle", { email: target.email })}
+              </p>
+              <p className="text-sm text-muted-foreground">{t("platform.viewAsHelp")}</p>
+            </div>
+            <div className="grid gap-x-4 gap-y-3 sm:grid-cols-2">
+              <TextField
+                label={t("platform.reason")}
+                autoFocus
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
+              <TextField
+                label={t("platform.ticket")}
+                value={ticket}
+                onChange={(e) => setTicket(e.target.value)}
+              />
+            </div>
+            {start.error ? <Alert tone="danger">{start.error.message}</Alert> : null}
+          </div>
+          <PanelFooter>
             <Button type="submit" size="sm" loading={start.isPending}>
               {t("platform.openAccount")}
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => setTarget(null)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-muted-foreground"
+              onClick={() => setTarget(null)}
+            >
               {t("common.cancel")}
             </Button>
-          </div>
-          {start.error ? <Alert tone="danger">{start.error.message}</Alert> : null}
+          </PanelFooter>
         </form>
       ) : null}
-    </Section>
+    </RuledPanel>
   );
 }

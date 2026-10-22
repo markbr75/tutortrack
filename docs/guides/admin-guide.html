@@ -1350,6 +1350,7 @@
           <li><span class="ui">Emails and documents</span>: email header line and footer, invoice and statement footer.</li>
           <li>App name, and social media links.</li>
           <li>Hiding "Powered by TutorTrack" needs white-labelling (Enterprise, or the white-label add-on). If you lose the feature, the footer comes back automatically.</li>
+          <li>The pages families, applicants and referees open on your address (sign-in, enquiry forms, proposals, shortlists, pay links, reviews, lesson feedback, re-enrolment, waitlist offers, vacancies, interview times and references) open with your logo, or your business name, ruled off above the title, and your main colour fills their buttons. The "Powered by TutorTrack" credit sits quietly at the foot. Embedded widgets take your colour and font and otherwise follow your own website's text colour and background.</li>
         </ul>
 
         <h3 id="website-domains">Custom domains</h3>
@@ -1467,8 +1468,10 @@
         <h3 id="privacy-retention">Retention</h3>
         <p>The <span class="ui">Retention</span> tab (<span class="ui">How long data is
           kept</span>) sets a period for each category of data. <span class="ui">Report what's due
-          (dry run)</span> shows what would be removed; <span class="ui">Purge now</span> removes
-          it after a confirmation.</p>
+          (dry run)</span> shows what would be removed; <span class="ui">Purge now</span> opens a
+          confirmation in place, at the foot of the table: it says that purging cannot be undone,
+          and the red <span class="ui">Purge now</span> beside it removes the data
+          (<span class="ui">Cancel</span> or Escape backs out).</p>
         <div class="table-wrap">
           <table>
             <thead><tr><th scope="col">Category</th><th scope="col">Default</th></tr></thead>
@@ -1554,7 +1557,11 @@
           not for customers. It is part of the admin app at <span class="path">/platform</span> on
           the root host, and staff sign in with their normal account. It lists every organisation
           and gives the tools to support them, change their plan, watch the platform and send
-          notices.</p>
+          notices. Its green side menu groups the pages by job: <span class="ui">Customers</span>
+          (Organisations, Health, Support, Customer notices), <span class="ui">Product</span>
+          (Plans and prices, Feature flags, Feedback and usage), <span class="ui">Revenue</span>
+          (SaaS metrics, Revenue share) and <span class="ui">Operations</span> (Operations,
+          Workflows). On a phone the menu opens from the button at the top left.</p>
 
         <h3 id="p-access">Who can use the console</h3>
         <p>Four conditions must all be true. If one fails, the console shows a red alert instead of
@@ -1606,7 +1613,7 @@
                 <tr><td><span class="ui">Suspend</span> / <span class="ui">Lift suspension</span></td><td>Suspension makes the organisation read-only for its owners and admins and shows them a banner. Reason required to suspend. Lifting returns it to Trial or Active according to the subscription. Closed organisations cannot be suspended.</td></tr>
                 <tr><td><span class="ui">Resend owner verification</span></td><td>Emails active owners whose email address is not verified.</td></tr>
                 <tr><td><span class="ui">Request data export</span></td><td>Starts a full organisation export (the same as the customer's own export). Reason required.</td></tr>
-                <tr><td><span class="ui">Schedule deletion</span></td><td>Type the organisation's subdomain to confirm and give a reason (5 characters or more). The status becomes Closed, an export is requested, and data is deleted after the grace period (<code>privacy.closure_grace_days</code>, default 30 days).</td></tr>
+                <tr><td><span class="ui">Schedule deletion</span></td><td>Type the organisation's subdomain to confirm (the button stays unavailable until it matches) and give a reason (5 characters or more). The status becomes Closed, an export is requested, and data is deleted after the grace period (<code>privacy.closure_grace_days</code>, default 30 days).</td></tr>
               </tbody>
             </table>
           </div>

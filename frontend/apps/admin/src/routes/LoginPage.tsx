@@ -1,11 +1,19 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  CheckboxField,
+  cn,
+  RuledPanel,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
 import { api, safeNext } from "../api";
-import { PublicLayout } from "../layout/PublicLayout";
+import { PublicLayout, usePublicBranding } from "../layout/PublicLayout";
 import { getPasskey, passkeysSupported } from "./webauthn";
 
 /** Sign in with a passkey (E03-T08): passkey-only, or as the second factor while a
@@ -23,6 +31,9 @@ function usePasskeySignIn(onDone: () => void) {
   });
 }
 
+/** A text link in link ink, underlined on hover. */
+const LINK = "font-medium text-link underline-offset-2 hover:underline";
+
 function params() {
   return new URLSearchParams(window.location.search);
 }
@@ -38,14 +49,16 @@ export function MFAStep({ onDone }: { onDone: () => void }) {
   const passkey = usePasskeySignIn(onDone);
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
       onSubmit={(e: FormEvent) => {
         e.preventDefault();
         verify.mutate();
       }}
     >
-      <h2 className="text-lg font-medium">{t("auth.mfaTitle")}</h2>
-      <p className="text-sm text-muted-foreground">{t("auth.mfaBody")}</p>
+      <div>
+        <h2 className="text-base font-semibold">{t("auth.mfaTitle")}</h2>
+        <p className="mt-0.5 text-sm text-muted-foreground">{t("auth.mfaBody")}</p>
+      </div>
       <TextField
         label={t("auth.mfaCode")}
         autoComplete="one-time-code"
@@ -96,6 +109,7 @@ export function LoginPage() {
       unwrap(await api.POST("/api/v1/auth/magic-link", { body: { email, next } })),
   });
   const passkey = usePasskeySignIn(finish);
+  const brand = usePublicBranding();
   const orgSso = useQuery({
     queryKey: ["org-sso"],
     queryFn: async () => unwrap(await api.GET("/api/v1/auth/org-sso")),
@@ -109,91 +123,137 @@ export function LoginPage() {
     );
   }
 
+  const secondary = cn(buttonClass({ variant: "secondary" }), "w-full");
   return (
     <PublicLayout title={t("auth.signInTitle")}>
       <div className="flex flex-col gap-4">
         {ssoError ? <Alert tone="danger">{t("auth.ssoError")}</Alert> : null}
         {magic.isSuccess ? <Alert tone="success">{t("auth.magicLinkSent")}</Alert> : null}
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(e: FormEvent) => {
-            e.preventDefault();
-            login.mutate();
-          }}
-        >
-          {login.isError ? <Alert tone="danger">{login.error.message}</Alert> : null}
-          <TextField
-            label={t("auth.email")}
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            label={t("auth.password")}
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
+        <RuledPanel>
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={(e: FormEvent) => {
+              e.preventDefault();
+              login.mutate();
+            }}
+          >
+            {login.isError ? <Alert tone="danger">{login.error.message}</Alert> : null}
+            <TextField
+              label={t("auth.email")}
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <TextField
+              label={t("auth.password")}
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <CheckboxField
+              label={t("auth.remember")}
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
             />
-            {t("auth.remember")}
-          </label>
-          <Button type="submit" loading={login.isPending}>
-            {t("auth.submit")}
-          </Button>
-        </form>
-        <Button
-          variant="secondary"
-          loading={magic.isPending}
-          disabled={!email}
-          onClick={() => magic.mutate()}
+            <Button type="submit" className="w-full" loading={login.isPending}>
+              {t("auth.submit")}
+            </Button>
+          </form>
+        </RuledPanel>
+        <p
+          aria-hidden="true"
+          className="flex items-center gap-3 text-sm text-muted-foreground before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border"
         >
-          {t("auth.magicLink")}
-        </Button>
-        {passkeysSupported() ? (
-          <Button variant="secondary" loading={passkey.isPending} onClick={() => passkey.mutate()}>
-            {t("passkeys.signIn")}
-          </Button>
-        ) : null}
-        {passkey.isError ? <Alert tone="danger">{t("passkeys.failed")}</Alert> : null}
-        {orgSso.data?.enabled ? (
-          <a
-            className="flex h-10 items-center justify-center rounded-md border border-border text-sm hover:bg-muted"
-            href={`${orgSso.data.start_url}?next=${encodeURIComponent(next)}`}
+          {t("auth.or")}
+        </p>
+        <div className="flex flex-col gap-2">
+          <Button
+            variant="secondary"
+            className="w-full"
+            loading={magic.isPending}
+            disabled={!email}
+            onClick={() => magic.mutate()}
           >
-            {t("auth.continueWith", { provider: orgSso.data.name })}
-          </a>
-        ) : null}
-        {providers.data?.length ? (
-          <>
-            <p className="text-center text-sm text-muted-foreground">{t("auth.or")}</p>
-            {providers.data.map((p) => (
-              <a
-                key={p.key}
-                className="flex h-10 items-center justify-center rounded-md border border-border text-sm hover:bg-muted"
-                href={`${p.start_url}?next=${encodeURIComponent(next)}`}
-              >
-                {t("auth.continueWith", { provider: t(`providers.${p.key}`) })}
-              </a>
-            ))}
-          </>
-        ) : null}
-        <div className="flex justify-between text-sm">
-          <a className="underline" href="/forgot-password">
+            {t("auth.magicLink")}
+          </Button>
+          {passkeysSupported() ? (
+            <Button
+              variant="secondary"
+              className="w-full"
+              loading={passkey.isPending}
+              onClick={() => passkey.mutate()}
+            >
+              {t("passkeys.signIn")}
+            </Button>
+          ) : null}
+          {orgSso.data?.enabled ? (
+            <a
+              className={secondary}
+              href={`${orgSso.data.start_url}?next=${encodeURIComponent(next)}`}
+            >
+              {t("auth.continueWith", { provider: orgSso.data.name })}
+            </a>
+          ) : null}
+          {providers.data?.map((p) => (
+            <a
+              key={p.key}
+              className={secondary}
+              href={`${p.start_url}?next=${encodeURIComponent(next)}`}
+            >
+              {t("auth.continueWith", { provider: t(`providers.${p.key}`) })}
+            </a>
+          ))}
+        </div>
+        {passkey.isError ? <Alert tone="danger">{t("passkeys.failed")}</Alert> : null}
+        <div className="flex flex-wrap justify-between gap-x-4 gap-y-2 text-sm">
+          <a className={LINK} href="/forgot-password">
             {t("auth.forgot")}
           </a>
-          <a className="underline" href="/signup">
-            {t("auth.noAccount")}
-          </a>
+          {/* Sign-up is TutorTrack's own: an organisation's sign-in page doesn't offer it. */}
+          {brand.isError ? (
+            <a className={LINK} href="/signup">
+              {t("auth.noAccount")}
+            </a>
+          ) : null}
         </div>
       </div>
     </PublicLayout>
+  );
+}
+
+/** The way forward from a dead sign-in link: ask for a new one (the same request as the
+ * sign-in page's "Email me a sign-in link"). */
+function NewLinkForm({ next }: { next: string }) {
+  const { t } = useTranslation();
+  const [email, setEmail] = useState("");
+  const send = useMutation({
+    mutationFn: async () =>
+      unwrap(await api.POST("/api/v1/auth/magic-link", { body: { email, next } })),
+  });
+  if (send.isSuccess) return <Alert tone="success">{t("auth.magicLinkSent")}</Alert>;
+  return (
+    <form
+      className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
+      onSubmit={(e: FormEvent) => {
+        e.preventDefault();
+        send.mutate();
+      }}
+    >
+      <TextField
+        label={t("auth.email")}
+        type="email"
+        autoComplete="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      {send.isError ? <Alert tone="danger">{send.error.message}</Alert> : null}
+      <Button type="submit" loading={send.isPending} disabled={!email}>
+        {t("designS11.auth.sendNewLink")}
+      </Button>
+    </form>
   );
 }
 
@@ -221,7 +281,13 @@ export function MagicLinkPage() {
       {mfa ? (
         <MFAStep onDone={() => window.location.assign(next)} />
       ) : verify.isError || !token ? (
-        <Alert tone="danger">{t("auth.linkInvalid")}</Alert>
+        <div className="flex flex-col gap-4">
+          <Alert tone="danger">{t("auth.linkInvalid")}</Alert>
+          <NewLinkForm next={next} />
+          <a className={`text-sm ${LINK}`} href="/login">
+            {t("auth.backToLogin")}
+          </a>
+        </div>
       ) : (
         <p role="status">{t("auth.checkingLink")}</p>
       )}
@@ -242,7 +308,7 @@ export function ForgotPasswordPage() {
         <Alert tone="success">{t("auth.forgotSent")}</Alert>
       ) : (
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
           onSubmit={(e: FormEvent) => {
             e.preventDefault();
             send.mutate();
@@ -260,7 +326,7 @@ export function ForgotPasswordPage() {
           </Button>
         </form>
       )}
-      <a className="mt-4 block text-sm underline" href="/login">
+      <a className={`mt-4 inline-block text-sm ${LINK}`} href="/login">
         {t("auth.backToLogin")}
       </a>
     </PublicLayout>
@@ -294,7 +360,7 @@ export function ResetPasswordPage() {
         </Alert>
       ) : (
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
           onSubmit={(e: FormEvent) => {
             e.preventDefault();
             reset.mutate();

@@ -27,6 +27,21 @@ describe("widget runtime", () => {
     expect(host.style.getPropertyValue("color")).toBe("");
   });
 
+  it("sets the font only when the tenant chose one, so the host page's font is kept", () => {
+    const chosen = document.createElement("div");
+    applyTheme(chosen, BRAND);
+    expect(chosen.style.getPropertyValue("--tt-font")).toBe("'Inter', system-ui, sans-serif");
+    const none = document.createElement("div");
+    applyTheme(none, {
+      ...BRAND,
+      font: "",
+      font_family: "system-ui, sans-serif",
+      font_css_url: "",
+    });
+    expect(none.style.getPropertyValue("--tt-font")).toBe("");
+    expect(document.querySelector("link[rel=stylesheet]")).toBeNull();
+  });
+
   it("emits analytics events to window, GA4, GTM and the Meta pixel", () => {
     const gtag = vi.fn();
     const fbq = vi.fn();

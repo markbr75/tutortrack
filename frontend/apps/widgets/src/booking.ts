@@ -60,6 +60,13 @@ export class TtBooking extends TtWidget {
         display: grid;
         gap: 12px;
       }
+      /* The chosen time is marked by an ink edge and weight; the tenant colour stays on
+         Continue, the one primary. */
+      button.slot[aria-pressed="true"] {
+        border: 2px solid currentColor;
+        padding: 7px 15px;
+        font-weight: 600;
+      }
       ul {
         list-style: none;
         padding: 0;
@@ -214,7 +221,7 @@ export class TtBooking extends TtWidget {
           (slot) =>
             html`<li>
               <button
-                class=${slot === this.chosenSlot ? "" : "secondary"}
+                class="secondary slot"
                 aria-pressed=${slot === this.chosenSlot}
                 @click=${() => {
                   this.chosenSlot = slot;

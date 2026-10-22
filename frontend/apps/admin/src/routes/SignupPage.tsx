@@ -65,8 +65,12 @@ export function SignupPage() {
   }
 
   return (
-    <PublicLayout title={t("signup.title")} subtitle={t("signup.subtitle")}>
-      <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
+    <PublicLayout title={t("signup.title")} subtitle={t("signup.subtitle")} tutortrack>
+      <form
+        onSubmit={submit}
+        className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
+        noValidate
+      >
         {signup.isError && Object.keys(errors).length === 0 && !elsewhere ? (
           <Alert tone="danger">{signup.error.message}</Alert>
         ) : null}
@@ -151,7 +155,7 @@ export function SignupPage() {
             <span>
               {t("gapG6.acceptTermsBefore")}{" "}
               <a
-                className="underline"
+                className="font-medium text-link underline underline-offset-2"
                 href={config.data?.terms_url}
                 target="_blank"
                 rel="noreferrer"
@@ -160,7 +164,7 @@ export function SignupPage() {
               </a>{" "}
               {t("gapG6.acceptTermsAnd")}{" "}
               <a
-                className="underline"
+                className="font-medium text-link underline underline-offset-2"
                 href={config.data?.privacy_notice_url}
                 target="_blank"
                 rel="noreferrer"

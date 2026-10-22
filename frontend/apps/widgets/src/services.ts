@@ -33,10 +33,9 @@ export class TtServices extends TtWidget {
       }
       h3 {
         margin: 0 0 4px;
-        font-size: 1.05rem;
       }
       .price {
-        font-weight: 700;
+        font-weight: 600;
       }
     `,
   ];

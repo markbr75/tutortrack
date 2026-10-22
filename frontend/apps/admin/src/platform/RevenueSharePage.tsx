@@ -1,6 +1,14 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FigureStrip,
+  figureCell,
+  PageHeader,
+  RuledTable,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -13,7 +21,7 @@ function thisMonth(): string {
 /** G6 (FR-30-7): revenue-share reconciliation: payments processed vs reported to the
  *  Stripe meter, per organisation and month, with a fix for unreported days. */
 export function RevenueSharePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [month, setMonth] = useState(thisMonth());
   const report = useQuery({
@@ -31,96 +39,110 @@ export function RevenueSharePage() {
     onSuccess: () =>
       void queryClient.invalidateQueries({ queryKey: ["platform", "revenue-share"] }),
   });
-  const money = (amount: string, currency: string) => formatMoney({ amount, currency });
+  const money = (amount: string, currency: string) =>
+    formatMoney({ amount, currency }, i18n.language);
+  const totals = Object.entries(report.data?.totals ?? {});
+  const several = totals.length > 1;
+  const rows = report.data?.rows ?? [];
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("revenueShare.title")}</h1>
-      <p className="text-sm text-muted-foreground">{t("revenueShare.intro")}</p>
-      <TextField
-        label={t("revenueShare.month")}
-        type="month"
-        value={month}
-        onChange={(e) => setMonth(e.target.value)}
+    <div className="max-w-6xl space-y-6">
+      <PageHeader
+        title={t("revenueShare.title")}
+        description={t("revenueShare.intro")}
+        actions={
+          <div className="w-44">
+            <TextField
+              label={t("revenueShare.month")}
+              hideLabel
+              size="sm"
+              type="month"
+              className="tabular-nums"
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+            />
+          </div>
+        }
       />
-      {report.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      {report.data ? (
-        <>
-          <ul className="flex flex-wrap gap-4 text-sm">
-            {Object.entries(report.data.totals).map(([currency, total]) => (
-              <li key={currency} className="rounded-md border border-border p-3">
-                <p className="font-medium">{currency}</p>
-                <p>
-                  {t("revenueShare.processed")}: {money(total.processed, currency)}
-                </p>
-                <p>
-                  {t("revenueShare.expectedFee")}: {money(total.expected_fee, currency)}
-                </p>
-              </li>
-            ))}
-          </ul>
-          {report.data.rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("revenueShare.none")}</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left">
-                    <th scope="col">{t("revenueShare.organisation")}</th>
-                    <th scope="col">{t("revenueShare.processed")}</th>
-                    <th scope="col">{t("revenueShare.reported")}</th>
-                    <th scope="col">{t("revenueShare.difference")}</th>
-                    <th scope="col">{t("revenueShare.expectedFee")}</th>
-                    <th scope="col">{t("revenueShare.state")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {report.data.rows.map((row) => (
-                    <tr key={row.organisation_id} className="border-t border-border align-top">
-                      <td>
-                        {row.organisation_name}
-                        <span className="block text-muted-foreground">{row.percent}%</span>
-                      </td>
-                      <td>{money(row.processed, row.currency)}</td>
-                      <td>{money(row.reported, row.currency)}</td>
-                      <td>{money(row.difference, row.currency)}</td>
-                      <td>{money(row.expected_fee, row.currency)}</td>
-                      <td>
-                        {row.ok ? (
-                          t("revenueShare.ok")
-                        ) : (
-                          <div className="space-y-1">
-                            {row.unreported_days.length ? (
-                              <p>
-                                {t("revenueShare.unreported", {
-                                  count: row.unreported_days.length,
-                                })}
-                              </p>
-                            ) : null}
-                            {row.changed_days.length ? (
-                              <p>{t("revenueShare.changed", { count: row.changed_days.length })}</p>
-                            ) : null}
-                            {row.unreported_days.length ? (
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                loading={fix.isPending && fix.variables === row.organisation_id}
-                                onClick={() => fix.mutate(row.organisation_id)}
-                              >
-                                {t("revenueShare.reportMissing")}
-                              </Button>
-                            ) : null}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </>
+      {totals.length ? (
+        <FigureStrip
+          label={t("revenueShare.title")}
+          figures={totals.flatMap(([currency, total]) => [
+            {
+              key: `${currency}-processed`,
+              label: several
+                ? `${t("revenueShare.processed")} (${currency})`
+                : t("revenueShare.processed"),
+              value: money(total.processed, currency),
+            },
+            {
+              key: `${currency}-fee`,
+              label: several
+                ? `${t("revenueShare.expectedFee")} (${currency})`
+                : t("revenueShare.expectedFee"),
+              value: money(total.expected_fee, currency),
+            },
+          ])}
+        />
       ) : null}
       {fix.error ? <Alert tone="danger">{fix.error.message}</Alert> : null}
+      <RuledTable
+        framed
+        caption={t("revenueShare.title")}
+        loading={report.isPending}
+        loadingLabel={t("grid.loading")}
+        empty={report.data && !rows.length ? t("revenueShare.none") : undefined}
+        columns={[
+          { header: t("revenueShare.organisation") },
+          { header: t("revenueShare.processed"), end: true, width: "w-32" },
+          { header: t("revenueShare.reported"), end: true, width: "w-32" },
+          { header: t("revenueShare.difference"), end: true, width: "w-32" },
+          { header: t("revenueShare.expectedFee"), end: true, width: "w-32" },
+          { header: t("revenueShare.state") },
+        ]}
+      >
+        {rows.map((row) => (
+          <tr key={row.organisation_id}>
+            <td className="min-w-44">
+              <span className="font-medium">{row.organisation_name}</span>
+              <span className="block text-xs text-muted-foreground tabular-nums">
+                {t("designS11.platform.sharePercent", { percent: row.percent })}
+              </span>
+            </td>
+            <td className={figureCell}>{money(row.processed, row.currency)}</td>
+            <td className={figureCell}>{money(row.reported, row.currency)}</td>
+            <td className={figureCell}>{money(row.difference, row.currency)}</td>
+            <td className={figureCell}>{money(row.expected_fee, row.currency)}</td>
+            <td className="min-w-52">
+              {row.ok ? (
+                <span className="text-muted-foreground">{t("revenueShare.ok")}</span>
+              ) : (
+                <div className="space-y-1">
+                  {row.unreported_days.length ? (
+                    <p className="font-semibold text-margin">
+                      {t("revenueShare.unreported", { count: row.unreported_days.length })}
+                    </p>
+                  ) : null}
+                  {row.changed_days.length ? (
+                    <p className="font-semibold text-margin">
+                      {t("revenueShare.changed", { count: row.changed_days.length })}
+                    </p>
+                  ) : null}
+                  {row.unreported_days.length ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={fix.isPending && fix.variables === row.organisation_id}
+                      onClick={() => fix.mutate(row.organisation_id)}
+                    >
+                      {t("revenueShare.reportMissing")}
+                    </Button>
+                  ) : null}
+                </div>
+              )}
+            </td>
+          </tr>
+        ))}
+      </RuledTable>
     </div>
   );
 }

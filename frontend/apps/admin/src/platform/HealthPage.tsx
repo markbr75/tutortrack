@@ -1,6 +1,16 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  cn,
+  FigureStrip,
+  figureCell,
+  PageHeader,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -16,19 +26,17 @@ const COMPONENTS: Array<keyof Components> = [
   "support",
   "nps",
 ];
-const RISK_STYLE: Record<string, string> = {
-  healthy: "border-success/40 bg-success/10",
-  watch: "border-warning/40 bg-warning/10",
-  at_risk: "border-danger/40 bg-danger/10",
+
+/** Risk in words: at risk waits on customer success (margin red), healthy needs nothing. */
+const RISK_CLASS: Record<string, string> = {
+  healthy: "text-muted-foreground",
+  watch: "font-medium",
+  at_risk: "font-semibold text-margin",
 };
 
 export function RiskBadge({ risk }: { risk: string }) {
   const { t } = useTranslation();
-  return (
-    <span className={`rounded border px-1.5 py-0.5 text-xs ${RISK_STYLE[risk] ?? ""}`}>
-      {t(`tenantHealth.risk.${risk}`)}
-    </span>
-  );
+  return <span className={RISK_CLASS[risk] ?? ""}>{t(`tenantHealth.risk.${risk}`)}</span>;
 }
 
 /** Tenant health for customer success (E30 FR-30-6): lowest scores first. */
@@ -51,97 +59,109 @@ export function HealthPage() {
   const run = useMutation({
     mutationFn: async () => unwrap(await api.POST("/api/v1/platform/insights/run")),
   });
+  const list = rows.data?.results ?? [];
   return (
     <div className="max-w-6xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">{t("tenantHealth.title")}</h1>
-        <Button variant="secondary" loading={run.isPending} onClick={() => run.mutate()}>
-          {t("tenantHealth.runNow")}
-        </Button>
-      </div>
+      <PageHeader
+        title={t("tenantHealth.title")}
+        description={t("tenantHealth.explain")}
+        actions={
+          <Button
+            size="sm"
+            variant="secondary"
+            loading={run.isPending}
+            onClick={() => run.mutate()}
+          >
+            {t("tenantHealth.runNow")}
+          </Button>
+        }
+      />
       {run.isSuccess ? <Alert tone="success">{t("tenantHealth.runStarted")}</Alert> : null}
-      <p className="text-sm text-muted-foreground">{t("tenantHealth.explain")}</p>
       {counts.data ? (
-        <dl className="grid grid-cols-3 gap-3">
-          {(["healthy", "watch", "at_risk"] as const).map((key) => (
-            <div key={key} className={`rounded-md border p-3 ${RISK_STYLE[key]}`}>
-              <dt className="text-sm">{t(`tenantHealth.risk.${key}`)}</dt>
-              <dd className="text-xl font-semibold">{counts.data[key]}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-      <div className="max-w-xs">
-        <SelectField
-          label={t("tenantHealth.filter")}
-          value={risk}
-          onChange={(e) => setRisk(e.target.value)}
-          options={[
-            { value: "", label: t("tenantHealth.all") },
-            { value: "at_risk", label: t("tenantHealth.risk.at_risk") },
-            { value: "watch", label: t("tenantHealth.risk.watch") },
-            { value: "healthy", label: t("tenantHealth.risk.healthy") },
-          ]}
+        <FigureStrip
+          label={t("tenantHealth.title")}
+          figures={(["healthy", "watch", "at_risk"] as const).map((key) => ({
+            key,
+            label: t(`tenantHealth.risk.${key}`),
+            value: counts.data[key],
+            tone: key === "at_risk" && counts.data[key] > 0 ? ("margin" as const) : undefined,
+          }))}
         />
-      </div>
-      {rows.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <caption className="sr-only">{t("tenantHealth.title")}</caption>
-          <thead>
-            <tr className="text-left">
-              <th scope="col" className="p-2">
-                {t("tenantHealth.organisation")}
+      ) : null}
+      <RuledPanel
+        title={t("designS11.platform.organisationsByScore")}
+        aside={
+          <SelectField
+            label={t("tenantHealth.filter")}
+            hideLabel
+            size="sm"
+            value={risk}
+            onChange={(e) => setRisk(e.target.value)}
+            options={[
+              { value: "", label: t("designS11.platform.anyRisk") },
+              { value: "at_risk", label: t("tenantHealth.risk.at_risk") },
+              { value: "watch", label: t("tenantHealth.risk.watch") },
+              { value: "healthy", label: t("tenantHealth.risk.healthy") },
+            ]}
+          />
+        }
+        flush
+      >
+        <p className="px-5 pt-3 text-xs text-muted-foreground md:hidden">
+          {t("designS11.platform.scrollSideways")}
+        </p>
+        <RuledTable
+          caption={t("tenantHealth.title")}
+          loading={rows.isPending}
+          loadingLabel={t("grid.loading")}
+          empty={rows.data && !list.length ? t("designS11.platform.noScores") : undefined}
+          columns={[
+            { header: t("tenantHealth.organisation") },
+            { header: t("tenantHealth.score"), end: true, width: "w-20" },
+            { header: t("tenantHealth.riskLabel") },
+            ...COMPONENTS.map((c) => ({
+              key: c,
+              header: t(`tenantHealth.components.${c}`),
+              end: true,
+            })),
+            { header: t("tenantHealth.scoredOn") },
+          ]}
+        >
+          {list.map((row) => (
+            <tr key={row.id}>
+              <th scope="row" className="min-w-44">
+                <Link
+                  to="/platform/tenants/$id"
+                  params={{ id: row.id }}
+                  className="underline-offset-2 hover:underline"
+                >
+                  {row.name}
+                </Link>
+                <span className="block text-xs font-normal text-muted-foreground">
+                  {row.plan ?? "–"}
+                </span>
               </th>
-              <th scope="col" className="p-2">
-                {t("tenantHealth.score")}
-              </th>
-              <th scope="col" className="p-2">
-                {t("tenantHealth.riskLabel")}
-              </th>
+              <td className={cn(figureCell, "font-semibold")}>{row.score}</td>
+              <td className="whitespace-nowrap">
+                <RiskBadge risk={row.risk} />
+              </td>
               {COMPONENTS.map((c) => (
-                <th key={c} scope="col" className="p-2">
-                  {t(`tenantHealth.components.${c}`)}
-                </th>
-              ))}
-              <th scope="col" className="p-2">
-                {t("tenantHealth.scoredOn")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {(rows.data?.results ?? []).map((row) => (
-              <tr key={row.id} className="border-t border-border">
-                <th scope="row" className="p-2 text-left font-normal">
-                  <Link
-                    to="/platform/tenants/$id"
-                    params={{ id: row.id }}
-                    className="font-medium underline"
-                  >
-                    {row.name}
-                  </Link>
-                  <span className="block text-xs text-muted-foreground">{row.plan ?? "—"}</span>
-                </th>
-                <td className="p-2 font-semibold">{row.score}</td>
-                <td className="p-2">
-                  <RiskBadge risk={row.risk} />
+                <td key={c} className={figureCell}>
+                  {row.components[c] ?? "–"}
                 </td>
-                {COMPONENTS.map((c) => (
-                  <td key={c} className="p-2">
-                    {row.components[c] ?? "—"}
-                  </td>
-                ))}
-                <td className="p-2">{formatDate(row.scored_on, i18n.language)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              ))}
+              <td className="whitespace-nowrap tabular-nums">
+                {formatDate(row.scored_on, i18n.language)}
+              </td>
+            </tr>
+          ))}
+        </RuledTable>
+      </RuledPanel>
     </div>
   );
 }
 
-/** The health card on an organisation's console page: today's score and the last 90 days. */
+/** The health panel on an organisation's console page: today's score and the last days. */
 export function TenantHealthCard({ id }: { id: string }) {
   const { t, i18n } = useTranslation();
   const history = useQuery({
@@ -151,30 +171,35 @@ export function TenantHealthCard({ id }: { id: string }) {
   });
   const latest = history.data?.[0];
   return (
-    <section className="space-y-2">
-      <h2 className="text-lg font-semibold">{t("tenantHealth.cardTitle")}</h2>
+    <RuledPanel
+      title={t("tenantHealth.cardTitle")}
+      aside={latest ? <RiskBadge risk={latest.risk} /> : null}
+      rule={latest?.risk === "at_risk" ? "margin" : "border"}
+      bodyClassName="px-5 pb-4"
+    >
       {!latest ? (
-        <p className="text-sm text-muted-foreground">{t("tenantHealth.notScored")}</p>
+        <p className="pt-4 text-sm text-muted-foreground">{t("tenantHealth.notScored")}</p>
       ) : (
-        <>
-          <p className="flex items-center gap-2">
-            <span className="text-2xl font-semibold">{latest.score}</span>
-            <RiskBadge risk={latest.risk} />
-            <span className="text-xs text-muted-foreground">
-              {formatDate(latest.date, i18n.language)}
-            </span>
-          </p>
-          <dl className="grid grid-cols-3 gap-2 text-sm sm:grid-cols-6">
-            {COMPONENTS.map((c) => (
-              <div key={c}>
-                <dt className="text-xs text-muted-foreground">
-                  {t(`tenantHealth.components.${c}`)}
-                </dt>
-                <dd>{latest.components[c] ?? "—"}</dd>
-              </div>
-            ))}
-          </dl>
-          <p className="text-xs text-muted-foreground">
+        <div className="space-y-1">
+          <FigureStrip
+            className="border-y-0"
+            columns={4}
+            label={t("tenantHealth.cardTitle")}
+            figures={[
+              {
+                key: "score",
+                label: t("tenantHealth.score"),
+                value: latest.score,
+                note: formatDate(latest.date, i18n.language),
+              },
+              ...COMPONENTS.map((c) => ({
+                key: c,
+                label: t(`tenantHealth.components.${c}`),
+                value: latest.components[c] ?? "–",
+              })),
+            ]}
+          />
+          <p className="text-xs text-muted-foreground tabular-nums">
             {t("tenantHealth.trend", {
               scores: (history.data ?? [])
                 .slice(0, 14)
@@ -183,8 +208,8 @@ export function TenantHealthCard({ id }: { id: string }) {
                 .join(" → "),
             })}
           </p>
-        </>
+        </div>
       )}
-    </section>
+    </RuledPanel>
   );
 }

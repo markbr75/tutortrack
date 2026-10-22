@@ -7,11 +7,13 @@ export class TtPoweredBy extends LitElement {
   static styles = css`
     :host {
       display: inline-block;
-      font: var(--tt-font, 12px system-ui, sans-serif);
-      color: var(--tt-muted-color, #64748b);
+      font-family: var(--tt-font, inherit);
+      font-size: 0.75em;
+      color: var(--tt-muted-color, color-mix(in srgb, currentColor 72%, transparent));
     }
     a {
-      color: var(--tt-brand-color, #2563eb);
+      color: inherit;
+      text-underline-offset: 0.2em;
     }
   `;
 

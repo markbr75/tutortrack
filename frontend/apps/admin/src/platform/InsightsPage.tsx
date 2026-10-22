@@ -1,10 +1,31 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
-import { SelectField, Spinner } from "@tutortrack/ui";
+import {
+  FigureStrip,
+  figureCell,
+  PageHeader,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  Spinner,
+} from "@tutortrack/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
+
+/** "Sept 2026", as on SaaS metrics. */
+function monthLabel(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(iso));
+}
+
+const PAIR = "grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-2";
 
 /** NPS/CSAT and product usage across organisations (E30 FR-30-6). */
 export function InsightsPage() {
@@ -24,89 +45,115 @@ export function InsightsPage() {
   });
   const n = nps.data;
   const u = usage.data;
+  const first = u?.funnel[0]?.organisations || 0;
   return (
-    <div className="max-w-6xl space-y-8">
-      <h1 className="text-2xl font-semibold">{t("productInsights.title")}</h1>
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">
+    <div className="max-w-6xl space-y-6">
+      <PageHeader title={t("productInsights.title")} />
+      <section aria-labelledby="insights-nps" className="space-y-6">
+        <h2 id="insights-nps" className="text-base font-semibold">
           {t("productInsights.npsTitle", { days: n?.days ?? 90 })}
         </h2>
         {nps.isPending ? <Spinner label={t("grid.loading")} /> : null}
         {n ? (
           <>
-            <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-              {(
+            <FigureStrip
+              label={t("productInsights.npsTitle", { days: n.days })}
+              columns={6}
+              figures={(
                 [
-                  ["nps", n.nps ?? "—"],
+                  ["nps", n.nps ?? "–"],
                   ["answers", n.answers],
                   ["promoters", n.promoters],
                   ["passives", n.passives],
                   ["detractors", n.detractors],
-                  ["csat", n.csat_average ?? "—"],
+                  ["csat", n.csat_average ?? "–"],
                 ] as const
-              ).map(([key, value]) => (
-                <div key={key} className="rounded-md border border-border p-3">
-                  <dt className="text-sm text-muted-foreground">
-                    {t(`productInsights.tiles.${key}`)}
-                  </dt>
-                  <dd className="text-xl font-semibold">{value}</dd>
-                </div>
-              ))}
-            </dl>
-            <div className="grid gap-6 md:grid-cols-2">
-              <table className="text-sm">
-                <caption className="text-left font-medium">{t("productInsights.byPlan")}</caption>
-                <tbody>
+              ).map(([key, value]) => ({
+                key,
+                label: t(`productInsights.tiles.${key}`),
+                value,
+              }))}
+            />
+            <div className={PAIR}>
+              <RuledPanel title={t("productInsights.byPlan")} flush>
+                <RuledTable
+                  caption={t("productInsights.byPlan")}
+                  columns={[
+                    { header: t("platform.plan") },
+                    { header: t("productInsights.tiles.nps"), end: true },
+                    { header: t("productInsights.tiles.answers"), end: true },
+                  ]}
+                >
                   {n.by_plan.map((row) => (
-                    <tr key={row.plan} className="border-t border-border">
-                      <th scope="row" className="p-2 text-left font-normal">
-                        {row.plan || "—"}
-                      </th>
-                      <td className="p-2">{row.nps ?? "—"}</td>
-                      <td className="p-2 text-muted-foreground">
+                    <tr key={row.plan}>
+                      <th scope="row">{row.plan || "–"}</th>
+                      <td className={figureCell}>{row.nps ?? "–"}</td>
+                      <td className={`${figureCell} text-muted-foreground`}>
                         {t("productInsights.answers", { count: row.answers })}
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </table>
-              <table className="text-sm">
-                <caption className="text-left font-medium">{t("productInsights.byMonth")}</caption>
-                <tbody>
+                </RuledTable>
+              </RuledPanel>
+              <RuledPanel title={t("productInsights.byMonth")} flush>
+                <RuledTable
+                  caption={t("productInsights.byMonth")}
+                  columns={[
+                    { header: t("saasMetrics.month") },
+                    { header: t("productInsights.tiles.nps"), end: true },
+                    { header: t("productInsights.tiles.answers"), end: true },
+                  ]}
+                >
                   {n.by_month.map((row) => (
-                    <tr key={row.month} className="border-t border-border">
-                      <th scope="row" className="p-2 text-left font-normal">
-                        {row.month ? formatDate(row.month, locale) : "—"}
+                    <tr key={row.month}>
+                      <th scope="row" className="tabular-nums">
+                        {row.month ? monthLabel(row.month, locale) : "–"}
                       </th>
-                      <td className="p-2">{row.nps ?? "—"}</td>
-                      <td className="p-2 text-muted-foreground">
+                      <td className={figureCell}>{row.nps ?? "–"}</td>
+                      <td className={`${figureCell} text-muted-foreground`}>
                         {t("productInsights.answers", { count: row.answers })}
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </table>
+                </RuledTable>
+              </RuledPanel>
             </div>
-            <h3 className="font-semibold">{t("productInsights.comments")}</h3>
-            <ul className="space-y-2">
-              {n.comments.map((c, i) => (
-                <li key={i} className="rounded-md border border-border p-2 text-sm">
-                  <p className="text-xs text-muted-foreground">
-                    {c.organisation} · {c.score}/10 · {c.role} · {formatDate(c.created_at, locale)}
-                  </p>
-                  <p className="whitespace-pre-wrap">{c.comment}</p>
-                </li>
-              ))}
-            </ul>
+            <RuledPanel title={t("productInsights.comments")} flush>
+              {n.comments.length ? (
+                <PanelRows>
+                  {n.comments.map((c, i) => (
+                    <PanelRow key={i}>
+                      <p className="text-xs text-muted-foreground tabular-nums">
+                        <span className="font-medium text-foreground">{c.organisation}</span> ·{" "}
+                        {c.score}/10 · {c.role} · {formatDate(c.created_at, locale)}
+                      </p>
+                      <p className="whitespace-pre-wrap">{c.comment}</p>
+                    </PanelRow>
+                  ))}
+                </PanelRows>
+              ) : (
+                <p className="px-5 py-4 text-sm text-muted-foreground">
+                  {t("designS11.platform.noComments")}
+                </p>
+              )}
+            </RuledPanel>
           </>
         ) : null}
       </section>
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">{t("productInsights.usageTitle")}</h2>
-        <p className="text-sm text-muted-foreground">{t("productInsights.usageExplain")}</p>
-        <div className="w-40">
+      <section aria-labelledby="insights-usage" className="space-y-6 border-t border-border pt-6">
+        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+          <div className="min-w-0">
+            <h2 id="insights-usage" className="text-base font-semibold">
+              {t("productInsights.usageTitle")}
+            </h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {t("productInsights.usageExplain")}
+            </p>
+          </div>
           <SelectField
             label={t("productInsights.window")}
+            hideLabel
+            size="sm"
             value={days}
             onChange={(e) => setDays(e.target.value)}
             options={["7", "30", "90"].map((d) => ({
@@ -115,87 +162,79 @@ export function InsightsPage() {
             }))}
           />
         </div>
+        {usage.isPending ? <Spinner label={t("grid.loading")} /> : null}
         {u ? (
           <>
-            <p className="text-sm">
+            <p className="text-sm tabular-nums">
               {t("productInsights.usageSummary", {
                 events: u.events,
                 people: u.people,
                 organisations: u.organisations,
               })}
             </p>
-            <div className="grid gap-6 md:grid-cols-2">
-              <table className="text-sm">
-                <caption className="text-left font-medium">
-                  {t("productInsights.topEvents")}
-                </caption>
-                <thead>
-                  <tr className="text-left">
-                    <th scope="col" className="p-2">
-                      {t("productInsights.event")}
-                    </th>
-                    <th scope="col" className="p-2">
-                      {t("productInsights.count")}
-                    </th>
-                    <th scope="col" className="p-2">
-                      {t("productInsights.people")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
+            <div className={PAIR}>
+              <RuledPanel title={t("productInsights.topEvents")} flush>
+                <RuledTable
+                  caption={t("productInsights.topEvents")}
+                  columns={[
+                    { header: t("productInsights.event") },
+                    { header: t("productInsights.count"), end: true },
+                    { header: t("productInsights.people"), end: true },
+                  ]}
+                >
                   {u.top_events.map((row) => (
-                    <tr key={row.name} className="border-t border-border">
-                      <th scope="row" className="p-2 text-left font-normal">
+                    <tr key={row.name}>
+                      <th scope="row" className="font-mono text-xs leading-5 font-normal">
                         {row.name}
                       </th>
-                      <td className="p-2">{row.count}</td>
-                      <td className="p-2">{row.people}</td>
+                      <td className={figureCell}>{row.count}</td>
+                      <td className={figureCell}>{row.people}</td>
                     </tr>
                   ))}
-                </tbody>
-              </table>
-              <table className="text-sm">
-                <caption className="text-left font-medium">{t("productInsights.topPages")}</caption>
-                <thead>
-                  <tr className="text-left">
-                    <th scope="col" className="p-2">
-                      {t("productInsights.page")}
-                    </th>
-                    <th scope="col" className="p-2">
-                      {t("productInsights.count")}
-                    </th>
-                    <th scope="col" className="p-2">
-                      {t("productInsights.people")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
+                </RuledTable>
+              </RuledPanel>
+              <RuledPanel title={t("productInsights.topPages")} flush>
+                <RuledTable
+                  caption={t("productInsights.topPages")}
+                  columns={[
+                    { header: t("productInsights.page") },
+                    { header: t("productInsights.count"), end: true },
+                    { header: t("productInsights.people"), end: true },
+                  ]}
+                >
                   {u.top_pages.map((row) => (
-                    <tr key={row.route} className="border-t border-border">
-                      <th scope="row" className="p-2 text-left font-normal">
+                    <tr key={row.route}>
+                      <th scope="row" className="font-mono text-xs leading-5 font-normal break-all">
                         {row.route || "/"}
                       </th>
-                      <td className="p-2">{row.count}</td>
-                      <td className="p-2">{row.people}</td>
+                      <td className={figureCell}>{row.count}</td>
+                      <td className={figureCell}>{row.people}</td>
                     </tr>
                   ))}
-                </tbody>
-              </table>
+                </RuledTable>
+              </RuledPanel>
             </div>
-            <h3 className="font-semibold">{t("productInsights.funnel")}</h3>
-            <ol className="space-y-1 text-sm">
-              {u.funnel.map((step) => {
-                const first = u.funnel[0]?.organisations || 0;
-                const share = first ? Math.round((step.organisations / first) * 100) : 0;
-                return (
-                  <li key={step.step} className="flex items-center gap-3">
-                    <span className="w-48">{t(`productInsights.steps.${step.step}`)}</span>
-                    <span className="w-16 font-medium">{step.organisations}</span>
-                    <span className="text-muted-foreground">{share}%</span>
-                  </li>
-                );
-              })}
-            </ol>
+            <RuledPanel title={t("designS11.platform.funnel")} flush>
+              <RuledTable
+                caption={t("designS11.platform.funnel")}
+                columns={[
+                  { header: t("designS11.platform.step") },
+                  { header: t("designS11.platform.organisations"), end: true },
+                  { header: t("designS11.platform.ofSignedUp"), end: true },
+                ]}
+              >
+                {u.funnel.map((step) => {
+                  const share = first ? Math.round((step.organisations / first) * 100) : 0;
+                  return (
+                    <tr key={step.step}>
+                      <th scope="row">{t(`productInsights.steps.${step.step}`)}</th>
+                      <td className={figureCell}>{step.organisations}</td>
+                      <td className={`${figureCell} text-muted-foreground`}>{share}%</td>
+                    </tr>
+                  );
+                })}
+              </RuledTable>
+            </RuledPanel>
           </>
         ) : null}
       </section>

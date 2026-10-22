@@ -75,7 +75,6 @@ export class TtClassCatalogue extends TtWidget {
       }
       h3 {
         margin: 0 0 4px;
-        font-size: 1.1rem;
       }
       .check {
         display: flex;

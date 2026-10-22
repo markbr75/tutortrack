@@ -421,12 +421,12 @@ export function PublicProposalPage({ token }: { token: string }) {
     onSuccess: (data) => queryClient.setQueryData(["public-proposal", token], data),
   });
   if (proposal.isError) return <PublicLayout title={t("proposals.missing")}>{null}</PublicLayout>;
-  if (!proposal.data) return <Spinner label={t("grid.loading")} />;
+  if (!proposal.data) return <PublicLayout wide loading />;
   const p = proposal.data;
   const money = (amount: string) => formatMoney({ amount, currency: p.currency });
   const errors = fieldErrors(accept.error);
   return (
-    <PublicLayout title={p.title} subtitle={`${p.organisation} · ${p.number}`} wide>
+    <PublicLayout title={p.title} subtitle={p.number} wide>
       <div className="space-y-6">
         {p.introduction ? <p className="whitespace-pre-line">{p.introduction}</p> : null}
         {p.tutors.length ? (

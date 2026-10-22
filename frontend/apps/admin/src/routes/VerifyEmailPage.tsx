@@ -20,7 +20,7 @@ export function VerifyEmailPage() {
   }, [token, mutate]);
 
   return (
-    <PublicLayout title={t("verifyEmail.title")}>
+    <PublicLayout title={t("verifyEmail.title")} tutortrack>
       {verify.isSuccess ? (
         <Alert tone="success">{t("verifyEmail.done")}</Alert>
       ) : verify.isError || !token ? (

@@ -1,4 +1,4 @@
-import { css, html, nothing } from "lit";
+import { css, html, nothing, svg } from "lit";
 
 import { TtWidget } from "./base";
 import { cached } from "./runtime";
@@ -37,7 +37,22 @@ export class TtReviews extends TtWidget {
         margin: 0;
       }
       .stars {
-        color: var(--tt-brand-color, #1d4ed8);
+        display: flex;
+        gap: 2px;
+      }
+      .stars svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.75;
+        stroke-linejoin: round;
+      }
+      .stars .on {
+        fill: currentColor;
+      }
+      .stars .off {
+        color: var(--tt-edge);
       }
     `,
   ];
@@ -67,7 +82,7 @@ export class TtReviews extends TtWidget {
                 ${
                   r.rating
                     ? html`<p>
-                        <span class="stars" aria-hidden="true">${r.stars}</span>
+                        <span class="stars" aria-hidden="true">${stars(r.rating)}</span>
                         <span class="sr-only">${t("stars", { n: r.rating })}</span>
                       </p>`
                     : nothing
@@ -80,6 +95,14 @@ export class TtReviews extends TtWidget {
       </ul>
       ${this.footer()}`;
   }
+}
+
+/** Five drawn outline stars, the rated number filled (never text glyphs). */
+function stars(rating: number) {
+  return [1, 2, 3, 4, 5].map(
+    (n) =>
+      svg`<svg viewBox="0 0 20 20" class=${n <= rating ? "on" : "off"}><path d="M10 2.6l2.3 4.7 5.1.7-3.7 3.6.9 5.1L10 14.3l-4.6 2.4.9-5.1-3.7-3.6 5.1-.7z"/></svg>`,
+  );
 }
 
 if (!customElements.get("tt-reviews")) customElements.define("tt-reviews", TtReviews);

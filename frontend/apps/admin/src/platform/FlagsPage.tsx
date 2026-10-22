@@ -1,6 +1,20 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  FormPanel,
+  NamePlate,
+  PageHeader,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  Spinner,
+  TextField,
+  UnitField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -30,37 +44,38 @@ export function FlagsPage() {
     },
   });
   return (
-    <div className="max-w-4xl space-y-4">
-      <h1 className="text-2xl font-semibold">{t("platform.nav.flags")}</h1>
-      <form
-        className="flex items-end gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          create.mutate();
-        }}
-      >
-        <TextField
-          label={t("platform.newFlag")}
-          value={key}
-          onChange={(e) => setKey(e.target.value)}
-        />
-        <Button type="submit" size="sm" loading={create.isPending}>
-          {t("platform.add")}
-        </Button>
-      </form>
-      {create.error ? <Alert tone="danger">{create.error.message}</Alert> : null}
+    <div className="max-w-4xl space-y-6">
+      <PageHeader title={t("platform.nav.flags")} />
       {flags.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      <ul className="space-y-3">
-        {flags.data?.map((flag) => (
-          <FlagCard key={flag.key} flag={flag} />
-        ))}
-      </ul>
+      {flags.data && !flags.data.length ? (
+        <p className="text-sm text-muted-foreground">{t("designS11.platform.noFlags")}</p>
+      ) : null}
+      {flags.data?.map((flag) => (
+        <FlagPanel key={flag.key} flag={flag} />
+      ))}
+      <FormPanel
+        title={t("designS11.platform.newFlag")}
+        submit={t("platform.add")}
+        pending={create.isPending}
+        onSubmit={() => create.mutate()}
+        columns={1}
+        error={create.error ? <Alert tone="danger">{create.error.message}</Alert> : null}
+      >
+        <div className="max-w-sm">
+          <TextField
+            label={t("platform.newFlag")}
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+          />
+        </div>
+      </FormPanel>
     </div>
   );
 }
 
-function FlagCard({ flag }: { flag: Flag }) {
-  const { t } = useTranslation();
+/** One flag: who it is on for, its rollout and plans, and the organisations named on it. */
+function FlagPanel({ flag }: { flag: Flag }) {
+  const { t, i18n } = useTranslation();
   const refresh = useRefresh();
   const [percent, setPercent] = useState(String(flag.rollout_percent));
   const [plans, setPlans] = useState((flag.plan_keys ?? []).join(", "));
@@ -98,36 +113,51 @@ function FlagCard({ flag }: { flag: Flag }) {
     onSuccess: refresh,
   });
   return (
-    <li className="space-y-2 rounded-md border border-border p-4 text-sm">
-      <h2 className="font-semibold">{flag.key}</h2>
-      {flag.description ? <p className="text-muted-foreground">{flag.description}</p> : null}
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
+    <RuledPanel
+      title={flag.key}
+      description={flag.description || undefined}
+      aside={
+        <span className={flag.enabled_globally ? "font-medium" : "text-muted-foreground"}>
+          {flag.enabled_globally
+            ? t("designS11.platform.onForEveryone")
+            : t("designS11.platform.rolloutShort", { percent: flag.rollout_percent })}
+        </span>
+      }
+      flush
+    >
+      <div className="space-y-4 px-5 py-4">
+        <CheckboxField
+          label={t("platform.everyone")}
           checked={flag.enabled_globally}
           onChange={(e) => update.mutate({ enabled_globally: e.target.checked })}
         />
-        {t("platform.everyone")}
-      </label>
-      <div className="flex flex-wrap items-end gap-2">
-        <TextField
-          label={t("platform.rollout")}
-          type="number"
-          min={0}
-          max={100}
-          value={percent}
-          onChange={(e) => setPercent(e.target.value)}
-          className="w-24"
-        />
-        <TextField
-          label={t("platform.plans")}
-          hint={t("platform.plansHint")}
-          value={plans}
-          onChange={(e) => setPlans(e.target.value)}
-        />
+        <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
+          <UnitField
+            label={t("platform.rollout")}
+            unit="%"
+            min={0}
+            max={100}
+            value={percent}
+            onChange={(e) => setPercent(e.target.value)}
+          />
+          <div className="min-w-56 flex-1">
+            <TextField
+              label={t("platform.plans")}
+              hint={t("platform.plansHint")}
+              value={plans}
+              onChange={(e) => setPlans(e.target.value)}
+            />
+          </div>
+        </div>
+        {update.error || override.error ? (
+          <Alert tone="danger">{(update.error ?? override.error)?.message}</Alert>
+        ) : null}
+      </div>
+      <PanelFooter>
         <Button
           size="sm"
           variant="secondary"
+          loading={update.isPending}
           onClick={() =>
             update.mutate({
               rollout_percent: Number(percent),
@@ -140,39 +170,64 @@ function FlagCard({ flag }: { flag: Flag }) {
         >
           {t("common.save")}
         </Button>
-      </div>
-      <ul>
-        {flag.overrides.map((o) => (
-          <li key={o.organisation} className="flex items-center justify-between">
-            <span>
-              {o.organisation_name}: {o.enabled ? t("platform.on") : t("platform.off")}
-              {o.expires_at ? ` · ${t("platform.until", { date: formatDate(o.expires_at) })}` : ""}
-            </span>
-            <Button size="sm" variant="ghost" onClick={() => remove.mutate(o.organisation)}>
-              {t("platform.remove")}
-            </Button>
-          </li>
-        ))}
-      </ul>
+      </PanelFooter>
+      {flag.overrides.length ? (
+        <PanelRows className="border-t border-border">
+          {flag.overrides.map((o) => (
+            <PanelRow key={o.organisation}>
+              <NamePlate
+                name={o.organisation_name}
+                context={[
+                  o.enabled ? t("platform.on") : t("platform.off"),
+                  o.expires_at
+                    ? t("platform.until", { date: formatDate(o.expires_at, i18n.language) })
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                aside={
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    onClick={() => remove.mutate(o.organisation)}
+                  >
+                    {t("platform.remove")}
+                  </Button>
+                }
+              />
+            </PanelRow>
+          ))}
+        </PanelRows>
+      ) : null}
       <form
-        className="flex items-end gap-2"
+        className="flex flex-wrap items-center gap-2 border-t border-border px-5 py-3"
         onSubmit={(e) => {
           e.preventDefault();
           override.mutate();
         }}
       >
-        <TextField
-          label={t("platform.organisationId")}
-          value={orgId}
-          onChange={(e) => setOrgId(e.target.value)}
-        />
-        <Button type="submit" size="sm" variant="secondary">
+        <div className="min-w-56 flex-1 sm:max-w-sm">
+          <TextField
+            label={t("platform.organisationId")}
+            hideLabel
+            size="sm"
+            placeholder={t("platform.organisationId")}
+            className="font-mono"
+            value={orgId}
+            onChange={(e) => setOrgId(e.target.value)}
+          />
+        </div>
+        <Button
+          type="submit"
+          size="sm"
+          variant="secondary"
+          className="h-9"
+          loading={override.isPending}
+        >
           {t("platform.turnOnFor")}
         </Button>
       </form>
-      {update.error || override.error ? (
-        <Alert tone="danger">{(update.error ?? override.error)?.message}</Alert>
-      ) : null}
-    </li>
+    </RuledPanel>
   );
 }

@@ -200,5 +200,14 @@
     "ledgerHelp": "Each branch can keep its own books. Records go to their branch's ledger when it has one switched on, otherwise to the organization's.",
     "wholeOrganisation": "{{provider}} · whole organization",
     "branchLedgersHelp": "Connect a branch to its own Xero organization, QuickBooks company, Sage business or FreeAgent company. Once its sync is switched on, that branch's invoices, payments and tutor bills go there instead of to the organization's ledger."
+  },
+  "designS11": {
+    "platform": {
+      "filterOrganisations": "Filter organizations",
+      "noOrganisations": "No organizations match these filters.",
+      "organisationsByScore": "Organizations, lowest score first",
+      "noScores": "No organizations have been scored yet.",
+      "organisations": "Organizations"
+    }
   }
 }

@@ -2,9 +2,10 @@ import { ApiError, unwrap } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
 import { Alert, Button, Spinner } from "@tutortrack/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { api } from "../api";
+import { BrandLine, PoweredBy } from "../layout/PublicLayout";
 import { stripeFor, type StripeClient, type StripeElements } from "./stripe";
 
 interface Mounted {
@@ -18,27 +19,12 @@ type Provider = "stripe" | "gocardless" | "paypal";
 /** One phone-first column for the public pay and setup pages. */
 const PAGE = "mx-auto max-w-lg space-y-6 px-4 py-8 sm:px-6";
 
-/** The business the family is paying, as a ruled brand line above the page heading: the
- * tenant's logo when it has one, otherwise its name in ink. Never a faded kicker. */
-function BrandLine({ name }: { name: string }) {
-  const brand = useQuery({
-    queryKey: ["public-branding"],
-    queryFn: async () => unwrap(await api.GET("/api/v1/public/branding")),
-    staleTime: 10 * 60_000,
-    retry: false,
-  });
-  const logo = brand.data?.logo_url;
-  const dark = brand.data?.logo_dark_url;
+/** The page frame: the column, then the quiet "Powered by" credit at the foot. */
+function PayFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="mb-5 border-b border-border pb-4">
-      {logo ? (
-        <picture>
-          {dark ? <source srcSet={dark} media="(prefers-color-scheme: dark)" /> : null}
-          <img src={logo} alt={name} className="h-8 w-auto" />
-        </picture>
-      ) : (
-        <p className="text-base font-semibold">{name}</p>
-      )}
+    <div className="flex min-h-dvh flex-col">
+      <main className={`${PAGE} w-full flex-1`}>{children}</main>
+      <PoweredBy />
     </div>
   );
 }
@@ -193,15 +179,15 @@ export function PayPage({ token }: { token: string }) {
 
   if (page.isPending)
     return (
-      <main className={PAGE}>
+      <PayFrame>
         <Spinner label={t("grid.loading")} />
-      </main>
+      </PayFrame>
     );
   if (!page.data)
     return (
-      <main className={PAGE}>
+      <PayFrame>
         <Alert tone="danger">{t("pay.notFound")}</Alert>
-      </main>
+      </PayFrame>
     );
   const data = page.data;
   const money = (value: { amount: string; currency: string }) => formatMoney(value, i18n.language);
@@ -209,7 +195,7 @@ export function PayPage({ token }: { token: string }) {
   const choosing = !intent.data || Boolean(intent.data.redirect_url);
 
   return (
-    <main className={PAGE}>
+    <PayFrame>
       <header>
         <BrandLine name={data.organisation} />
         <h1 className="text-xl font-semibold">
@@ -315,7 +301,7 @@ export function PayPage({ token }: { token: string }) {
           ) : null}
         </section>
       )}
-    </main>
+    </PayFrame>
   );
 }
 
@@ -405,7 +391,7 @@ export function SetupPage({ token }: { token: string }) {
 
   const header = (
     <header>
-      {page.data ? <BrandLine name={page.data.organisation} /> : null}
+      <BrandLine name={page.data?.organisation} />
       <h1 className="text-xl font-semibold">{t("pay.setupTitle")}</h1>
       {page.data ? (
         <p className="mt-1 text-sm text-muted-foreground">{page.data.client_name}</p>
@@ -421,7 +407,7 @@ export function SetupPage({ token }: { token: string }) {
 
   if (back?.provider === "gocardless")
     return (
-      <main className={PAGE}>
+      <PayFrame>
         {header}
         {finished ??
           (complete.error ? (
@@ -429,23 +415,23 @@ export function SetupPage({ token }: { token: string }) {
           ) : (
             <Spinner label={t("payOptions.finishing")} />
           ))}
-      </main>
+      </PayFrame>
     );
   if (page.isPending)
     return (
-      <main className={PAGE}>
+      <PayFrame>
         <Spinner label={t("grid.loading")} />
-      </main>
+      </PayFrame>
     );
   if (!page.data)
     return (
-      <main className={PAGE}>
+      <PayFrame>
         <Alert tone="danger">{t("pay.linkExpired")}</Alert>
-      </main>
+      </PayFrame>
     );
   const redirecting = Boolean(page.data.redirect_url);
   return (
-    <main className={PAGE}>
+    <PayFrame>
       {header}
       {finished ?? (
         <form
@@ -489,6 +475,6 @@ export function SetupPage({ token }: { token: string }) {
           ) : null}
         </form>
       )}
-    </main>
+    </PayFrame>
   );
 }
