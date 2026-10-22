@@ -7917,7 +7917,8 @@
       "prices": "Prices",
       "sharePercent": "{{percent}}% share",
       "newNotice": "New notice",
-      "scrollSideways": "Scroll sideways to see every column."
+      "scrollSideways": "Scroll sideways to see every column.",
+      "funnel": "Onboarding funnel"
     }
   }
 }

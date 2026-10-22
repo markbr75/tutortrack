@@ -350,26 +350,28 @@ export function OnboardingPage() {
               {t("common.back")}
             </Button>
           ) : null}
+          {/* Quiet ways out first, the step's one primary last on the right. */}
           <Button
             type="button"
-            variant="secondary"
+            variant="ghost"
+            className="text-muted-foreground"
             onClick={() => submit.mutate({ key: current, skip: true })}
           >
             {t("common.skip")}
-          </Button>
-          <Button type="submit" loading={submit.isPending}>
-            {isLast ? t("onboarding.finish") : t("common.next")}
           </Button>
           {isLast ? null : (
             <Button
               type="button"
               variant="ghost"
-              className="ml-auto text-muted-foreground"
+              className="text-muted-foreground"
               onClick={() => submit.mutate({ key: "complete", skip: false })}
             >
               {t("onboarding.finish")}
             </Button>
           )}
+          <Button type="submit" className="ml-auto" loading={submit.isPending}>
+            {isLast ? t("onboarding.finish") : t("common.next")}
+          </Button>
         </PanelFooter>
       </form>
       <div className="mt-8 border-t border-border pt-6">

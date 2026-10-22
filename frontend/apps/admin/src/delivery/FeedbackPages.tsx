@@ -7,6 +7,7 @@ import {
   FigureStrip,
   PageHeader,
   Panel,
+  PanelFooter,
   SelectField,
   Spinner,
   TextAreaField,
@@ -396,63 +397,67 @@ export function PublicFeedbackPage({ token }: { token: string }) {
       }
     >
       <form
-        className="space-y-5 rounded-xl border border-border bg-surface px-5 py-5"
+        className="rounded-xl border border-border bg-surface"
         onSubmit={(e) => {
           e.preventDefault();
           if (rating) answer.mutate();
         }}
       >
-        <fieldset>
-          <legend className="text-sm font-medium">{t("lessonFeedback.rateIt")}</legend>
-          <div className="mt-2 grid grid-cols-5 gap-2">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <label
-                key={n}
-                className="flex cursor-pointer flex-col items-center gap-1 rounded-md border border-field bg-surface px-1 py-2 hover:bg-muted has-[:checked]:border-foreground has-[:checked]:bg-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-link"
-              >
-                <input
-                  type="radio"
-                  name="rating"
-                  value={n}
-                  className="sr-only"
-                  aria-label={t("lessonFeedback.starsLabel", { count: n })}
-                  checked={rating === n}
-                  onChange={() => setRating(n)}
-                />
-                <Star
-                  aria-hidden="true"
-                  strokeWidth={1.75}
-                  className={
-                    n <= rating ? "size-5 fill-current text-foreground" : "size-5 text-field"
-                  }
-                />
-                <span className="text-xs tabular-nums">
-                  {t("lessonFeedback.starsLabel", { count: n })}
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <TextAreaField
-          id="feedback-comment"
-          label={t("lessonFeedback.commentOptional")}
-          rows={4}
-          maxLength={2000}
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-        />
-        <CheckboxField
-          label={t("gapG6.stopAskingFeedback")}
-          checked={stopAsking}
-          onChange={(e) => setStopAsking(e.target.checked)}
-        />
-        {!rating && answer.isIdle ? (
-          <p className="text-xs text-muted-foreground">{t("lessonFeedback.chooseStars")}</p>
-        ) : null}
-        <Button type="submit" className="w-full sm:w-auto" disabled={!rating || answer.isPending}>
-          {t("lessonFeedback.send")}
-        </Button>
-        {answer.error ? <Alert tone="danger">{answer.error.message}</Alert> : null}
+        <div className="space-y-6 px-5 py-4">
+          <fieldset aria-describedby="feedback-rating-hint">
+            <legend className="text-sm font-medium">{t("lessonFeedback.rateIt")}</legend>
+            <div className="mt-2 grid max-w-sm grid-cols-5 gap-2">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <label
+                  key={n}
+                  className="flex cursor-pointer flex-col items-center gap-1 rounded-md border border-field bg-surface px-1 py-2 hover:bg-muted has-[:checked]:border-foreground has-[:checked]:bg-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-link"
+                >
+                  <input
+                    type="radio"
+                    name="rating"
+                    value={n}
+                    className="sr-only"
+                    aria-label={t("lessonFeedback.starsLabel", { count: n })}
+                    checked={rating === n}
+                    onChange={() => setRating(n)}
+                  />
+                  <Star
+                    aria-hidden="true"
+                    strokeWidth={1.75}
+                    className={
+                      n <= rating ? "size-5 fill-current text-foreground" : "size-5 text-field"
+                    }
+                  />
+                  <span aria-hidden="true" className="text-xs tabular-nums">
+                    {n}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <p id="feedback-rating-hint" className="mt-1.5 text-xs text-muted-foreground">
+              {t("lessonFeedback.chooseStars")}
+            </p>
+          </fieldset>
+          <TextAreaField
+            id="feedback-comment"
+            label={t("lessonFeedback.commentOptional")}
+            rows={4}
+            maxLength={2000}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+          />
+          <CheckboxField
+            label={t("gapG6.stopAskingFeedback")}
+            checked={stopAsking}
+            onChange={(e) => setStopAsking(e.target.checked)}
+          />
+          {answer.error ? <Alert tone="danger">{answer.error.message}</Alert> : null}
+        </div>
+        <PanelFooter>
+          <Button type="submit" disabled={!rating} loading={answer.isPending}>
+            {t("lessonFeedback.send")}
+          </Button>
+        </PanelFooter>
       </form>
     </PublicLayout>
   );

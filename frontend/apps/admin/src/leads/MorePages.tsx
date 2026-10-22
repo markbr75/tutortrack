@@ -829,7 +829,8 @@ export function OfferPage({ token }: { token: string }) {
       {o.status === "offered" ? (
         <>
           {o.expires_at ? (
-            <p className="mt-2 text-sm text-muted-foreground">
+            // The family's reply-by date waits on them: the page's one margin red.
+            <p className="mt-2 text-sm font-medium text-margin tabular-nums">
               {t("leads.offerUntil", { date: formatDateTime(o.expires_at) })}
             </p>
           ) : null}

@@ -113,6 +113,10 @@ export function PublicLayout({
 }) {
   const { t } = useTranslation();
   useDocumentTitle(loading ? undefined : title, tutortrack);
+  // TutorTrack's own pages (sign-up, onboarding, the root host's sign-in) title at 26px; a
+  // tenant's family-facing pages are phone-first and title at 20px, like the pay pages and portal.
+  const brand = usePublicBranding(!tutortrack);
+  const owned = tutortrack || brand.isError;
   return (
     <div className="flex min-h-dvh flex-col">
       <main
@@ -124,8 +128,12 @@ export function PublicLayout({
             <Spinner label={t("grid.loading")} />
           ) : (
             <>
-              <h1 className="text-2xl font-semibold">{title}</h1>
-              {subtitle ? <p className="mt-1 text-muted-foreground">{subtitle}</p> : null}
+              <h1 className={owned ? "text-2xl font-semibold" : "text-xl font-semibold"}>
+                {title}
+              </h1>
+              {subtitle ? (
+                <p className={cn("mt-1 text-muted-foreground", !owned && "text-sm")}>{subtitle}</p>
+              ) : null}
             </>
           )}
         </header>

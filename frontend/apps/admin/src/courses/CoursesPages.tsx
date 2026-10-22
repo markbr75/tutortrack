@@ -1774,9 +1774,12 @@ export function ReEnrolPage({ token }: { token: string }) {
           </p>
           <p className="text-sm text-muted-foreground tabular-nums">
             {p.mode === "opt_out" ? t("courses.reEnrol.optOut") : t("courses.reEnrol.confirm")}{" "}
-            {t(p.mode === "opt_out" ? "courses.reEnrol.deadline" : "designS6.courses.answerBy", {
-              date: formatDateTime(p.deadline, i18n.language),
-            })}
+            {/* The reply-by date waits on the family while the answer is open: margin red. */}
+            <span className={p.open ? "font-medium text-margin" : undefined}>
+              {t(p.mode === "opt_out" ? "courses.reEnrol.deadline" : "designS6.courses.answerBy", {
+                date: formatDateTime(p.deadline, i18n.language),
+              })}
+            </span>
           </p>
         </div>
         <div className="border-y border-border py-3">

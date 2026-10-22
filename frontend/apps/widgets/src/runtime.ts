@@ -103,6 +103,10 @@ export function applyTheme(
     host.style.setProperty("--tt-brand-color", brand.primary_colour);
     host.style.setProperty("--tt-on-brand", brand.on_primary);
     host.style.setProperty("--tt-link-color", brand.link_colour);
+  }
+  // Only a font the tenant chose (`font` is empty otherwise, while `font_family` still carries
+  // a system stack): without one the widget keeps the host page's own font.
+  if (brand?.font && brand.font_family) {
     host.style.setProperty("--tt-font", brand.font_family);
     if (brand.font_css_url && !document.querySelector(`link[href="${brand.font_css_url}"]`)) {
       const link = document.createElement("link");

@@ -18,6 +18,7 @@ import { Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 
 import { api } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
 import { RecordHeader, RecordLayout } from "../components/RecordHeader";
 import { TenantHealthCard } from "./HealthPage";
 import { orgStatusClass } from "./TenantsPage";
@@ -502,8 +503,22 @@ function Overrides({ detail }: { detail: Detail }) {
   );
 }
 
+/** An email address that may break only after the "@", never mid-word. */
+function EmailAddress({ email }: { email: string }) {
+  const at = email.indexOf("@");
+  if (at < 0) return <span className="font-medium">{email}</span>;
+  return (
+    <span className="font-medium">
+      {email.slice(0, at + 1)}
+      <wbr />
+      {email.slice(at + 1)}
+    </span>
+  );
+}
+
 function Members({ detail }: { detail: Detail }) {
   const { t, i18n } = useTranslation();
+  const phone = useIsPhone();
   const [target, setTarget] = useState<Member | null>(null);
   const [reason, setReason] = useState("");
   const [ticket, setTicket] = useState("");
@@ -525,40 +540,52 @@ function Members({ detail }: { detail: Detail }) {
     >
       <RuledTable
         caption={t("platform.members")}
-        columns={[
-          { header: t("platform.email") },
-          { header: t("platform.lastActivity") },
-          { header: t("platform.security") },
-          { header: t("platform.actions"), hidden: true },
-        ]}
+        columns={
+          phone
+            ? [{ header: t("platform.email") }, { header: t("platform.actions"), hidden: true }]
+            : [
+                { header: t("platform.email") },
+                { header: t("platform.lastActivity") },
+                { header: t("platform.security") },
+                { header: t("platform.actions"), hidden: true },
+              ]
+        }
       >
-        {detail.members.map((m) => (
-          <tr key={m.id}>
-            <td className="min-w-48">
-              <span className="font-medium [overflow-wrap:anywhere]">{m.email}</span>
-              <span className="block text-xs text-muted-foreground">
-                {t(`roles.${m.role}`, { defaultValue: m.role })}
-              </span>
-            </td>
-            <td className="whitespace-nowrap tabular-nums">
-              {m.last_active_at ? formatDate(m.last_active_at, i18n.language) : "–"}
-            </td>
-            <td className={m.email_verified ? undefined : "text-muted-foreground"}>
-              {m.email_verified ? t("platform.verified") : t("platform.unverified")}
-              {m.has_mfa ? ` · ${t("designS11.platform.twoStep")}` : ""}
-            </td>
-            <td className="py-1.5 text-right align-middle whitespace-nowrap">
-              <Button
-                size="sm"
-                variant="secondary"
-                aria-expanded={target?.id === m.id}
-                onClick={() => setTarget(m)}
-              >
-                {t("platform.viewAs")}
-              </Button>
-            </td>
-          </tr>
-        ))}
+        {detail.members.map((m) => {
+          const lastActive = m.last_active_at ? formatDate(m.last_active_at, i18n.language) : "–";
+          const security = `${m.email_verified ? t("platform.verified") : t("platform.unverified")}${
+            m.has_mfa ? ` · ${t("designS11.platform.twoStep")}` : ""
+          }`;
+          const role = t(`roles.${m.role}`, { defaultValue: m.role });
+          return (
+            <tr key={m.id}>
+              <td className="min-w-60">
+                <EmailAddress email={m.email} />
+                <span className="block text-xs text-muted-foreground tabular-nums">
+                  {phone ? [role, lastActive, security].join(" · ") : role}
+                </span>
+              </td>
+              {phone ? null : (
+                <>
+                  <td className="whitespace-nowrap tabular-nums">{lastActive}</td>
+                  <td className={m.email_verified ? undefined : "text-muted-foreground"}>
+                    {security}
+                  </td>
+                </>
+              )}
+              <td className="py-1.5 text-right align-middle whitespace-nowrap">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  aria-expanded={target?.id === m.id}
+                  onClick={() => setTarget(m)}
+                >
+                  {t("platform.viewAs")}
+                </Button>
+              </td>
+            </tr>
+          );
+        })}
       </RuledTable>
       {target ? (
         <form

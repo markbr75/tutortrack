@@ -59,7 +59,7 @@ export function OperationsPage() {
       {figures.length ? (
         <FigureStrip
           label={t("platform.nav.operations")}
-          columns={3}
+          columns={4}
           figures={figures.map(([label, value]) => ({
             key: label,
             label: label.startsWith("queue:")

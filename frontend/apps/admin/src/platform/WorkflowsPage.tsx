@@ -173,8 +173,15 @@ function WorkflowRow({ row }: { row: Row }) {
             required
           />
         </div>
-        <Button type="submit" size="sm" variant="danger" className="h-9" loading={act.isPending}>
-          {t("workflowConsole.apply")}
+        {/* The button names what it will do; only terminating is destructive. */}
+        <Button
+          type="submit"
+          size="sm"
+          variant={action === "terminate" ? "danger" : "secondary"}
+          className="h-9"
+          loading={act.isPending}
+        >
+          {t(`workflowConsole.actions.${action}`)}
         </Button>
       </form>
       {act.error ? <Alert tone="danger">{act.error.message}</Alert> : null}

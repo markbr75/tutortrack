@@ -16,6 +16,15 @@ import { useState } from "react";
 
 import { api } from "../api";
 
+/** "Sept 2026", as on SaaS metrics. */
+function monthLabel(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(iso));
+}
+
 const PAIR = "grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-2";
 
 /** NPS/CSAT and product usage across organisations (E30 FR-30-6). */
@@ -98,7 +107,7 @@ export function InsightsPage() {
                   {n.by_month.map((row) => (
                     <tr key={row.month}>
                       <th scope="row" className="tabular-nums">
-                        {row.month ? formatDate(row.month, locale) : "–"}
+                        {row.month ? monthLabel(row.month, locale) : "–"}
                       </th>
                       <td className={figureCell}>{row.nps ?? "–"}</td>
                       <td className={`${figureCell} text-muted-foreground`}>
@@ -205,9 +214,9 @@ export function InsightsPage() {
                 </RuledTable>
               </RuledPanel>
             </div>
-            <RuledPanel title={t("productInsights.funnel")} flush>
+            <RuledPanel title={t("designS11.platform.funnel")} flush>
               <RuledTable
-                caption={t("productInsights.funnel")}
+                caption={t("designS11.platform.funnel")}
                 columns={[
                   { header: t("designS11.platform.step") },
                   { header: t("designS11.platform.organisations"), end: true },
