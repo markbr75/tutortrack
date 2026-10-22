@@ -26,6 +26,7 @@ import { BrandMark, PoweredBy } from "./branding";
 import { OfflineBanner } from "./offline/OfflineIndicator";
 import { HouseholdSwitcher, StudentSignIn } from "./HouseholdSwitcher";
 import { PortalFrame } from "./layout/PortalFrame";
+import { isPositive } from "./money";
 import { StatusBanner } from "./StatusBanner";
 import { usePortalBranding } from "./useBranding";
 import { AffiliateShell } from "./affiliate/AffiliatePages";
@@ -116,6 +117,29 @@ function personName(
   return [user?.first_name, user?.last_name].filter(Boolean).join(" ") || user?.email || "";
 }
 
+/** What waits for the family, for the tab bar's count pills: unread messages and invoices
+ * past their due date (both from data the screens already load, so the caches are shared). */
+function useFamilyWaiting(features: { messages?: boolean; invoices?: boolean } | undefined) {
+  const threads = useQuery({
+    queryKey: ["portal", "threads", "family"],
+    enabled: Boolean(features?.messages),
+    refetchInterval: 60_000,
+    queryFn: async () => unwrap(await api.GET("/api/v1/portal/threads")),
+  });
+  const billing = useQuery({
+    queryKey: ["portal", "billing"],
+    enabled: Boolean(features?.invoices),
+    queryFn: async () => unwrap(await api.GET("/api/v1/portal/billing")),
+  });
+  const today = new Date().toISOString().slice(0, 10);
+  return {
+    unread: (threads.data ?? []).reduce((sum, row) => sum + (row.unread ?? 0), 0),
+    overdue: (billing.data?.invoices ?? []).filter(
+      (inv) => isPositive(inv.balance_due.amount) && Boolean(inv.due_date) && inv.due_date! < today,
+    ).length,
+  };
+}
+
 function FamilyShell({ person }: { person: string }) {
   const { t } = useTranslation();
   const me = usePortalMe();
@@ -130,6 +154,7 @@ function FamilyShell({ person }: { person: string }) {
     mutationFn: async () => api.POST("/api/v1/auth/logout"),
     onSuccess: () => window.location.assign("/portal/"),
   });
+  const waiting = useFamilyWaiting(me.data?.features);
   if (me.isPending) return <Spinner className="p-6" label={t("grid.loading")} />;
   if (isSignedOut(me.error)) return <SignIn />;
   const status = problemStatus(me.error);
@@ -137,7 +162,7 @@ function FamilyShell({ person }: { person: string }) {
     return (
       <main className="mx-auto max-w-sm space-y-3 p-6">
         <p>{t(status === 403 ? "portal.notFamily" : "errors.generic")}</p>
-        <a className="underline" href="/">
+        <a className="font-medium text-link underline-offset-2 hover:underline" href="/">
           {t("portal.toMainApp")}
         </a>
       </main>
@@ -161,10 +186,26 @@ function FamilyShell({ person }: { person: string }) {
       : []),
     { to: "/recordings", label: t("classroom.recordingsNav"), icon: Video, group: "lessons" },
     ...(f.invoices
-      ? [{ to: "/billing", label: t("portal.nav.billing"), icon: CreditCard, group: "account" }]
+      ? [
+          {
+            to: "/billing",
+            label: t("portal.nav.billing"),
+            icon: CreditCard,
+            group: "account",
+            count: waiting.overdue,
+          },
+        ]
       : []),
     ...(f.messages
-      ? [{ to: "/messages", label: t("portalMessages.nav"), icon: MessageSquare, group: "account" }]
+      ? [
+          {
+            to: "/messages",
+            label: t("portalMessages.nav"),
+            icon: MessageSquare,
+            group: "account",
+            count: waiting.unread,
+          },
+        ]
       : []),
     ...(f.profile
       ? [{ to: "/profile", label: t("portal.nav.profile"), icon: UserRound, group: "account" }]

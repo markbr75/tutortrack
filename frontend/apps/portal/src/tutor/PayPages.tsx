@@ -1,10 +1,22 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  figureCell,
+  FigureStrip,
+  PanelFooter,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 
 import { api, uploadFile } from "../api";
+import { FileField, PanelEmpty, PortalHeader, Word } from "../layout/PortalPage";
 import { AnnualEarnings } from "./G3Pages";
 import { MyUsTaxInfo } from "./Phase3";
 
@@ -18,6 +30,35 @@ function TotalsLine({ totals }: { totals: Totals }) {
   return <>{parts.length ? parts.join(" + ") : formatMoney({ amount: "0", currency: "GBP" })}</>;
 }
 
+/** A pay item's title without the raw ISO date the server appends ("… · 2026-10-19"); the
+ * date is shown once, formatted, in the caption. */
+function payTitle(description: string): string {
+  return description.replace(/\s*·\s*\d{4}-\d{2}-\d{2}$/, "");
+}
+
+/** A ruled row with a primary line, one caption and a fixed amount column. */
+function AmountRow({
+  primary,
+  caption,
+  amount,
+}: {
+  primary: ReactNode;
+  caption?: ReactNode;
+  amount: string;
+}) {
+  return (
+    <li className="flex items-baseline justify-between gap-4 px-5 py-2.5 text-sm">
+      <div className="min-w-0">
+        <p className="font-medium">{primary}</p>
+        {caption ? <div className="text-xs text-muted-foreground">{caption}</div> : null}
+      </div>
+      <p className="w-28 shrink-0 text-right font-semibold whitespace-nowrap tabular-nums">
+        {amount}
+      </p>
+    </li>
+  );
+}
+
 /** Pay to come, held pay with what releases it, payouts and statements (FR-12-9). */
 export function EarningsPage() {
   const { t, i18n } = useTranslation();
@@ -27,83 +68,116 @@ export function EarningsPage() {
   });
   if (!earnings.data) return <Spinner label={t("grid.loading")} />;
   const e = earnings.data;
+  const money = (v: { amount: string; currency: string }) => formatMoney(v, i18n.language);
+  const date = (iso: string) => formatDate(iso, i18n.language);
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-semibold">{t("tutor.nav.earnings")}</h1>
-      <MyUsTaxInfo />
-      <AnnualEarnings />
-      <dl className="grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-lg border border-border p-3">
-          <dt className="text-muted-foreground">{t("pay.upcoming")}</dt>
-          <dd className="text-lg font-semibold">
-            <TotalsLine totals={e.upcoming_total} />
-          </dd>
-        </div>
-        <div className="rounded-lg border border-border p-3">
-          <dt className="text-muted-foreground">{t("pay.yearToDate")}</dt>
-          <dd className="text-lg font-semibold">
-            <TotalsLine totals={e.year_to_date} />
-          </dd>
-        </div>
-      </dl>
-      {e.held.length ? (
-        <section aria-labelledby="held" className="space-y-2">
-          <h2 id="held" className="font-semibold">
-            {t("pay.held")}
-          </h2>
-          <ul className="divide-y divide-border rounded-lg border border-border text-sm">
-            {e.held.map((item) => (
-              <li key={item.id} className="space-y-1 p-3">
-                <div className="flex justify-between gap-2">
-                  <span>{item.description}</span>
-                  <span>{formatMoney(item.amount, i18n.language)}</span>
-                </div>
-                {(item.hold_reasons as string[]).map((reason) => (
-                  <p key={reason} className="text-xs text-muted-foreground">
-                    {t(`pay.holdReasons.${reason}`)}
-                  </p>
-                ))}
-              </li>
+    <div>
+      <PortalHeader title={t("tutor.nav.earnings")} description={t("tutor.provisional")} />
+      <div className="space-y-6">
+        <FigureStrip
+          label={t("tutor.nav.earnings")}
+          figures={[
+            {
+              key: "upcoming",
+              label: t("pay.upcoming"),
+              value: <TotalsLine totals={e.upcoming_total} />,
+            },
+            {
+              key: "ytd",
+              label: t("pay.yearToDate"),
+              value: <TotalsLine totals={e.year_to_date} />,
+            },
+          ]}
+        />
+        {e.held.length ? (
+          // Held pay waits on the tutor (a report to write, documents to update).
+          <RuledPanel
+            title={t("pay.held")}
+            rule="margin"
+            aside={<span className="font-semibold text-margin tabular-nums">{e.held.length}</span>}
+            flush
+          >
+            <ul className="divide-y divide-rule">
+              {e.held.map((item) => (
+                <AmountRow
+                  key={item.id}
+                  primary={payTitle(item.description)}
+                  caption={(item.hold_reasons as string[]).map((reason, n) => (
+                    <p key={reason}>
+                      {n === 0 ? <span className="tabular-nums">{date(item.date)} · </span> : null}
+                      {t(`pay.holdReasons.${reason}`)}
+                    </p>
+                  ))}
+                  amount={money(item.amount)}
+                />
+              ))}
+            </ul>
+          </RuledPanel>
+        ) : null}
+        <RuledPanel title={t("pay.upcomingItems")} flush>
+          <RuledTable
+            caption={t("pay.upcomingItems")}
+            columns={[
+              { key: "what", header: t("g3.tutorReview.lesson") },
+              { key: "amount", header: t("pay.amount"), end: true, width: "w-28" },
+            ]}
+            empty={e.upcoming.length ? undefined : t("designS10.nothingToCome")}
+          >
+            {e.upcoming.map((item) => (
+              <tr key={item.id}>
+                <td>
+                  <span className="font-medium">{payTitle(item.description)}</span>
+                  <span className="block text-xs text-muted-foreground tabular-nums">
+                    {date(item.date)}
+                  </span>
+                </td>
+                <td className={figureCell}>{money(item.amount)}</td>
+              </tr>
             ))}
-          </ul>
-        </section>
-      ) : null}
-      <section aria-labelledby="upcoming" className="space-y-2">
-        <h2 id="upcoming" className="font-semibold">
-          {t("pay.upcomingItems")}
-        </h2>
-        <ul className="divide-y divide-border rounded-lg border border-border text-sm">
-          {e.upcoming.map((item) => (
-            <li key={item.id} className="flex justify-between gap-2 p-3">
-              <span>
-                {formatDate(item.date, i18n.language)} · {item.description}
-              </span>
-              <span>{formatMoney(item.amount, i18n.language)}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section aria-labelledby="paid" className="space-y-2">
-        <h2 id="paid" className="font-semibold">
-          {t("pay.history")}
-        </h2>
-        <ul className="divide-y divide-border rounded-lg border border-border text-sm">
-          {e.payouts.map((payout) => (
-            <li key={payout.id} className="flex justify-between gap-2 p-3">
-              <span>{payout.paid_at ? formatDate(payout.paid_at, i18n.language) : ""}</span>
-              <span>{formatMoney(payout.amount, i18n.language)}</span>
-            </li>
-          ))}
-          {e.statements.map((statement) => (
-            <li key={statement.id} className="flex justify-between gap-2 p-3">
-              <a className="underline" href={`/api/v1/pay-statements/${statement.id}/pdf`}>
-                {t(`pay.statementKinds.${statement.kind}`)} {statement.number}
-              </a>
-              <span>{formatMoney(statement.total, i18n.language)}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+          </RuledTable>
+        </RuledPanel>
+        <RuledPanel title={t("pay.history")} flush>
+          {e.payouts.length || e.statements.length ? (
+            <ul className="divide-y divide-rule">
+              {e.payouts.map((payout) => (
+                <AmountRow
+                  key={payout.id}
+                  primary={
+                    <span className="tabular-nums">
+                      {payout.paid_at ? date(payout.paid_at) : t("designS10.payout")}
+                    </span>
+                  }
+                  caption={t("designS10.payout")}
+                  amount={money(payout.amount)}
+                />
+              ))}
+              {e.statements.map((statement) => (
+                <AmountRow
+                  key={statement.id}
+                  primary={
+                    <a
+                      className="text-link underline-offset-2 hover:underline"
+                      href={`/api/v1/pay-statements/${statement.id}/pdf`}
+                    >
+                      {t(`pay.statementKinds.${statement.kind}`)} {statement.number}
+                    </a>
+                  }
+                  caption={
+                    statement.issued_at ? (
+                      <span className="tabular-nums">{date(statement.issued_at)}</span>
+                    ) : undefined
+                  }
+                  amount={money(statement.total)}
+                />
+              ))}
+            </ul>
+          ) : (
+            <PanelEmpty>{t("designS10.noPayouts")}</PanelEmpty>
+          )}
+        </RuledPanel>
+        <AnnualEarnings />
+        <MyUsTaxInfo />
+      </div>
     </div>
   );
 }
@@ -171,88 +245,130 @@ export function ExpensesPage() {
     e.preventDefault();
     submit.mutate();
   };
+  const rows = claims.data?.results ?? [];
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-semibold">{t("pay.expenses")}</h1>
-      <form className="space-y-3" onSubmit={onSubmit} aria-label={t("pay.newClaim")}>
-        <label className="block space-y-1 text-sm">
-          <span className="font-medium">{t("pay.category")}</span>
-          <select
-            required
-            className="block w-full rounded-md border border-border bg-background px-3 py-2"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="">{t("pay.chooseCategory")}</option>
-            {categories.data?.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <TextField
-          label={t("pay.date")}
-          type="date"
-          required
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-        <TextField
-          label={t("pay.description")}
-          required
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        {mileage ? (
-          <div className="flex flex-wrap items-end gap-2">
-            <TextField
-              label={t("pay.distance", { unit: chosen?.distance_unit ?? "mi" })}
-              inputMode="decimal"
-              required
-              value={distance}
-              onChange={(e) => setDistance(e.target.value)}
-            />
-            <Button type="button" variant="secondary" size="sm" onClick={() => suggest.mutate()}>
-              {t("pay.suggestDistance")}
-            </Button>
-          </div>
-        ) : (
-          <TextField
-            label={t("pay.amount")}
-            inputMode="decimal"
-            required
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-        )}
-        <label className="block space-y-1 text-sm">
-          <span className="font-medium">{t("pay.receipt")}</span>
-          <input
-            type="file"
-            accept="image/*,application/pdf"
-            capture="environment"
-            onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
-          />
-        </label>
-        <Button type="submit" disabled={submit.isPending}>
-          {t("pay.submitClaim")}
-        </Button>
-        {submit.error ? <Alert tone="danger">{submit.error.message}</Alert> : null}
-        {submit.isSuccess ? <p role="status">{t("pay.claimSent")}</p> : null}
-      </form>
-      <ul className="divide-y divide-border rounded-lg border border-border text-sm">
-        {claims.data?.results.map((claim) => (
-          <li key={claim.id} className="flex justify-between gap-2 p-3">
-            <span>
-              {formatDate(claim.date, i18n.language)} · {claim.description} ·{" "}
-              {t(`pay.claimStatus.${claim.status}`)}
-              {claim.decision_comment ? ` · ${claim.decision_comment}` : ""}
-            </span>
-            <span>{formatMoney(claim.amount, i18n.language)}</span>
-          </li>
-        ))}
-      </ul>
+    <div>
+      <PortalHeader title={t("pay.expenses")} />
+      <div className="space-y-6">
+        <form onSubmit={onSubmit} aria-label={t("pay.newClaim")}>
+          <RuledPanel title={t("pay.newClaim")} flush>
+            <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
+              <SelectField
+                label={t("pay.category")}
+                required
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                options={[
+                  { value: "", label: t("pay.chooseCategory") },
+                  ...(categories.data ?? []).map((c) => ({ value: c.id, label: c.name })),
+                ]}
+              />
+              <TextField
+                label={t("pay.date")}
+                className="tabular-nums"
+                type="date"
+                required
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+              <div className="sm:col-span-2">
+                <TextField
+                  label={t("pay.description")}
+                  required
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+              {mileage ? (
+                <div className="flex flex-wrap items-end gap-2">
+                  <TextField
+                    className="w-32 text-right tabular-nums"
+                    label={t("pay.distance", { unit: chosen?.distance_unit ?? "mi" })}
+                    inputMode="decimal"
+                    required
+                    value={distance}
+                    onChange={(e) => setDistance(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-10"
+                    onClick={() => suggest.mutate()}
+                  >
+                    {t("pay.suggestDistance")}
+                  </Button>
+                </div>
+              ) : (
+                <TextField
+                  className="w-32 text-right tabular-nums"
+                  label={t("pay.amount")}
+                  inputMode="decimal"
+                  required
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+              )}
+              <FileField
+                label={t("pay.receipt")}
+                accept="image/*,application/pdf"
+                capture="environment"
+                onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
+              />
+            </div>
+            {submit.error ? (
+              <div className="px-5 pb-4">
+                <Alert tone="danger">{submit.error.message}</Alert>
+              </div>
+            ) : null}
+            <PanelFooter>
+              <Button type="submit" disabled={submit.isPending}>
+                {t("pay.submitClaim")}
+              </Button>
+              <span role="status" className="text-sm text-success">
+                {submit.isSuccess ? t("pay.claimSent") : ""}
+              </span>
+            </PanelFooter>
+          </RuledPanel>
+        </form>
+        <RuledPanel title={t("designS10.yourClaims")} flush>
+          {rows.length ? (
+            <ul className="divide-y divide-rule">
+              {rows.map((claim) => (
+                <AmountRow
+                  key={claim.id}
+                  primary={claim.description}
+                  caption={
+                    <>
+                      <span className="tabular-nums">{formatDate(claim.date, i18n.language)}</span>{" "}
+                      ·{" "}
+                      <Word
+                        tone={
+                          claim.status === "submitted"
+                            ? "margin"
+                            : claim.status === "draft"
+                              ? "muted"
+                              : "ink"
+                        }
+                        className={
+                          claim.status === "approved" || claim.status === "rejected"
+                            ? "text-foreground"
+                            : ""
+                        }
+                      >
+                        {t(`pay.claimStatus.${claim.status}`)}
+                      </Word>
+                      {claim.decision_comment ? ` · ${claim.decision_comment}` : ""}
+                    </>
+                  }
+                  amount={formatMoney(claim.amount, i18n.language)}
+                />
+              ))}
+            </ul>
+          ) : (
+            <PanelEmpty>{t("designS10.noClaims")}</PanelEmpty>
+          )}
+        </RuledPanel>
+      </div>
     </div>
   );
 }
@@ -283,59 +399,70 @@ export function PayDetailsSection() {
   if (!profile.data) return null;
   const p = profile.data;
   return (
-    <section aria-labelledby="pay-details" className="space-y-3">
-      <h2 id="pay-details" className="font-semibold">
-        {t("pay.details")}
-      </h2>
-      <p className="text-sm">
-        {p.bank_hint ? t("pay.bankOnFile", { hint: p.bank_hint }) : t("pay.noBank")}
-      </p>
-      <form
-        className="space-y-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          saveBank.mutate();
-        }}
+    <form
+      aria-labelledby="pay-details"
+      onSubmit={(e) => {
+        e.preventDefault();
+        saveBank.mutate();
+      }}
+    >
+      <RuledPanel
+        title={t("pay.details")}
+        titleId="pay-details"
+        description={p.bank_hint ? t("pay.bankOnFile", { hint: p.bank_hint }) : t("pay.noBank")}
+        flush
       >
-        <TextField
-          label={t("pay.accountName")}
-          value={bank.account_name}
-          onChange={(e) => setBank({ ...bank, account_name: e.target.value })}
-        />
-        <TextField
-          label={t("pay.sortCode")}
-          inputMode="numeric"
-          value={bank.sort_code}
-          onChange={(e) => setBank({ ...bank, sort_code: e.target.value })}
-        />
-        <TextField
-          label={t("pay.accountNumber")}
-          inputMode="numeric"
-          value={bank.account_number}
-          onChange={(e) => setBank({ ...bank, account_number: e.target.value })}
-        />
-        <Button type="submit" size="sm" disabled={saveBank.isPending}>
-          {t("pay.saveBank")}
-        </Button>
-        {saveBank.error ? <Alert tone="danger">{saveBank.error.message}</Alert> : null}
-      </form>
-      {p.employment_type === "self_employed" ? (
-        p.self_billing_agreed_at ? (
-          <p className="text-sm">{t("pay.selfBillingAgreed")}</p>
-        ) : (
-          <div className="space-y-2 text-sm">
-            <p>{t("pay.selfBillingText")}</p>
-            <Button size="sm" variant="secondary" onClick={() => agree.mutate()}>
-              {t("pay.agreeSelfBilling")}
-            </Button>
+        <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-3">
+          <TextField
+            label={t("pay.accountName")}
+            value={bank.account_name}
+            onChange={(e) => setBank({ ...bank, account_name: e.target.value })}
+          />
+          <TextField
+            label={t("pay.sortCode")}
+            className="tabular-nums"
+            inputMode="numeric"
+            value={bank.sort_code}
+            onChange={(e) => setBank({ ...bank, sort_code: e.target.value })}
+          />
+          <TextField
+            label={t("pay.accountNumber")}
+            className="tabular-nums"
+            inputMode="numeric"
+            value={bank.account_number}
+            onChange={(e) => setBank({ ...bank, account_number: e.target.value })}
+          />
+        </div>
+        {saveBank.error ? (
+          <div className="px-5 pb-4">
+            <Alert tone="danger">{saveBank.error.message}</Alert>
           </div>
-        )
-      ) : null}
-      {p.method === "stripe_connect" && !p.stripe_payouts_enabled ? (
-        <Button size="sm" variant="secondary" onClick={() => stripe.mutate()}>
-          {t("pay.setUpStripe")}
-        </Button>
-      ) : null}
-    </section>
+        ) : null}
+        {p.employment_type === "self_employed" ? (
+          <div className="space-y-2 border-t border-rule px-5 py-3 text-sm">
+            {p.self_billing_agreed_at ? (
+              <p>{t("pay.selfBillingAgreed")}</p>
+            ) : (
+              <>
+                <p className="text-muted-foreground">{t("pay.selfBillingText")}</p>
+                <Button type="button" size="sm" variant="secondary" onClick={() => agree.mutate()}>
+                  {t("pay.agreeSelfBilling")}
+                </Button>
+              </>
+            )}
+          </div>
+        ) : null}
+        <PanelFooter>
+          {p.method === "stripe_connect" && !p.stripe_payouts_enabled ? (
+            <Button type="button" variant="secondary" onClick={() => stripe.mutate()}>
+              {t("pay.setUpStripe")}
+            </Button>
+          ) : null}
+          <Button type="submit" variant="secondary" disabled={saveBank.isPending}>
+            {t("pay.saveBank")}
+          </Button>
+        </PanelFooter>
+      </RuledPanel>
+    </form>
   );
 }

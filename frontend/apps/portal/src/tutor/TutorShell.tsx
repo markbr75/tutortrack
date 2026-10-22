@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { useEffect } from "react";
 
+import { unwrap } from "@tutortrack/api-client";
+
 import { api } from "../api";
 import { BrandMark, PoweredBy } from "../branding";
 import { PortalFrame } from "../layout/PortalFrame";
@@ -36,6 +38,35 @@ import {
 } from "../offline/client";
 import { OfflineIndicator } from "../offline/OfflineIndicator";
 import { useTutorMe } from "./useTutorMe";
+
+/** What waits for the tutor, for the tab bar's count pills: today's lessons that are over and
+ * still to mark plus reports to write (on Today), job offers, unread messages and
+ * notifications. Shares its caches with Today and Messages. */
+function useTutorWaiting(enabled: boolean) {
+  const today = useQuery({
+    queryKey: ["tutor", "today"],
+    enabled,
+    refetchInterval: 60_000,
+    queryFn: async () => unwrap(await api.GET("/api/v1/tutor/today")),
+  });
+  const threads = useQuery({
+    queryKey: ["portal", "threads", "tutor"],
+    enabled,
+    refetchInterval: 60_000,
+    queryFn: async () => unwrap(await api.GET("/api/v1/tutor/threads")),
+  });
+  const d = today.data;
+  const now = Date.now();
+  const due = (d?.lessons ?? []).filter(
+    (lesson) => lesson.status === "planned" && new Date(lesson.end).getTime() <= now,
+  ).length;
+  return {
+    toMark: due + (d?.reports_due ?? 0),
+    offers: d?.offers ?? 0,
+    notifications: d?.unread ?? 0,
+    unreadMessages: (threads.data ?? []).reduce((sum, row) => sum + (row.unread ?? 0), 0),
+  };
+}
 
 /** The tutor's phone-first shell (E16-T01). */
 export function TutorShell() {
@@ -66,10 +97,11 @@ export function TutorShell() {
     },
     onSuccess: () => window.location.assign("/portal/"),
   });
+  const waiting = useTutorWaiting(Boolean(me.data));
   if (me.isPending) return <Spinner className="p-6" label={t("grid.loading")} />;
   if (!me.data) return <p className="p-6">{t("tutor.noProfile")}</p>;
   const nav = [
-    { to: "/tutor", label: t("tutor.nav.today"), icon: Sun },
+    { to: "/tutor", label: t("tutor.nav.today"), icon: Sun, count: waiting.toMark },
     {
       to: "/tutor/schedule",
       label: t("tutor.nav.schedule"),
@@ -94,7 +126,13 @@ export function TutorShell() {
       icon: CalendarSync,
       group: "teaching",
     },
-    { to: "/tutor/jobs", label: t("tutor.nav.jobs"), icon: Briefcase, group: "teaching" },
+    {
+      to: "/tutor/jobs",
+      label: t("tutor.nav.jobs"),
+      icon: Briefcase,
+      group: "teaching",
+      count: waiting.offers,
+    },
     {
       to: "/tutor/homework",
       label: t("learning.tutor.homework"),
@@ -117,8 +155,20 @@ export function TutorShell() {
       icon: FileCheck,
       group: "money",
     },
-    { to: "/tutor/messages", label: t("portalMessages.nav"), icon: MessageSquare, group: "you" },
-    { to: "/tutor/notifications", label: t("tutor.nav.notifications"), icon: Bell, group: "you" },
+    {
+      to: "/tutor/messages",
+      label: t("portalMessages.nav"),
+      icon: MessageSquare,
+      group: "you",
+      count: waiting.unreadMessages,
+    },
+    {
+      to: "/tutor/notifications",
+      label: t("tutor.nav.notifications"),
+      icon: Bell,
+      group: "you",
+      count: waiting.notifications,
+    },
     { to: "/tutor/onboarding", label: t("tutor.nav.onboarding"), icon: ListChecks, group: "you" },
     { to: "/tutor/compliance", label: t("tutor.nav.compliance"), icon: ShieldCheck, group: "you" },
     { to: "/tutor/tests", label: t("hiring.tests.nav"), icon: ClipboardCheck, group: "you" },

@@ -1,16 +1,18 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Button, Spinner } from "@tutortrack/ui";
+import { Button, PanelFooter, Spinner, TextAreaField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { useState } from "react";
 
 import { api } from "../api";
+import { PortalHeader } from "../layout/PortalPage";
 
 function Reply({ reportId }: { reportId: string }) {
   const { t } = useTranslation();
-  const id = useId();
   const queryClient = useQueryClient();
   const [body, setBody] = useState("");
+  const [open, setOpen] = useState(false);
+  const [sent, setSent] = useState(false);
   const send = useMutation({
     mutationFn: async () =>
       unwrap(
@@ -21,29 +23,59 @@ function Reply({ reportId }: { reportId: string }) {
       ),
     onSuccess: () => {
       setBody("");
+      setOpen(false);
+      setSent(true);
       void queryClient.invalidateQueries({ queryKey: ["portal", "reports"] });
     },
   });
+  if (!open) {
+    return (
+      <PanelFooter className="border-border">
+        <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
+          {t("portal.reply")}
+        </Button>
+        {sent ? (
+          <span role="status" className="text-sm text-success">
+            {t("designS10.replySent")}
+          </span>
+        ) : null}
+      </PanelFooter>
+    );
+  }
   return (
     <form
-      className="space-y-1"
+      className="border-t border-border"
       onSubmit={(e) => {
         e.preventDefault();
         if (body.trim()) send.mutate();
       }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") setOpen(false);
+      }}
     >
-      <label htmlFor={id} className="text-sm font-medium">
-        {t("portal.reply")}
-      </label>
-      <textarea
-        id={id}
-        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-      />
-      <Button type="submit" size="sm" disabled={send.isPending}>
-        {t("portal.sendReply")}
-      </Button>
+      <div className="px-5 py-4">
+        <TextAreaField
+          autoFocus
+          label={t("portal.reply")}
+          rows={3}
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+        />
+      </div>
+      <PanelFooter>
+        <Button type="submit" size="sm" disabled={send.isPending}>
+          {t("portal.sendReply")}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="text-muted-foreground hover:text-foreground"
+          onClick={() => setOpen(false)}
+        >
+          {t("common.cancel")}
+        </Button>
+      </PanelFooter>
     </form>
   );
 }
@@ -64,7 +96,7 @@ function ReportFiles({ ids }: { ids: string[] }) {
           <li key={id}>
             <button
               type="button"
-              className="underline underline-offset-2"
+              className="font-medium text-link underline-offset-2 hover:underline"
               onClick={() => void open(id)}
             >
               {t("g3.files.attachment", { n: n + 1 })}
@@ -82,7 +114,9 @@ function show(value: unknown): string {
   return Array.isArray(value) ? value.join(", ") : String(value ?? "");
 }
 
-/** Shared lesson reports (only the fields families may see) with replies (FR-15-6). */
+/** Shared lesson reports (only the fields families may see) with replies (FR-15-6). Each
+ * report is one ruled leaf: the lesson and when, the answers as ruled rows, the replies, and
+ * the reply form under a register rule. */
 export function ReportsPage() {
   const { t, i18n } = useTranslation();
   const reports = useQuery({
@@ -91,49 +125,55 @@ export function ReportsPage() {
   });
   if (reports.isPending) return <Spinner label={t("grid.loading")} />;
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">{t("portal.nav.reports")}</h1>
+    <div>
+      <PortalHeader title={t("portal.nav.reports")} />
       {!reports.data?.length ? (
         <p className="text-sm text-muted-foreground">{t("portal.noReports")}</p>
       ) : null}
-      {reports.data?.map((r) => (
-        <article
-          key={r.id}
-          className="space-y-3 rounded-lg border border-border p-4"
-          aria-label={r.lesson_title}
-        >
-          <header>
-            <h2 className="font-semibold">{r.lesson_title}</h2>
-            <p className="text-sm text-muted-foreground">
-              {formatDateTime(r.lesson_start, i18n.language)} · {r.tutor_name}
-            </p>
-          </header>
-          <dl className="space-y-2">
-            {r.answers.map((a) => (
-              <div key={a.label}>
-                <dt className="text-sm font-medium">{a.label}</dt>
-                <dd className="whitespace-pre-wrap text-sm">
-                  {a.type === "attachment" && Array.isArray(a.value) ? (
-                    <ReportFiles ids={a.value as string[]} />
-                  ) : (
-                    show(a.value)
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          {r.comments.length ? (
-            <ul className="space-y-1 border-t border-border pt-2 text-sm">
-              {r.comments.map((c, i) => (
-                <li key={i}>
-                  <strong>{c.author}:</strong> {c.body}
-                </li>
+      <div className="space-y-6">
+        {reports.data?.map((r) => (
+          <article
+            key={r.id}
+            className="rounded-xl border border-border bg-surface"
+            aria-label={r.lesson_title}
+          >
+            <header className="border-b border-border px-5 py-3.5">
+              <h2 className="text-base font-semibold">{r.lesson_title}</h2>
+              <p className="text-xs text-muted-foreground tabular-nums">
+                {formatDateTime(r.lesson_start, i18n.language)} · {r.tutor_name}
+              </p>
+            </header>
+            <dl className="divide-y divide-rule">
+              {r.answers.map((a) => (
+                <div key={a.label} className="space-y-0.5 px-5 py-2.5">
+                  <dt className="text-xs font-semibold text-muted-foreground">{a.label}</dt>
+                  <dd className="text-sm whitespace-pre-wrap">
+                    {a.type === "attachment" && Array.isArray(a.value) ? (
+                      <ReportFiles ids={a.value as string[]} />
+                    ) : (
+                      show(a.value)
+                    )}
+                  </dd>
+                </div>
               ))}
-            </ul>
-          ) : null}
-          <Reply reportId={r.id} />
-        </article>
-      ))}
+            </dl>
+            {r.comments.length ? (
+              <ul
+                aria-label={t("designS10.replies")}
+                className="divide-y divide-rule border-t border-border"
+              >
+                {r.comments.map((c, i) => (
+                  <li key={i} className="px-5 py-2.5 text-sm">
+                    <p className="text-xs font-medium">{c.author}</p>
+                    <p className="whitespace-pre-wrap">{c.body}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <Reply reportId={r.id} />
+          </article>
+        ))}
+      </div>
     </div>
   );
 }

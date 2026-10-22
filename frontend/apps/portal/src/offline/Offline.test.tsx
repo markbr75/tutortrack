@@ -142,7 +142,11 @@ describe("tutor offline", () => {
       "/portal/tutor/lessons/l1",
     );
     fireEvent.click(within(review).getByRole("button", { name: /Discard/ }));
-    await waitFor(() => expect(screen.queryByRole("region")).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("region", { name: "Your changes need review" }),
+      ).not.toBeInTheDocument(),
+    );
   });
 
   it("tells families they're offline", async () => {

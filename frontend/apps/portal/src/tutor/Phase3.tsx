@@ -1,6 +1,15 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -11,7 +20,7 @@ type VideoAttendance = components["schemas"]["VideoAttendance"];
 const TIN_TYPES = ["ssn", "itin", "ein"] as const;
 
 /** The register suggested by who joined the online lesson (E22-T10); applying it fills in
- * the tutor's register, which they still confirm. */
+ * the tutor's register, which they still confirm. The register panel's first row. */
 export function VideoRegisterHint({
   lessonId,
   onApply,
@@ -31,11 +40,18 @@ export function VideoRegisterHint({
   });
   if (!data.data?.available) return null;
   return (
-    <div className="space-y-1 rounded-md border border-border p-3 text-sm" role="note">
-      <p>{t("videoLessons.fromVideo")}</p>
-      {data.data.actual_minutes !== null ? (
-        <p>{t("videoLessons.actualMinutes", { count: data.data.actual_minutes })}</p>
-      ) : null}
+    <div
+      className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-rule px-5 py-2.5 text-sm"
+      role="note"
+    >
+      <div>
+        <p>{t("videoLessons.fromVideo")}</p>
+        {data.data.actual_minutes !== null ? (
+          <p className="text-xs text-muted-foreground">
+            {t("videoLessons.actualMinutes", { count: data.data.actual_minutes })}
+          </p>
+        ) : null}
+      </div>
       <Button size="sm" variant="secondary" type="button" onClick={() => onApply(data.data!)}>
         {t("videoLessons.useSuggestion")}
       </Button>
@@ -47,11 +63,13 @@ export function VideoRegisterHint({
 export function ClassroomLink({ lessonId }: { lessonId: string }) {
   const { t } = useTranslation();
   return (
-    <p>
-      <Link to="/classroom/$lessonId" params={{ lessonId }} className="text-sm underline">
-        {t("classroom.open")}
-      </Link>
-    </p>
+    <Link
+      to="/classroom/$lessonId"
+      params={{ lessonId }}
+      className="text-sm font-medium text-link underline-offset-2 hover:underline"
+    >
+      {t("classroom.open")}
+    </Link>
   );
 }
 
@@ -74,14 +92,11 @@ export function TutorRecordings({ lessonId }: { lessonId: string }) {
   });
   if (!recordings.data?.length) return null;
   return (
-    <section aria-labelledby="lesson-recordings" className="space-y-1 text-sm">
-      <h2 id="lesson-recordings" className="font-semibold">
-        {t("videoLessons.recordings")}
-      </h2>
-      <ul className="space-y-1">
+    <RuledPanel title={t("videoLessons.recordings")} titleId="lesson-recordings" flush>
+      <PanelRows>
         {recordings.data.map((r) => (
-          <li key={r.id} className="flex items-center justify-between gap-2">
-            <span>
+          <PanelRow key={r.id} className="flex items-center justify-between gap-2">
+            <span className="tabular-nums">
               {r.started_at
                 ? formatDateTime(r.started_at, i18n.language)
                 : t("videoLessons.recording")}
@@ -89,11 +104,15 @@ export function TutorRecordings({ lessonId }: { lessonId: string }) {
             <Button size="sm" variant="secondary" onClick={() => play.mutate(r.id)}>
               {t("videoLessons.watch")}
             </Button>
-          </li>
+          </PanelRow>
         ))}
-      </ul>
-      {play.error ? <Alert tone="danger">{play.error.message}</Alert> : null}
-    </section>
+      </PanelRows>
+      {play.error ? (
+        <div className="px-5 pb-4">
+          <Alert tone="danger">{play.error.message}</Alert>
+        </div>
+      ) : null}
+    </RuledPanel>
   );
 }
 
@@ -109,27 +128,27 @@ export function MyBackgroundChecks() {
   });
   if (!checks.data?.length) return null;
   return (
-    <section aria-labelledby="my-checks" className="space-y-2">
-      <h2 id="my-checks" className="font-semibold">
-        {t("backgroundChecks.mine")}
-      </h2>
-      <ul className="space-y-2 text-sm">
+    <RuledPanel title={t("backgroundChecks.mine")} titleId="my-checks" flush>
+      <PanelRows>
         {checks.data.map((c) => (
-          <li key={c.id} className="space-y-1 rounded-lg border border-border p-3">
+          <PanelRow key={c.id} className="flex flex-wrap items-center justify-between gap-2">
             <p className="font-medium">
               {c.provider_label}: {t(`backgroundChecks.status.${c.status}`)}
             </p>
             {c.invite_url ? (
-              <p>
-                <a className="underline" href={c.invite_url} target="_blank" rel="noreferrer">
-                  {t("backgroundChecks.complete")}
-                </a>
-              </p>
+              <a
+                className="font-medium text-link underline-offset-2 hover:underline"
+                href={c.invite_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {t("backgroundChecks.complete")}
+              </a>
             ) : null}
-          </li>
+          </PanelRow>
         ))}
-      </ul>
-    </section>
+      </PanelRows>
+    </RuledPanel>
   );
 }
 
@@ -176,56 +195,62 @@ export function MyUsTaxInfo() {
     (summary.data ? summary.data.box1 !== "0.00" : false);
   if (!usd) return null;
   return (
-    <section
-      aria-labelledby="us-tax"
-      className="space-y-2 rounded-lg border border-border p-3 text-sm"
+    <form
+      aria-label={t("payrollPhase3.taxId")}
+      onSubmit={(e) => {
+        e.preventDefault();
+        save.mutate();
+      }}
     >
-      <h2 id="us-tax" className="font-semibold">
-        {t("payrollPhase3.usTaxTitle")}
-      </h2>
-      {summary.data ? (
-        <p>
-          {t("payrollPhase3.paidInYear", {
-            year,
-            amount: formatMoney(
-              { amount: summary.data.box1, currency: summary.data.currency },
-              i18n.language,
-            ),
-          })}
-          {summary.data.filed ? ` ${t("payrollPhase3.formFiled")}` : ""}
-        </p>
-      ) : null}
-      <p>
-        {identity.data?.tin_hint
-          ? t("payrollPhase3.yourTaxIdOnFile", { hint: identity.data.tin_hint })
-          : t("payrollPhase3.addYourTaxId")}
-      </p>
-      <form
-        className="grid gap-2 sm:grid-cols-[auto_1fr_auto] sm:items-end"
-        aria-label={t("payrollPhase3.taxId")}
-        onSubmit={(e) => {
-          e.preventDefault();
-          save.mutate();
-        }}
+      <RuledPanel
+        title={t("payrollPhase3.usTaxTitle")}
+        titleId="us-tax"
+        description={
+          identity.data?.tin_hint
+            ? t("payrollPhase3.yourTaxIdOnFile", { hint: identity.data.tin_hint })
+            : t("payrollPhase3.addYourTaxId")
+        }
+        flush
       >
-        <SelectField
-          label={t("payrollPhase3.tinType")}
-          value={tinType}
-          options={TIN_TYPES.map((v) => ({ value: v, label: t(`payrollPhase3.tinTypes.${v}`) }))}
-          onChange={(e) => setTinType(e.target.value as (typeof TIN_TYPES)[number])}
-        />
-        <TextField
-          label={t("payrollPhase3.tin")}
-          autoComplete="off"
-          inputMode="numeric"
-          value={tin}
-          onChange={(e) => setTin(e.target.value)}
-        />
-        <Button type="submit" size="sm" disabled={!tin} loading={save.isPending}>
-          {t("payrollPhase3.saveTaxId")}
-        </Button>
-      </form>
-      {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
-    </section>
+        {summary.data ? (
+          <p className="border-b border-rule px-5 py-2.5 text-sm tabular-nums">
+            {t("payrollPhase3.paidInYear", {
+              year,
+              amount: formatMoney(
+                { amount: summary.data.box1, currency: summary.data.currency },
+                i18n.language,
+              ),
+            })}
+            {summary.data.filed ? ` ${t("payrollPhase3.formFiled")}` : ""}
+          </p>
+        ) : null}
+        <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
+          <SelectField
+            label={t("payrollPhase3.tinType")}
+            value={tinType}
+            options={TIN_TYPES.map((v) => ({ value: v, label: t(`payrollPhase3.tinTypes.${v}`) }))}
+            onChange={(e) => setTinType(e.target.value as (typeof TIN_TYPES)[number])}
+          />
+          <TextField
+            label={t("payrollPhase3.tin")}
+            className="tabular-nums"
+            autoComplete="off"
+            inputMode="numeric"
+            value={tin}
+            onChange={(e) => setTin(e.target.value)}
+          />
+        </div>
+        {save.error ? (
+          <div className="px-5 pb-4">
+            <Alert tone="danger">{save.error.message}</Alert>
+          </div>
+        ) : null}
+        <PanelFooter>
+          <Button type="submit" disabled={!tin} loading={save.isPending}>
+            {t("payrollPhase3.saveTaxId")}
+          </Button>
+        </PanelFooter>
+      </RuledPanel>
+    </form>
   );
 }

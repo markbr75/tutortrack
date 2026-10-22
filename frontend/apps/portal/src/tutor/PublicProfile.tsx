@@ -1,10 +1,20 @@
 import { ApiError, unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  PanelFooter,
+  RuledPanel,
+  Spinner,
+  TextAreaField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { api, uploadFile } from "../api";
+import { FileField, Word } from "../layout/PortalPage";
 import { AiBioHelper } from "./AiDrafts";
 
 const SECTIONS = ["qualifications", "languages", "experience", "location"] as const;
@@ -21,8 +31,6 @@ interface Draft {
 export function PublicProfileSection() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const bioId = useId();
-  const photoId = useId();
   const profile = useQuery({
     queryKey: ["public-profile-mine"],
     queryFn: async () => unwrap(await api.GET("/api/v1/public-profiles/mine")),
@@ -54,89 +62,77 @@ export function PublicProfileSection() {
       : {};
   const p = profile.data;
   return (
-    <section aria-labelledby="public-profile-h" className="space-y-3">
-      <h2 id="public-profile-h" className="text-lg font-semibold">
-        {t("tutor.publicProfile.title")}
-      </h2>
-      <p className="text-sm text-muted-foreground">{t("tutor.publicProfile.intro")}</p>
-      <p className="text-sm">
-        <strong>{t(`tutor.publicProfile.status_${p.status}`)}</strong>
-      </p>
-      {p.status === "rejected" && p.rejection_reason ? (
-        <Alert tone="warning">
-          {t("tutor.publicProfile.rejected", { reason: p.rejection_reason })}
-        </Alert>
-      ) : null}
-      <form
-        className="space-y-3"
-        aria-labelledby="public-profile-h"
-        onSubmit={(e) => {
-          e.preventDefault();
-          save.mutate({ ...draft, ...(photo !== undefined ? { photo } : {}) });
-        }}
+    <form
+      aria-labelledby="public-profile-h"
+      onSubmit={(e) => {
+        e.preventDefault();
+        save.mutate({ ...draft, ...(photo !== undefined ? { photo } : {}) });
+      }}
+    >
+      <RuledPanel
+        title={t("tutor.publicProfile.title")}
+        titleId="public-profile-h"
+        description={t("tutor.publicProfile.intro")}
+        aside={
+          // What waits on the business (approval) is margin red; the rest are words in ink.
+          <Word
+            tone={p.status === "pending" ? "margin" : p.status === "draft" ? "muted" : "ink"}
+            className={p.status === "approved" || p.status === "rejected" ? "font-medium" : ""}
+          >
+            {t(`tutor.publicProfile.status_${p.status}`)}
+          </Word>
+        }
+        flush
       >
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
+        <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
+          {p.status === "rejected" && p.rejection_reason ? (
+            <Alert tone="warning" className="sm:col-span-2">
+              {t("tutor.publicProfile.rejected", { reason: p.rejection_reason })}
+            </Alert>
+          ) : null}
+          <CheckboxField
+            className="sm:col-span-2"
+            label={t("tutor.publicProfile.listed")}
             checked={p.listed}
             onChange={(e) => save.mutate({ listed: e.target.checked })}
           />
-          {t("tutor.publicProfile.listed")}
-        </label>
-        <TextField
-          label={t("tutor.publicProfile.displayName")}
-          value={draft.display_name}
-          required
-          error={errors.display_name?.[0]}
-          onChange={(e) => setDraft({ ...draft, display_name: e.target.value })}
-        />
-        <TextField
-          label={t("tutor.publicProfile.headline")}
-          value={draft.headline}
-          error={errors.headline?.[0]}
-          onChange={(e) => setDraft({ ...draft, headline: e.target.value })}
-        />
-        <div className="space-y-1">
-          <label htmlFor={bioId} className="text-sm font-medium">
-            {t("tutor.publicProfile.bio")}
-          </label>
-          <textarea
-            id={bioId}
-            rows={6}
-            className="w-full rounded-md border border-border bg-background px-3 py-2"
-            value={draft.bio}
-            aria-invalid={errors.bio ? true : undefined}
-            aria-describedby={errors.bio ? `${bioId}-error` : undefined}
-            onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
+          <TextField
+            label={t("tutor.publicProfile.displayName")}
+            value={draft.display_name}
+            required
+            error={errors.display_name?.[0]}
+            onChange={(e) => setDraft({ ...draft, display_name: e.target.value })}
           />
-          {errors.bio ? (
-            <p id={`${bioId}-error`} role="alert" className="text-sm text-danger">
-              {errors.bio.join(" ")}
-            </p>
-          ) : null}
-          <AiBioHelper tutorId={p.tutor} onUse={(bio) => setDraft({ ...draft, bio })} />
-        </div>
-        <div className="space-y-1">
-          <label htmlFor={photoId} className="text-sm font-medium">
-            {t("tutor.publicProfile.photo")}
-          </label>
-          <input
-            id={photoId}
-            type="file"
+          <TextField
+            label={t("tutor.publicProfile.headline")}
+            value={draft.headline}
+            error={errors.headline?.[0]}
+            onChange={(e) => setDraft({ ...draft, headline: e.target.value })}
+          />
+          <div className="space-y-3 sm:col-span-2">
+            <TextAreaField
+              label={t("tutor.publicProfile.bio")}
+              rows={6}
+              value={draft.bio}
+              error={errors.bio?.join(" ")}
+              onChange={(e) => setDraft({ ...draft, bio: e.target.value })}
+            />
+            <AiBioHelper tutorId={p.tutor} onUse={(bio) => setDraft({ ...draft, bio })} />
+          </div>
+          <FileField
+            label={t("tutor.publicProfile.photo")}
             accept="image/png,image/jpeg,image/webp"
-            className="text-sm"
             onChange={async (e) => {
               const file = e.target.files?.[0];
               if (file) setPhoto(await uploadFile(file));
             }}
           />
-        </div>
-        <fieldset className="space-y-1">
-          <legend className="text-sm font-medium">{t("tutor.publicProfile.show")}</legend>
-          {SECTIONS.map((key) => (
-            <label key={key} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
+          <fieldset className="space-y-2">
+            <legend className="mb-1 text-sm font-medium">{t("tutor.publicProfile.show")}</legend>
+            {SECTIONS.map((key) => (
+              <CheckboxField
+                key={key}
+                label={t(`tutor.publicProfile.${key}`)}
                 checked={draft.show.includes(key)}
                 onChange={(e) =>
                   setDraft({
@@ -147,21 +143,22 @@ export function PublicProfileSection() {
                   })
                 }
               />
-              {t(`tutor.publicProfile.${key}`)}
-            </label>
-          ))}
-        </fieldset>
-        {save.isSuccess ? (
-          <Alert tone="success">
-            {save.data?.status === "approved"
-              ? t("tutor.publicProfile.published")
-              : t("tutor.publicProfile.saved")}
-          </Alert>
-        ) : null}
-        <Button type="submit" loading={save.isPending}>
-          {t("tutor.publicProfile.submit")}
-        </Button>
-      </form>
-    </section>
+            ))}
+          </fieldset>
+          {save.isSuccess ? (
+            <Alert tone="success" className="sm:col-span-2">
+              {save.data?.status === "approved"
+                ? t("tutor.publicProfile.published")
+                : t("tutor.publicProfile.saved")}
+            </Alert>
+          ) : null}
+        </div>
+        <PanelFooter>
+          <Button type="submit" variant="secondary" loading={save.isPending}>
+            {t("tutor.publicProfile.submit")}
+          </Button>
+        </PanelFooter>
+      </RuledPanel>
+    </form>
   );
 }

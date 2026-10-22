@@ -245,6 +245,8 @@ describe("portal", () => {
     );
     fireEvent.click(screen.getByRole("link", { name: "Reports" }));
     expect(await screen.findByText("Fractions")).toBeInTheDocument();
+    // The reply field opens in place from the report's footer.
+    fireEvent.click(screen.getByRole("button", { name: "Reply to the tutor" }));
     fireEvent.change(screen.getByLabelText("Reply to the tutor"), { target: { value: "Thanks!" } });
     fireEvent.click(screen.getByRole("button", { name: "Send reply" }));
     await waitFor(() =>

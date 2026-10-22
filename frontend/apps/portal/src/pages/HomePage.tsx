@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
 import { api, usePortalMe } from "../api";
+import { isPositive, sumAmounts } from "../money";
 import { LessonCard, type PortalLesson } from "./LessonCard";
 
 /** Next lesson, the week ahead, amount due, latest reports and news (FR-15-2). */
@@ -26,9 +27,12 @@ export function HomePage() {
       {d.amount_due && Number(d.amount_due.amount) > 0 ? (
         // One ruled line of money, like the register's money strip.
         <div className="flex items-center justify-between gap-4 border-y border-border py-3">
-          <p className="font-semibold tabular-nums">
-            {t("portal.amountDue", { amount: formatMoney(d.amount_due, i18n.language) })}
-          </p>
+          <div className="min-w-0">
+            <p className="font-semibold tabular-nums">
+              {t("portal.amountDue", { amount: formatMoney(d.amount_due, i18n.language) })}
+            </p>
+            <OverdueNote currency={d.amount_due.currency} />
+          </div>
           <Link to="/billing" className={buttonClass()}>
             {t("portal.payNow")}
           </Link>
@@ -98,6 +102,32 @@ export function HomePage() {
         </section>
       ) : null}
     </div>
+  );
+}
+
+/** Under the owed line, only while part of it is past due: how much, in margin red. Owing
+ * alone is not overdue, so nothing shows otherwise. */
+function OverdueNote({ currency }: { currency: string }) {
+  const { t, i18n } = useTranslation();
+  const me = usePortalMe();
+  const billing = useQuery({
+    queryKey: ["portal", "billing"],
+    enabled: Boolean(me.data?.features.invoices),
+    queryFn: async () => unwrap(await api.GET("/api/v1/portal/billing")),
+  });
+  const overdue = sumAmounts(
+    (billing.data?.accounts ?? [])
+      .map((account) => account.balances.overdue)
+      .filter((money) => money.currency === currency)
+      .map((money) => money.amount),
+  );
+  if (!isPositive(overdue)) return null;
+  return (
+    <p className="text-sm font-medium text-margin tabular-nums">
+      {t("designS10.overdueOfIt", {
+        amount: formatMoney({ amount: overdue, currency }, i18n.language),
+      })}
+    </p>
   );
 }
 

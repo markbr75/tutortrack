@@ -1,10 +1,22 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  PanelFooter,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  TextAreaField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useId, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { api } from "../api";
+import { PortalHeader } from "../layout/PortalPage";
 import { isNetworkError, isOffline, queueChange } from "../offline/client";
 import { AiReportDrafter } from "./AiDrafts";
 import { DictationButton } from "./Dictation";
@@ -24,7 +36,6 @@ export function ReportFieldInput({
   onChange: (v: unknown) => void;
   disabled: boolean;
 }) {
-  const id = useId();
   const { t } = useTranslation();
   // E21: curriculum topics to pick from; a matching name tags the lesson on submit.
   const topics = useQuery({
@@ -42,7 +53,7 @@ export function ReportFieldInput({
         disabled={disabled}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
         options={[
-          { value: "", label: "—" },
+          { value: "", label: "–" },
           ...[1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: String(n) })),
         ]}
       />
@@ -56,7 +67,7 @@ export function ReportFieldInput({
         disabled={disabled}
         onChange={(e) => onChange(e.target.value || null)}
         options={[
-          { value: "", label: "—" },
+          { value: "", label: "–" },
           ...(field.options ?? []).map((o) => ({ value: o, label: o })),
         ]}
       />
@@ -65,21 +76,18 @@ export function ReportFieldInput({
   if (field.type === "multi_select" || field.type === "checklist") {
     const chosen = (value as string[]) ?? [];
     return (
-      <fieldset className="space-y-1">
-        <legend className="text-sm font-medium">{label}</legend>
+      <fieldset className="space-y-2">
+        <legend className="mb-1 text-sm font-medium">{label}</legend>
         {(field.options ?? []).map((o) => (
-          <label key={o} className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              className="size-5"
-              checked={chosen.includes(o)}
-              disabled={disabled}
-              onChange={(e) =>
-                onChange(e.target.checked ? [...chosen, o] : chosen.filter((c) => c !== o))
-              }
-            />
-            {o}
-          </label>
+          <CheckboxField
+            key={o}
+            label={o}
+            checked={chosen.includes(o)}
+            disabled={disabled}
+            onChange={(e) =>
+              onChange(e.target.checked ? [...chosen, o] : chosen.filter((c) => c !== o))
+            }
+          />
         ))}
       </fieldset>
     );
@@ -87,7 +95,7 @@ export function ReportFieldInput({
   if (field.type === "topics" || field.type === "attachment") {
     const list = (value as string[]) ?? [];
     return (
-      <div className="space-y-2">
+      <div className="grid items-start gap-x-4 gap-y-3 sm:grid-cols-2">
         <TextField
           label={label}
           hint={t("tutor.commaHint")}
@@ -120,24 +128,20 @@ export function ReportFieldInput({
     );
   }
   return (
-    <div className="space-y-1">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <label htmlFor={id} className="text-sm font-medium">
-          {label}
-        </label>
-        <DictationButton
-          value={(value as string) ?? ""}
-          onChange={onChange}
-          disabled={disabled}
-          fieldLabel={field.label}
-        />
-      </div>
-      <textarea
-        id={id}
+    // The dictation button (when the browser has speech recognition) sits under the field.
+    <div className="space-y-1.5">
+      <TextAreaField
+        label={label}
+        rows={4}
         disabled={disabled}
-        className="min-h-24 w-full rounded-md border border-border bg-background px-3 py-2 text-base"
         value={(value as string) ?? ""}
         onChange={(e) => onChange(e.target.value)}
+      />
+      <DictationButton
+        value={(value as string) ?? ""}
+        onChange={onChange}
+        disabled={disabled}
+        fieldLabel={field.label}
       />
     </div>
   );
@@ -213,48 +217,106 @@ export function TutorReportPage({ reportId }: { reportId: string }) {
   if (!r) return null;
   const written = r.status === "submitted" || r.status === "approved";
   return (
+    <div>
+      <PortalHeader
+        back={
+          r.lesson ? (
+            <Link to="/tutor/lessons/$lessonId" params={{ lessonId: r.lesson }}>
+              {r.lesson_title}
+            </Link>
+          ) : undefined
+        }
+        title={t("tutor.reportFor", { title: r.lesson_title })}
+      />
+      <div className="space-y-6">
+        {r.returned_note ? <Alert tone="warning">{r.returned_note}</Alert> : null}
+        {!written ? (
+          <AiReportDrafter
+            reportId={reportId}
+            onDraft={(draft) => {
+              setAiRequest(draft.request);
+              setAnswers((a) => ({ ...(a ?? {}), ...draft.answers }));
+            }}
+          />
+        ) : null}
+        <ReportForm
+          label={r.lesson_title}
+          fields={r.template_fields}
+          answers={answers}
+          written={written}
+          pending={save.isPending}
+          onChange={(key, v) => setAnswers((a) => ({ ...(a ?? {}), [key]: v }))}
+          onSubmit={() => save.mutate("submit")}
+          onDraft={() => save.mutate("draft")}
+        >
+          {save.data === "queued" ? <Alert>{t("pwa.reportQueued")}</Alert> : null}
+          {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
+        </ReportForm>
+      </div>
+    </div>
+  );
+}
+
+/** The report's fields in one ruled panel; Save draft and Submit report in its footer, or a
+ * success alert once it is written. Shared with the offline report page. */
+export function ReportForm({
+  label,
+  fields,
+  answers,
+  written,
+  pending,
+  onChange,
+  onSubmit,
+  onDraft,
+  lead,
+  children,
+}: {
+  label: string;
+  fields: ReadonlyArray<Field>;
+  answers: Answers;
+  written: boolean;
+  pending: boolean;
+  onChange: (key: string, value: unknown) => void;
+  onSubmit: () => void;
+  onDraft: () => void;
+  lead?: ReactNode;
+  children?: ReactNode;
+}) {
+  const { t } = useTranslation();
+  return (
     <form
-      className="space-y-4"
-      aria-label={r.lesson_title}
+      aria-label={label}
       onSubmit={(e) => {
         e.preventDefault();
-        save.mutate("submit");
+        onSubmit();
       }}
     >
-      <h1 className="text-xl font-semibold">{t("tutor.reportFor", { title: r.lesson_title })}</h1>
-      {r.returned_note ? <Alert tone="warning">{r.returned_note}</Alert> : null}
-      {!written ? (
-        <AiReportDrafter
-          reportId={reportId}
-          onDraft={(draft) => {
-            setAiRequest(draft.request);
-            setAnswers((a) => ({ ...(a ?? {}), ...draft.answers }));
-          }}
-        />
-      ) : null}
-      {r.template_fields.map((field) => (
-        <ReportFieldInput
-          key={field.key}
-          field={field}
-          value={answers[field.key]}
-          disabled={written}
-          onChange={(v) => setAnswers((a) => ({ ...(a ?? {}), [field.key]: v }))}
-        />
-      ))}
-      {written ? (
-        <Alert tone="success">{t("tutor.reportSubmitted")}</Alert>
-      ) : (
-        <div className="flex gap-2">
-          <Button type="submit" disabled={save.isPending}>
-            {t("tutor.submitReport")}
-          </Button>
-          <Button type="button" variant="secondary" onClick={() => save.mutate("draft")}>
-            {t("tutor.saveDraft")}
-          </Button>
+      <RuledPanel label={label} flush>
+        <div className="space-y-4 px-5 py-4">
+          {lead}
+          {fields.map((field) => (
+            <ReportFieldInput
+              key={field.key}
+              field={field}
+              value={answers[field.key]}
+              disabled={written}
+              onChange={(v) => onChange(field.key, v)}
+            />
+          ))}
+          {written ? <Alert tone="success">{t("tutor.reportSubmitted")}</Alert> : null}
+          {children}
         </div>
-      )}
-      {save.data === "queued" ? <Alert>{t("pwa.reportQueued")}</Alert> : null}
-      {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
+        {written ? null : (
+          <PanelFooter>
+            <Button type="button" variant="secondary" disabled={pending} onClick={onDraft}>
+              {t("tutor.saveDraft")}
+            </Button>
+            <Button type="submit" disabled={pending}>
+              {t("tutor.submitReport")}
+            </Button>
+          </PanelFooter>
+        )}
+      </RuledPanel>
     </form>
   );
 }

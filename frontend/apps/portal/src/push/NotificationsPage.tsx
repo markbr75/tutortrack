@@ -1,11 +1,21 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  NamePlate,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { api } from "../api";
 import { DigestPreferences } from "../digests/DigestPreferences";
+import { PanelLoading, PortalHeader } from "../layout/PortalPage";
 import {
   currentSubscription,
   disablePush,
@@ -17,17 +27,21 @@ import {
 
 type Preference = components["schemas"]["MyPreference"];
 
+const quiet = "text-muted-foreground hover:text-foreground";
+
 /** Push notifications on this phone, my devices, and which channels each kind of message
  * uses (E16-T09, FR-16-9). */
 export function NotificationsPage() {
   const { t } = useTranslation();
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-semibold">{t("pwa.notifications")}</h1>
-      <ThisDevice />
-      <Devices />
-      <Preferences />
-      <DigestPreferences />
+    <div>
+      <PortalHeader title={t("pwa.notifications")} />
+      <div className="space-y-6">
+        <ThisDevice />
+        <Devices />
+        <Preferences />
+        <DigestPreferences />
+      </div>
     </div>
   );
 }
@@ -67,57 +81,67 @@ function ThisDevice() {
   });
 
   let body: JSX.Element;
+  let footer: JSX.Element | null = null;
   if (!pushSupported()) {
     body =
       isIos() && !isStandalone() ? (
         <Alert title={t("pwa.iosTitle")}>{t("pwa.iosSteps")}</Alert>
       ) : (
-        <p className="text-sm">{t("pwa.unsupported")}</p>
+        <p className="text-sm text-muted-foreground">{t("pwa.unsupported")}</p>
       );
   } else if (config.isPending || subscribed === null) {
-    body = <Spinner label={t("grid.loading")} />;
+    body = <PanelLoading label={t("grid.loading")} />;
   } else if (!config.data?.enabled) {
-    body = <p className="text-sm">{t("pwa.notConfigured")}</p>;
+    body = <p className="text-sm text-muted-foreground">{t("pwa.notConfigured")}</p>;
   } else if (denied) {
     body = <Alert tone="warning">{t("pwa.blocked")}</Alert>;
   } else if (subscribed) {
     body = (
-      <div className="space-y-2">
+      <div className="space-y-1">
         <p className="text-sm">{t("pwa.onHere")}</p>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" onClick={() => test.mutate()} loading={test.isPending}>
-            {t("pwa.sendTest")}
-          </Button>
-          <Button variant="ghost" onClick={() => turnOff.mutate()} loading={turnOff.isPending}>
-            {t("pwa.turnOff")}
-          </Button>
-        </div>
         {test.isSuccess ? (
-          <p role="status" className="text-sm">
+          <p role="status" className="text-sm text-success">
             {t("pwa.testSent", { count: test.data.delivered })}
           </p>
         ) : null}
       </div>
     );
-  } else {
-    body = (
-      <div className="space-y-2">
-        <p className="text-sm">{t("pwa.offHere")}</p>
-        <Button onClick={() => turnOn.mutate()} loading={turnOn.isPending}>
-          {t("pwa.turnOn")}
+    footer = (
+      <>
+        <Button variant="secondary" onClick={() => test.mutate()} loading={test.isPending}>
+          {t("pwa.sendTest")}
         </Button>
-      </div>
+        <Button
+          variant="ghost"
+          className={quiet}
+          onClick={() => turnOff.mutate()}
+          loading={turnOff.isPending}
+        >
+          {t("pwa.turnOff")}
+        </Button>
+      </>
+    );
+  } else {
+    body = <p className="text-sm text-muted-foreground">{t("pwa.offHere")}</p>;
+    footer = (
+      <Button onClick={() => turnOn.mutate()} loading={turnOn.isPending}>
+        {t("pwa.turnOn")}
+      </Button>
     );
   }
   const error = turnOn.error ?? turnOff.error ?? test.error;
   return (
-    <section aria-labelledby="this-device" className="space-y-2">
-      <h2 id="this-device" className="font-semibold">
-        {t("pwa.thisDevice")}
-      </h2>
-      {body}
-      {error ? <Alert tone="danger">{error.message}</Alert> : null}
-    </section>
+    <RuledPanel
+      title={t("pwa.thisDevice")}
+      titleId="this-device"
+      flush
+      footer={footer ?? undefined}
+    >
+      <div className="space-y-3 px-5 py-4">
+        {body}
+        {error ? <Alert tone="danger">{error.message}</Alert> : null}
+      </div>
+    </RuledPanel>
   );
 }
 
@@ -135,25 +159,33 @@ function Devices() {
   });
   if (!devices.data?.length) return null;
   return (
-    <section aria-labelledby="devices" className="space-y-2">
-      <h2 id="devices" className="font-semibold">
-        {t("pwa.devices")}
-      </h2>
-      <ul className="space-y-2">
+    <RuledPanel title={t("pwa.devices")} titleId="devices" flush>
+      <PanelRows>
         {devices.data.map((d) => (
-          <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
-            <span>
-              {d.device || d.push_service} ·{" "}
-              {t("pwa.since", { date: formatDateTime(d.created_at, i18n.language) })}
-            </span>
-            <Button size="sm" variant="ghost" onClick={() => remove.mutate(d.id)}>
-              {t("pwa.removeDevice")}
-              <span className="sr-only"> {d.device || d.push_service}</span>
-            </Button>
-          </li>
+          <PanelRow key={d.id}>
+            <NamePlate
+              name={d.device || d.push_service}
+              context={
+                <span className="tabular-nums">
+                  {t("pwa.since", { date: formatDateTime(d.created_at, i18n.language) })}
+                </span>
+              }
+              aside={
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className={quiet}
+                  onClick={() => remove.mutate(d.id)}
+                >
+                  {t("pwa.removeDevice")}
+                  <span className="sr-only"> {d.device || d.push_service}</span>
+                </Button>
+              }
+            />
+          </PanelRow>
         ))}
-      </ul>
-    </section>
+      </PanelRows>
+    </RuledPanel>
   );
 }
 
@@ -178,7 +210,6 @@ function Preferences() {
       ),
     onSuccess: (data) => setRows(data.preferences),
   });
-  if (!rows) return <Spinner label={t("grid.loading")} />;
   const toggle = (category: string, channel: Preference["channels"][number], on: boolean) =>
     setRows((current) =>
       (current ?? []).map((r) =>
@@ -195,43 +226,58 @@ function Preferences() {
   return (
     <form
       aria-labelledby="what-you-hear"
-      className="space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
         save.mutate();
       }}
     >
-      <h2 id="what-you-hear" className="font-semibold">
-        {t("pwa.whatYouHear")}
-      </h2>
-      <p className="text-sm text-muted-foreground">{t("pwa.whatYouHearHelp")}</p>
-      {rows.map((row) => (
-        <fieldset key={row.category} className="space-y-1">
-          <legend className="text-sm font-medium">{t(`pwa.category.${row.category}`)}</legend>
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {row.available.map((channel) => (
-              <label key={channel} className="flex min-h-6 items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  className="size-5"
-                  checked={row.channels.includes(channel)}
-                  onChange={(e) => toggle(row.category, channel, e.target.checked)}
-                />
-                {t(`comms.channel.${channel}`)}
-              </label>
+      <RuledPanel
+        title={t("pwa.whatYouHear")}
+        titleId="what-you-hear"
+        description={t("pwa.whatYouHearHelp")}
+        flush
+      >
+        {!rows ? (
+          <PanelLoading label={t("grid.loading")} />
+        ) : (
+          <div className="divide-y divide-rule">
+            {rows.map((row) => (
+              <fieldset
+                key={row.category}
+                className="grid gap-x-4 gap-y-2 px-5 py-3 sm:grid-cols-[12rem_minmax(0,1fr)]"
+              >
+                <legend className="float-left text-sm font-medium sm:pt-0.5">
+                  {t(`pwa.category.${row.category}`)}
+                </legend>
+                <div className="flex flex-wrap gap-x-5 gap-y-1">
+                  {row.available.map((channel) => (
+                    <CheckboxField
+                      key={channel}
+                      className="min-h-6 justify-center"
+                      label={t(`comms.channel.${channel}`)}
+                      checked={row.channels.includes(channel)}
+                      onChange={(e) => toggle(row.category, channel, e.target.checked)}
+                    />
+                  ))}
+                </div>
+              </fieldset>
             ))}
           </div>
-        </fieldset>
-      ))}
-      <Button type="submit" loading={save.isPending}>
-        {t("comms.save")}
-      </Button>
-      {save.isSuccess ? (
-        <p role="status" className="text-sm">
-          {t("pwa.saved")}
-        </p>
-      ) : null}
-      {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
+        )}
+        {save.error ? (
+          <div className="px-5 pb-4">
+            <Alert tone="danger">{save.error.message}</Alert>
+          </div>
+        ) : null}
+        <PanelFooter>
+          <Button type="submit" loading={save.isPending}>
+            {t("comms.save")}
+          </Button>
+          <span role="status" className="text-sm text-success">
+            {save.isSuccess ? t("pwa.saved") : ""}
+          </span>
+        </PanelFooter>
+      </RuledPanel>
     </form>
   );
 }
