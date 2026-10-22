@@ -1,6 +1,16 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  NamePlate,
+  Panel,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  SelectField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
@@ -105,28 +115,43 @@ export function BackgroundChecksCard({ tutorId }: { tutorId: string }) {
   );
   const rows: Check[] = checks.data?.results ?? [];
   return (
-    <section className="rounded-lg border border-border p-4 text-sm" aria-labelledby="bg-checks">
-      <h2 id="bg-checks" className="mb-2 font-semibold">
-        {t("backgroundChecks.title")}
-      </h2>
+    <Panel title={t("backgroundChecks.title")} flush>
       {rows.length === 0 ? (
-        <p className="text-muted-foreground">{t("backgroundChecks.none")}</p>
+        <p className="px-5 py-4 text-sm text-muted-foreground">{t("backgroundChecks.none")}</p>
       ) : (
-        <ul className="space-y-2">
+        <PanelRows>
           {rows.map((c) => {
             const shown = details[c.id];
+            const waiting = c.status === "completed" && c.result === "consider" && !c.reviewed_at;
             return (
-              <li key={c.id} className="space-y-1 rounded-md border border-border p-2">
-                <p>
-                  <strong>{c.provider_label}</strong> · {t(`backgroundChecks.status.${c.status}`)}
-                  {c.result ? ` · ${t(`backgroundChecks.result.${c.result}`)}` : ""}
-                  {c.completed_at ? ` · ${formatDateTime(c.completed_at, i18n.language)}` : ""}
-                </p>
-                {c.error ? <p className="text-danger">{c.error}</p> : null}
+              <PanelRow key={c.id} className="space-y-2">
+                <NamePlate
+                  name={c.provider_label}
+                  context={
+                    <>
+                      {t(`backgroundChecks.status.${c.status}`)}
+                      {c.result ? (
+                        <>
+                          {" · "}
+                          <span className={waiting ? "font-semibold text-margin" : undefined}>
+                            {t(`backgroundChecks.result.${c.result}`)}
+                          </span>
+                        </>
+                      ) : null}
+                      {c.completed_at ? (
+                        <span className="tabular-nums">
+                          {" · "}
+                          {formatDateTime(c.completed_at, i18n.language)}
+                        </span>
+                      ) : null}
+                    </>
+                  }
+                />
+                {c.error ? <p className="text-sm text-danger">{c.error}</p> : null}
                 {c.verification_link ? (
                   <p>
                     <a
-                      className="underline"
+                      className="text-link underline-offset-2 hover:underline"
                       href={c.verification_link}
                       target="_blank"
                       rel="noreferrer"
@@ -136,17 +161,19 @@ export function BackgroundChecksCard({ tutorId }: { tutorId: string }) {
                   </p>
                 ) : null}
                 {shown ? (
-                  <dl className="grid grid-cols-[auto_1fr] gap-x-2">
-                    <dt>{t("backgroundChecks.certificate")}</dt>
-                    <dd>{shown.certificate_number || "–"}</dd>
-                    <dt>{t("backgroundChecks.issued")}</dt>
-                    <dd>{c.certificate_issue_date ? formatDate(c.certificate_issue_date) : "–"}</dd>
+                  <dl className="grid grid-cols-[minmax(6rem,40%)_minmax(0,1fr)] gap-x-4 gap-y-1 rounded-md border border-border px-3 py-2">
+                    <dt className="text-muted-foreground">{t("backgroundChecks.certificate")}</dt>
+                    <dd className="tabular-nums">{shown.certificate_number || "–"}</dd>
+                    <dt className="text-muted-foreground">{t("backgroundChecks.issued")}</dt>
+                    <dd className="tabular-nums">
+                      {c.certificate_issue_date ? formatDate(c.certificate_issue_date) : "–"}
+                    </dd>
                     {shown.report_url ? (
                       <>
-                        <dt>{t("backgroundChecks.report")}</dt>
+                        <dt className="text-muted-foreground">{t("backgroundChecks.report")}</dt>
                         <dd>
                           <a
-                            className="underline"
+                            className="text-link underline-offset-2 hover:underline"
                             href={shown.report_url}
                             target="_blank"
                             rel="noreferrer"
@@ -158,24 +185,22 @@ export function BackgroundChecksCard({ tutorId }: { tutorId: string }) {
                     ) : null}
                   </dl>
                 ) : null}
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-2 empty:hidden">
+                  {canVerify &&
+                  ((c.provider === "wwcc" && OPEN.has(c.status)) ||
+                    (c.status === "completed" && c.result === "consider" && !c.reviewed_at)) ? (
+                    <Button size="sm" onClick={() => outcome.mutate({ id: c.id, result: "clear" })}>
+                      {t("backgroundChecks.markClear")}
+                    </Button>
+                  ) : null}
                   {canRequest && OPEN.has(c.status) ? (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => act.mutate({ id: c.id, kind: "refresh" })}
-                      >
-                        {t("backgroundChecks.checkNow")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => act.mutate({ id: c.id, kind: "cancel" })}
-                      >
-                        {t("backgroundChecks.cancel")}
-                      </Button>
-                    </>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => act.mutate({ id: c.id, kind: "refresh" })}
+                    >
+                      {t("backgroundChecks.checkNow")}
+                    </Button>
                   ) : null}
                   {canResults &&
                   c.status === "completed" &&
@@ -188,108 +213,121 @@ export function BackgroundChecksCard({ tutorId }: { tutorId: string }) {
                   {canVerify &&
                   ((c.provider === "wwcc" && OPEN.has(c.status)) ||
                     (c.status === "completed" && c.result === "consider" && !c.reviewed_at)) ? (
-                    <>
-                      <Button
-                        size="sm"
-                        onClick={() => outcome.mutate({ id: c.id, result: "clear" })}
-                      >
-                        {t("backgroundChecks.markClear")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => outcome.mutate({ id: c.id, result: "unable" })}
-                      >
-                        {t("backgroundChecks.markUnable")}
-                      </Button>
-                    </>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-muted-foreground"
+                      onClick={() => outcome.mutate({ id: c.id, result: "unable" })}
+                    >
+                      {t("backgroundChecks.markUnable")}
+                    </Button>
+                  ) : null}
+                  {canRequest && OPEN.has(c.status) ? (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-muted-foreground"
+                      onClick={() => act.mutate({ id: c.id, kind: "cancel" })}
+                    >
+                      {t("backgroundChecks.cancel")}
+                    </Button>
                   ) : null}
                 </div>
-              </li>
+              </PanelRow>
             );
           })}
-        </ul>
+        </PanelRows>
       )}
-      <ErrorList error={act.error ?? outcome.error ?? reveal.error} />
+      <div className="px-5 pb-4 empty:hidden">
+        <ErrorList error={act.error ?? outcome.error ?? reveal.error} />
+      </div>
       {canRequest && options.length ? (
         <form
-          className="mt-3 space-y-2 border-t border-border pt-3"
+          className="border-t border-border"
           aria-labelledby={`${formId}-title`}
           onSubmit={(e) => {
             e.preventDefault();
             start.mutate();
           }}
         >
-          <h3 id={`${formId}-title`} className="font-medium">
-            {t("backgroundChecks.start")}
-          </h3>
-          <SelectField
-            label={t("backgroundChecks.provider")}
-            value={chosen}
-            options={options.map((p) => ({
-              value: p.key,
-              label: p.recommended ? t("backgroundChecks.recommended", { name: p.title }) : p.title,
-            }))}
-            onChange={(e) => {
-              setProvider(e.target.value);
-              setPackageKey("");
-            }}
-          />
-          {selected && selected.packages.length ? (
-            <SelectField
-              label={t("backgroundChecks.package")}
-              value={packageKey || String(selected.packages[0]?.key ?? "")}
-              options={selected.packages.map((p) => ({
-                value: String(p.key),
-                label: String(p.label),
-              }))}
-              onChange={(e) => setPackageKey(e.target.value)}
-            />
-          ) : null}
-          {chosen === "dbs_update" ? (
-            <TextField
-              label={t("backgroundChecks.certificateNumber")}
-              hint={t("backgroundChecks.certificateHint")}
-              value={certificate}
-              autoComplete="off"
-              onChange={(e) => setCertificate(e.target.value)}
-            />
-          ) : null}
-          {chosen === "wwcc" ? (
-            <SelectField
-              label={t("backgroundChecks.state")}
-              value={stateCode}
-              options={AU_STATES.map((s) => ({ value: s, label: s }))}
-              onChange={(e) => setStateCode(e.target.value)}
-            />
-          ) : null}
-          {selected && !selected.connected ? (
-            <div className="space-y-1">
-              <Alert tone="warning">
-                {t("backgroundChecks.connectFirst", { name: selected.title })}
-              </Alert>
-              <ConnectProviders
-                level="organisation"
-                providers={connectable.filter((p) => p.key === chosen)}
-                returnPath={window.location.pathname}
+          <div className="space-y-3 px-5 py-4">
+            <h3 id={`${formId}-title`} className="text-sm font-semibold">
+              {t("backgroundChecks.start")}
+            </h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <SelectField
+                label={t("backgroundChecks.provider")}
+                value={chosen}
+                options={options.map((p) => ({
+                  value: p.key,
+                  label: p.recommended
+                    ? t("backgroundChecks.recommended", { name: p.title })
+                    : p.title,
+                }))}
+                onChange={(e) => {
+                  setProvider(e.target.value);
+                  setPackageKey("");
+                }}
               />
+              {selected && selected.packages.length ? (
+                <SelectField
+                  label={t("backgroundChecks.package")}
+                  value={packageKey || String(selected.packages[0]?.key ?? "")}
+                  options={selected.packages.map((p) => ({
+                    value: String(p.key),
+                    label: String(p.label),
+                  }))}
+                  onChange={(e) => setPackageKey(e.target.value)}
+                />
+              ) : null}
+              {chosen === "dbs_update" ? (
+                <TextField
+                  label={t("backgroundChecks.certificateNumber")}
+                  hint={t("backgroundChecks.certificateHint")}
+                  value={certificate}
+                  autoComplete="off"
+                  onChange={(e) => setCertificate(e.target.value)}
+                />
+              ) : null}
+              {chosen === "wwcc" ? (
+                <SelectField
+                  label={t("backgroundChecks.state")}
+                  value={stateCode}
+                  options={AU_STATES.map((s) => ({ value: s, label: s }))}
+                  onChange={(e) => setStateCode(e.target.value)}
+                />
+              ) : null}
             </div>
-          ) : null}
-          <label className="flex items-start gap-2">
-            <input
-              type="checkbox"
-              className="mt-1 size-4"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-            />
-            <span>{t("backgroundChecks.consent")}</span>
-          </label>
-          <Button size="sm" type="submit" disabled={!consent} loading={start.isPending}>
-            {t("backgroundChecks.startButton")}
-          </Button>
-          <ErrorList error={start.error} />
+            {selected && !selected.connected ? (
+              <div className="space-y-2">
+                <Alert tone="warning">
+                  {t("backgroundChecks.connectFirst", { name: selected.title })}
+                </Alert>
+                <ConnectProviders
+                  level="organisation"
+                  providers={connectable.filter((p) => p.key === chosen)}
+                  returnPath={window.location.pathname}
+                />
+              </div>
+            ) : null}
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5 size-4"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+              />
+              <span>{t("backgroundChecks.consent")}</span>
+            </label>
+            <ErrorList error={start.error} />
+          </div>
+          <PanelFooter>
+            <Button size="sm" type="submit" disabled={!consent} loading={start.isPending}>
+              {t("backgroundChecks.startButton")}
+            </Button>
+          </PanelFooter>
         </form>
       ) : null}
-    </section>
+    </Panel>
   );
 }

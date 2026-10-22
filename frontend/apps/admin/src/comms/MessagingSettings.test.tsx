@@ -66,9 +66,11 @@ describe("messaging settings (E13-T12)", () => {
       }),
     );
     render(<App />);
+    // The panel is titled by the address; its status is a word in the line beneath.
     expect(
-      await screen.findByRole("heading", { name: /hello@brightminds.co.uk · Waiting for DNS/ }),
+      await screen.findByRole("heading", { name: "hello@brightminds.co.uk" }),
     ).toBeInTheDocument();
+    expect(screen.getByText("Waiting for DNS")).toBeInTheDocument();
     expect(screen.getByText("pm._domainkey.brightminds.co.uk")).toBeInTheDocument();
     expect(screen.getByText("Recommended")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Check DNS" }));

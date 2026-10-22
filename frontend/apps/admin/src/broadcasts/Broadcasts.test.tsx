@@ -121,11 +121,14 @@ describe("broadcasts (E13-T10)", () => {
     mockApi(routes());
     render(<App />);
     fireEvent.click(await screen.findByRole("button", { name: "Half term" }));
-    const detail = await screen.findByRole("region", { name: /Half term · Sent/ });
+    const detail = await screen.findByRole("region", { name: "Half term" });
+    expect(within(detail).getByText("Sent", { selector: "span" })).toBeInTheDocument();
     expect(within(detail).getByText("Hello Priya")).toBeInTheDocument();
-    const opened = within(detail).getByText("Opened").closest("div")!;
+    const opened = within(detail).getByText("Opened", { selector: "dt" }).closest("div")!;
     expect(within(opened).getByText("3")).toBeInTheDocument();
-    expect(within(detail).getByText("opened")).toBeInTheDocument();
+    // Each recipient's outcome is a word, not the raw delivery status.
+    const recipients = within(detail).getByRole("table", { name: "Recipients" });
+    expect(within(recipients).getByText("Opened")).toBeInTheDocument();
     expect(within(detail).getByText("1 has no address for this channel")).toBeInTheDocument();
   });
 
@@ -176,7 +179,7 @@ describe("broadcasts (E13-T10)", () => {
         definition: { client_statuses: ["active"], tags: ["tg1"], contacts: "primary" },
       }),
     );
-    const detail = await screen.findByRole("region", { name: /Offer · Draft/ });
+    const detail = await screen.findByRole("region", { name: "Offer" });
     fireEvent.click(within(detail).getByRole("button", { name: "Send now" }));
     await waitFor(() =>
       expect(calls.find((c) => c.path.endsWith("/schedule"))?.body).toEqual({

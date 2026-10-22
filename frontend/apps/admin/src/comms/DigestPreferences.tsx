@@ -1,6 +1,6 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, TextField } from "@tutortrack/ui";
+import { Alert, Button, Panel, PanelFooter, SelectField, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -45,61 +45,68 @@ export function DigestPreferences() {
     setDraft((d) => ({ ...d, [row.kind]: { ...row, ...patch } }));
 
   return (
-    <section aria-labelledby="digests-title" className="space-y-3">
-      <h2 id="digests-title" className="font-semibold">
-        {t("digests.title")}
-      </h2>
+    <Panel title={t("digests.title")} titleId="digests-title" flush>
       <form
-        className="space-y-3"
+        aria-labelledby="digests-title"
         onSubmit={(e) => {
           e.preventDefault();
           save.mutate(current);
         }}
       >
-        {current.map((row) => (
-          <fieldset key={row.kind} className="space-y-2 rounded-md border border-border p-3">
-            <legend className="px-1 text-sm font-medium">{t(`digests.kind.${row.kind}`)}</legend>
-            {!row.org_enabled ? (
-              <p className="text-xs text-muted-foreground">{t("digests.notSent")}</p>
-            ) : null}
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                className="size-4"
-                checked={row.enabled}
-                onChange={(e) => change(row, { enabled: e.target.checked })}
-              />
-              {t("digests.wantIt")}
-            </label>
-            <div className="flex flex-wrap items-end gap-3">
-              <TextField
-                className="w-32"
-                type="time"
-                label={t("digests.time")}
-                value={row.send_time}
-                onChange={(e) => change(row, { send_time: e.target.value })}
-              />
-              {row.weekday !== null && row.weekday !== undefined ? (
-                <SelectField
-                  label={t("digests.day")}
-                  value={String(row.weekday)}
-                  onChange={(e) => change(row, { weekday: Number(e.target.value) })}
-                  options={DAYS.map((d) => ({ value: String(d), label: weekday(d) }))}
-                />
-              ) : null}
+        <div className="divide-y divide-rule">
+          {current.map((row) => (
+            <div key={row.kind} className="px-5 py-4">
+              <fieldset className="space-y-3">
+                <legend className="text-sm font-semibold">{t(`digests.kind.${row.kind}`)}</legend>
+                {!row.org_enabled ? (
+                  <p className="text-xs text-muted-foreground">{t("digests.notSent")}</p>
+                ) : null}
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="size-4"
+                    checked={row.enabled}
+                    onChange={(e) => change(row, { enabled: e.target.checked })}
+                  />
+                  {t("digests.wantIt")}
+                </label>
+                <div className="flex flex-wrap items-end gap-3">
+                  <TextField
+                    className="w-32 tabular-nums"
+                    type="time"
+                    label={t("digests.time")}
+                    value={row.send_time}
+                    onChange={(e) => change(row, { send_time: e.target.value })}
+                  />
+                  {row.weekday !== null && row.weekday !== undefined ? (
+                    <SelectField
+                      label={t("digests.day")}
+                      value={String(row.weekday)}
+                      onChange={(e) => change(row, { weekday: Number(e.target.value) })}
+                      options={DAYS.map((d) => ({ value: String(d), label: weekday(d) }))}
+                    />
+                  ) : null}
+                </div>
+              </fieldset>
             </div>
-          </fieldset>
-        ))}
-        <Button type="submit" size="sm" disabled={save.isPending}>
-          {t("digests.save")}
-        </Button>
-        {save.isSuccess ? (
-          <p role="status" className="text-xs text-muted-foreground">
-            {t("digests.saved")}
-          </p>
+          ))}
+        </div>
+        {save.error ? (
+          <div className="px-5 pb-4">
+            <Alert tone="danger">{save.error.message}</Alert>
+          </div>
         ) : null}
-        {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
+        <PanelFooter>
+          <Button type="submit" size="sm" loading={save.isPending}>
+            {t("digests.save")}
+          </Button>
+          {save.isSuccess ? (
+            <span role="status" className="text-muted-foreground">
+              {t("digests.saved")}
+            </span>
+          ) : null}
+        </PanelFooter>
       </form>
-    </section>
+    </Panel>
   );
 }

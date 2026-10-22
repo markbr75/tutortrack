@@ -1,11 +1,19 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  NamePlate,
+  PanelFooter,
+  PanelRows,
+  RuledPanel,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
 import { api, usePermission } from "../api";
-import { Card } from "./shared";
 
 type Post = components["schemas"]["BlogPost"];
 
@@ -29,23 +37,35 @@ export function BlogTab() {
   });
   const canManage = usePermission("sites.site.manage");
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">{t("blogPosts.intro")}</p>
-      {canManage && !editing ? (
-        <Button onClick={() => setEditing("new")}>{t("blogPosts.new")}</Button>
-      ) : null}
+    <div className="max-w-4xl space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <p className="max-w-2xl text-sm text-muted-foreground">{t("blogPosts.intro")}</p>
+        {canManage && !editing ? (
+          <Button onClick={() => setEditing("new")}>{t("blogPosts.new")}</Button>
+        ) : null}
+      </div>
       {editing ? (
-        <PostEditor post={editing === "new" ? null : editing} onClose={() => setEditing(null)} />
+        <PostEditor
+          key={editing === "new" ? "new" : editing.id}
+          post={editing === "new" ? null : editing}
+          onClose={() => setEditing(null)}
+        />
       ) : null}
-      {posts.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      {posts.data?.results.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("blogPosts.none")}</p>
-      ) : null}
-      <ul className="divide-y divide-border">
-        {posts.data?.results.map((post) => (
-          <PostRow key={post.id} post={post} onEdit={() => setEditing(post)} />
-        ))}
-      </ul>
+      {posts.isPending ? (
+        <Spinner label={t("grid.loading")} />
+      ) : (
+        <RuledPanel title={t("blogPosts.tab")} flush>
+          {posts.data?.results.length ? (
+            <PanelRows>
+              {posts.data.results.map((post) => (
+                <PostRow key={post.id} post={post} onEdit={() => setEditing(post)} />
+              ))}
+            </PanelRows>
+          ) : (
+            <p className="px-5 py-4 text-sm text-muted-foreground">{t("blogPosts.none")}</p>
+          )}
+        </RuledPanel>
+      )}
     </div>
   );
 }
@@ -71,25 +91,43 @@ function PostRow({ post, onEdit }: { post: Post; onEdit: () => void }) {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["site-posts"] }),
   });
   return (
-    <li className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
-      <div>
-        <p className="font-medium">{post.title}</p>
-        <p className="text-muted-foreground">
-          {t(`blogPosts.status.${post.status}`)}
-          {post.published_at ? ` · ${formatDateTime(post.published_at)}` : ""} · {post.url}
-        </p>
-      </div>
-      <div className="flex gap-2">
-        <Button size="sm" variant="secondary" onClick={onEdit}>
-          {t("blogPosts.edit")}
-        </Button>
-        {canPublish ? (
-          <Button size="sm" loading={toggle.isPending} onClick={() => toggle.mutate()}>
-            {post.status === "published" ? t("blogPosts.unpublish") : t("blogPosts.publish")}
-          </Button>
-        ) : null}
-      </div>
-      {toggle.error ? <Alert tone="danger">{toggle.error.message}</Alert> : null}
+    <li className="px-5 py-2.5 text-sm">
+      <NamePlate
+        name={post.title}
+        context={
+          <>
+            <span className={post.status === "published" ? undefined : "text-foreground"}>
+              {t(`blogPosts.status.${post.status}`)}
+            </span>
+            {post.published_at ? (
+              <span className="tabular-nums"> · {formatDateTime(post.published_at)}</span>
+            ) : null}{" "}
+            · <span className="break-all">{post.url}</span>
+          </>
+        }
+        aside={
+          <>
+            <Button size="sm" variant="secondary" onClick={onEdit}>
+              {t("blogPosts.edit")}
+            </Button>
+            {canPublish ? (
+              <Button
+                size="sm"
+                variant={post.status === "published" ? "ghost" : "secondary"}
+                loading={toggle.isPending}
+                onClick={() => toggle.mutate()}
+              >
+                {post.status === "published" ? t("blogPosts.unpublish") : t("blogPosts.publish")}
+              </Button>
+            ) : null}
+          </>
+        }
+      />
+      {toggle.error ? (
+        <Alert tone="danger" className="mt-2">
+          {toggle.error.message}
+        </Alert>
+      ) : null}
     </li>
   );
 }
@@ -129,67 +167,76 @@ function PostEditor({ post, onClose }: { post: Post | null; onClose: () => void 
     },
   });
   return (
-    <Card title={post ? t("blogPosts.editTitle") : t("blogPosts.new")}>
+    <RuledPanel title={post ? t("blogPosts.editTitle") : t("blogPosts.new")} flush>
       <form
-        className="space-y-3"
         onSubmit={(e) => {
           e.preventDefault();
           save.mutate();
         }}
       >
-        <TextField
-          label={t("blogPosts.title")}
-          value={form.title}
-          onChange={set("title")}
-          required
-        />
-        <TextField
-          label={t("blogPosts.slug")}
-          hint={t("blogPosts.slugHint")}
-          value={form.slug}
-          onChange={set("slug")}
-        />
-        <TextField label={t("blogPosts.excerpt")} value={form.excerpt} onChange={set("excerpt")} />
-        <div className="flex flex-col gap-1">
-          <label htmlFor={bodyId} className="text-sm font-medium">
-            {t("blogPosts.body")}
-          </label>
-          <textarea
-            id={bodyId}
-            className="min-h-48 rounded-md border border-border bg-background p-2 text-sm"
-            aria-describedby={`${bodyId}-hint`}
-            value={form.body}
-            onChange={set("body")}
+        <div className="space-y-4 px-5 py-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField
+              label={t("blogPosts.title")}
+              value={form.title}
+              onChange={set("title")}
+              required
+            />
+            <TextField
+              label={t("blogPosts.slug")}
+              hint={t("blogPosts.slugHint")}
+              value={form.slug}
+              onChange={set("slug")}
+            />
+          </div>
+          <TextField
+            label={t("blogPosts.excerpt")}
+            value={form.excerpt}
+            onChange={set("excerpt")}
           />
-          <p id={`${bodyId}-hint`} className="text-xs text-muted-foreground">
-            {t("blogPosts.bodyHint")}
-          </p>
+          <div className="flex flex-col gap-1">
+            <label htmlFor={bodyId} className="text-sm font-medium">
+              {t("blogPosts.body")}
+            </label>
+            <textarea
+              id={bodyId}
+              className="min-h-48 rounded-md border border-field bg-surface px-3 py-2 text-sm"
+              aria-describedby={`${bodyId}-hint`}
+              value={form.body}
+              onChange={set("body")}
+            />
+            <p id={`${bodyId}-hint`} className="text-xs text-muted-foreground">
+              {t("blogPosts.bodyHint")}
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <TextField
+              label={t("blogPosts.author")}
+              value={form.author_name}
+              onChange={set("author_name")}
+            />
+            <TextField
+              label={t("blogPosts.seoTitle")}
+              value={form.seo_title}
+              onChange={set("seo_title")}
+            />
+            <TextField
+              label={t("blogPosts.metaDescription")}
+              value={form.meta_description}
+              onChange={set("meta_description")}
+            />
+          </div>
+          {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
         </div>
-        <TextField
-          label={t("blogPosts.author")}
-          value={form.author_name}
-          onChange={set("author_name")}
-        />
-        <TextField
-          label={t("blogPosts.seoTitle")}
-          value={form.seo_title}
-          onChange={set("seo_title")}
-        />
-        <TextField
-          label={t("blogPosts.metaDescription")}
-          value={form.meta_description}
-          onChange={set("meta_description")}
-        />
-        {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
-        <div className="flex gap-2">
-          <Button type="submit" loading={save.isPending}>
+        <PanelFooter>
+          <Button type="submit" size="sm" loading={save.isPending}>
             {t("blogPosts.save")}
           </Button>
-          <Button type="button" variant="secondary" onClick={onClose}>
+          <Button type="button" size="sm" variant="ghost" onClick={onClose}>
             {t("blogPosts.cancel")}
           </Button>
-        </div>
+        </PanelFooter>
       </form>
-    </Card>
+    </RuledPanel>
   );
 }
