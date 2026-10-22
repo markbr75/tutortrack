@@ -1709,7 +1709,8 @@
       "submit": "Save and submit",
       "saved": "Saved. Your changes will show once approved.",
       "published": "Saved and published."
-    }
+    },
+    "earlierToMark": "Earlier lessons to mark"
   },
   "plan": {
     "title": "Billing & plan",

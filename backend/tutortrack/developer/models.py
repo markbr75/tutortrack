@@ -245,3 +245,6 @@ class Sandbox(TenantModel):
 
     class Meta(TenantModel.Meta):
         ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return self.name

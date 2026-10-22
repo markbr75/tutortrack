@@ -145,6 +145,9 @@ class Charge(BranchScopedModel):
             models.Index(fields=["client", "status"], name="charge_client_idx"),
         ]
 
+    def __str__(self) -> str:
+        return f"{self.get_kind_display()} {self.date:%Y-%m-%d} ({self.gross})"
+
 
 class InvoiceRun(BranchScopedModel):
     """A batch of draft invoices for a period (FR-10-3). ``branch`` is the branch whose
@@ -306,6 +309,9 @@ class CreditNote(BranchScopedModel):
         constraints = [
             models.UniqueConstraint(fields=["organisation", "number"], name="credit_note_number")
         ]
+
+    def __str__(self) -> str:
+        return self.number
 
 
 class CreditNoteLine(TenantModel):

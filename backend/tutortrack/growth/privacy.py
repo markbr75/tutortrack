@@ -10,6 +10,7 @@ from typing import Any
 
 from django.db.models import Q
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from tutortrack.privacy import subjects
 from tutortrack.privacy.registry import (
@@ -178,7 +179,7 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
 register(
     Provider(
         key="growth",
-        label="Reviews and referrals",
+        label=gettext_lazy("Reviews and referrals"),
         expand=expand,
         export=export,
         erase=erase,

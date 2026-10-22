@@ -7,7 +7,7 @@ from typing import Any
 
 from django.utils.dateparse import parse_date
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -57,8 +57,27 @@ class TutorMeView(TutorView):
 
 
 class TutorTodayView(TutorView):
-    @extend_schema(responses=s.TutorTodaySerializer)
+    @extend_schema(
+        responses=s.TutorTodaySerializer,
+        examples=[
+            OpenApiExample(
+                "Two lessons to mark",
+                response_only=True,
+                value={
+                    "date": "2026-10-22",
+                    "lessons": [],
+                    "reports_due": 1,
+                    "unmarked_lessons": 2,
+                    "offers": 0,
+                    "unread": 3,
+                    "earnings_this_month": {"amount": "420.00", "currency": "GBP"},
+                },
+            )
+        ],
+    )
     def get(self, request: Request) -> Response:
+        """The tutor's day, plus what is waiting: ``unmarked_lessons`` counts lessons that
+        have ended and are still planned, on any of the last 60 days."""
         return Response(
             s.TutorTodaySerializer(selectors.today(self.tutor(request), request.user)).data
         )

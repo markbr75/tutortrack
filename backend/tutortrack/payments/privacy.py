@@ -8,6 +8,7 @@ from typing import Any
 
 from django.db.models import Q
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from tutortrack.privacy.registry import (
     ErasureContext,
@@ -99,4 +100,6 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
     return out
 
 
-register(Provider(key="payments", label="Payments", export=export, erase=erase, order=41))
+register(
+    Provider(key="payments", label=gettext_lazy("Payments"), export=export, erase=erase, order=41)
+)

@@ -52,6 +52,9 @@ class CancellationPolicy(TenantModel):
             ),
         ]
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class CancellationRecord(TenantModel):
     """Who cancelled a lesson, with how much notice, and what the policy decided."""
@@ -153,6 +156,9 @@ class ReportTemplate(TenantModel):
             )
         ]
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class ReportTemplateVersion(TenantModel):
     """``fields``: ``[{"key", "label", "type", "required", "visibility", "options",
@@ -230,6 +236,9 @@ class LessonReport(TenantModel):
         if self.status == self.Status.SUBMITTED:
             return "submitted"
         return "overdue" if self.due_at <= moment else "due"
+
+    def __str__(self) -> str:
+        return f"Lesson report due {self.due_at:%Y-%m-%d}"
 
 
 class LessonReportComment(TenantModel):

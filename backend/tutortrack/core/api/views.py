@@ -7,7 +7,14 @@ from django.db.models import QuerySet
 from django.http import HttpResponse
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiParameter,
+    extend_schema,
+    extend_schema_field,
+    extend_schema_serializer,
+    inline_serializer,
+)
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -16,7 +23,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .. import flags
+from .. import audit_labels, flags
 from ..context import require_organisation_id
 from ..models import AuditEntry, StoredFile
 from ..permissions import HasOrganisation, HasPermission
@@ -27,17 +34,52 @@ from .viewsets import TenantScopedViewMixin
 # --- audit --------------------------------------------------------------------------------------
 
 
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            "A lesson series that changed",
+            response_only=True,
+            value={
+                "id": "01a16c2e-5b1f-7c4e-9d0a-6f2b8e1c3a47",
+                "action": "status_change",
+                "action_label": "Status changed",
+                "object_type": "scheduling.lessonseries",
+                "record_type_label": "Lesson series",
+                "object_id": "01a13c73-be4e-728d-8dab-387399f8d864",
+                "object_repr": "LessonSeries object (01a13c73-be4e-728d-8dab-387399f8d864)",
+                "record_label": "Lesson series #f8d864",
+                "changes": {"status": ["active", "ended"]},
+                "actor": "01a13c70-0d1e-7a55-8c3f-2b9e4d6a1f00",
+                "actor_email": "owner@example.com",
+                "impersonator": None,
+                "ip": "203.0.113.7",
+                "request_id": "req-4f9c",
+                "created_at": "2026-10-21T09:30:00Z",
+            },
+        )
+    ]
+)
 class AuditEntrySerializer(BaseModelSerializer):
+    """An audit entry. ``object_repr`` is the record's name when it changed (what ``q``
+    searches); ``record_label``, ``record_type_label`` and ``action_label`` are readable
+    labels computed when read, in the request's language."""
+
     actor_email = serializers.EmailField(source="actor.email", read_only=True, default=None)
+    action_label = serializers.SerializerMethodField()
+    record_type_label = serializers.SerializerMethodField()
+    record_label = serializers.SerializerMethodField()
 
     class Meta:
         model = AuditEntry
         fields = [
             "id",
             "action",
+            "action_label",
             "object_type",
+            "record_type_label",
             "object_id",
             "object_repr",
+            "record_label",
             "changes",
             "actor",
             "actor_email",
@@ -47,6 +89,18 @@ class AuditEntrySerializer(BaseModelSerializer):
             "created_at",
         ]
         read_only_fields = fields
+
+    @extend_schema_field(serializers.CharField())
+    def get_action_label(self, obj: AuditEntry) -> str:
+        return audit_labels.action_label(obj.action)
+
+    @extend_schema_field(serializers.CharField())
+    def get_record_type_label(self, obj: AuditEntry) -> str:
+        return audit_labels.record_type_label(obj.object_type)
+
+    @extend_schema_field(serializers.CharField())
+    def get_record_label(self, obj: AuditEntry) -> str:
+        return audit_labels.record_label(obj.object_type, obj.object_id, obj.object_repr)
 
 
 class AuditEntryFilter(filters.FilterSet):

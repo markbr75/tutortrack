@@ -30,6 +30,9 @@ class MatchQuery(TenantModel):
     class Meta(TenantModel.Meta):
         ordering = ["-created_at"]
 
+    def __str__(self) -> str:
+        return f"Tutor search ({self.result_count} found)"
+
 
 class MatchResult(TenantModel):
     query = models.ForeignKey(MatchQuery, on_delete=models.CASCADE, related_name="results")
@@ -140,6 +143,9 @@ class JobPosting(TenantModel):
 
     class Meta(TenantModel.Meta):
         ordering = ["-published_at"]
+
+    def __str__(self) -> str:
+        return self.title
 
 
 class JobPostingApplication(TenantModel):

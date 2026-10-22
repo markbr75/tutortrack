@@ -81,6 +81,9 @@ class ProviderAccount(TenantModel):
             ),
         ]
 
+    def __str__(self) -> str:
+        return f"{self.get_provider_display()} {self.account_ref}"
+
 
 class ProviderCustomer(TenantModel):
     client = models.ForeignKey("people.Client", on_delete=models.CASCADE, related_name="+")
@@ -236,6 +239,9 @@ class Payment(BranchScopedModel):
         ]
         indexes = [models.Index(fields=["client", "status"], name="payment_client_idx")]
 
+    def __str__(self) -> str:
+        return f"{self.get_method_display()} {self.amount}"
+
 
 class PaymentAllocation(TenantModel):
     payment = models.ForeignKey(Payment, on_delete=models.PROTECT, related_name="allocations")
@@ -295,6 +301,9 @@ class Refund(TenantModel):
 
     class Meta(TenantModel.Meta):
         ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"Refund {self.amount}"
 
 
 class Dispute(TenantModel):

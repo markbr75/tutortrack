@@ -182,7 +182,7 @@ class RetentionCategory:
 @dataclass(frozen=True)
 class Provider:
     key: str
-    label: str
+    label: Any  # str or lazy translation; names the area in erasure reports
     expand: Callable[[Person], None] | None = None
     export: Callable[[Person], list[Section]] | None = None
     files: Callable[[Person], list[Any]] | None = None

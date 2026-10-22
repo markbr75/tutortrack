@@ -74,7 +74,7 @@ def _purge_video_events(cutoff: datetime, dry_run: bool, limit: int) -> int:
     return MeetingParticipantEvent.objects.filter(pk__in=ids).delete()[0]
 
 
-register(Provider(key="calendar_sync", label="Online lessons", erase=erase, order=37))
+register(Provider(key="calendar_sync", label=gettext_lazy("Online lessons"), erase=erase, order=37))
 register_retention(
     RetentionCategory(
         key="recordings",

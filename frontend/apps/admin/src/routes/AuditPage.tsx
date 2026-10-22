@@ -118,10 +118,17 @@ export function AuditPage() {
       />
     </label>
   );
-  const action = (code: string) =>
-    t(`designS9b.audit.actions.${code}`, { defaultValue: humanise(code) });
-  const objectType = (code: string) =>
-    t(`designS9b.audit.objects.${code}`, { defaultValue: humanise(code.split(".").pop() ?? code) });
+  // The API sends readable labels (action, record type, record); older responses without
+  // them fall back to the translated or humanised codes and the recorded description.
+  const action = (entry: AuditEntry) =>
+    entry.action_label ||
+    t(`designS9b.audit.actions.${entry.action}`, { defaultValue: humanise(entry.action) });
+  const objectType = (entry: AuditEntry) =>
+    entry.record_type_label ||
+    t(`designS9b.audit.objects.${entry.object_type}`, {
+      defaultValue: humanise(entry.object_type.split(".").pop() ?? entry.object_type),
+    });
+  const record = (entry: AuditEntry) => entry.record_label || entry.object_repr;
 
   const columns = useMemo<ColumnDef<AuditEntry, unknown>[]>(
     () => [
@@ -131,7 +138,7 @@ export function AuditPage() {
         cell: ({ row }) => (
           <div className="min-w-32">
             <span className="block font-medium whitespace-nowrap">
-              {action(row.original.action)}
+              {action(row.original)}
             </span>
             {/* Who and when fold into one caption under the action (and, on phones, the
                 record). Each part stays whole, so the line only wraps at a separator. */}
@@ -143,10 +150,10 @@ export function AuditPage() {
               <span className="whitespace-nowrap">
                 {formatDateTime(row.original.created_at, i18n.language)}
               </span>
-              {phone && row.original.object_repr ? (
+              {phone && record(row.original) ? (
                 <>
                   {" · "}
-                  <span className="[overflow-wrap:anywhere]">{row.original.object_repr}</span>
+                  <span className="[overflow-wrap:anywhere]">{record(row.original)}</span>
                 </>
               ) : null}
             </span>
@@ -158,9 +165,9 @@ export function AuditPage() {
         header: t("audit.object"),
         cell: ({ row }) => (
           <div className="min-w-28">
-            <span className="block [overflow-wrap:anywhere]">{row.original.object_repr}</span>
+            <span className="block [overflow-wrap:anywhere]">{record(row.original)}</span>
             <span className="block text-xs text-muted-foreground">
-              {objectType(row.original.object_type)}
+              {objectType(row.original)}
             </span>
           </div>
         ),
@@ -175,7 +182,7 @@ export function AuditPage() {
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- action/objectType follow t
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- action/objectType/record follow t
     [t, i18n.language, phone],
   );
 

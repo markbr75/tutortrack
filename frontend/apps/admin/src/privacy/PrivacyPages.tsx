@@ -673,6 +673,8 @@ function ErasureReport({
     string,
     { anonymised?: number; deleted?: number; retained?: number; notes?: string[] }
   >;
+  // Areas are provider keys ("scheduling"); the API names them ("Lessons").
+  const areaLabels = (record.area_labels ?? {}) as Record<string, string>;
   const caption = t("privacyCentre.erasureReport", {
     status: t(`privacyCentre.erasureStatuses.${record.status}`),
     date: record.completed_at ? formatDateTime(record.completed_at, locale) : "",
@@ -693,7 +695,7 @@ function ErasureReport({
           .filter(([, v]) => v && typeof v === "object" && "anonymised" in v)
           .map(([key, v]) => (
             <tr key={key}>
-              <td>{key}</td>
+              <td>{areaLabels[key] || key}</td>
               <td className={figureCell}>{v.anonymised}</td>
               <td className={figureCell}>{v.deleted}</td>
               <td>
@@ -1085,7 +1087,12 @@ function RetentionSection() {
             </Cell>
             <Cell className="min-w-48 text-xs text-muted-foreground tabular-nums">
               {Object.entries(r.report as Record<string, { due?: number; done?: number }>)
-                .map(([k, v]) => `${k}: ${r.dry_run ? (v.due ?? 0) : (v.done ?? 0)}`)
+                .map(
+                  ([k, v]) =>
+                    `${(r.area_labels as Record<string, string> | undefined)?.[k] || k}: ${
+                      r.dry_run ? (v.due ?? 0) : (v.done ?? 0)
+                    }`,
+                )
                 .join(", ")}
             </Cell>
           </tr>

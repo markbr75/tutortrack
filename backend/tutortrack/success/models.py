@@ -45,6 +45,9 @@ class SetupChecklist(TenantModel):
             models.UniqueConstraint(fields=["organisation"], name="setup_checklist_one_per_org")
         ]
 
+    def __str__(self) -> str:
+        return "Setup checklist"
+
 
 class SetupChecklistItem(TenantModel):
     class Key(models.TextChoices):
@@ -67,6 +70,9 @@ class SetupChecklistItem(TenantModel):
         constraints = [
             models.UniqueConstraint(fields=["organisation", "key"], name="setup_item_unique")
         ]
+
+    def __str__(self) -> str:
+        return f"Setup step: {self.get_key_display()}"
 
 
 class SurveyResponse(TenantModel):

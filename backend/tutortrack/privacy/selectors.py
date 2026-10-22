@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Any
 
 from django.db.models import Q, QuerySet
+from django.utils.translation import gettext_lazy
 
 from tutortrack.core.permissions import has_perm, permission_scope
 
@@ -100,6 +101,44 @@ def is_erased(subject_type: str, subject_id: Any) -> bool:
         subject_id=str(subject_id),
         status=ErasureRecord.Status.COMPLETED,
     ).exists()
+
+
+# --- report labels ------------------------------------------------------------------------------
+
+# Erasure report keys the engine writes itself, next to one key per provider.
+ERASURE_STEP_LABELS: dict[str, Any] = {
+    "files": gettext_lazy("Files"),
+    "logins": gettext_lazy("Logins ended"),
+    "financial": gettext_lazy("Financial records"),
+    "blocked": gettext_lazy("Blocked"),
+}
+
+
+def erasure_area_label(key: str) -> str:
+    """The name of an erasure report area: the provider's label (``Provider.label``) or a
+    step the engine runs itself. Unknown keys (a provider since removed) show as they are."""
+    from . import registry
+
+    try:
+        return str(registry.provider(key).label)
+    except KeyError:
+        return str(ERASURE_STEP_LABELS.get(key, key))
+
+
+def retention_area_label(key: str) -> str:
+    """The name of a retention run report area: the category's label."""
+    from . import registry
+
+    category = registry.retention_category(key)
+    return str(category.label) if category else key
+
+
+def erasure_area_labels(report: dict[str, Any]) -> dict[str, str]:
+    return {key: erasure_area_label(key) for key in report}
+
+
+def retention_area_labels(report: dict[str, Any]) -> dict[str, str]:
+    return {key: retention_area_label(key) for key in report}
 
 
 # --- safeguarding -------------------------------------------------------------------------------

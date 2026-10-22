@@ -4,6 +4,7 @@ choosing a tutor and the message sent to them."""
 from __future__ import annotations
 
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from tutortrack.privacy.registry import (
     ErasureContext,
@@ -50,4 +51,8 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
     return out
 
 
-register(Provider(key="matching", label="Tutor shortlists", export=export, erase=erase, order=36))
+register(
+    Provider(
+        key="matching", label=gettext_lazy("Tutor shortlists"), export=export, erase=erase, order=36
+    )
+)

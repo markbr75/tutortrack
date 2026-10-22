@@ -5,6 +5,7 @@ are removed, and expense descriptions lose the person's name."""
 from __future__ import annotations
 
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from tutortrack.privacy.registry import (
     ErasureContext,
@@ -112,4 +113,6 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
     return out
 
 
-register(Provider(key="payroll", label="Tutor pay", export=export, erase=erase, order=42))
+register(
+    Provider(key="payroll", label=gettext_lazy("Tutor pay"), export=export, erase=erase, order=42)
+)

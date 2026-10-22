@@ -39,6 +39,30 @@ def lesson_pay(link: Any) -> Money | None:
     return (link.pay_amount * link.pay_percent / Decimal(100)).round_to_minor()
 
 
+# How far back the "lessons to mark" count looks. Older lessons still planned are for the
+# office's unconfirmed-lessons queue, not the tutor's Today pill.
+UNMARKED_LOOKBACK_DAYS = 60
+
+
+def unmarked_lessons(tutor: TutorProfile) -> int:
+    """The tutor's lessons that are over and still planned (not completed, missed or
+    cancelled), on any day in the last ``UNMARKED_LOOKBACK_DAYS`` days, today included.
+    Scoped to the tutor's own lessons; RLS keeps it to the current organisation."""
+    from tutortrack.scheduling.models import Lesson
+
+    moment = now()
+    return (
+        Lesson.objects.filter(
+            tutors__tutor=tutor,
+            status=Lesson.Status.PLANNED,
+            end__lte=moment,
+            start__gte=moment - timedelta(days=UNMARKED_LOOKBACK_DAYS),
+        )
+        .distinct()
+        .count()
+    )
+
+
 def today(tutor: TutorProfile, user: Any) -> dict[str, Any]:
     from tutortrack.comms.models import InAppNotification
     from tutortrack.delivery.models import LessonReport
@@ -78,6 +102,7 @@ def today(tutor: TutorProfile, user: Any) -> dict[str, Any]:
             for lesson in lessons
         ],
         "reports_due": LessonReport.objects.filter(tutor=tutor).exclude(status__in=written).count(),
+        "unmarked_lessons": unmarked_lessons(tutor),
         "offers": JobTutor.objects.filter(tutor=tutor, status=JobTutor.Status.OFFERED).count()
         + JobOffer.objects.filter(tutor=tutor, status=JobOffer.Status.SENT).count(),
         "unread": InAppNotification.objects.filter(user=user, read_at__isnull=True).count(),

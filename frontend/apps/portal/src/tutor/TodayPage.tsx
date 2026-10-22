@@ -49,7 +49,14 @@ export function TodayPage() {
       </span>
     </li>
   );
+  // The tab's pill counts lessons still to mark on earlier days too; name those here, as
+  // today's sit in the register above.
+  const dueToday = d.lessons.filter(
+    (lesson) => lesson.status === "planned" && new Date(lesson.end) <= now,
+  ).length;
+  const earlier = Math.max(0, (d.unmarked_lessons ?? dueToday) - dueToday);
   const waiting = [
+    { count: earlier, label: t("tutor.earlierToMark"), to: "/tutor/schedule" },
     { count: d.reports_due, label: t("tutor.reportsDue"), to: "/tutor/schedule" },
     { count: d.offers, label: t("tutor.offers"), to: "/tutor/jobs" },
     { count: d.unread, label: t("tutor.unread"), to: "/tutor/notifications" },

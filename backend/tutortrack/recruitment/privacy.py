@@ -172,7 +172,7 @@ def _rejected(cutoff: datetime, limit: int) -> list[tuple[str, str]]:
 register(
     Provider(
         key="recruitment",
-        label="Applications",
+        label=gettext_lazy("Applications"),
         expand=expand,
         export=export,
         files=files,
@@ -246,7 +246,7 @@ def _purge_check_details(cutoff: datetime, dry_run: bool, limit: int) -> int:
 register(
     Provider(
         key="background_checks",
-        label="Background checks",
+        label=gettext_lazy("Background checks"),
         export=_check_export,
         erase=_check_erase,
         order=36,

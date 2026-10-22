@@ -337,6 +337,12 @@ class TutorTodaySerializer(serializers.Serializer):
     date = serializers.DateField()
     lessons = TutorDayLessonSerializer(many=True)
     reports_due = serializers.IntegerField()
+    unmarked_lessons = serializers.IntegerField(
+        help_text=(
+            "The tutor's lessons that have ended and are still planned (not yet marked "
+            "completed, missed or cancelled), today and on earlier days within the last 60 days."
+        )
+    )
     offers = serializers.IntegerField()
     unread = serializers.IntegerField()
     earnings_this_month = MoneyOut()

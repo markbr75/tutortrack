@@ -4,6 +4,7 @@ person from keep a copy of their data, so erasure clears those rows' values."""
 from __future__ import annotations
 
 from django.db.models import Q
+from django.utils.translation import gettext_lazy
 
 from tutortrack.privacy.registry import ErasureContext, ErasureOutcome, Person, Provider, register
 
@@ -23,4 +24,4 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
     return out
 
 
-register(Provider(key="migration", label="Import history", erase=erase, order=38))
+register(Provider(key="migration", label=gettext_lazy("Import history"), erase=erase, order=38))

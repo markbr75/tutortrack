@@ -162,6 +162,10 @@ class ExportPreviewSerializer(serializers.Serializer):
 
 
 class ErasureRecordSerializer(BaseModelSerializer):
+    area_labels = serializers.SerializerMethodField(
+        help_text="A readable name for each key of ``report`` (the area that was erased)."
+    )
+
     class Meta:
         model = ErasureRecord
         fields = [
@@ -175,12 +179,19 @@ class ErasureRecordSerializer(BaseModelSerializer):
             "labels",
             "steps_done",
             "report",
+            "area_labels",
             "financial_retained_until",
             "financial_erased_at",
             "completed_at",
             "created_at",
         ]
         read_only_fields = fields
+
+    @extend_schema_field(serializers.DictField(child=serializers.CharField()))
+    def get_area_labels(self, obj: ErasureRecord) -> dict[str, str]:
+        from ..selectors import erasure_area_labels
+
+        return erasure_area_labels(obj.report or {})
 
 
 class ErasurePreviewSerializer(serializers.Serializer):
@@ -266,6 +277,10 @@ class RetentionPolicySerializer(BaseModelSerializer):
 
 
 class RetentionRunSerializer(BaseModelSerializer):
+    area_labels = serializers.SerializerMethodField(
+        help_text="A readable name for each key of ``report`` (the retention category)."
+    )
+
     class Meta:
         model = RetentionRun
         fields = [
@@ -274,12 +289,19 @@ class RetentionRunSerializer(BaseModelSerializer):
             "status",
             "trigger",
             "report",
+            "area_labels",
             "started_at",
             "finished_at",
             "requested_by",
             "workflow_id",
         ]
         read_only_fields = fields
+
+    @extend_schema_field(serializers.DictField(child=serializers.CharField()))
+    def get_area_labels(self, obj: RetentionRun) -> dict[str, str]:
+        from ..selectors import retention_area_labels
+
+        return retention_area_labels(obj.report or {})
 
 
 class RetentionRunCreateSerializer(serializers.Serializer):

@@ -31,6 +31,9 @@ class Announcement(TenantModel):
     class Meta(TenantModel.Meta):
         ordering = ["-published_at"]
 
+    def __str__(self) -> str:
+        return self.title
+
 
 class StudentLogin(TenantModel):
     """A guardian-managed portal login for a student under 13 (FR-15-1): a username and a

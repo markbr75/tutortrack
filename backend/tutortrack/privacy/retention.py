@@ -166,8 +166,10 @@ def finish_run(run: RetentionRun, *, status: str = RetentionRun.Status.COMPLETED
             if run.dry_run
             else _("Retention purge: %(n)s items purged or anonymised") % {"n": done}
         )
+        from .selectors import retention_area_label
+
         body = "\n".join(
-            f"{k}: {v.get('done' if not run.dry_run else 'due', 0)}"
+            f"{retention_area_label(k)}: {v.get('done' if not run.dry_run else 'due', 0)}"
             for k, v in sorted(run.report.items())
         )
         notifications.send(

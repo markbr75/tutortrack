@@ -128,6 +128,57 @@ describe("privacy centre", () => {
     });
   });
 
+  it("names the areas of an erasure report", async () => {
+    window.history.pushState(null, "", "/privacy/requests/d1");
+    const erased = { ...REQUEST, kind: "erasure", status: "completed" };
+    mockApi(
+      routes({
+        "GET /api/v1/data-requests/d1": { body: erased },
+        "GET /api/v1/data-requests/d1/erasure": {
+          body: {
+            id: "x1", request: "d1", reason: "request", subject_type: "people.student",
+            subject_id: "s1", status: "completed", subjects: {}, labels: {}, steps_done: [],
+            report: {
+              scheduling: { anonymised: 4, deleted: 0, retained: 0, notes: [] },
+              billing: { anonymised: 1, deleted: 0, retained: 2, notes: [] },
+              logins: { revoked: 1 },
+            },
+            area_labels: { scheduling: "Lessons", logins: "Logins ended" },
+            financial_retained_until: null, financial_erased_at: null,
+            completed_at: "2026-10-12T10:00:00Z", created_at: "2026-10-12T09:00:00Z",
+          },
+        }, // prettier-ignore
+      }),
+    );
+    render(<App />);
+    expect(await screen.findByRole("cell", { name: "Lessons" })).toBeInTheDocument();
+    expect(screen.queryByRole("cell", { name: "scheduling" })).not.toBeInTheDocument();
+    // An area the response doesn't name keeps its key.
+    expect(screen.getByRole("cell", { name: "billing" })).toBeInTheDocument();
+  });
+
+  it("names the categories in a retention run's report", async () => {
+    window.history.pushState(null, "", "/privacy");
+    mockApi(
+      routes({
+        "GET /api/v1/data-requests": page([]),
+        "GET /api/v1/retention-policies": { body: [] },
+        "GET /api/v1/retention-runs": page([
+          {
+            id: "r1", dry_run: true, status: "completed", trigger: "manual",
+            report: { "comms.messages": { due: 3, done: 0, days: 730 } },
+            area_labels: { "comms.messages": "Message log and in-app notifications" },
+            started_at: "2026-10-12T10:00:00Z", finished_at: "2026-10-12T10:01:00Z",
+            requested_by: null, workflow_id: "",
+          },
+        ]), // prettier-ignore
+      }),
+    );
+    render(<App />);
+    fireEvent.click(await screen.findByRole("tab", { name: "Retention" }));
+    expect(await screen.findByText("Message log and in-app notifications: 3")).toBeInTheDocument();
+  });
+
   it("edits retention periods and starts a dry run", async () => {
     window.history.pushState(null, "", "/privacy");
     const calls = mockApi(
