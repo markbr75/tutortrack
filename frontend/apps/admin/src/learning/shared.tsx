@@ -1,36 +1,43 @@
-import { Alert, Button } from "@tutortrack/ui";
-import { useId, type FormEvent, type ReactNode } from "react";
+import { useTranslation } from "@tutortrack/i18n";
+import { Alert, FormPanel, RuledPanel, RuledTable, type RuledColumn } from "@tutortrack/ui";
+import { useId, type ReactNode } from "react";
 
+/**
+ * A learning list: a register table in a ruled panel titled by what it lists, with skeleton
+ * rows while it loads and one faded-ink sentence when it is empty.
+ */
 export function Table({
   caption,
-  headers,
+  columns,
+  loading,
+  empty,
+  aside,
+  description,
   children,
 }: {
   caption: string;
-  headers: string[];
-  children: ReactNode;
+  columns: ReadonlyArray<RuledColumn>;
+  loading?: boolean;
+  /** The sentence shown instead of rows; pass it only when there are none. */
+  empty?: string;
+  aside?: ReactNode;
+  description?: ReactNode;
+  children?: ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <caption className="mb-2 text-left font-semibold">{caption}</caption>
-        <thead>
-          <tr className="text-left">
-            {headers.map((h, i) => (
-              <th key={`${h}-${i}`} scope="col" className="px-2 py-1">
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>{children}</tbody>
-      </table>
-    </div>
+    <RuledPanel flush title={caption} aside={aside} description={description}>
+      <RuledTable
+        caption={caption}
+        columns={columns}
+        loading={loading}
+        loadingLabel={t("grid.loading")}
+        empty={empty}
+      >
+        {children}
+      </RuledTable>
+    </RuledPanel>
   );
-}
-
-export function Cell({ children }: { children?: ReactNode }) {
-  return <td className="border-t border-border px-2 py-1 align-top">{children}</td>;
 }
 
 export function FormCard({
@@ -39,6 +46,8 @@ export function FormCard({
   pending,
   error,
   onSubmit,
+  lead,
+  columns = 2,
   children,
 }: {
   title: string;
@@ -46,24 +55,22 @@ export function FormCard({
   pending?: boolean;
   error?: Error | null;
   onSubmit: () => void;
+  lead?: ReactNode;
+  columns?: 1 | 2 | 3;
   children: ReactNode;
 }) {
   return (
-    <form
-      className="space-y-3 rounded-md border border-border p-4"
-      aria-label={title}
-      onSubmit={(e: FormEvent) => {
-        e.preventDefault();
-        onSubmit();
-      }}
+    <FormPanel
+      title={title}
+      submit={submit}
+      pending={pending}
+      onSubmit={onSubmit}
+      error={error ? <Alert tone="danger">{error.message}</Alert> : null}
+      lead={lead}
+      columns={columns}
     >
-      <h2 className="font-semibold">{title}</h2>
-      <div className="grid gap-3 sm:grid-cols-2">{children}</div>
-      {error ? <Alert tone="danger">{error.message}</Alert> : null}
-      <Button type="submit" disabled={pending}>
-        {submit}
-      </Button>
-    </form>
+      {children}
+    </FormPanel>
   );
 }
 
@@ -72,22 +79,25 @@ export function TextArea({
   value,
   onChange,
   required,
+  rows,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
+  rows?: number;
 }) {
   const id = useId();
   return (
-    <div className="flex flex-col gap-1 sm:col-span-2">
+    <div className="flex flex-col gap-1 sm:col-span-full">
       <label htmlFor={id} className="text-sm font-medium">
         {label}
       </label>
       <textarea
         id={id}
         required={required}
-        className="min-h-20 rounded-md border border-border bg-background px-3 py-2 text-sm"
+        rows={rows ?? 3}
+        className="rounded-md border border-field bg-surface px-3 py-2 text-sm"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
@@ -96,5 +106,9 @@ export function TextArea({
 }
 
 export function Empty({ children }: { children: ReactNode }) {
-  return <p className="text-sm text-muted-foreground">{children}</p>;
+  return <p className="px-5 py-6 text-sm text-muted-foreground">{children}</p>;
 }
+
+/** A file picker whose button matches a small secondary button. */
+export const fileInput =
+  "max-w-full text-sm text-muted-foreground file:mr-3 file:h-8 file:cursor-pointer file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted";

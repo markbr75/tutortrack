@@ -1,10 +1,18 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Button, TextField } from "@tutortrack/ui";
+import {
+  Button,
+  NamePlate,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, usePermission } from "../api";
+import { PanelEmpty, PanelLoading } from "../billing/moneyUi";
 import { MutationError, QueryState } from "./shared";
 
 type Subject = components["schemas"]["Subject"];
@@ -29,15 +37,22 @@ function AddLevel({ subject }: { subject: Subject }) {
         if (name.trim()) add.mutate();
       }}
     >
-      <TextField
-        label={t("catalogue.subjects.newLevel", { subject: subject.name })}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <Button type="submit" variant="secondary" size="sm" disabled={add.isPending}>
+      <div className="min-w-56 flex-1 sm:max-w-sm">
+        <TextField
+          label={t("catalogue.subjects.newLevel", { subject: subject.name })}
+          size="sm"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </div>
+      <Button type="submit" variant="secondary" size="sm" className="h-9" loading={add.isPending}>
         {t("catalogue.add")}
       </Button>
-      <MutationError error={add.error} />
+      {add.error ? (
+        <div className="w-full">
+          <MutationError error={add.error} />
+        </div>
+      ) : null}
     </form>
   );
 }
@@ -69,70 +84,97 @@ export function SubjectsSection() {
       ),
     onSuccess: refresh,
   });
+  const rows = subjects.data ?? [];
   return (
-    <div className="space-y-6">
-      {canManage ? (
-        <form
-          className="flex flex-wrap items-end gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (name.trim()) add.mutate();
-          }}
-        >
-          <TextField
-            label={t("catalogue.subjects.new")}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Button type="submit" disabled={add.isPending}>
-            {t("catalogue.add")}
-          </Button>
-          <MutationError error={add.error} />
-        </form>
-      ) : null}
-      <QueryState query={subjects}>
-        <ul className="divide-y divide-border rounded-md border border-border">
-          {(subjects.data ?? []).map((subject) => (
-            <li key={subject.id} className="p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="font-medium">{subject.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {subject.levels.map((l) => l.name).join(", ") ||
-                      t("catalogue.subjects.noLevels")}
-                    {subject.exam_boards?.length ? ` · ${subject.exam_boards.join(", ")}` : ""}
-                  </p>
-                </div>
-                {canManage ? (
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      aria-expanded={open === subject.id}
-                      onClick={() => setOpen(open === subject.id ? null : subject.id)}
-                    >
-                      {t("catalogue.subjects.addLevel")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      aria-label={t("catalogue.archiveNamed", { name: subject.name })}
-                      onClick={() => archive.mutate(subject.id)}
-                    >
-                      {t("catalogue.archive")}
-                    </Button>
-                  </div>
-                ) : null}
+    <QueryState query={subjects}>
+      <RuledPanel
+        flush
+        title={t("catalogue.tabs.subjects")}
+        aside={
+          subjects.data ? (
+            <span className="text-muted-foreground tabular-nums">
+              {t("designS6.catalogue.subjectCount", { count: rows.length })}
+            </span>
+          ) : null
+        }
+        footer={
+          canManage ? (
+            <form
+              className="flex w-full flex-wrap items-end gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (name.trim()) add.mutate();
+              }}
+            >
+              <div className="min-w-56 flex-1 sm:max-w-sm">
+                <TextField
+                  label={t("catalogue.subjects.new")}
+                  size="sm"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
               </div>
-              {open === subject.id ? (
-                <div className="mt-3">
-                  <AddLevel subject={subject} />
+              <Button type="submit" variant="secondary" size="sm" className="h-9" loading={add.isPending}>
+                {t("catalogue.add")}
+              </Button>
+              {add.error ? (
+                <div className="w-full">
+                  <MutationError error={add.error} />
                 </div>
               ) : null}
-            </li>
-          ))}
-        </ul>
-      </QueryState>
-    </div>
+            </form>
+          ) : null
+        }
+      >
+        {subjects.isPending ? (
+          <PanelLoading label={t("grid.loading")} />
+        ) : !rows.length ? (
+          <PanelEmpty>{t("designS6.catalogue.noSubjects")}</PanelEmpty>
+        ) : (
+          <PanelRows>
+            {rows.map((subject) => (
+              <PanelRow key={subject.id}>
+                <NamePlate
+                  name={subject.name}
+                  context={
+                    (subject.levels.map((l) => l.name).join(", ") ||
+                      t("catalogue.subjects.noLevels")) +
+                    (subject.exam_boards?.length ? ` · ${subject.exam_boards.join(", ")}` : "")
+                  }
+                  aside={
+                    canManage ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          aria-expanded={open === subject.id}
+                          onClick={() => setOpen(open === subject.id ? null : subject.id)}
+                        >
+                          {t("catalogue.subjects.addLevel")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-muted-foreground"
+                          aria-label={t("catalogue.archiveNamed", { name: subject.name })}
+                          onClick={() => archive.mutate(subject.id)}
+                        >
+                          {t("catalogue.archive")}
+                        </Button>
+                      </>
+                    ) : null
+                  }
+                />
+                {open === subject.id ? (
+                  <div className="mt-3">
+                    <AddLevel subject={subject} />
+                  </div>
+                ) : null}
+              </PanelRow>
+            ))}
+          </PanelRows>
+        )}
+      </RuledPanel>
+    </QueryState>
   );
 }

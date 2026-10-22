@@ -5,17 +5,22 @@ import {
   Button,
   MASTERY_LEVELS,
   MasteryHeatmap,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
   SelectField,
-  Spinner,
   TextField,
   TrendChart,
   type MasteryLevel,
 } from "@tutortrack/ui";
+import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, usePermission } from "../api";
 import { useLevelLabels } from "./hooks";
+import { PanelLoading } from "../billing/moneyUi";
+import { BackSeparator, RecordHeader, RecordLayout } from "../components/RecordHeader";
 import { Empty, FormCard } from "./shared";
 
 type Goal = components["schemas"]["Goal"];
@@ -57,50 +62,43 @@ export function StudentLearningPage({ studentId }: { studentId: string }) {
         }),
       ),
   });
-  return (
-    <section className="space-y-8">
-      <h1 className="text-2xl font-semibold">
-        {student.data
-          ? t("learning.studentTitle", { name: student.data.full_name })
-          : t("learning.title")}
-      </h1>
-      {stats.data ? (
-        <p className="text-sm">
-          {stats.data.completion_rate
-            ? t("learning.homework.rate", {
-                rate: stats.data.completion_rate,
-                due: stats.data.due,
-                overdue: stats.data.overdue,
-              })
-            : t("learning.homework.noneDue")}
-        </p>
+  const main = (
+    <>
+      {coverage.isPending ? (
+        <RuledPanel title={t("learning.coverage.title")}>
+          <PanelLoading label={t("grid.loading")} />
+        </RuledPanel>
       ) : null}
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">{t("learning.coverage.title")}</h2>
-        {coverage.isLoading ? <Spinner label={t("grid.loading")} /> : null}
-        {coverage.data && !coverage.data.length ? (
+      {coverage.data && !coverage.data.length ? (
+        <RuledPanel flush title={t("learning.coverage.title")}>
           <Empty>{t("learning.coverage.none")}</Empty>
-        ) : null}
-        {coverage.data?.map((c) => (
-          <div key={c.curriculum.id} className="space-y-2">
-            <h3 className="font-medium">
-              {c.curriculum.name} ·{" "}
+        </RuledPanel>
+      ) : null}
+      {coverage.data?.map((c) => (
+        <RuledPanel
+          key={c.curriculum.id}
+          title={c.curriculum.name}
+          description={t("learning.coverage.title")}
+          aside={
+            <span className="text-muted-foreground tabular-nums">
               {t("learning.coverage.covered", { covered: c.covered, total: c.topics })}
-            </h3>
-            <MasteryHeatmap
-              units={c.units}
-              levelLabels={levelLabels}
-              legendLabel={t("learning.coverage.legend")}
-              lessonsLabel={(count) => t("learning.coverage.lessons", { count })}
-            />
-            <MasteryForm studentId={studentId} units={c.units} />
-          </div>
-        ))}
-      </section>
-      <section className="space-y-3">
+            </span>
+          }
+          footer={<MasteryForm studentId={studentId} units={c.units} />}
+        >
+          <MasteryHeatmap
+            units={c.units}
+            levelLabels={levelLabels}
+            legendLabel={t("learning.coverage.legend")}
+            lessonsLabel={(count) => t("learning.coverage.lessons", { count })}
+          />
+        </RuledPanel>
+      ))}
+      <RuledPanel title={t("learning.trend.title")}>
         <TrendChart
           points={trend.data ?? []}
           formatDate={(iso) => formatDate(iso, i18n.language)}
+          hideTitle
           labels={{
             title: t("learning.trend.title"),
             date: t("learning.assessments.date"),
@@ -110,8 +108,43 @@ export function StudentLearningPage({ studentId }: { studentId: string }) {
             empty: t("learning.trend.empty"),
           }}
         />
-      </section>
-      <GoalsSection studentId={studentId} />
+      </RuledPanel>
+    </>
+  );
+  return (
+    <section>
+      <RecordHeader
+        back={
+          <>
+            <Link to="/learning">{t("learning.title")}</Link>
+            {student.data ? (
+              <>
+                <BackSeparator />
+                <Link to="/students/$studentId" params={{ studentId }}>
+                  {student.data.full_name}
+                </Link>
+              </>
+            ) : null}
+          </>
+        }
+        title={
+          student.data
+            ? t("learning.studentTitle", { name: student.data.full_name })
+            : t("learning.title")
+        }
+        description={
+          stats.data
+            ? stats.data.completion_rate
+              ? t("learning.homework.rate", {
+                  rate: stats.data.completion_rate,
+                  due: stats.data.due,
+                  overdue: stats.data.overdue,
+                })
+              : t("learning.homework.noneDue")
+            : undefined
+        }
+      />
+      <RecordLayout main={main} side={<GoalsSection studentId={studentId} />} />
     </section>
   );
 }
@@ -141,34 +174,49 @@ function MasteryForm({
   if (!canEdit) return null;
   return (
     <form
-      className="flex flex-wrap items-end gap-2"
+      className="flex w-full flex-wrap items-end gap-2"
       aria-label={t("learning.coverage.setLevel")}
       onSubmit={(e) => {
         e.preventDefault();
         if (node) save.mutate();
       }}
     >
-      <SelectField
-        label={t("learning.coverage.topic")}
-        value={node}
-        onChange={(e) => setNode(e.target.value)}
-        options={[
-          { value: "", label: t("learning.coverage.chooseTopic") },
-          ...units.flatMap((u) =>
-            u.topics.map((x) => ({ value: x.id, label: `${u.name}: ${x.name}` })),
-          ),
-        ]}
-      />
+      <div className="min-w-56 flex-1 sm:max-w-sm">
+        <SelectField
+          label={t("learning.coverage.topic")}
+          size="sm"
+          value={node}
+          onChange={(e) => setNode(e.target.value)}
+          options={[
+            { value: "", label: t("learning.coverage.chooseTopic") },
+            ...units.flatMap((u) =>
+              u.topics.map((x) => ({ value: x.id, label: `${u.name}: ${x.name}` })),
+            ),
+          ]}
+        />
+      </div>
       <SelectField
         label={t("learning.coverage.level")}
+        size="sm"
         value={level}
         onChange={(e) => setLevel(e.target.value as MasteryLevel)}
         options={MASTERY_LEVELS.map((v) => ({ value: v, label: levelLabels[v] }))}
       />
-      <Button type="submit" disabled={!node || save.isPending}>
+      <Button
+        type="submit"
+        size="sm"
+        variant="secondary"
+        className="h-9"
+        disabled={!node}
+        loading={save.isPending}
+      >
         {t("learning.coverage.setLevel")}
       </Button>
-      {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
+      {save.error ? (
+        <Alert tone="danger" className="w-full">
+          {save.error.message}
+        </Alert>
+      ) : null}
     </form>
   );
 }
@@ -211,13 +259,24 @@ function GoalsSection({ studentId }: { studentId: string }) {
       void refresh();
     },
   });
+  const list = goals.data?.results ?? [];
   return (
-    <section className="space-y-3">
-      <h2 className="text-lg font-semibold">{t("learning.goals.title")}</h2>
-      {goals.data && !goals.data.results.length ? <Empty>{t("learning.goals.none")}</Empty> : null}
-      {goals.data?.results.map((g) => (
-        <GoalCard key={g.id} goal={g} canManage={canManage} onChange={refresh} />
-      ))}
+    <>
+      <RuledPanel flush title={t("learning.goals.title")}>
+        {goals.isPending ? (
+          <PanelLoading label={t("grid.loading")} />
+        ) : !list.length ? (
+          <Empty>{t("learning.goals.none")}</Empty>
+        ) : (
+          <PanelRows>
+            {list.map((g) => (
+              <PanelRow key={g.id}>
+                <GoalCard goal={g} canManage={canManage} onChange={refresh} />
+              </PanelRow>
+            ))}
+          </PanelRows>
+        )}
+      </RuledPanel>
       {canManage ? (
         <FormCard
           title={t("learning.goals.new")}
@@ -225,6 +284,7 @@ function GoalsSection({ studentId }: { studentId: string }) {
           pending={create.isPending}
           error={create.error}
           onSubmit={() => create.mutate()}
+          columns={1}
         >
           <TextField
             label={t("learning.goals.goal")}
@@ -251,7 +311,7 @@ function GoalsSection({ studentId }: { studentId: string }) {
           />
         </FormCard>
       ) : null}
-    </section>
+    </>
   );
 }
 
@@ -275,44 +335,47 @@ export function GoalCard({
       ),
     onSuccess: onChange,
   });
+  const milestones = goal.milestones ?? [];
+  const done = milestones.filter((m) => m.done).length;
   return (
-    <article aria-label={goal.title} className="space-y-2 rounded-md border border-border p-3">
-      <h3 className="font-medium">
-        {goal.title}
-        {goal.target_grade
-          ? ` · ${t("learning.goals.targetIs", { grade: goal.target_grade })}`
-          : ""}
-      </h3>
-      <p className="text-sm">
-        {t(`learning.goals.statuses.${goal.status}`)}
-        {goal.due_date ? ` · ${formatDate(goal.due_date, i18n.language)}` : ""}
-      </p>
-      <div
-        role="progressbar"
-        aria-label={t("learning.goals.progress")}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={goal.progress_percent ?? 0}
-        className="h-2 w-full max-w-sm rounded bg-muted"
-      >
-        <div className="h-2 rounded bg-brand" style={{ width: `${goal.progress_percent ?? 0}%` }} />
+    <article aria-label={goal.title} className="space-y-2">
+      <div>
+        <h3 className="font-medium">
+          {goal.title}
+          {goal.target_grade
+            ? ` · ${t("learning.goals.targetIs", { grade: goal.target_grade })}`
+            : ""}
+        </h3>
+        <p className="text-xs text-muted-foreground tabular-nums">
+          {[
+            t(`learning.goals.statuses.${goal.status}`),
+            t("designS6.learning.progressDone", { percent: goal.progress_percent ?? 0 }),
+            milestones.length
+              ? t("designS6.learning.milestonesDone", { done, total: milestones.length })
+              : "",
+            goal.due_date ? formatDate(goal.due_date, i18n.language) : "",
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
       </div>
-      <p className="text-xs text-muted-foreground">{goal.progress_percent ?? 0}%</p>
-      {goal.milestones?.length ? (
-        <ul className="space-y-1 text-sm">
-          {goal.milestones.map((m) => (
+      {milestones.length ? (
+        <ul className="space-y-1.5 text-sm">
+          {milestones.map((m) => (
             <li key={m.id}>
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  className="size-5"
+                  className="size-4"
                   checked={Boolean(m.done)}
                   disabled={!canManage || toggle.isPending}
                   onChange={(e) =>
                     m.id && toggle.mutate({ milestone: m.id, done: e.target.checked })
                   }
                 />
-                {m.title}
+                <span className={m.done ? "text-muted-foreground line-through" : undefined}>
+                  {m.title}
+                </span>
               </label>
             </li>
           ))}

@@ -1,12 +1,27 @@
 import { unwrap } from "@tutortrack/api-client";
-import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, TextField } from "@tutortrack/ui";
+import { formatDate, useTranslation } from "@tutortrack/i18n";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  figureCell,
+  FormPanel,
+  NamePlate,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { api, useOrganisation, usePermission } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
 import { PAGE, formatRate } from "./format";
-import { Cell, MutationError, QueryState, Table } from "./shared";
+import { PanelEmpty, PanelLoading } from "../billing/moneyUi";
+import { Faded, MutationError, QueryState, Table } from "./shared";
 
 /* E06 Phase 2 settings: rooms (T10), pay tiers and tutor rates (T07), holiday calendars
  * and premiums (T08), discounts, promo codes and price lists (T09). */
@@ -27,20 +42,16 @@ function Form({
   children: ReactNode;
 }) {
   return (
-    <form
-      className="space-y-3 rounded-lg border border-border p-4"
-      onSubmit={(e: FormEvent) => {
-        e.preventDefault();
-        onSubmit();
-      }}
+    <FormPanel
+      title={title}
+      submit={submit}
+      pending={pending}
+      onSubmit={onSubmit}
+      error={error ? <MutationError error={error} /> : null}
+      columns={3}
     >
-      <h2 className="font-semibold">{title}</h2>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
-      <Button type="submit" disabled={pending}>
-        {submit}
-      </Button>
-      <MutationError error={error} />
-    </form>
+      {children}
+    </FormPanel>
   );
 }
 
@@ -61,10 +72,15 @@ function money(amount: string, currency: string) {
 
 const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
 
+/** A file picker whose button matches a small secondary button. */
+const fileInput =
+  "max-w-full text-sm text-muted-foreground file:mr-3 file:h-8 file:cursor-pointer file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted";
+
 // --- rooms ----------------------------------------------------------------------------------------
 
 export function RoomsSection() {
   const { t } = useTranslation();
+  const isPhone = useIsPhone();
   const canManage = usePermission("catalogue.manage");
   const empty = { location: "", name: "", capacity: "", resources: "" };
   const [draft, setDraft] = useState(empty);
@@ -103,19 +119,31 @@ export function RoomsSection() {
       <QueryState query={rooms}>
         <Table
           caption={t("pricing.rooms.title")}
-          headers={[
-            t("catalogue.name"),
-            t("pricing.rooms.location"),
-            t("pricing.rooms.capacity"),
-            t("pricing.rooms.resources"),
+          loading={rooms.isPending}
+          count={rooms.data?.results.length}
+          empty={t("designS6.catalogue.noRooms")}
+          columns={[
+            { header: t("catalogue.name") },
+            ...(isPhone ? [] : [{ header: t("pricing.rooms.location") }]),
+            { header: t("pricing.rooms.capacity"), end: true, width: "w-24" },
+            ...(isPhone ? [] : [{ header: t("pricing.rooms.resources") }]),
           ]}
         >
           {(rooms.data?.results ?? []).map((room) => (
             <tr key={room.id}>
-              <Cell>{room.name}</Cell>
-              <Cell>{room.location_name}</Cell>
-              <Cell>{room.capacity ?? "—"}</Cell>
-              <Cell>{room.resources.map((r) => r.name).join(", ")}</Cell>
+              <td className="font-medium">
+                {room.name}
+                {isPhone ? (
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {[room.location_name, room.resources.map((r) => r.name).join(", ")]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                ) : null}
+              </td>
+              {isPhone ? null : <td>{room.location_name}</td>}
+              <td className={figureCell}>{room.capacity ?? <Faded>–</Faded>}</td>
+              {isPhone ? null : <td>{room.resources.map((r) => r.name).join(", ")}</td>}
             </tr>
           ))}
         </Table>
@@ -223,78 +251,125 @@ export function PayTiersSection() {
   const tiers = grid.data?.tiers ?? [];
   const cell = (service: string, tier: string) =>
     grid.data?.cells.find((c) => c.service === service && c.tier === tier);
+  const serviceRows = services.data?.results ?? [];
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">{t("pricing.tiers.intro")}</p>
       <QueryState query={grid}>
-        <Table
-          caption={t("pricing.tiers.grid")}
-          headers={[t("catalogue.tabs.services"), ...tiers.map((tier) => tier.name)]}
+        <RuledPanel
+          flush
+          title={t("pricing.tiers.grid")}
+          description={t("pricing.tiers.intro")}
+          footer={
+            canManage && tiers.length ? (
+              <>
+                <a
+                  className={buttonClass({ variant: "secondary", size: "sm" })}
+                  href="/api/v1/catalogue/tier-rates/csv"
+                  download
+                >
+                  {t("pricing.tiers.export")}
+                </a>
+                <label className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{t("pricing.tiers.importLabel")}</span>
+                  <input
+                    className={fileInput}
+                    type="file"
+                    accept=".csv,text/csv"
+                    onChange={(e) => setUpload(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => importCsv.mutate()}
+                  disabled={!upload}
+                  loading={importCsv.isPending}
+                >
+                  {t("pricing.tiers.import")}
+                </Button>
+                <Button
+                  className="sm:ml-auto"
+                  onClick={() => save.mutate()}
+                  disabled={!Object.keys(edits).length}
+                  loading={save.isPending}
+                >
+                  {t("pricing.tiers.save")}
+                </Button>
+              </>
+            ) : null
+          }
         >
-          {(services.data?.results ?? []).map((service) => (
-            <tr key={service.id}>
-              <Cell>{service.name}</Cell>
-              {tiers.map((tier) => {
-                const key = `${service.id}:${tier.id}`;
-                const current = cell(service.id, tier.id)?.pay_rate;
-                return (
-                  <Cell key={tier.id}>
-                    {canManage ? (
-                      <TextField
-                        label={t("pricing.tiers.payFor", {
-                          service: service.name,
-                          tier: tier.name,
-                        })}
-                        className="w-24"
-                        inputMode="decimal"
-                        value={edits[key] ?? (current ? String(Number(current.amount)) : "")}
-                        onChange={(e) => setEdits({ ...edits, [key]: e.target.value })}
-                      />
-                    ) : (
-                      formatRate(current, locale)
-                    )}
-                  </Cell>
-                );
-              })}
-            </tr>
-          ))}
-        </Table>
+          {!grid.isPending && !tiers.length ? (
+            <PanelEmpty>{t("designS6.catalogue.noTiers")}</PanelEmpty>
+          ) : (
+            <RuledTable
+              caption={t("pricing.tiers.grid")}
+              loading={grid.isPending || services.isPending}
+              loadingLabel={t("grid.loading")}
+              empty={
+                !services.isPending && !serviceRows.length
+                  ? t("designS6.catalogue.noServices")
+                  : undefined
+              }
+              columns={[
+                { header: t("catalogue.tabs.services") },
+                ...tiers.map((tier) => ({
+                  key: tier.id,
+                  header: tier.name,
+                  end: true,
+                  width: "w-32",
+                })),
+              ]}
+            >
+              {serviceRows.map((service) => (
+                <tr key={service.id}>
+                  <td className="font-medium">{service.name}</td>
+                  {tiers.map((tier) => {
+                    const key = `${service.id}:${tier.id}`;
+                    const current = cell(service.id, tier.id)?.pay_rate;
+                    return (
+                      <td key={tier.id} className={canManage ? "py-1.5" : figureCell}>
+                        {canManage ? (
+                          <TextField
+                            label={t("pricing.tiers.payFor", {
+                              service: service.name,
+                              tier: tier.name,
+                            })}
+                            hideLabel
+                            size="sm"
+                            className="ml-auto w-24 text-right tabular-nums"
+                            inputMode="decimal"
+                            value={edits[key] ?? (current ? String(Number(current.amount)) : "")}
+                            onChange={(e) => setEdits({ ...edits, [key]: e.target.value })}
+                          />
+                        ) : current ? (
+                          formatRate(current, locale)
+                        ) : (
+                          <Faded>–</Faded>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </RuledTable>
+          )}
+          {importCsv.data || save.error || importCsv.error ? (
+            <div className="space-y-3 border-t border-rule px-5 py-4">
+              {importCsv.data ? (
+                <Alert tone={importCsv.data.row_errors.length ? "warning" : "success"}>
+                  {importCsv.data.row_errors.length
+                    ? t("pricing.tiers.importErrors", {
+                        rows: importCsv.data.row_errors.map((e) => e.row).join(", "),
+                      })
+                    : t("pricing.tiers.imported", { count: importCsv.data.updated })}
+                </Alert>
+              ) : null}
+              <MutationError error={save.error ?? importCsv.error} />
+            </div>
+          ) : null}
+        </RuledPanel>
       </QueryState>
-      {canManage ? (
-        <div className="flex flex-wrap items-end gap-3">
-          <Button
-            onClick={() => save.mutate()}
-            disabled={!Object.keys(edits).length || save.isPending}
-          >
-            {t("pricing.tiers.save")}
-          </Button>
-          <a className="text-sm underline" href="/api/v1/catalogue/tier-rates/csv" download>
-            {t("pricing.tiers.export")}
-          </a>
-          <label className="text-sm">
-            {t("pricing.tiers.importLabel")}
-            <input
-              className="ml-2"
-              type="file"
-              accept=".csv,text/csv"
-              onChange={(e) => setUpload(e.target.files?.[0] ?? null)}
-            />
-          </label>
-          <Button variant="secondary" onClick={() => importCsv.mutate()} disabled={!upload}>
-            {t("pricing.tiers.import")}
-          </Button>
-        </div>
-      ) : null}
-      {importCsv.data ? (
-        <Alert tone={importCsv.data.row_errors.length ? "warning" : "success"}>
-          {importCsv.data.row_errors.length
-            ? t("pricing.tiers.importErrors", {
-                rows: importCsv.data.row_errors.map((e) => e.row).join(", "),
-              })
-            : t("pricing.tiers.imported", { count: importCsv.data.updated })}
-        </Alert>
-      ) : null}
-      <MutationError error={save.error ?? importCsv.error} />
       {canManage ? (
         <Form
           title={t("pricing.tiers.new")}
@@ -364,37 +439,55 @@ export function PremiumsSection() {
   return (
     <div className="space-y-6">
       <QueryState query={rules}>
-        <Table
-          caption={t("pricing.premiums.title")}
-          headers={[
-            t("catalogue.name"),
-            t("pricing.premiums.when"),
-            t("pricing.premiums.charge"),
-            t("pricing.premiums.pay"),
-          ]}
-        >
-          {(rules.data?.results ?? []).map((rule) => (
-            <tr key={rule.id}>
-              <Cell>{rule.name}</Cell>
-              <Cell>
-                {[
-                  (rule.weekdays ?? []).map(dayName).join(" "),
-                  rule.time_from
-                    ? t("pricing.premiums.from", { time: rule.time_from.slice(0, 5) })
-                    : "",
-                  rule.public_holidays ? t("pricing.premiums.holidays") : "",
-                  rule.short_notice_hours
-                    ? t("pricing.premiums.notice", { hours: rule.short_notice_hours })
-                    : "",
-                ]
-                  .filter(Boolean)
-                  .join(", ") || t("pricing.premiums.always")}
-              </Cell>
-              <Cell>{rule.charge_percent ? `+${Number(rule.charge_percent)}%` : ""}</Cell>
-              <Cell>{rule.pay_percent ? `+${Number(rule.pay_percent)}%` : ""}</Cell>
-            </tr>
-          ))}
-        </Table>
+        <RuledPanel flush title={t("pricing.premiums.title")}>
+          <RuledTable
+            caption={t("pricing.premiums.title")}
+            loading={rules.isPending}
+            loadingLabel={t("grid.loading")}
+            empty={
+              rules.data && !rules.data.results.length
+                ? t("designS6.catalogue.noPremiums")
+                : undefined
+            }
+            columns={[
+              { header: t("catalogue.name") },
+              { header: t("pricing.premiums.when") },
+              { header: t("pricing.premiums.charge"), end: true, width: "w-28" },
+              { header: t("pricing.premiums.pay"), end: true, width: "w-28" },
+            ]}
+          >
+            {(rules.data?.results ?? []).map((rule) => (
+              <tr key={rule.id}>
+                <td className="font-medium">{rule.name}</td>
+                <td>
+                  {[
+                    (rule.weekdays ?? []).map(dayName).join(" "),
+                    rule.time_from
+                      ? t("pricing.premiums.from", { time: rule.time_from.slice(0, 5) })
+                      : "",
+                    rule.public_holidays ? t("pricing.premiums.holidays") : "",
+                    rule.short_notice_hours
+                      ? t("pricing.premiums.notice", { hours: rule.short_notice_hours })
+                      : "",
+                  ]
+                    .filter(Boolean)
+                    .join(", ") || t("pricing.premiums.always")}
+                </td>
+                <td className={figureCell}>
+                  {[
+                    rule.charge_percent ? `+${Number(rule.charge_percent)}%` : "",
+                    rule.charge_fixed ? `+${formatRate(rule.charge_fixed, i18n.language)}` : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ") || <Faded>–</Faded>}
+                </td>
+                <td className={figureCell}>
+                  {rule.pay_percent ? `+${Number(rule.pay_percent)}%` : <Faded>–</Faded>}
+                </td>
+              </tr>
+            ))}
+          </RuledTable>
+        </RuledPanel>
       </QueryState>
       {canManage ? (
         <Form
@@ -411,12 +504,13 @@ export function PremiumsSection() {
             required
           />
           <fieldset className="sm:col-span-2">
-            <legend className="text-sm font-medium">{t("pricing.premiums.days")}</legend>
-            <div className="flex flex-wrap gap-3">
+            <legend className="mb-2 text-sm font-medium">{t("pricing.premiums.days")}</legend>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
               {WEEKDAYS.map((day) => (
-                <label key={day} className="flex items-center gap-1 text-sm">
+                <label key={day} className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
+                    className="size-4"
                     checked={draft.weekdays.includes(day)}
                     onChange={(e) =>
                       setDraft({
@@ -438,9 +532,10 @@ export function PremiumsSection() {
             value={draft.time_from}
             onChange={(e) => setDraft({ ...draft, time_from: e.target.value })}
           />
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex items-center gap-2 text-sm sm:mt-7">
             <input
               type="checkbox"
+              className="size-4"
               checked={draft.public_holidays}
               onChange={(e) => setDraft({ ...draft, public_holidays: e.target.checked })}
             />
@@ -456,18 +551,21 @@ export function PremiumsSection() {
           <TextField
             label={t("pricing.premiums.chargePercent")}
             inputMode="decimal"
+            className="text-right tabular-nums"
             value={draft.charge_percent}
             onChange={(e) => setDraft({ ...draft, charge_percent: e.target.value })}
           />
           <TextField
             label={t("pricing.premiums.chargeFixed")}
             inputMode="decimal"
+            className="text-right tabular-nums"
             value={draft.charge_fixed}
             onChange={(e) => setDraft({ ...draft, charge_fixed: e.target.value })}
           />
           <TextField
             label={t("pricing.premiums.payPercent")}
             inputMode="decimal"
+            className="text-right tabular-nums"
             value={draft.pay_percent}
             onChange={(e) => setDraft({ ...draft, pay_percent: e.target.value })}
           />
@@ -479,7 +577,7 @@ export function PremiumsSection() {
 }
 
 function HolidaysSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const canManage = usePermission("catalogue.manage");
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
@@ -508,40 +606,82 @@ function HolidaysSection() {
       ),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["pricing", "holidays"] }),
   });
+  const list = calendars.data ?? [];
   return (
-    <section className="space-y-3" aria-labelledby="holidays-heading">
-      <h2 id="holidays-heading" className="text-lg font-semibold">
-        {t("pricing.holidays.title")}
-      </h2>
-      <p className="text-sm text-muted-foreground">{t("pricing.holidays.intro")}</p>
+    <div className="space-y-6">
       <QueryState query={calendars}>
-        <ul className="space-y-3">
-          {(calendars.data ?? []).map((calendar) => (
-            <li key={calendar.id} className="rounded-lg border border-border p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-medium">
-                  {calendar.name} ({calendar.holidays.length})
-                </span>
-                {canManage ? (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => importYear.mutate(calendar.id)}
-                    aria-label={t("pricing.holidays.importNamed", { name: calendar.name, year })}
-                  >
-                    {t("pricing.holidays.import", { year })}
-                  </Button>
-                ) : null}
+        <RuledPanel
+          flush
+          titleId="holidays-heading"
+          title={t("pricing.holidays.title")}
+          description={t("pricing.holidays.intro")}
+          footer={
+            canManage && list.length ? (
+              <div className="flex items-end gap-2">
+                <TextField
+                  label={t("pricing.holidays.year")}
+                  size="sm"
+                  type="number"
+                  className="w-24 text-right tabular-nums"
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                />
+                <p className="pb-2 text-xs text-muted-foreground">
+                  {t("designS6.catalogue.yearHint")}
+                </p>
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {calendar.holidays
-                  .slice(0, 12)
-                  .map((h) => `${h.date} ${h.name}`)
-                  .join(" · ")}
-              </p>
-            </li>
-          ))}
-        </ul>
+            ) : null
+          }
+        >
+          {calendars.isPending ? (
+            <PanelLoading label={t("grid.loading")} />
+          ) : !list.length ? (
+            <PanelEmpty>{t("designS6.catalogue.noCalendars")}</PanelEmpty>
+          ) : (
+            <PanelRows>
+              {list.map((calendar) => (
+                <PanelRow key={calendar.id}>
+                  <NamePlate
+                    name={calendar.name}
+                    context={
+                      <span className="tabular-nums">
+                        {[
+                          t("designS6.catalogue.holidayCount", {
+                            count: calendar.holidays.length,
+                          }),
+                          ...calendar.holidays
+                            .slice(0, 12)
+                            .map((h) => `${formatDate(h.date, i18n.language)} ${h.name}`),
+                        ].join(" · ")}
+                      </span>
+                    }
+                    aside={
+                      canManage ? (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          loading={importYear.isPending && importYear.variables === calendar.id}
+                          onClick={() => importYear.mutate(calendar.id)}
+                          aria-label={t("pricing.holidays.importNamed", {
+                            name: calendar.name,
+                            year,
+                          })}
+                        >
+                          {t("pricing.holidays.import", { year })}
+                        </Button>
+                      ) : null
+                    }
+                  />
+                </PanelRow>
+              ))}
+            </PanelRows>
+          )}
+          {importYear.error ? (
+            <div className="border-t border-rule px-5 py-4">
+              <MutationError error={importYear.error} />
+            </div>
+          ) : null}
+        </RuledPanel>
       </QueryState>
       {canManage ? (
         <Form
@@ -549,7 +689,7 @@ function HolidaysSection() {
           submit={t("pricing.holidays.create")}
           onSubmit={() => add.mutate()}
           pending={add.isPending}
-          error={add.error ?? importYear.error}
+          error={add.error}
         >
           <TextField
             label={t("catalogue.name")}
@@ -557,15 +697,9 @@ function HolidaysSection() {
             onChange={(e) => setName(e.target.value)}
             required
           />
-          <TextField
-            label={t("pricing.holidays.year")}
-            type="number"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-          />
         </Form>
       ) : null}
-    </section>
+    </div>
   );
 }
 
@@ -583,6 +717,7 @@ const KINDS = [
 
 export function DiscountsSection() {
   const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const { data: org } = useOrganisation();
   const currency = org?.default_currency ?? "GBP";
   const canManage = usePermission("rates.manage");
@@ -638,48 +773,76 @@ export function DiscountsSection() {
   return (
     <div className="space-y-6">
       <QueryState query={discounts}>
-        <Table
-          caption={t("pricing.discounts.title")}
-          headers={[
-            t("catalogue.name"),
-            t("pricing.discounts.kind"),
-            t("pricing.discounts.effect"),
-          ]}
-        >
-          {(discounts.data?.results ?? []).map((rule) => (
-            <tr key={rule.id}>
-              <Cell>{rule.name}</Cell>
-              <Cell>{t(`pricing.discounts.kinds.${rule.kind}`)}</Cell>
-              <Cell>
-                {rule.percent ? `-${Number(rule.percent)}%` : ""}
-                {rule.fixed_price ? ` ${formatRate(rule.fixed_price, i18n.language)}` : ""}
-              </Cell>
-            </tr>
-          ))}
-        </Table>
+        <RuledPanel flush title={t("pricing.discounts.title")}>
+          <RuledTable
+            caption={t("pricing.discounts.title")}
+            loading={discounts.isPending}
+            loadingLabel={t("grid.loading")}
+            empty={
+              discounts.data && !discounts.data.results.length
+                ? t("designS6.catalogue.noDiscounts")
+                : undefined
+            }
+            columns={[
+              { header: t("catalogue.name") },
+              ...(isPhone ? [] : [{ header: t("pricing.discounts.kind") }]),
+              { header: t("pricing.discounts.effect"), end: true, width: "w-32" },
+            ]}
+          >
+            {(discounts.data?.results ?? []).map((rule) => (
+              <tr key={rule.id}>
+                <td className="font-medium">
+                  {rule.name}
+                  {isPhone ? (
+                    <span className="block text-xs font-normal text-muted-foreground">
+                      {t(`pricing.discounts.kinds.${rule.kind}`)}
+                    </span>
+                  ) : null}
+                </td>
+                {isPhone ? null : <td>{t(`pricing.discounts.kinds.${rule.kind}`)}</td>}
+                <td className={figureCell}>
+                  {[
+                    rule.percent ? `\u2212${Number(rule.percent)}%` : "",
+                    rule.fixed_price ? formatRate(rule.fixed_price, i18n.language) : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ") || <Faded>–</Faded>}
+                </td>
+              </tr>
+            ))}
+          </RuledTable>
+        </RuledPanel>
       </QueryState>
       <QueryState query={codes}>
-        <Table
-          caption={t("pricing.discounts.codes")}
-          headers={[
-            t("pricing.discounts.code"),
-            t("pricing.discounts.discount"),
-            t("pricing.discounts.uses"),
-          ]}
-        >
-          {(codes.data?.results ?? []).map((code) => (
-            <tr key={code.id}>
-              <Cell>
-                <code>{code.code}</code>
-              </Cell>
-              <Cell>{code.discount_name}</Cell>
-              <Cell>
-                {code.uses}
-                {code.max_uses ? ` / ${code.max_uses}` : ""}
-              </Cell>
-            </tr>
-          ))}
-        </Table>
+        <RuledPanel flush title={t("pricing.discounts.codes")}>
+          <RuledTable
+            caption={t("pricing.discounts.codes")}
+            loading={codes.isPending}
+            loadingLabel={t("grid.loading")}
+            empty={
+              codes.data && !codes.data.results.length
+                ? t("designS6.catalogue.noCodes")
+                : undefined
+            }
+            columns={[
+              { header: t("pricing.discounts.code") },
+              { header: t("pricing.discounts.discount") },
+              { header: t("pricing.discounts.uses"), end: true, width: "w-28" },
+            ]}
+          >
+            {(codes.data?.results ?? []).map((code) => (
+              <tr key={code.id}>
+                <td className="font-medium tracking-wide">{code.code}</td>
+                <td>{code.discount_name}</td>
+                <td className={figureCell}>
+                  {code.max_uses
+                    ? t("designS6.catalogue.usesOf", { uses: code.uses, max: code.max_uses })
+                    : code.uses}
+                </td>
+              </tr>
+            ))}
+          </RuledTable>
+        </RuledPanel>
       </QueryState>
       {canManage ? (
         <Form
@@ -707,6 +870,7 @@ export function DiscountsSection() {
           <TextField
             label={t("pricing.discounts.percent")}
             inputMode="decimal"
+            className="text-right tabular-nums"
             value={draft.percent}
             onChange={(e) => setDraft({ ...draft, percent: e.target.value })}
           />
@@ -714,6 +878,7 @@ export function DiscountsSection() {
             <TextField
               label={t("pricing.discounts.trialPrice")}
               inputMode="decimal"
+              className="text-right tabular-nums"
               value={draft.fixed_price}
               onChange={(e) => setDraft({ ...draft, fixed_price: e.target.value })}
             />
@@ -790,31 +955,39 @@ export function PriceListsSection() {
   const serviceName = (id: string) => services.data?.results.find((s) => s.id === id)?.name ?? id;
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">{t("pricing.priceLists.intro")}</p>
       <QueryState query={lists}>
-        <Table
-          caption={t("pricing.priceLists.title")}
-          headers={[
-            t("catalogue.name"),
-            t("pricing.priceLists.prices"),
-            t("pricing.priceLists.clients"),
-          ]}
-        >
-          {(lists.data?.results ?? []).map((list) => (
-            <tr key={list.id}>
-              <Cell>{list.name}</Cell>
-              <Cell>
-                {(list.items ?? [])
-                  .map(
-                    (item) =>
-                      `${serviceName(item.service)} ${formatRate(item.charge_rate, locale)}`,
-                  )
-                  .join(", ")}
-              </Cell>
-              <Cell>{list.clients.length}</Cell>
-            </tr>
-          ))}
-        </Table>
+        <RuledPanel flush title={t("pricing.priceLists.title")} description={t("pricing.priceLists.intro")}>
+          <RuledTable
+            caption={t("pricing.priceLists.title")}
+            loading={lists.isPending}
+            loadingLabel={t("grid.loading")}
+            empty={
+              lists.data && !lists.data.results.length
+                ? t("designS6.catalogue.noPriceLists")
+                : undefined
+            }
+            columns={[
+              { header: t("catalogue.name") },
+              { header: t("pricing.priceLists.prices") },
+              { header: t("pricing.priceLists.clients"), end: true, width: "w-24" },
+            ]}
+          >
+            {(lists.data?.results ?? []).map((list) => (
+              <tr key={list.id}>
+                <td className="font-medium">{list.name}</td>
+                <td className="tabular-nums">
+                  {(list.items ?? [])
+                    .map(
+                      (item) =>
+                        `${serviceName(item.service)} ${formatRate(item.charge_rate, locale)}`,
+                    )
+                    .join(", ")}
+                </td>
+                <td className={figureCell}>{list.clients.length}</td>
+              </tr>
+            ))}
+          </RuledTable>
+        </RuledPanel>
       </QueryState>
       {canManage ? (
         <Form
@@ -842,6 +1015,7 @@ export function PriceListsSection() {
           <TextField
             label={t("pricing.priceLists.rate")}
             inputMode="decimal"
+            className="text-right tabular-nums"
             value={draft.rate}
             onChange={(e) => setDraft({ ...draft, rate: e.target.value })}
           />

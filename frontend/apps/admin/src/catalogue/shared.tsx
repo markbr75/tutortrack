@@ -1,5 +1,5 @@
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, ErrorFallback, Spinner } from "@tutortrack/ui";
+import { Alert, ErrorFallback, RuledTable, type RuledColumn } from "@tutortrack/ui";
 import type { ReactNode } from "react";
 
 import { fieldErrors } from "../api";
@@ -21,7 +21,6 @@ export function QueryState({
       />
     );
   }
-  if (query.isPending) return <Spinner label={t("grid.loading")} />;
   return <>{children}</>;
 }
 
@@ -31,7 +30,7 @@ export function MutationError({ error }: { error: unknown }) {
   if (!error) return null;
   const errors = Object.entries(fieldErrors(error));
   return (
-    <Alert tone="danger" className="mt-3">
+    <Alert tone="danger">
       {errors.length
         ? errors.map(([field, message]) => `${field}: ${message}`).join(" ")
         : t("errors.generic")}
@@ -39,34 +38,43 @@ export function MutationError({ error }: { error: unknown }) {
   );
 }
 
+/**
+ * A catalogue list: a framed register table with skeleton rows while it loads and one
+ * faded-ink sentence when it is empty.
+ */
 export function Table({
   caption,
-  headers,
+  columns,
+  loading,
+  count,
+  empty,
+  framed = true,
   children,
 }: {
   caption: string;
-  headers: string[];
+  columns: ReadonlyArray<RuledColumn>;
+  loading?: boolean;
+  count?: number;
+  empty?: string;
+  framed?: boolean;
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
-        <caption className="sr-only">{caption}</caption>
-        <thead>
-          <tr className="border-b border-border">
-            {headers.map((h) => (
-              <th key={h} scope="col" className="px-2 py-2 font-medium">
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">{children}</tbody>
-      </table>
-    </div>
+    <RuledTable
+      framed={framed}
+      caption={caption}
+      columns={columns}
+      loading={loading}
+      loadingLabel={t("grid.loading")}
+      empty={!loading && count === 0 ? (empty ?? t("grid.empty")) : undefined}
+    >
+      {children}
+    </RuledTable>
   );
 }
 
-export function Cell({ children }: { children: ReactNode }) {
-  return <td className="px-2 py-2 align-top">{children}</td>;
+/** A secondary word in faded ink (an inactive status, an empty value). */
+export function Faded({ children }: { children: ReactNode }) {
+  return <span className="text-muted-foreground">{children}</span>;
 }

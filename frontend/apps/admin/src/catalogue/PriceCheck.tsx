@@ -1,6 +1,14 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  figureCell,
+  FormPanel,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -64,59 +72,72 @@ export function PriceCheck() {
       ),
   });
   const result = quote.data;
+  const studentRows = studentList.data?.results ?? [];
   return (
     <div className="space-y-6">
-      <form
-        className="space-y-4 rounded-lg border border-border p-4"
-        onSubmit={(e) => {
-          e.preventDefault();
+      <FormPanel
+        title={t("designS6.catalogue.priceCheck")}
+        description={t("designS6.catalogue.priceCheckHelp")}
+        submit={t("catalogue.price.check")}
+        pending={quote.isPending}
+        disabled={!service || students.length === 0}
+        onSubmit={() => {
           if (service && students.length) quote.mutate();
         }}
+        error={quote.error ? <MutationError error={quote.error} /> : null}
+        columns={4}
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <SelectField
-            label={t("catalogue.price.service")}
-            required
-            value={service}
-            onChange={(e) => setService(e.target.value)}
-            options={[
-              { value: "", label: t("catalogue.price.choose") },
-              ...(services.data?.results ?? []).map((s) => ({ value: s.id, label: s.name })),
-            ]}
-          />
-          <TextField
-            label={t("catalogue.services.duration")}
-            type="number"
-            min={5}
-            max={600}
-            value={minutes}
-            onChange={(e) => setMinutes(e.target.value)}
-          />
-          <SelectField
-            label={t("catalogue.price.tutor")}
-            value={tutor}
-            onChange={(e) => setTutor(e.target.value)}
-            options={[
-              { value: "", label: t("catalogue.price.noTutor") },
-              ...(tutorList.data?.results ?? []).map((s) => ({ value: s.id, label: s.full_name })),
-            ]}
-          />
-          <TextField
-            label={t("catalogue.price.jobRate", { currency })}
-            hint={t("catalogue.price.jobRateHint")}
-            inputMode="decimal"
-            value={jobRate}
-            onChange={(e) => setJobRate(e.target.value)}
-          />
-        </div>
-        <fieldset>
-          <legend className="mb-2 text-sm font-medium">{t("catalogue.price.students")}</legend>
-          <div className="grid max-h-48 gap-1 overflow-y-auto sm:grid-cols-3">
-            {(studentList.data?.results ?? []).map((s) => (
-              <label key={s.id} className="flex items-center gap-2 text-sm">
+        <SelectField
+          label={t("catalogue.price.service")}
+          required
+          value={service}
+          onChange={(e) => setService(e.target.value)}
+          options={[
+            { value: "", label: t("catalogue.price.choose") },
+            ...(services.data?.results ?? []).map((s) => ({ value: s.id, label: s.name })),
+          ]}
+        />
+        <TextField
+          label={t("catalogue.services.duration")}
+          type="number"
+          min={5}
+          max={600}
+          className="tabular-nums"
+          value={minutes}
+          onChange={(e) => setMinutes(e.target.value)}
+        />
+        <SelectField
+          label={t("catalogue.price.tutor")}
+          value={tutor}
+          onChange={(e) => setTutor(e.target.value)}
+          options={[
+            { value: "", label: t("catalogue.price.noTutor") },
+            ...(tutorList.data?.results ?? []).map((s) => ({ value: s.id, label: s.full_name })),
+          ]}
+        />
+        <TextField
+          label={t("catalogue.price.jobRate", { currency })}
+          hint={t("catalogue.price.jobRateHint")}
+          inputMode="decimal"
+          className="text-right tabular-nums"
+          value={jobRate}
+          onChange={(e) => setJobRate(e.target.value)}
+        />
+        <fieldset className="sm:col-span-full">
+          <legend className="mb-2 text-sm font-medium">
+            {t("catalogue.price.students")}
+            {students.length ? (
+              <span className="ml-2 font-normal text-muted-foreground tabular-nums">
+                {t("designS6.catalogue.chosen", { count: students.length })}
+              </span>
+            ) : null}
+          </legend>
+          <div className="relative grid max-h-48 gap-x-4 gap-y-1.5 overflow-y-auto rounded-md border border-border px-3 py-2.5 sm:grid-cols-2 lg:grid-cols-3">
+            {studentRows.map((s) => (
+              <label key={s.id} className="flex min-w-0 items-center gap-2 text-sm">
                 <input
                   type="checkbox"
-                  className="size-4"
+                  className="size-4 shrink-0"
                   checked={students.includes(s.id)}
                   onChange={(e) =>
                     setStudents((list) =>
@@ -124,58 +145,97 @@ export function PriceCheck() {
                     )
                   }
                 />
-                {s.full_name}
+                <span className="truncate">{s.full_name}</span>
               </label>
             ))}
           </div>
         </fieldset>
-        <Button type="submit" disabled={quote.isPending || !service || students.length === 0}>
-          {t("catalogue.price.check")}
-        </Button>
-        <MutationError error={quote.error} />
-      </form>
+      </FormPanel>
 
       {result ? (
-        <section aria-live="polite" className="space-y-4">
+        <section aria-live="polite" className="grid items-start gap-6 lg:grid-cols-2">
           {result.charges ? (
-            <div>
-              <h2 className="font-semibold">
-                {t("catalogue.price.charges")}: {formatRate(result.total_charge, i18n.language)}
-              </h2>
-              <ul className="mt-2 space-y-2">
-                {result.charges.map((line) => (
-                  <li key={line.student_id} className="rounded-md border border-border p-2 text-sm">
-                    <p className="font-medium">
-                      {names.get(line.student_id) ?? line.student_id}:{" "}
-                      {formatRate(line.amount, i18n.language)}
-                    </p>
-                    <p className="text-muted-foreground">{line.trace.join(" · ")}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <QuoteLines
+              title={t("catalogue.price.charges")}
+              total={formatRate(result.total_charge, i18n.language)}
+              who={t("learning.student")}
+              lines={result.charges.map((line) => ({
+                key: line.student_id,
+                name: names.get(line.student_id) ?? line.student_id,
+                trace: line.trace.join(" · "),
+                amount: formatRate(line.amount, i18n.language),
+              }))}
+            />
           ) : null}
           {result.pay ? (
-            <div>
-              <h2 className="font-semibold">
-                {t("catalogue.price.pay")}: {formatRate(result.total_pay, i18n.language)}
-              </h2>
-              <ul className="mt-2 space-y-2">
-                {result.pay.map((line) => (
-                  <li key={line.tutor_id} className="rounded-md border border-border p-2 text-sm">
-                    <p className="font-medium">
-                      {names.get(line.tutor_id) ?? line.tutor_id}:{" "}
-                      {formatRate(line.amount, i18n.language)}
-                    </p>
-                    <p className="text-muted-foreground">{line.trace.join(" · ")}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <QuoteLines
+              title={t("catalogue.price.pay")}
+              total={formatRate(result.total_pay, i18n.language)}
+              who={t("catalogue.price.tutor")}
+              lines={result.pay.map((line) => ({
+                key: line.tutor_id,
+                name: names.get(line.tutor_id) ?? line.tutor_id,
+                trace: line.trace.join(" · "),
+                amount: formatRate(line.amount, i18n.language),
+              }))}
+            />
           ) : null}
           {!result.charges && !result.pay ? <Alert>{t("catalogue.price.noAccess")}</Alert> : null}
         </section>
       ) : null}
     </div>
+  );
+}
+
+/** One side of a quote: a line per person with the rate engine's trace, and the total under
+ * the amounts. The heading carries the total for screen readers too. */
+function QuoteLines({
+  title,
+  total,
+  who,
+  lines,
+}: {
+  title: string;
+  total: string;
+  who: string;
+  lines: { key: string; name: string; trace: string; amount: string }[];
+}) {
+  const { t } = useTranslation();
+  return (
+    <RuledPanel
+      flush
+      title={
+        <>
+          {title}
+          <span className="sr-only">: {total}</span>
+        </>
+      }
+    >
+      <RuledTable
+        caption={title}
+        columns={[
+          { header: who },
+          { header: t("billing.amount"), end: true, width: "w-32" },
+        ]}
+        footer={
+          <tr>
+            <th scope="row" className="py-2.5 text-right font-semibold">
+              {t("billing.total")}
+            </th>
+            <td className={`${figureCell} font-semibold`}>{total}</td>
+          </tr>
+        }
+      >
+        {lines.map((line) => (
+          <tr key={line.key}>
+            <td>
+              <span className="font-medium">{line.name}</span>
+              <span className="block text-xs text-muted-foreground">{line.trace}</span>
+            </td>
+            <td className={figureCell}>{line.amount}</td>
+          </tr>
+        ))}
+      </RuledTable>
+    </RuledPanel>
   );
 }

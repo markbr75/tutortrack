@@ -1,12 +1,13 @@
 import { unwrap, type components } from "@tutortrack/api-client";
-import { useTranslation } from "@tutortrack/i18n";
-import { Button, SelectField, TextField } from "@tutortrack/ui";
+import { formatDate, useTranslation } from "@tutortrack/i18n";
+import { Button, figureCell, FormPanel, SelectField, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { api, useOrganisation, usePermission } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
 import { PAGE, formatRate } from "./format";
-import { Cell, MutationError, QueryState, Table } from "./shared";
+import { Faded, MutationError, QueryState, Table } from "./shared";
 
 function AddForm({
   title,
@@ -23,20 +24,16 @@ function AddForm({
 }) {
   const { t } = useTranslation();
   return (
-    <form
-      className="space-y-3 rounded-lg border border-border p-4"
-      onSubmit={(e: FormEvent) => {
-        e.preventDefault();
-        onSubmit();
-      }}
+    <FormPanel
+      title={title}
+      submit={t("catalogue.add")}
+      pending={pending}
+      onSubmit={onSubmit}
+      error={error ? <MutationError error={error} /> : null}
+      columns={3}
     >
-      <h2 className="font-semibold">{title}</h2>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{children}</div>
-      <Button type="submit" disabled={pending}>
-        {t("catalogue.add")}
-      </Button>
-      <MutationError error={error} />
-    </form>
+      {children}
+    </FormPanel>
   );
 }
 
@@ -54,6 +51,7 @@ function useCatalogueMutation<T>(key: string, fn: () => Promise<T>, reset: () =>
 /** Tax rates (FR-06-3). */
 export function TaxRatesSection() {
   const { t } = useTranslation();
+  const isPhone = useIsPhone();
   const canManage = usePermission("rates.manage");
   const [draft, setDraft] = useState({ name: "", percent: "", exempt_reason: "" });
   const rates = useQuery({
@@ -81,21 +79,29 @@ export function TaxRatesSection() {
       <QueryState query={rates}>
         <Table
           caption={t("catalogue.tabs.tax")}
-          headers={[
-            t("catalogue.name"),
-            t("catalogue.tax.percent"),
-            t("catalogue.tax.exemptReason"),
-            t("catalogue.tax.default"),
+          loading={rates.isPending}
+          count={rates.data?.length}
+          empty={t("designS6.catalogue.noTaxRates")}
+          columns={[
+            { header: t("catalogue.name") },
+            { header: t("catalogue.tax.percent"), end: true, width: "w-24" },
+            ...(isPhone ? [] : [{ header: t("catalogue.tax.exemptReason") }]),
+            { header: t("catalogue.tax.default") },
           ]}
         >
           {(rates.data ?? []).map((rate) => (
             <tr key={rate.id}>
-              <Cell>{rate.name}</Cell>
-              <Cell>{Number(rate.percent)}%</Cell>
-              <Cell>{rate.exempt_reason}</Cell>
-              <Cell>
+              <td className="font-medium">
+                {rate.name}
+                {isPhone && rate.exempt_reason ? (
+                  <span className="block text-xs font-normal text-muted-foreground">{rate.exempt_reason}</span>
+                ) : null}
+              </td>
+              <td className={figureCell}>{Number(rate.percent)}%</td>
+              {isPhone ? null : <td>{rate.exempt_reason}</td>}
+              <td className="py-1.5">
                 {rate.is_default ? (
-                  t("catalogue.tax.isDefault")
+                  <span className="inline-block py-1">{t("catalogue.tax.isDefault")}</span>
                 ) : canManage ? (
                   <Button
                     size="sm"
@@ -106,7 +112,7 @@ export function TaxRatesSection() {
                     {t("catalogue.tax.makeDefault")}
                   </Button>
                 ) : null}
-              </Cell>
+              </td>
             </tr>
           ))}
         </Table>
@@ -155,6 +161,7 @@ const LOCATION_TYPES: LocationType[] = [
 /** Locations (FR-06-10). */
 export function LocationsSection() {
   const { t } = useTranslation();
+  const isPhone = useIsPhone();
   const canManage = usePermission("catalogue.manage");
   const empty = { name: "", type: "centre" as LocationType, line1: "", city: "", postcode: "" };
   const [draft, setDraft] = useState(empty);
@@ -186,21 +193,33 @@ export function LocationsSection() {
       <QueryState query={locations}>
         <Table
           caption={t("catalogue.tabs.locations")}
-          headers={[
-            t("catalogue.name"),
-            t("catalogue.locations.type"),
-            t("catalogue.locations.address"),
+          loading={locations.isPending}
+          count={locations.data?.results.length}
+          empty={t("designS6.catalogue.noLocations")}
+          columns={[
+            { header: t("catalogue.name") },
+            ...(isPhone ? [] : [{ header: t("catalogue.locations.type") }]),
+            { header: t("catalogue.locations.address") },
           ]}
         >
           {(locations.data?.results ?? []).map((l) => (
             <tr key={l.id}>
-              <Cell>{l.name}</Cell>
-              <Cell>{t(`catalogue.locations.types.${l.type ?? "centre"}`)}</Cell>
-              <Cell>
-                {l.address
-                  ? [l.address.line1, l.address.city, l.address.postcode].filter(Boolean).join(", ")
-                  : ""}
-              </Cell>
+              <td className="font-medium">
+                {l.name}
+                {isPhone ? (
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {t(`catalogue.locations.types.${l.type ?? "centre"}`)}
+                  </span>
+                ) : null}
+              </td>
+              {isPhone ? null : <td>{t(`catalogue.locations.types.${l.type ?? "centre"}`)}</td>}
+              <td>
+                {l.address ? (
+                  [l.address.line1, l.address.city, l.address.postcode].filter(Boolean).join(", ")
+                ) : (
+                  <Faded>–</Faded>
+                )}
+              </td>
             </tr>
           ))}
         </Table>
@@ -266,6 +285,7 @@ const PRODUCT_CATEGORIES: ProductCategory[] = [
 /** Fees and products (FR-06-9). */
 export function ProductsSection() {
   const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const canManage = usePermission("catalogue.manage");
   const { data: org } = useOrganisation();
   const currency = org?.default_currency ?? "GBP";
@@ -301,19 +321,38 @@ export function ProductsSection() {
       <QueryState query={products}>
         <Table
           caption={t("catalogue.tabs.products")}
-          headers={[
-            t("catalogue.name"),
-            t("catalogue.products.category"),
-            t("catalogue.products.price"),
-            t("catalogue.products.tutorShare"),
+          loading={products.isPending}
+          count={products.data?.results.length}
+          empty={t("designS6.catalogue.noProducts")}
+          columns={[
+            { header: t("catalogue.name") },
+            ...(isPhone ? [] : [{ header: t("catalogue.products.category") }]),
+            { header: t("catalogue.products.price"), end: true, width: isPhone ? "w-24" : "w-32" },
+            ...(isPhone
+              ? []
+              : [{ header: t("catalogue.products.tutorShare"), end: true, width: "w-28" }]),
           ]}
         >
           {(products.data?.results ?? []).map((p) => (
             <tr key={p.id}>
-              <Cell>{p.name}</Cell>
-              <Cell>{t(`catalogue.products.categories.${p.category ?? "other"}`)}</Cell>
-              <Cell>{formatRate(p.price, i18n.language)}</Cell>
-              <Cell>{Number(p.tutor_share_percent ?? 0)}%</Cell>
+              <td className="font-medium">
+                {p.name}
+                {isPhone ? (
+                  <span className="block text-xs font-normal text-muted-foreground tabular-nums">
+                    {t(`catalogue.products.categories.${p.category ?? "other"}`)} ·{" "}
+                    {t("designS6.catalogue.tutorShareIs", {
+                      percent: Number(p.tutor_share_percent ?? 0),
+                    })}
+                  </span>
+                ) : null}
+              </td>
+              {isPhone ? null : (
+                <td>{t(`catalogue.products.categories.${p.category ?? "other"}`)}</td>
+              )}
+              <td className={figureCell}>{formatRate(p.price, i18n.language)}</td>
+              {isPhone ? null : (
+                <td className={figureCell}>{Number(p.tutor_share_percent ?? 0)}%</td>
+              )}
             </tr>
           ))}
         </Table>
@@ -345,6 +384,7 @@ export function ProductsSection() {
           <TextField
             label={t("catalogue.products.priceIn", { currency })}
             inputMode="decimal"
+            className="text-right tabular-nums"
             required
             value={draft.price}
             onChange={(e) => setDraft((d) => ({ ...d, price: e.target.value }))}
@@ -366,6 +406,7 @@ type QuantityType = components["schemas"]["QuantityTypeEnum"];
 /** Package templates (FR-06-8). */
 export function PackagesSection() {
   const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const canManage = usePermission("catalogue.manage");
   const { data: org } = useOrganisation();
   const currency = org?.default_currency ?? "GBP";
@@ -403,25 +444,58 @@ export function PackagesSection() {
       <QueryState query={packages}>
         <Table
           caption={t("catalogue.tabs.packages")}
-          headers={[
-            t("catalogue.name"),
-            t("catalogue.packages.quantity"),
-            t("catalogue.products.price"),
-            t("catalogue.packages.validity"),
+          loading={packages.isPending}
+          count={packages.data?.results.length}
+          empty={t("designS6.catalogue.noPackages")}
+          columns={[
+            { header: t("catalogue.name") },
+            ...(isPhone
+              ? []
+              : [{ header: t("catalogue.packages.quantity"), end: true, width: "w-28" }]),
+            { header: t("catalogue.products.price"), end: true, width: isPhone ? "w-24" : "w-32" },
+            ...(isPhone ? [] : [{ header: t("catalogue.packages.validity") }]),
           ]}
         >
           {(packages.data?.results ?? []).map((p) => (
             <tr key={p.id}>
-              <Cell>{p.name}</Cell>
-              <Cell>
-                {t(`catalogue.packages.amount.${p.quantity_type}`, { count: Number(p.quantity) })}
-              </Cell>
-              <Cell>{formatRate(p.price, i18n.language)}</Cell>
-              <Cell>
-                {p.validity_days
-                  ? t("catalogue.packages.days", { count: p.validity_days })
-                  : (p.valid_until ?? "–")}
-              </Cell>
+              <td className="font-medium">
+                {p.name}
+                {isPhone ? (
+                  <span className="block text-xs font-normal text-muted-foreground tabular-nums">
+                    {[
+                      t(`catalogue.packages.amount.${p.quantity_type}`, {
+                        count: Number(p.quantity),
+                      }),
+                      p.validity_days
+                        ? t("catalogue.packages.days", { count: p.validity_days })
+                        : p.valid_until
+                          ? formatDate(p.valid_until, i18n.language)
+                          : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                ) : null}
+              </td>
+              {isPhone ? null : (
+                <td className={figureCell}>
+                  {t(`catalogue.packages.amount.${p.quantity_type}`, {
+                    count: Number(p.quantity),
+                  })}
+                </td>
+              )}
+              <td className={figureCell}>{formatRate(p.price, i18n.language)}</td>
+              {isPhone ? null : (
+                <td className="tabular-nums">
+                  {p.validity_days ? (
+                    t("catalogue.packages.days", { count: p.validity_days })
+                  ) : p.valid_until ? (
+                    formatDate(p.valid_until, i18n.language)
+                  ) : (
+                    <Faded>–</Faded>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </Table>
@@ -460,6 +534,7 @@ export function PackagesSection() {
           <TextField
             label={t("catalogue.products.priceIn", { currency })}
             inputMode="decimal"
+            className="text-right tabular-nums"
             required
             value={draft.price}
             onChange={(e) => setDraft((d) => ({ ...d, price: e.target.value }))}

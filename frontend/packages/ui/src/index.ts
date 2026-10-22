@@ -13,6 +13,7 @@ export {
 export { DataGrid, type DataGridLabels, type DataGridProps } from "./DataGrid";
 export { ErrorBoundary, ErrorFallback, type ErrorFallbackProps } from "./ErrorFallback";
 export { FigureStrip, type StripFigure } from "./FigureStrip";
+export { FormPanel } from "./FormPanel";
 export {
   Alert,
   SelectField,
@@ -36,5 +37,6 @@ export { FactList, NamePlate, Panel, PanelRow, PanelRows } from "./Panel";
 export { RegisterMark } from "./RegisterMark";
 export { PanelFooter, RuledPanel, type RuledPanelProps } from "./RuledPanel";
 export { registerMarkFor, type RegisterMarkKind } from "./registerMarks";
+export { figureCell, RuledTable, type RuledColumn } from "./RuledTable";
 export { Segmented } from "./Segmented";
 export { Tabs, type TabItem, type TabsProps } from "./Tabs";

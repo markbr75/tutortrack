@@ -1,5 +1,5 @@
 import { useTranslation } from "@tutortrack/i18n";
-import { Tabs } from "@tutortrack/ui";
+import { PageHeader, Tabs } from "@tutortrack/ui";
 import { useState } from "react";
 
 import {
@@ -41,7 +41,7 @@ export function CataloguePage() {
   const [tab, setTab] = useState<Tab>("services");
   return (
     <section>
-      <h1 className="mb-4 text-2xl font-semibold">{t("catalogue.title")}</h1>
+      <PageHeader title={t("catalogue.title")} />
       <Tabs
         label={t("catalogue.title")}
         tabs={TABS.map((key) => ({ key, label: t(`catalogue.tabs.${key}`) }))}
