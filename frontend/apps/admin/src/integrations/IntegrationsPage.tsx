@@ -1,10 +1,21 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  cn,
+  PageHeader,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
 import { api, useMe, usePermission } from "../api";
+import { PanelEmpty, PanelLoading } from "../billing/moneyUi";
 import { ErrorList } from "../calendar/ErrorList";
 
 type Connection = components["schemas"]["IntegrationConnection"];
@@ -59,22 +70,27 @@ function useConnections(mine: boolean) {
   });
 }
 
+/** A connection's state in words (a failure in danger), then its account and last sync. */
 function StatusText({ connection }: { connection: Connection }) {
   const { t, i18n } = useTranslation();
+  const failing = connection.status === "error" || connection.status === "needs_reconnect";
   return (
-    <p className="text-sm">
+    <>
       <span
-        className={
-          connection.status === "active" ? "font-medium text-success" : "font-medium text-danger"
-        }
+        className={cn(
+          failing && "font-medium text-danger",
+          connection.status === "disconnected" && "text-muted-foreground",
+        )}
       >
         {t(`integrations.status.${connection.status}`)}
       </span>
       {connection.account_name ? ` · ${connection.account_name}` : ""}
-      {connection.last_sync_at
-        ? ` · ${t("integrations.lastSync", { when: formatDateTime(connection.last_sync_at, i18n.language) })}`
-        : ""}
-    </p>
+      {connection.last_sync_at ? (
+        <span className="tabular-nums">
+          {` · ${t("integrations.lastSync", { when: formatDateTime(connection.last_sync_at, i18n.language) })}`}
+        </span>
+      ) : null}
+    </>
   );
 }
 
@@ -127,7 +143,7 @@ export function CalendarSyncPanel({ connectionId }: { connectionId: string }) {
   const calendars = page.data.calendars;
   return (
     <form
-      className="mt-3 space-y-3 border-t border-border pt-3"
+      className="mt-3 space-y-4 border-t border-rule pt-3"
       aria-label={t("integrations.syncSettings")}
       onSubmit={(e) => {
         e.preventDefault();
@@ -135,72 +151,95 @@ export function CalendarSyncPanel({ connectionId }: { connectionId: string }) {
       }}
     >
       {page.data.calendars_error ? <Alert tone="warning">{page.data.calendars_error}</Alert> : null}
-      <fieldset className="space-y-1">
-        <legend className="text-sm font-medium">{t("integrations.readCalendars")}</legend>
-        <p className="text-xs text-muted-foreground">{t("integrations.readHelp")}</p>
-        {calendars.map((c) => (
-          <label key={c.id} className="flex items-center gap-2 text-sm">
+      <div className="grid items-start gap-x-6 gap-y-4 sm:grid-cols-2">
+        <fieldset className="min-w-0">
+          <legend className="text-sm font-medium">{t("integrations.readCalendars")}</legend>
+          <p className="mb-1.5 text-xs text-muted-foreground">{t("integrations.readHelp")}</p>
+          {calendars.map((c) => (
+            <label key={c.id} className="flex items-center gap-2 py-0.5 text-sm">
+              <input
+                type="checkbox"
+                checked={read.includes(c.id)}
+                onChange={(e) =>
+                  setRead(e.target.checked ? [...read, c.id] : read.filter((id) => id !== c.id))
+                }
+              />
+              {c.name}
+            </label>
+          ))}
+        </fieldset>
+        <div className="min-w-0 space-y-3">
+          <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
-              checked={read.includes(c.id)}
-              onChange={(e) =>
-                setRead(e.target.checked ? [...read, c.id] : read.filter((id) => id !== c.id))
-              }
+              checked={writeEnabled}
+              onChange={(e) => setWriteEnabled(e.target.checked)}
             />
-            {c.name}
+            {t("integrations.writeEnabled")}
           </label>
-        ))}
-      </fieldset>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={writeEnabled}
-          onChange={(e) => setWriteEnabled(e.target.checked)}
-        />
-        {t("integrations.writeEnabled")}
-      </label>
-      {writeEnabled ? (
-        <SelectField
-          label={t("integrations.writeCalendar")}
-          value={write}
-          onChange={(e) => setWrite(e.target.value)}
-          options={[
-            { value: "", label: t("integrations.ownCalendar") },
-            ...calendars.filter((c) => c.writable).map((c) => ({ value: c.id, label: c.name })),
-          ]}
-        />
-      ) : null}
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={twoWay}
-          disabled={!page.data.two_way_allowed}
-          onChange={(e) => setTwoWay(e.target.checked)}
-        />
-        {t("integrations.twoWay")}
-      </label>
-      <p className="text-xs text-muted-foreground">{t("integrations.twoWayHelp")}</p>
-      <TextField
-        label={t("integrations.titleFormat")}
-        hint={t("integrations.titleHelp")}
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <div className="flex flex-wrap gap-2">
-        <Button size="sm" type="submit" disabled={save.isPending}>
-          {t("common.save")}
-        </Button>
-        <Button size="sm" variant="secondary" type="button" onClick={() => syncNow.mutate()}>
+          {writeEnabled ? (
+            <SelectField
+              label={t("integrations.writeCalendar")}
+              value={write}
+              onChange={(e) => setWrite(e.target.value)}
+              options={[
+                { value: "", label: t("integrations.ownCalendar") },
+                ...calendars
+                  .filter((c) => c.writable)
+                  .map((c) => ({ value: c.id, label: c.name })),
+              ]}
+            />
+          ) : null}
+          <div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={twoWay}
+                disabled={!page.data.two_way_allowed}
+                onChange={(e) => setTwoWay(e.target.checked)}
+              />
+              {t("integrations.twoWay")}
+            </label>
+            <p className="mt-0.5 pl-6 text-xs text-muted-foreground">
+              {t("integrations.twoWayHelp")}
+            </p>
+          </div>
+        </div>
+        <div className="sm:col-span-2">
+          <TextField
+            label={t("integrations.titleFormat")}
+            hint={t("integrations.titleHelp")}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          size="sm"
+          variant="secondary"
+          type="button"
+          loading={syncNow.isPending}
+          onClick={() => syncNow.mutate()}
+        >
           {t("integrations.syncNow")}
         </Button>
+        <Button size="sm" type="submit" loading={save.isPending}>
+          {t("common.save")}
+        </Button>
+        {save.isSuccess ? (
+          <p role="status" className="text-sm text-success">
+            {t("integrations.saved")}
+          </p>
+        ) : null}
       </div>
-      {save.isSuccess ? <p role="status">{t("integrations.saved")}</p> : null}
       <ErrorList error={save.error ?? syncNow.error} />
     </form>
   );
 }
 
-function ConnectionCard({ connection, showOwner }: { connection: Connection; showOwner: boolean }) {
+/** One connection as a ruled row: the provider, its state in words, and its actions. */
+function ConnectionRow({ connection, showOwner }: { connection: Connection; showOwner: boolean }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const me = useMe();
@@ -216,33 +255,53 @@ function ConnectionCard({ connection, showOwner }: { connection: Connection; sho
   const mine = connection.user?.id === me.data?.user.id;
   const calendar = connection.capabilities.includes("calendar") && connection.level === "user";
   return (
-    <li className="rounded-md border border-border p-4" aria-label={connection.provider_name}>
-      <h3 className="font-semibold">{connection.provider_name}</h3>
-      {showOwner ? (
-        <p className="text-sm text-muted-foreground">
-          {connection.user ? connection.user.name : t("integrations.organisationLevel")}
-        </p>
-      ) : null}
-      <StatusText connection={connection} />
+    <li className="px-5 py-2.5 text-sm" aria-label={connection.provider_name}>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="min-w-0">
+          <h3 className="font-medium">{connection.provider_name}</h3>
+          <p className="text-xs text-muted-foreground">
+            {showOwner ? (
+              <>
+                {connection.user ? connection.user.name : t("integrations.organisationLevel")}
+                {" · "}
+              </>
+            ) : null}
+            <StatusText connection={connection} />
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {calendar && mine ? (
+            <Button size="sm" variant="secondary" onClick={() => setOpen(!open)} aria-expanded={open}>
+              {t("integrations.syncSettings")}
+            </Button>
+          ) : null}
+          <Button
+            size="sm"
+            variant="secondary"
+            loading={act.isPending && act.variables === "check"}
+            onClick={() => act.mutate("check")}
+          >
+            {t("integrations.check")}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-muted-foreground"
+            onClick={() => act.mutate("disconnect")}
+          >
+            {t("integrations.disconnect")}
+          </Button>
+        </div>
+      </div>
       {connection.error ? (
-        <Alert tone={connection.status === "needs_reconnect" ? "danger" : "warning"}>
+        <Alert
+          tone={connection.status === "needs_reconnect" ? "danger" : "warning"}
+          className="mt-2"
+        >
           {connection.status === "needs_reconnect" ? t("integrations.reconnectNeeded") : null}{" "}
           {connection.error}
         </Alert>
       ) : null}
-      <div className="mt-2 flex flex-wrap gap-2">
-        {calendar && mine ? (
-          <Button size="sm" variant="secondary" onClick={() => setOpen(!open)} aria-expanded={open}>
-            {t("integrations.syncSettings")}
-          </Button>
-        ) : null}
-        <Button size="sm" variant="secondary" onClick={() => act.mutate("check")}>
-          {t("integrations.check")}
-        </Button>
-        <Button size="sm" variant="ghost" onClick={() => act.mutate("disconnect")}>
-          {t("integrations.disconnect")}
-        </Button>
-      </div>
       <ErrorList error={act.error} />
       {open ? <CalendarSyncPanel connectionId={connection.id} /> : null}
     </li>
@@ -294,13 +353,14 @@ export function ConnectProviders({
   });
   const available = providers.filter((p) => p.levels.includes(level));
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
         {available.map((p) => (
           <Button
             key={p.key}
             size="sm"
             variant="secondary"
+            aria-expanded={p.auth === "oauth2" ? undefined : form === p.key}
             onClick={() => (p.auth === "oauth2" ? start.mutate(p.key) : setForm(p.key))}
           >
             {t("integrations.connect", { provider: p.name })}
@@ -309,7 +369,7 @@ export function ConnectProviders({
       </div>
       {form ? (
         <form
-          className="space-y-2 rounded-md border border-border p-3"
+          className="space-y-3 border-t border-rule pt-3"
           aria-label={t("integrations.credentialsFor", {
             provider: available.find((p) => p.key === form)?.name ?? form,
           })}
@@ -318,23 +378,31 @@ export function ConnectProviders({
             connect.mutate(form);
           }}
         >
-          {(available.find((p) => p.key === form)?.credential_fields ?? []).map((field) => (
-            <TextField
-              key={field}
-              label={t(`integrations.fields.${field}`)}
-              type={field === "password" || field === "api_key" ? "password" : "text"}
-              autoComplete="off"
-              required={field !== "server_url"}
-              hint={field === "password" ? t("integrations.appPasswordHint") : undefined}
-              value={fields[field] ?? ""}
-              onChange={(e) => setFields({ ...fields, [field]: e.target.value })}
-            />
-          ))}
-          <div className="flex gap-2">
-            <Button size="sm" type="submit" disabled={connect.isPending}>
+          <div className="grid items-start gap-x-4 gap-y-3 sm:grid-cols-2">
+            {(available.find((p) => p.key === form)?.credential_fields ?? []).map((field) => (
+              <TextField
+                key={field}
+                label={t(`integrations.fields.${field}`)}
+                type={field === "password" || field === "api_key" ? "password" : "text"}
+                autoComplete="off"
+                required={field !== "server_url"}
+                hint={field === "password" ? t("integrations.appPasswordHint") : undefined}
+                value={fields[field] ?? ""}
+                onChange={(e) => setFields({ ...fields, [field]: e.target.value })}
+              />
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" type="submit" loading={connect.isPending}>
               {t("integrations.save")}
             </Button>
-            <Button size="sm" variant="ghost" type="button" onClick={() => setForm(null)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              type="button"
+              className="text-muted-foreground"
+              onClick={() => setForm(null)}
+            >
               {t("common.cancel")}
             </Button>
           </div>
@@ -361,15 +429,17 @@ export function MeetingPreferenceForm() {
   if (!pref.data) return null;
   return (
     <div className="space-y-2">
-      <SelectField
-        label={t("integrations.myVideoProvider")}
-        value={pref.data.provider ?? ""}
-        onChange={(e) => save.mutate({ provider: e.target.value })}
-        options={[
-          { value: "", label: t("integrations.orgDefault") },
-          ...VIDEO.map((v) => ({ value: v, label: t(`integrations.video.${v}`) })),
-        ]}
-      />
+      <div className="sm:max-w-sm">
+        <SelectField
+          label={t("integrations.myVideoProvider")}
+          value={pref.data.provider ?? ""}
+          onChange={(e) => save.mutate({ provider: e.target.value })}
+          options={[
+            { value: "", label: t("integrations.orgDefault") },
+            ...VIDEO.map((v) => ({ value: v, label: t(`integrations.video.${v}`) })),
+          ]}
+        />
+      </div>
       {pref.data.provider === "zoom" ? (
         <label className="flex items-center gap-2 text-sm">
           <input
@@ -406,42 +476,74 @@ function VideoDefaults() {
     onSuccess: (data) => queryClient.setQueryData(["settings", "integrations"], data),
   });
   const values = settings.data?.values as Record<string, unknown> | undefined;
-  if (!values) return null;
   return (
-    <div className="max-w-md space-y-3">
-      <SelectField
-        label={t("integrations.defaultVideo")}
-        value={String(values["integrations.video_provider"])}
-        onChange={(e) => save.mutate({ "integrations.video_provider": e.target.value })}
-        options={VIDEO.map((v) => ({ value: v, label: t(`integrations.video.${v}`) }))}
-      />
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={Boolean(values["integrations.auto_create_meetings"])}
-          onChange={(e) => save.mutate({ "integrations.auto_create_meetings": e.target.checked })}
-        />
-        {t("integrations.autoCreate")}
-      </label>
-      <TextField
-        type="number"
-        min={0}
-        max={120}
-        label={t("integrations.joinWindow")}
-        defaultValue={String(values["integrations.join_window_minutes"])}
-        onBlur={(e) => save.mutate({ "integrations.join_window_minutes": Number(e.target.value) })}
-      />
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={Boolean(values["integrations.calendar_two_way"])}
-          onChange={(e) => save.mutate({ "integrations.calendar_two_way": e.target.checked })}
-        />
-        {t("integrations.allowTwoWay")}
-      </label>
-      {save.isSuccess ? <p role="status">{t("integrations.saved")}</p> : null}
-      <ErrorList error={save.error} />
-    </div>
+    <RuledPanel
+      title={t("integrations.videoDefaults")}
+      titleId="video-heading"
+      aside={
+        save.isSuccess ? (
+          <p role="status" className="text-success">
+            {t("integrations.saved")}
+          </p>
+        ) : null
+      }
+      flush
+    >
+      {!values ? (
+        <PanelLoading label={t("grid.loading")} />
+      ) : (
+        <div className="space-y-4 px-5 py-4">
+          <div className="grid items-start gap-x-4 gap-y-3 sm:grid-cols-2">
+            <SelectField
+              label={t("integrations.defaultVideo")}
+              value={String(values["integrations.video_provider"])}
+              onChange={(e) => save.mutate({ "integrations.video_provider": e.target.value })}
+              options={VIDEO.map((v) => ({ value: v, label: t(`integrations.video.${v}`) }))}
+            />
+            <div className="flex flex-col gap-1">
+              <label htmlFor="join-window" className="text-sm font-medium">
+                {t("integrations.joinWindow")}
+              </label>
+              <span className="flex items-center gap-2">
+                <input
+                  id="join-window"
+                  type="number"
+                  min={0}
+                  max={120}
+                  className="h-10 w-24 rounded-md border border-field bg-surface px-3 text-right text-sm tabular-nums"
+                  defaultValue={String(values["integrations.join_window_minutes"])}
+                  onBlur={(e) =>
+                    save.mutate({ "integrations.join_window_minutes": Number(e.target.value) })
+                  }
+                />
+                <span className="text-sm text-muted-foreground">{t("designS9a.minutes")}</span>
+              </span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={Boolean(values["integrations.auto_create_meetings"])}
+                onChange={(e) =>
+                  save.mutate({ "integrations.auto_create_meetings": e.target.checked })
+                }
+              />
+              {t("integrations.autoCreate")}
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={Boolean(values["integrations.calendar_two_way"])}
+                onChange={(e) => save.mutate({ "integrations.calendar_two_way": e.target.checked })}
+              />
+              {t("integrations.allowTwoWay")}
+            </label>
+          </div>
+          <ErrorList error={save.error} />
+        </div>
+      )}
+    </RuledPanel>
   );
 }
 
@@ -465,64 +567,64 @@ export function IntegrationsPage() {
   const others = (all.data ?? []).filter((c) => !mine.data?.some((m) => m.id === c.id));
 
   return (
-    <div className="max-w-3xl space-y-8">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold">{t("integrations.title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("integrations.help")}</p>
-      </header>
-      {simulated ? <Alert>{t("integrations.simulated")}</Alert> : null}
-      {complete.isPending ? <Spinner label={t("integrations.finishing")} /> : null}
-      {complete.isSuccess ? <Alert tone="success">{t("integrations.connected")}</Alert> : null}
-      {denied ? <Alert tone="warning">{t("integrations.denied")}</Alert> : null}
-      <ErrorList error={complete.error} />
+    <div className="max-w-4xl">
+      <PageHeader title={t("integrations.title")} description={t("integrations.help")} />
+      <div className="space-y-6">
+        {simulated ? <Alert>{t("integrations.simulated")}</Alert> : null}
+        {complete.isPending ? <Spinner label={t("integrations.finishing")} /> : null}
+        {complete.isSuccess ? <Alert tone="success">{t("integrations.connected")}</Alert> : null}
+        {denied ? <Alert tone="warning">{t("integrations.denied")}</Alert> : null}
+        <ErrorList error={complete.error} />
 
-      <section className="space-y-3" aria-labelledby="mine-heading">
-        <h2 id="mine-heading" className="text-lg font-semibold">
-          {t("integrations.mine")}
-        </h2>
-        <ul className="space-y-3">
-          {(mine.data ?? []).map((c) => (
-            <ConnectionCard key={c.id} connection={c} showOwner={false} />
-          ))}
-        </ul>
-        {providers.data ? (
-          <ConnectProviders level="user" providers={providers.data} returnPath={RETURN_PATH} />
-        ) : null}
-        <MeetingPreferenceForm />
-      </section>
-
-      {canView ? (
-        <section className="space-y-3" aria-labelledby="org-heading">
-          <h2 id="org-heading" className="text-lg font-semibold">
-            {t("integrations.organisation")}
-          </h2>
-          {others.length ? (
-            <ul className="space-y-3">
-              {others.map((c) => (
-                <ConnectionCard key={c.id} connection={c} showOwner />
+        <RuledPanel title={t("integrations.mine")} titleId="mine-heading" flush>
+          {!mine.data ? (
+            <PanelLoading label={t("grid.loading")} />
+          ) : mine.data.length ? (
+            <ul className="divide-y divide-rule">
+              {mine.data.map((c) => (
+                <ConnectionRow key={c.id} connection={c} showOwner={false} />
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted-foreground">{t("integrations.noneYet")}</p>
+            <PanelEmpty>{t("integrations.noneYet")}</PanelEmpty>
           )}
-          {canManage && providers.data ? (
-            <ConnectProviders
-              level="organisation"
-              providers={providers.data}
-              returnPath={RETURN_PATH}
-            />
+          {providers.data ? (
+            <div className="border-t border-rule px-5 py-3">
+              <ConnectProviders level="user" providers={providers.data} returnPath={RETURN_PATH} />
+            </div>
           ) : null}
-        </section>
-      ) : null}
+          <div className="border-t border-rule px-5 py-4">
+            <MeetingPreferenceForm />
+          </div>
+        </RuledPanel>
 
-      {canSettings ? (
-        <section className="space-y-3" aria-labelledby="video-heading">
-          <h2 id="video-heading" className="text-lg font-semibold">
-            {t("integrations.videoDefaults")}
-          </h2>
-          <VideoDefaults />
-        </section>
-      ) : null}
+        {canView ? (
+          <RuledPanel title={t("integrations.organisation")} titleId="org-heading" flush>
+            {others.length ? (
+              <PanelRows>
+                {others.map((c) => (
+                  <ConnectionRow key={c.id} connection={c} showOwner />
+                ))}
+              </PanelRows>
+            ) : !all.data ? (
+              <PanelLoading label={t("grid.loading")} />
+            ) : (
+              <PanelEmpty>{t("integrations.noneYet")}</PanelEmpty>
+            )}
+            {canManage && providers.data ? (
+              <div className="border-t border-rule px-5 py-3">
+                <ConnectProviders
+                  level="organisation"
+                  providers={providers.data}
+                  returnPath={RETURN_PATH}
+                />
+              </div>
+            ) : null}
+          </RuledPanel>
+        ) : null}
+
+        {canSettings ? <VideoDefaults /> : null}
+      </div>
     </div>
   );
 }

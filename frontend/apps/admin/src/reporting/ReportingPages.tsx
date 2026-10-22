@@ -609,7 +609,7 @@ export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
             </div>
           ) : null}
           {panels.length ? (
-            <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 md:grid-cols-2 lg:grid-cols-6">
+            <div className="grid grid-flow-row-dense grid-cols-[minmax(0,1fr)] items-start gap-6 md:grid-cols-2 lg:grid-cols-6">
               {panels}
             </div>
           ) : null}
@@ -953,7 +953,14 @@ export function ResultTable({
                 <tr key={i} className={cn("font-semibold", i > 0 && "border-t border-rule")}>
                   {cols.map((c, j) => (
                     <td key={c.key} className={figure(c) ? figureCell : undefined}>
-                      {j === 0 ? t("reporting.total") : c.key in row ? show(c, row) : ""}
+                      {j === 0 && !figure(c) ? (
+                        t("reporting.total")
+                      ) : (
+                        <>
+                          {j === 0 ? <span className="sr-only">{t("reporting.total")} </span> : null}
+                          {c.key in row ? show(c, row) : ""}
+                        </>
+                      )}
                     </td>
                   ))}
                 </tr>
@@ -1448,6 +1455,12 @@ export function SavedReportsPage() {
     enabled: canSchedule,
     queryFn: async () => unwrap(await api.GET("/api/v1/scheduled-reports")),
   });
+  const defs = useQuery({
+    queryKey: ["reports"],
+    enabled: canExport,
+    queryFn: async () => unwrap(await api.GET("/api/v1/reporting/reports")),
+  });
+  const reportTitle = (key: string) => defs.data?.find((d) => d.key === key)?.title ?? key;
   const runs = useQuery({
     queryKey: ["report-runs"],
     enabled: canExport,
@@ -1598,6 +1611,7 @@ export function SavedReportsPage() {
         <RuledPanel title={t("reporting.runsTitle")} titleId="runs" flush>
           <RuledTable
             caption={t("reporting.runsTitle")}
+            tableClassName="[&_td]:align-middle"
             loading={runs.isPending}
             loadingLabel={t("grid.loading")}
             empty={!runs.isPending && runRows.length === 0 ? t("designS9a.noRuns") : undefined}
@@ -1612,7 +1626,7 @@ export function SavedReportsPage() {
             {runRows.map((r) => (
               <tr key={r.id}>
                 <td>
-                  <span className="font-medium">{r.saved_report_name ?? r.report_key}</span>
+                  <span className="font-medium">{r.saved_report_name ?? reportTitle(r.report_key)}</span>
                   {phone ? (
                     <span className="block text-xs text-muted-foreground tabular-nums">
                       {formatDateTime(r.created_at, locale)}

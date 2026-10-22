@@ -21,8 +21,8 @@ import {
  * Rule). Series are told apart by strength and, for lines, by dash, so colour is never the
  * only cue; a legend names them and the numbers are always available as a table.
  */
-const STRENGTH = [1, 0.55, 0.3, 0.16];
-const DASH = [undefined, "6 4", "2 3", "8 3 2 3"];
+const STRENGTH = [1, 0.7, 0.45, 0.26, 0.12];
+const DASH = [undefined, "6 4", "2 3", "8 3 2 3", "1 4"];
 /** Axis text, grid and cursor take the register's tokens through CSS (it beats SVG attributes). */
 const SKIN = cn(
   "text-link",

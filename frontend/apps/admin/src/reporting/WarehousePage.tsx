@@ -214,7 +214,11 @@ function ExportsTable({ destination }: { destination: Destination }) {
                 </span>
                 {run.error ? <span className="block text-xs text-danger">{run.error}</span> : null}
               </td>
-              {phone ? null : <td className={figureCell}>{run.row_count}</td>}
+              {phone ? null : (
+                <td className={figureCell}>
+                  {new Intl.NumberFormat(i18n.language).format(run.row_count)}
+                </td>
+              )}
               {files && !phone ? <td>{links}</td> : null}
             </tr>
           );

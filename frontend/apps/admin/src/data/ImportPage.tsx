@@ -33,7 +33,8 @@ import {
 import { BatchStatus } from "./DataPage";
 
 const DATE_ORDERS = ["DMY", "MDY", "YMD"] as const;
-const quietGhost = "text-muted-foreground";
+/** A quiet action after the primary; on phones it may wrap, so it sits on the content edge. */
+const quietGhost = "text-muted-foreground max-sm:px-0";
 
 function usePreview(id: string, enabled: boolean) {
   return useQuery({
@@ -306,7 +307,7 @@ function PreviewGrid({ batch }: { batch: ImportBatch }) {
       >
         {rows.map((row) => (
           <tr key={row.id}>
-            <th scope="row" className="py-2.5 text-right font-normal tabular-nums">
+            <th scope="row" className="py-2.5 text-right align-top font-normal tabular-nums">
               {row.row_number}
             </th>
             <td>

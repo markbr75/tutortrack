@@ -1,28 +1,41 @@
 import { ApiError, unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  cn,
+  FigureStrip,
+  FormPanel,
+  figureCell,
+  NamePlate,
+  PageHeader,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  Tabs,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { X } from "lucide-react";
+import { useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
+import { PanelEmpty, PanelLoading } from "../billing/moneyUi";
+import { useIsPhone } from "../billing/useIsPhone";
 
 type Scope = components["schemas"]["Scope"];
 type Endpoint = components["schemas"]["WebhookEndpoint"];
 type Delivery = components["schemas"]["WebhookDelivery"];
 type EventType = components["schemas"]["EventType"];
 
-const linkClass = "underline underline-offset-2";
-const pre = "overflow-x-auto rounded-md bg-muted p-3 text-xs";
-
-export function Card({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section aria-label={title} className="space-y-3 rounded-lg border border-border p-4">
-      <h2 className="font-semibold">{title}</h2>
-      {children}
-    </section>
-  );
-}
+/** Code and payloads: a ruled box on the stock, scrolling sideways inside itself. */
+export const codeBlock =
+  "relative overflow-x-auto rounded-md border border-border bg-background px-3 py-2.5 font-mono text-xs leading-relaxed";
+const quietGhost = "text-muted-foreground";
 
 function errorText(error: unknown): string {
   return error instanceof ApiError ? error.message : String(error ?? "");
@@ -35,12 +48,16 @@ function SecretOnce({ secret, onDone }: { secret: string; onDone: () => void }) 
   return (
     <Alert tone="warning" title={t("developer.secretOnceTitle")}>
       <p className="text-sm">{t("developer.secretOnce")}</p>
-      <code className="mt-2 block break-all rounded bg-muted p-2 text-xs" data-testid="secret">
+      <code
+        className="mt-2 block rounded-md border border-field bg-surface px-3 py-2 font-mono text-xs break-all"
+        data-testid="secret"
+      >
         {secret}
       </code>
-      <div className="mt-2 flex gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button
           type="button"
+          size="sm"
           variant="secondary"
           onClick={() => {
             void navigator.clipboard?.writeText(secret);
@@ -49,7 +66,7 @@ function SecretOnce({ secret, onDone }: { secret: string; onDone: () => void }) 
         >
           {copied ? t("developer.copied") : t("developer.copy")}
         </Button>
-        <Button type="button" variant="ghost" onClick={onDone}>
+        <Button type="button" size="sm" variant="ghost" onClick={onDone}>
           {t("developer.done")}
         </Button>
       </div>
@@ -77,11 +94,11 @@ function ScopePicker({
   legend: string;
 }) {
   return (
-    <fieldset className="space-y-1">
-      <legend className="text-sm font-medium">{legend}</legend>
-      <div className="grid gap-1 sm:grid-cols-2">
+    <fieldset className="min-w-0 sm:col-span-2 lg:col-span-3">
+      <legend className="mb-1 text-sm font-medium">{legend}</legend>
+      <div className="grid gap-x-4 gap-y-1.5 sm:grid-cols-2 lg:grid-cols-3">
         {scopes.map((scope) => (
-          <label key={scope.key} className="flex items-start gap-2 text-sm">
+          <label key={scope.key} className="flex min-w-0 items-start gap-2 text-sm">
             <input
               type="checkbox"
               className="mt-1"
@@ -92,8 +109,9 @@ function ScopePicker({
                 )
               }
             />
-            <span>
-              <code className="text-xs">{scope.key}</code> {scope.description}
+            <span className="min-w-0">
+              {scope.description}
+              <code className="block font-mono text-xs text-muted-foreground">{scope.key}</code>
             </span>
           </label>
         ))}
@@ -111,18 +129,26 @@ export function DeveloperPage() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("overview");
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">{t("developer.title")}</h1>
-        <span className="flex gap-4 text-sm">
-          <Link to="/developer/docs" className={linkClass}>
-            {t("developer.docs.link")}
-          </Link>
-          <Link to="/settings/marketplace" className={linkClass}>
-            {t("marketplace.title")}
-          </Link>
-        </span>
-      </div>
+    <div>
+      <PageHeader
+        title={t("developer.title")}
+        actions={
+          <>
+            <Link
+              to="/settings/marketplace"
+              className={buttonClass({ variant: "secondary", size: "sm" })}
+            >
+              {t("marketplace.title")}
+            </Link>
+            <Link
+              to="/developer/docs"
+              className={buttonClass({ variant: "secondary", size: "sm" })}
+            >
+              {t("developer.docs.link")}
+            </Link>
+          </>
+        }
+      />
       <Tabs
         label={t("developer.title")}
         tabs={[
@@ -146,31 +172,50 @@ export function DeveloperPage() {
 }
 
 function Overview() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const overview = useQuery({
     queryKey: ["developer-overview"],
     queryFn: async () => unwrap(await api.GET("/api/v1/developer/overview")),
   });
-  if (!overview.data) return <Spinner label={t("grid.loading")} />;
+  if (!overview.data) {
+    return (
+      <RuledPanel label={t("developer.tabs.overview")} flush>
+        <PanelLoading label={t("grid.loading")} />
+      </RuledPanel>
+    );
+  }
   const o = overview.data;
-  const stats: [string, number][] = [
-    [t("developer.stats.apiKeys"), o.api_keys],
-    [t("developer.stats.connectedApps"), o.connected_apps],
-    [t("developer.stats.endpoints"), o.webhook_endpoints],
-    [t("developer.stats.deliveries"), o.deliveries_24h],
-    [t("developer.stats.failing"), o.failed_24h],
-  ];
+  const n = new Intl.NumberFormat(i18n.language);
   return (
     <div className="space-y-4">
       {o.sandbox_of ? <Alert tone="info">{t("developer.sandboxBanner")}</Alert> : null}
-      <dl className="grid gap-3 sm:grid-cols-5">
-        {stats.map(([label, value]) => (
-          <div key={label} className="rounded-lg border border-border p-3">
-            <dt className="text-sm text-muted-foreground">{label}</dt>
-            <dd className="text-2xl font-semibold">{value}</dd>
-          </div>
-        ))}
-      </dl>
+      <FigureStrip
+        label={t("developer.tabs.overview")}
+        figures={[
+          { key: "keys", label: t("developer.stats.apiKeys"), value: n.format(o.api_keys) },
+          {
+            key: "apps",
+            label: t("developer.stats.connectedApps"),
+            value: n.format(o.connected_apps),
+          },
+          {
+            key: "endpoints",
+            label: t("developer.stats.endpoints"),
+            value: n.format(o.webhook_endpoints),
+          },
+          {
+            key: "deliveries",
+            label: t("developer.stats.deliveries"),
+            value: n.format(o.deliveries_24h),
+          },
+          {
+            key: "failing",
+            label: t("developer.stats.failing"),
+            value: n.format(o.failed_24h),
+            tone: o.failed_24h > 0 ? "danger" : "default",
+          },
+        ]}
+      />
       <p className="text-sm text-muted-foreground">
         {t("developer.rateLimits", {
           perMinute: o.rate_limit_per_minute,
@@ -186,6 +231,7 @@ function Overview() {
 function ApiKeys() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
+  const phone = useIsPhone();
   const canManage = usePermission("developer.apikey.manage");
   const scopes = useScopes();
   const keys = useQuery({
@@ -239,117 +285,127 @@ function ApiKeys() {
     onSuccess: refresh,
   });
   if (!canManage) return <Alert tone="info">{t("developer.noPermission")}</Alert>;
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    create.mutate();
-  };
+  const rows = keys.data?.results ?? [];
+  const lastUsed = (iso: string | null | undefined) =>
+    iso ? formatDateTime(iso, i18n.language) : t("developer.never");
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {secret ? <SecretOnce secret={secret} onDone={() => setSecret(null)} /> : null}
-      <Card title={t("developer.keys.new")}>
-        <form onSubmit={submit} className="space-y-3">
-          <TextField
-            label={t("developer.keys.name")}
-            value={name}
-            required
-            onChange={(e) => setName(e.target.value)}
-          />
-          {scopes.data ? (
-            <ScopePicker
-              legend={t("developer.scopes")}
-              scopes={scopes.data}
-              value={chosen}
-              onChange={setChosen}
-            />
-          ) : null}
-          <TextField
-            label={t("developer.keys.allowlist")}
-            hint={t("developer.keys.allowlistHint")}
-            value={allowlist}
-            onChange={(e) => setAllowlist(e.target.value)}
-          />
-          <TextField
-            label={t("developer.keys.expires")}
-            type="date"
-            value={expires}
-            onChange={(e) => setExpires(e.target.value)}
-          />
-          {create.error ? <Alert tone="danger">{errorText(create.error)}</Alert> : null}
-          <Button type="submit" disabled={!name || chosen.length === 0 || create.isPending}>
-            {t("developer.keys.create")}
-          </Button>
-        </form>
-      </Card>
-      {!keys.data ? (
-        <Spinner label={t("grid.loading")} />
-      ) : keys.data.results.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("developer.keys.none")}</p>
-      ) : (
-        <table className="w-full text-left text-sm">
-          <caption className="sr-only">{t("developer.tabs.keys")}</caption>
-          <thead>
-            <tr className="border-b border-border">
-              <th scope="col" className="py-2">
-                {t("developer.keys.name")}
-              </th>
-              <th scope="col">{t("developer.keys.key")}</th>
-              <th scope="col">{t("developer.scopes")}</th>
-              <th scope="col">{t("developer.keys.lastUsed")}</th>
-              <th scope="col">
-                <span className="sr-only">{t("developer.actions")}</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {keys.data.results.map((key) => (
-              <tr key={key.id} className="border-b border-border align-top">
-                <td className="py-2">
+      <RuledPanel title={t("developer.tabs.keys")} flush>
+        <RuledTable
+          caption={t("developer.tabs.keys")}
+          loading={!keys.data}
+          loadingLabel={t("grid.loading")}
+          empty={keys.data && rows.length === 0 ? t("developer.keys.none") : undefined}
+          columns={[
+            { key: "name", header: t("developer.keys.name"), width: "min-w-40" },
+            ...(phone
+              ? []
+              : [
+                  { key: "key", header: t("developer.keys.key") },
+                  { key: "scopes", header: t("developer.scopes") },
+                  { key: "used", header: t("developer.keys.lastUsed") },
+                ]),
+            { key: "actions", header: t("developer.actions"), hidden: true },
+          ]}
+        >
+          {rows.map((key) => (
+            <tr key={key.id}>
+              <td>
+                <span className={cn("font-medium", !key.active && "text-muted-foreground")}>
                   {key.name}
-                  {!key.active ? (
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      ({t("developer.keys.inactive")})
-                    </span>
-                  ) : null}
-                </td>
-                <td>
-                  <code className="text-xs">{key.display}</code>
-                </td>
-                <td className="text-xs">{key.scopes.join(", ")}</td>
-                <td>
-                  {key.last_used_at
-                    ? formatDateTime(key.last_used_at, i18n.language)
-                    : t("developer.never")}
-                </td>
-                <td className="space-x-2 whitespace-nowrap text-right">
-                  {key.active ? (
-                    <>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => rotate.mutate(key.id)}
-                        aria-label={t("developer.keys.rotateNamed", { name: key.name })}
-                      >
-                        {t("developer.keys.rotate")}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => {
-                          if (window.confirm(t("developer.keys.confirmRevoke")))
-                            revoke.mutate(key.id);
-                        }}
-                        aria-label={t("developer.keys.revokeNamed", { name: key.name })}
-                      >
-                        {t("developer.keys.revoke")}
-                      </Button>
-                    </>
-                  ) : null}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+                </span>
+                {!key.active || phone ? (
+                  <span className="block text-xs text-muted-foreground">
+                    {[
+                      key.active ? null : t("developer.keys.inactive"),
+                      phone ? key.display : null,
+                      phone ? lastUsed(key.last_used_at) : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                ) : null}
+              </td>
+              {phone ? null : (
+                <>
+                  <td>
+                    <code className="font-mono text-xs whitespace-nowrap">{key.display}</code>
+                  </td>
+                  <td className="text-xs text-muted-foreground">
+                    <code className="font-mono">{key.scopes.join(", ")}</code>
+                  </td>
+                  <td className="whitespace-nowrap tabular-nums">{lastUsed(key.last_used_at)}</td>
+                </>
+              )}
+              <td className="py-1.5 text-right">
+                {key.active ? (
+                  <span className="inline-flex flex-wrap justify-end gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => rotate.mutate(key.id)}
+                      aria-label={t("developer.keys.rotateNamed", { name: key.name })}
+                    >
+                      {t("developer.keys.rotate")}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className={quietGhost}
+                      onClick={() => {
+                        if (window.confirm(t("developer.keys.confirmRevoke")))
+                          revoke.mutate(key.id);
+                      }}
+                      aria-label={t("developer.keys.revokeNamed", { name: key.name })}
+                    >
+                      {t("developer.keys.revoke")}
+                    </Button>
+                  </span>
+                ) : null}
+              </td>
+            </tr>
+          ))}
+        </RuledTable>
+      </RuledPanel>
+      <FormPanel
+        title={t("developer.keys.new")}
+        submit={t("developer.keys.create")}
+        columns={3}
+        pending={create.isPending}
+        disabled={!name || chosen.length === 0}
+        onSubmit={() => create.mutate()}
+        error={create.error ? <Alert tone="danger">{errorText(create.error)}</Alert> : null}
+      >
+        <TextField
+          label={t("developer.keys.name")}
+          value={name}
+          required
+          onChange={(e) => setName(e.target.value)}
+        />
+        <TextField
+          label={t("developer.keys.allowlist")}
+          hint={t("developer.keys.allowlistHint")}
+          value={allowlist}
+          onChange={(e) => setAllowlist(e.target.value)}
+        />
+        <TextField
+          label={t("developer.keys.expires")}
+          type="date"
+          value={expires}
+          onChange={(e) => setExpires(e.target.value)}
+        />
+        {scopes.data ? (
+          <ScopePicker
+            legend={t("developer.scopes")}
+            scopes={scopes.data}
+            value={chosen}
+            onChange={setChosen}
+          />
+        ) : null}
+      </FormPanel>
     </div>
   );
 }
@@ -396,40 +452,67 @@ function Webhooks() {
       refresh();
     },
   });
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    create.mutate();
-  };
   const options = types.data ? eventOptions(types.data) : [];
+  const rows = endpoints.data?.results ?? [];
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {secret ? <SecretOnce secret={secret} onDone={() => setSecret(null)} /> : null}
-      {canManage ? (
-        <Card title={t("developer.webhooks.new")}>
-          <form onSubmit={submit} className="space-y-3">
-            <TextField
-              label={t("developer.webhooks.url")}
-              hint={t("developer.webhooks.urlHint")}
-              type="url"
-              required
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
-            <TextField
-              label={t("developer.webhooks.description")}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            <div className="flex flex-wrap items-end gap-2">
-              <SelectField
-                label={t("developer.webhooks.addEvent")}
-                value={picking}
-                onChange={(e) => setPicking(e.target.value)}
-                options={[
-                  { value: "", label: t("developer.webhooks.chooseEvent") },
-                  ...options.map((o) => ({ value: o, label: o })),
-                ]}
+      <RuledPanel title={t("designS9a.endpoints")} flush>
+        {!endpoints.data ? (
+          <PanelLoading label={t("grid.loading")} />
+        ) : rows.length === 0 ? (
+          <PanelEmpty>{t("developer.webhooks.none")}</PanelEmpty>
+        ) : (
+          <PanelRows>
+            {rows.map((endpoint) => (
+              <EndpointRow
+                key={endpoint.id}
+                endpoint={endpoint}
+                canManage={canManage}
+                open={selected === endpoint.id}
+                onToggle={() => setSelected(selected === endpoint.id ? null : endpoint.id)}
+                onSecret={setSecret}
+                onChanged={refresh}
               />
+            ))}
+          </PanelRows>
+        )}
+      </RuledPanel>
+      {canManage ? (
+        <FormPanel
+          title={t("developer.webhooks.new")}
+          submit={t("developer.webhooks.create")}
+          pending={create.isPending}
+          disabled={!url || events.length === 0}
+          onSubmit={() => create.mutate()}
+          error={create.error ? <Alert tone="danger">{errorText(create.error)}</Alert> : null}
+        >
+          <TextField
+            label={t("developer.webhooks.url")}
+            hint={t("developer.webhooks.urlHint")}
+            type="url"
+            required
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
+          <TextField
+            label={t("developer.webhooks.description")}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <div className="space-y-2 sm:col-span-2">
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="min-w-56">
+                <SelectField
+                  label={t("developer.webhooks.addEvent")}
+                  value={picking}
+                  onChange={(e) => setPicking(e.target.value)}
+                  options={[
+                    { value: "", label: t("developer.webhooks.chooseEvent") },
+                    ...options.map((o) => ({ value: o, label: o })),
+                  ]}
+                />
+              </div>
               <Button
                 type="button"
                 variant="secondary"
@@ -445,46 +528,26 @@ function Webhooks() {
             {events.length ? (
               <ul aria-label={t("developer.webhooks.events")} className="flex flex-wrap gap-2">
                 {events.map((ev) => (
-                  <li key={ev} className="rounded bg-muted px-2 py-1 text-xs">
-                    {ev}{" "}
+                  <li
+                    key={ev}
+                    className="flex h-8 items-center gap-1 rounded-md border border-border bg-surface pl-2.5 font-mono text-xs"
+                  >
+                    {ev}
                     <button
                       type="button"
-                      className="ml-1"
+                      className="grid size-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                       aria-label={t("developer.webhooks.removeEvent", { event: ev })}
                       onClick={() => setEvents(events.filter((x) => x !== ev))}
                     >
-                      ×
+                      <X aria-hidden="true" className="size-3.5" strokeWidth={1.75} />
                     </button>
                   </li>
                 ))}
               </ul>
             ) : null}
-            {create.error ? <Alert tone="danger">{errorText(create.error)}</Alert> : null}
-            <Button type="submit" disabled={!url || events.length === 0 || create.isPending}>
-              {t("developer.webhooks.create")}
-            </Button>
-          </form>
-        </Card>
+          </div>
+        </FormPanel>
       ) : null}
-      {!endpoints.data ? (
-        <Spinner label={t("grid.loading")} />
-      ) : endpoints.data.results.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("developer.webhooks.none")}</p>
-      ) : (
-        <ul className="divide-y divide-border rounded-lg border border-border">
-          {endpoints.data.results.map((endpoint) => (
-            <EndpointRow
-              key={endpoint.id}
-              endpoint={endpoint}
-              canManage={canManage}
-              open={selected === endpoint.id}
-              onToggle={() => setSelected(selected === endpoint.id ? null : endpoint.id)}
-              onSecret={setSecret}
-              onChanged={refresh}
-            />
-          ))}
-        </ul>
-      )}
     </div>
   );
 }
@@ -535,40 +598,55 @@ function EndpointRow({
     },
     onSuccess: onChanged,
   });
+  const status = endpoint.status;
   return (
-    <li className="space-y-2 p-3 text-sm">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="min-w-0">
-          <span className="block break-all font-medium">{endpoint.url}</span>
-          <span className="text-xs text-muted-foreground">
-            {t(`developer.webhooks.status.${endpoint.status}`)} · {endpoint.events.join(", ")}
-            {endpoint.failing_since
-              ? ` · ${t("developer.webhooks.failingSince", {
+    <PanelRow className="space-y-2">
+      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+        <div className="min-w-0">
+          <p className="font-medium break-all">{endpoint.url}</p>
+          <p className="text-xs text-muted-foreground">
+            <span
+              className={cn(
+                status === "disabled" && "font-medium text-danger",
+                status === "paused" && "text-muted-foreground",
+              )}
+            >
+              {t(`developer.webhooks.status.${status}`)}
+            </span>
+            {" · "}
+            <code className="font-mono">{endpoint.events.join(", ")}</code>
+            {endpoint.failing_since ? (
+              <span className="font-medium text-danger">
+                {" · "}
+                {t("developer.webhooks.failingSince", {
                   when: formatDateTime(endpoint.failing_since, i18n.language),
-                })}`
-              : ""}
-          </span>
-        </span>
-        <span className="flex flex-wrap gap-2">
-          <Button type="button" variant="secondary" onClick={onToggle} aria-expanded={open}>
+                })}
+              </span>
+            ) : null}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" size="sm" variant="secondary" onClick={onToggle} aria-expanded={open}>
             {t("developer.webhooks.log")}
           </Button>
           {canManage ? (
             <>
-              <Button type="button" variant="secondary" onClick={() => test.mutate()}>
+              <Button type="button" size="sm" variant="secondary" onClick={() => test.mutate()}>
                 {t("developer.webhooks.sendTest")}
               </Button>
-              <Button type="button" variant="secondary" onClick={() => toggle.mutate()}>
-                {endpoint.status === "active"
+              <Button type="button" size="sm" variant="secondary" onClick={() => toggle.mutate()}>
+                {status === "active"
                   ? t("developer.webhooks.pause")
                   : t("developer.webhooks.enable")}
               </Button>
-              <Button type="button" variant="ghost" onClick={() => rotate.mutate()}>
+              <Button type="button" size="sm" variant="secondary" onClick={() => rotate.mutate()}>
                 {t("developer.webhooks.rotate")}
               </Button>
               <Button
                 type="button"
+                size="sm"
                 variant="ghost"
+                className={quietGhost}
                 onClick={() => {
                   if (window.confirm(t("developer.webhooks.confirmDelete"))) remove.mutate();
                 }}
@@ -577,20 +655,21 @@ function EndpointRow({
               </Button>
             </>
           ) : null}
-        </span>
+        </div>
       </div>
       {test.isSuccess ? (
-        <p role="status" className="text-xs text-muted-foreground">
+        <p role="status" className="text-xs text-success">
           {t("developer.webhooks.testQueued")}
         </p>
       ) : null}
       {open ? <DeliveryLog endpointId={endpoint.id} canManage={canManage} /> : null}
-    </li>
+    </PanelRow>
   );
 }
 
 function DeliveryLog({ endpointId, canManage }: { endpointId: string; canManage: boolean }) {
   const { t, i18n } = useTranslation();
+  const phone = useIsPhone();
   const [open, setOpen] = useState<string | null>(null);
   const deliveries = useQuery({
     queryKey: ["webhook-deliveries", endpointId],
@@ -601,38 +680,38 @@ function DeliveryLog({ endpointId, canManage }: { endpointId: string; canManage:
         }),
       ),
   });
-  if (!deliveries.data) return <Spinner label={t("grid.loading")} />;
-  if (deliveries.data.results.length === 0)
-    return <p className="text-xs text-muted-foreground">{t("developer.deliveries.none")}</p>;
+  const rows = deliveries.data?.results ?? [];
   return (
-    <table className="w-full text-left text-xs">
-      <caption className="sr-only">{t("developer.webhooks.log")}</caption>
-      <thead>
-        <tr className="border-b border-border">
-          <th scope="col" className="py-1">
-            {t("developer.deliveries.event")}
-          </th>
-          <th scope="col">{t("developer.deliveries.status")}</th>
-          <th scope="col">{t("developer.deliveries.attempts")}</th>
-          <th scope="col">{t("developer.deliveries.when")}</th>
-          <th scope="col">
-            <span className="sr-only">{t("developer.actions")}</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {deliveries.data.results.map((d) => (
-          <DeliveryRow
-            key={d.id}
-            delivery={d}
-            canManage={canManage}
-            open={open === d.id}
-            onToggle={() => setOpen(open === d.id ? null : d.id)}
-            locale={i18n.language}
-          />
-        ))}
-      </tbody>
-    </table>
+    <RuledTable
+      caption={t("developer.webhooks.log")}
+      className="rounded-md border border-border"
+      loading={!deliveries.data}
+      loadingLabel={t("grid.loading")}
+      empty={deliveries.data && rows.length === 0 ? t("developer.deliveries.none") : undefined}
+      columns={[
+        { key: "event", header: t("developer.deliveries.event"), width: "min-w-36" },
+        { key: "status", header: t("developer.deliveries.status") },
+        ...(phone
+          ? []
+          : [
+              { key: "attempts", header: t("developer.deliveries.attempts"), end: true },
+              { key: "when", header: t("developer.deliveries.when") },
+            ]),
+        { key: "actions", header: t("developer.actions"), hidden: true },
+      ]}
+    >
+      {rows.map((d) => (
+        <DeliveryRow
+          key={d.id}
+          delivery={d}
+          canManage={canManage}
+          open={open === d.id}
+          onToggle={() => setOpen(open === d.id ? null : d.id)}
+          locale={i18n.language}
+          phone={phone}
+        />
+      ))}
+    </RuledTable>
   );
 }
 
@@ -642,12 +721,14 @@ function DeliveryRow({
   open,
   onToggle,
   locale,
+  phone,
 }: {
   delivery: Delivery;
   canManage: boolean;
   open: boolean;
   onToggle: () => void;
   locale: string;
+  phone: boolean;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -670,52 +751,93 @@ function DeliveryRow({
     onSuccess: refresh,
   });
   const waiting = delivery.status === "pending" || delivery.status === "retrying";
+  const columns = phone ? 3 : 5;
   return (
     <>
-      <tr className="border-b border-border">
-        <td className="py-1">
-          <button type="button" className={linkClass} onClick={onToggle} aria-expanded={open}>
+      <tr>
+        <td>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 text-left font-mono text-xs text-link hover:underline"
+            onClick={onToggle}
+            aria-expanded={open}
+          >
             {delivery.event_type}
           </button>
+          {phone ? (
+            <span className="block text-xs text-muted-foreground tabular-nums">
+              {formatDateTime(delivery.created_at, locale)}
+            </span>
+          ) : null}
         </td>
         <td>
-          {t(`developer.deliveries.statuses.${delivery.status}`)}
-          {delivery.last_status_code ? ` (${delivery.last_status_code})` : ""}
-        </td>
-        <td>{delivery.attempt_count}</td>
-        <td>{formatDateTime(delivery.created_at, locale)}</td>
-        <td className="space-x-2 whitespace-nowrap text-right">
-          {canManage && waiting ? (
-            <Button type="button" variant="ghost" onClick={() => retry.mutate()}>
-              {t("developer.deliveries.retryNow")}
-            </Button>
+          <span className={delivery.status === "failed" ? "font-medium text-danger" : undefined}>
+            {t(`developer.deliveries.statuses.${delivery.status}`)}
+          </span>
+          {delivery.last_status_code ? (
+            <span className="text-muted-foreground tabular-nums">
+              {" "}
+              ({delivery.last_status_code})
+            </span>
           ) : null}
-          {canManage && !waiting ? (
-            <Button type="button" variant="ghost" onClick={() => redeliver.mutate()}>
-              {t("developer.deliveries.redeliver")}
+        </td>
+        {phone ? null : (
+          <>
+            <td className={figureCell}>{delivery.attempt_count}</td>
+            <td className="whitespace-nowrap tabular-nums">
+              {formatDateTime(delivery.created_at, locale)}
+            </td>
+          </>
+        )}
+        <td className="py-1.5 text-right">
+          {canManage ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => (waiting ? retry.mutate() : redeliver.mutate())}
+            >
+              {waiting ? t("developer.deliveries.retryNow") : t("developer.deliveries.redeliver")}
             </Button>
           ) : null}
         </td>
       </tr>
       {open ? (
         <tr>
-          <td colSpan={5} className="space-y-2 py-2">
+          <td colSpan={columns} className="space-y-3 bg-background/60">
             {!detail.data ? (
-              <Spinner label={t("grid.loading")} />
+              <PanelLoading label={t("grid.loading")} />
             ) : (
               <>
-                <ol className="space-y-1" aria-label={t("developer.deliveries.attempts")}>
+                <ol className="space-y-2" aria-label={t("developer.deliveries.attempts")}>
                   {detail.data.attempts.map((a) => (
-                    <li key={a.number}>
-                      #{a.number} · {formatDateTime(a.attempted_at, locale)} ·{" "}
-                      {a.status_code ?? a.error} · {a.duration_ms} ms
-                      {a.response_snippet ? <pre className={pre}>{a.response_snippet}</pre> : null}
+                    <li key={a.number} className="text-sm">
+                      <p className="tabular-nums">
+                        <span className="font-medium">#{a.number}</span> ·{" "}
+                        {formatDateTime(a.attempted_at, locale)} ·{" "}
+                        <span className={a.error || (a.status_code ?? 0) >= 400 ? "text-danger" : undefined}>
+                          {a.status_code ?? a.error}
+                        </span>{" "}
+                        · {a.duration_ms} ms
+                      </p>
+                      {a.response_snippet ? (
+                        <pre className={cn(codeBlock, "mt-1")}>{a.response_snippet}</pre>
+                      ) : null}
                     </li>
                   ))}
                 </ol>
-                <pre className={pre} aria-label={t("developer.deliveries.payload")}>
-                  {JSON.stringify(detail.data.body, null, 2)}
-                </pre>
+                <div>
+                  <p className="mb-1 text-xs font-semibold text-muted-foreground">
+                    {t("developer.deliveries.payload")}
+                  </p>
+                  <pre
+                    className={codeBlock}
+                    tabIndex={0}
+                    aria-label={t("developer.deliveries.payload")}
+                  >
+                    {JSON.stringify(detail.data.body, null, 2)}
+                  </pre>
+                </div>
               </>
             )}
           </td>
@@ -778,52 +900,85 @@ function Apps() {
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["connected-apps"] }),
   });
+  const grants = connected.data?.results ?? [];
+  const registered = apps.data?.results ?? [];
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {secret ? <SecretOnce secret={secret} onDone={() => setSecret(null)} /> : null}
       {canConnect ? (
-        <Card title={t("developer.apps.connected")}>
+        <RuledPanel title={t("developer.apps.connected")} flush>
           {!connected.data ? (
-            <Spinner label={t("grid.loading")} />
-          ) : connected.data.results.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("developer.apps.noneConnected")}</p>
+            <PanelLoading label={t("grid.loading")} />
+          ) : grants.length === 0 ? (
+            <PanelEmpty>{t("developer.apps.noneConnected")}</PanelEmpty>
           ) : (
-            <ul className="divide-y divide-border">
-              {connected.data.results.map((grant) => (
-                <li key={grant.id} className="flex flex-wrap justify-between gap-2 py-2 text-sm">
-                  <span>
-                    <span className="font-medium">{grant.application.name}</span>{" "}
-                    <span className="text-xs text-muted-foreground">
-                      {grant.user_email} · {grant.scopes.join(", ")} ·{" "}
-                      {grant.last_used_at
-                        ? formatDateTime(grant.last_used_at, i18n.language)
-                        : t("developer.never")}
-                    </span>
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => disconnect.mutate(grant.id)}
-                    aria-label={t("developer.apps.disconnectNamed", {
-                      name: grant.application.name,
-                    })}
-                  >
-                    {t("developer.apps.disconnect")}
-                  </Button>
-                </li>
+            <PanelRows>
+              {grants.map((grant) => (
+                <PanelRow key={grant.id}>
+                  <NamePlate
+                    name={grant.application.name}
+                    context={
+                      <>
+                        {grant.user_email} ·{" "}
+                        <code className="font-mono">{grant.scopes.join(", ")}</code> ·{" "}
+                        <span className="tabular-nums">
+                          {grant.last_used_at
+                            ? formatDateTime(grant.last_used_at, i18n.language)
+                            : t("developer.never")}
+                        </span>
+                      </>
+                    }
+                    aside={
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className={quietGhost}
+                        onClick={() => disconnect.mutate(grant.id)}
+                        aria-label={t("developer.apps.disconnectNamed", {
+                          name: grant.application.name,
+                        })}
+                      >
+                        {t("developer.apps.disconnect")}
+                      </Button>
+                    }
+                  />
+                </PanelRow>
               ))}
-            </ul>
+            </PanelRows>
           )}
-        </Card>
+        </RuledPanel>
       ) : null}
       {canRegister ? (
-        <Card title={t("developer.apps.registered")}>
-          {secret ? <SecretOnce secret={secret} onDone={() => setSecret(null)} /> : null}
-          <form
-            className="space-y-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              register.mutate();
-            }}
+        <>
+          <RuledPanel title={t("developer.apps.registered")} flush>
+            {!apps.data ? (
+              <PanelLoading label={t("grid.loading")} />
+            ) : registered.length === 0 ? (
+              <PanelEmpty>{t("designS9a.noApps")}</PanelEmpty>
+            ) : (
+              <PanelRows>
+                {registered.map((app) => (
+                  <PanelRow key={app.id}>
+                    <NamePlate
+                      name={app.name}
+                      context={<code className="font-mono">{app.client_id}</code>}
+                    />
+                  </PanelRow>
+                ))}
+              </PanelRows>
+            )}
+          </RuledPanel>
+          <FormPanel
+            title={t("designS9a.registerApp")}
+            submit={t("developer.apps.register")}
+            columns={2}
+            pending={register.isPending}
+            disabled={!name || !redirect || allowed.length === 0}
+            onSubmit={() => register.mutate()}
+            error={
+              register.error ? <Alert tone="danger">{errorText(register.error)}</Alert> : null
+            }
           >
             <TextField
               label={t("developer.apps.name")}
@@ -838,9 +993,10 @@ function Apps() {
               required
               onChange={(e) => setRedirect(e.target.value)}
             />
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-start gap-2 text-sm sm:col-span-2">
               <input
                 type="checkbox"
+                className="mt-1"
                 checked={confidential}
                 onChange={(e) => setConfidential(e.target.checked)}
               />
@@ -854,22 +1010,8 @@ function Apps() {
                 onChange={setAllowed}
               />
             ) : null}
-            {register.error ? <Alert tone="danger">{errorText(register.error)}</Alert> : null}
-            <Button type="submit" disabled={!name || !redirect || allowed.length === 0}>
-              {t("developer.apps.register")}
-            </Button>
-          </form>
-          {apps.data && apps.data.results.length ? (
-            <ul className="divide-y divide-border text-sm">
-              {apps.data.results.map((app) => (
-                <li key={app.id} className="py-2">
-                  <span className="font-medium">{app.name}</span>{" "}
-                  <code className="text-xs">{app.client_id}</code>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </Card>
+          </FormPanel>
+        </>
       ) : null}
     </div>
   );
@@ -891,30 +1033,59 @@ function Sandboxes() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["sandboxes"] }),
   });
   if (!canManage) return <Alert tone="info">{t("developer.noPermission")}</Alert>;
+  const rows = sandboxes.data?.results ?? [];
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">{t("developer.sandboxes.intro")}</p>
-      {create.error ? <Alert tone="danger">{errorText(create.error)}</Alert> : null}
-      <Button type="button" onClick={() => create.mutate()} disabled={create.isPending}>
-        {create.isPending ? t("developer.sandboxes.creating") : t("developer.sandboxes.create")}
-      </Button>
-      {sandboxes.data?.results.length ? (
-        <ul className="divide-y divide-border rounded-lg border border-border text-sm">
-          {sandboxes.data.results.map((sb) => (
-            <li key={sb.id} className="flex flex-wrap justify-between gap-2 p-3">
-              <span>
-                <span className="font-medium">{sb.name}</span>{" "}
-                <span className="text-xs text-muted-foreground">
-                  {formatDateTime(sb.created_at, i18n.language)}
-                </span>
-              </span>
-              <a href={sb.url} className={linkClass}>
-                {t("developer.sandboxes.open")}
-              </a>
-            </li>
-          ))}
-        </ul>
+    <RuledPanel
+      title={t("developer.tabs.sandboxes")}
+      description={t("developer.sandboxes.intro")}
+      flush
+      footer={
+        <>
+          <Button type="button" size="sm" onClick={() => create.mutate()} loading={create.isPending}>
+            {create.isPending ? t("developer.sandboxes.creating") : t("developer.sandboxes.create")}
+          </Button>
+        </>
+      }
+    >
+      {create.error ? (
+        <div className="px-5 pt-4">
+          <Alert tone="danger">{errorText(create.error)}</Alert>
+        </div>
       ) : null}
-    </div>
+      {!sandboxes.data ? (
+        <PanelLoading label={t("grid.loading")} />
+      ) : rows.length === 0 ? (
+        <PanelEmpty>{t("designS9a.noSandboxes")}</PanelEmpty>
+      ) : (
+        <PanelRows>
+          {rows.map((sb) => (
+            <PanelRow key={sb.id}>
+              <NamePlate
+                name={sb.name}
+                context={
+                  <span className="tabular-nums">
+                    {formatDateTime(sb.created_at, i18n.language)}
+                  </span>
+                }
+                aside={
+                  <a href={sb.url} className={buttonClass({ variant: "secondary", size: "sm" })}>
+                    {t("developer.sandboxes.open")}
+                  </a>
+                }
+              />
+            </PanelRow>
+          ))}
+        </PanelRows>
+      )}
+    </RuledPanel>
+  );
+}
+
+/** A guide or reference section on the developer docs page. */
+export function DocPanel({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <RuledPanel title={title} bodyClassName="space-y-3 px-5 py-4 text-sm">
+      {children}
+    </RuledPanel>
   );
 }
