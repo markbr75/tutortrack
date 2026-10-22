@@ -311,7 +311,13 @@ function PreviewGrid({ batch }: { batch: ImportBatch }) {
               {row.row_number}
             </th>
             <td>
-              <span className={row.status === "invalid" || row.status === "failed" ? "font-medium text-danger" : undefined}>
+              <span
+                className={
+                  row.status === "invalid" || row.status === "failed"
+                    ? "font-medium text-danger"
+                    : undefined
+                }
+              >
                 {t(`dataTransfer.rowStatus.${row.status}`)}
               </span>
               {row.action ? (

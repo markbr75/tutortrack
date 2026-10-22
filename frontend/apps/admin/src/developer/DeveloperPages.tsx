@@ -626,7 +626,13 @@ function EndpointRow({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="button" size="sm" variant="secondary" onClick={onToggle} aria-expanded={open}>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={onToggle}
+            aria-expanded={open}
+          >
             {t("developer.webhooks.log")}
           </Button>
           {canManage ? (
@@ -696,8 +702,8 @@ function DeliveryLog({ endpointId, canManage }: { endpointId: string; canManage:
           : [
               { key: "attempts", header: t("developer.deliveries.attempts"), end: true },
               { key: "when", header: t("developer.deliveries.when") },
+              { key: "actions", header: t("developer.actions"), hidden: true },
             ]),
-        { key: "actions", header: t("developer.actions"), hidden: true },
       ]}
     >
       {rows.map((d) => (
@@ -751,7 +757,17 @@ function DeliveryRow({
     onSuccess: refresh,
   });
   const waiting = delivery.status === "pending" || delivery.status === "retrying";
-  const columns = phone ? 3 : 5;
+  const columns = phone ? 2 : 5;
+  const action = canManage ? (
+    <Button
+      type="button"
+      size="sm"
+      variant="secondary"
+      onClick={() => (waiting ? retry.mutate() : redeliver.mutate())}
+    >
+      {waiting ? t("developer.deliveries.retryNow") : t("developer.deliveries.redeliver")}
+    </Button>
+  ) : null;
   return (
     <>
       <tr>
@@ -765,9 +781,12 @@ function DeliveryRow({
             {delivery.event_type}
           </button>
           {phone ? (
-            <span className="block text-xs text-muted-foreground tabular-nums">
-              {formatDateTime(delivery.created_at, locale)}
-            </span>
+            <>
+              <span className="block text-xs text-muted-foreground tabular-nums">
+                {formatDateTime(delivery.created_at, locale)}
+              </span>
+              {action ? <span className="mt-2 block">{action}</span> : null}
+            </>
           ) : null}
         </td>
         <td>
@@ -787,20 +806,9 @@ function DeliveryRow({
             <td className="whitespace-nowrap tabular-nums">
               {formatDateTime(delivery.created_at, locale)}
             </td>
+            <td className="py-1.5 text-right">{action}</td>
           </>
         )}
-        <td className="py-1.5 text-right">
-          {canManage ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              onClick={() => (waiting ? retry.mutate() : redeliver.mutate())}
-            >
-              {waiting ? t("developer.deliveries.retryNow") : t("developer.deliveries.redeliver")}
-            </Button>
-          ) : null}
-        </td>
       </tr>
       {open ? (
         <tr>
@@ -815,7 +823,11 @@ function DeliveryRow({
                       <p className="tabular-nums">
                         <span className="font-medium">#{a.number}</span> ·{" "}
                         {formatDateTime(a.attempted_at, locale)} ·{" "}
-                        <span className={a.error || (a.status_code ?? 0) >= 400 ? "text-danger" : undefined}>
+                        <span
+                          className={
+                            a.error || (a.status_code ?? 0) >= 400 ? "text-danger" : undefined
+                          }
+                        >
                           {a.status_code ?? a.error}
                         </span>{" "}
                         · {a.duration_ms} ms
@@ -976,9 +988,7 @@ function Apps() {
             pending={register.isPending}
             disabled={!name || !redirect || allowed.length === 0}
             onSubmit={() => register.mutate()}
-            error={
-              register.error ? <Alert tone="danger">{errorText(register.error)}</Alert> : null
-            }
+            error={register.error ? <Alert tone="danger">{errorText(register.error)}</Alert> : null}
           >
             <TextField
               label={t("developer.apps.name")}
@@ -1041,7 +1051,12 @@ function Sandboxes() {
       flush
       footer={
         <>
-          <Button type="button" size="sm" onClick={() => create.mutate()} loading={create.isPending}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => create.mutate()}
+            loading={create.isPending}
+          >
             {create.isPending ? t("developer.sandboxes.creating") : t("developer.sandboxes.create")}
           </Button>
         </>

@@ -161,7 +161,11 @@ export function Chart({
           swatch: <Swatch kind="pie" index={i} />,
         }))
       : series.length > 1
-        ? series.map((s, i) => ({ key: s.key, label: s.label, swatch: <Swatch kind={kind} index={i} /> }))
+        ? series.map((s, i) => ({
+            key: s.key,
+            label: s.label,
+            swatch: <Swatch kind={kind} index={i} />,
+          }))
         : [];
   return (
     <figure className="min-w-0 space-y-3" aria-label={label}>
@@ -206,7 +210,12 @@ export function Chart({
                     strokeDasharray={DASH[i % DASH.length]}
                     strokeOpacity={i >= DASH.length ? strength(i) : 1}
                     dot={data.length <= 12 ? { r: 3, fill: "currentColor", strokeWidth: 0 } : false}
-                    activeDot={{ r: 5, fill: "currentColor", stroke: "hsl(var(--tt-surface))", strokeWidth: 2 }}
+                    activeDot={{
+                      r: 5,
+                      fill: "currentColor",
+                      stroke: "hsl(var(--tt-surface))",
+                      strokeWidth: 2,
+                    }}
                     isAnimationActive={false}
                   />
                 ))}

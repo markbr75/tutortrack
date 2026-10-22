@@ -19,7 +19,7 @@ import {
 } from "@tutortrack/ui";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useId, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
 import { PanelEmpty, PanelLoading } from "../billing/moneyUi";
@@ -74,7 +74,7 @@ function useLocale(): string {
  * Displays a report or widget value: money with its currency, dates in the locale's words
  * (a month group as "Oct 2026"), counts with the locale's separators, otherwise as given.
  */
-export function useFormat() {
+function useFormat() {
   const locale = useLocale();
   return (value: unknown, type: string, currency?: string, grain?: string): string => {
     if (value === null || value === undefined || value === "") return "";
@@ -628,6 +628,15 @@ export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
 export function ReportsNav() {
   const { t } = useTranslation();
   const canBuild = usePermission("reporting.builder.use");
+  const navRef = useRef<HTMLElement>(null);
+  // On phones the row scrolls sideways: bring the current page's link into view.
+  useEffect(() => {
+    const nav = navRef.current;
+    const active = nav?.querySelector<HTMLElement>("a.active");
+    if (nav && active && active.offsetLeft + active.offsetWidth > nav.clientWidth) {
+      nav.scrollLeft = active.offsetLeft - 16;
+    }
+  }, []);
   const links = [
     { to: "/analytics", label: t("reporting.library") },
     { to: "/analytics/saved", label: t("reporting.savedTitle") },
@@ -636,6 +645,7 @@ export function ReportsNav() {
   ] as const;
   return (
     <nav
+      ref={navRef}
       aria-label={t("reporting.sections")}
       className="relative mb-6 flex gap-1 overflow-x-auto border-b border-border [scrollbar-width:none]"
     >
@@ -960,7 +970,9 @@ export function ResultTable({
                         t("reporting.total")
                       ) : (
                         <>
-                          {j === 0 ? <span className="sr-only">{t("reporting.total")} </span> : null}
+                          {j === 0 ? (
+                            <span className="sr-only">{t("reporting.total")} </span>
+                          ) : null}
                           {c.key in row ? show(c, row) : ""}
                         </>
                       )}
@@ -1115,13 +1127,7 @@ function SaveView({ reportKey, params }: { reportKey: string; params: Record<str
         <input type="checkbox" checked={shared} onChange={(e) => setShared(e.target.checked)} />
         {t("reporting.shareView")}
       </label>
-      <Button
-        type="submit"
-        size="sm"
-        variant="secondary"
-        className="h-9"
-        disabled={save.isPending}
-      >
+      <Button type="submit" size="sm" variant="secondary" className="h-9" disabled={save.isPending}>
         {t("reporting.saveView")}
       </Button>
       {save.isSuccess ? (
@@ -1409,9 +1415,7 @@ export function ScheduleForm({
                 checked={recipients.includes(s.id)}
                 onChange={(e) =>
                   setRecipients(
-                    e.target.checked
-                      ? [...recipients, s.id]
-                      : recipients.filter((r) => r !== s.id),
+                    e.target.checked ? [...recipients, s.id] : recipients.filter((r) => r !== s.id),
                   )
                 }
               />
@@ -1629,7 +1633,9 @@ export function SavedReportsPage() {
             {runRows.map((r) => (
               <tr key={r.id}>
                 <td>
-                  <span className="font-medium">{r.saved_report_name ?? reportTitle(r.report_key)}</span>
+                  <span className="font-medium">
+                    {r.saved_report_name ?? reportTitle(r.report_key)}
+                  </span>
                   {phone ? (
                     <span className="block text-xs text-muted-foreground tabular-nums">
                       {formatDateTime(r.created_at, locale)}

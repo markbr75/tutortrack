@@ -216,7 +216,11 @@ export function NewImportForm({
             className={fileInput}
           />
           <p className="text-xs">
-            <a className="text-link hover:underline" href={`/api/v1/import-templates/${chosen}`} download>
+            <a
+              className="text-link hover:underline"
+              href={`/api/v1/import-templates/${chosen}`}
+              download
+            >
               {t("dataTransfer.template")}
             </a>
           </p>
@@ -521,7 +525,12 @@ function ProjectView({ project }: { project: MigrationProject }) {
             caption={t("dataTransfer.migration.reconciliation")}
             columns={[
               { key: "metric", header: t("dataTransfer.migration.metric"), width: "min-w-40" },
-              { key: "source", header: t("dataTransfer.migration.source"), end: true, width: "w-32" },
+              {
+                key: "source",
+                header: t("dataTransfer.migration.source"),
+                end: true,
+                width: "w-32",
+              },
               {
                 key: "imported",
                 header: t("dataTransfer.migration.imported"),
@@ -679,7 +688,9 @@ function ExportTab() {
           {jobs.map((job) => (
             <PanelRow key={job.id}>
               <p className="flex flex-wrap items-baseline justify-between gap-x-3">
-                <span className="tabular-nums">{formatDateTime(job.created_at, i18n.language)}</span>
+                <span className="tabular-nums">
+                  {formatDateTime(job.created_at, i18n.language)}
+                </span>
                 <span
                   role="status"
                   className={cn(

@@ -218,11 +218,13 @@ describe("home", () => {
     });
     render(<App />);
     const dashboard = await screen.findByRole("region", { name: "Dashboard" });
-    expect(
-      await within(dashboard).findByRole("region", { name: "Lessons delivered" }),
-    ).toBeInTheDocument();
+    const figures = await within(dashboard).findByRole("group", {
+      name: "Figures for the period",
+    });
+    expect(within(figures).getByText("Lessons delivered")).toBeInTheDocument();
     // Revenue and today's lessons are already in the money strip and the register.
-    expect(within(dashboard).queryAllByRole("region")).toHaveLength(1);
+    expect(within(dashboard).queryByText("Revenue")).not.toBeInTheDocument();
+    expect(within(dashboard).queryAllByRole("region")).toHaveLength(0);
   });
 
   it("shows only what the role may see", async () => {

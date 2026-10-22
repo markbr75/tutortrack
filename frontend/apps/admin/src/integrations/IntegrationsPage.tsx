@@ -184,9 +184,7 @@ export function CalendarSyncPanel({ connectionId }: { connectionId: string }) {
               onChange={(e) => setWrite(e.target.value)}
               options={[
                 { value: "", label: t("integrations.ownCalendar") },
-                ...calendars
-                  .filter((c) => c.writable)
-                  .map((c) => ({ value: c.id, label: c.name })),
+                ...calendars.filter((c) => c.writable).map((c) => ({ value: c.id, label: c.name })),
               ]}
             />
           ) : null}
@@ -273,7 +271,12 @@ function ConnectionRow({ connection, showOwner }: { connection: Connection; show
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {calendar && mine ? (
-            <Button size="sm" variant="secondary" onClick={() => setOpen(!open)} aria-expanded={open}>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setOpen(!open)}
+              aria-expanded={open}
+            >
               {t("integrations.syncSettings")}
             </Button>
           ) : null}
