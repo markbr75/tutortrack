@@ -1,17 +1,27 @@
 import { ApiError, unwrap, type components } from "@tutortrack/api-client";
-import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import { formatDateTime, useTranslation } from "@tutortrack/i18n";
+import {
+  Alert,
+  Button,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
-import { Chart } from "./Chart";
-import { ReportsNav, ResultTable, ScheduleForm } from "./ReportingPages";
+import { PanelEmpty, PanelLoading } from "../billing/moneyUi";
+import { RecordLayout } from "../components/RecordHeader";
+import { ReportsPage, ResultPanel, ScheduleForm } from "./ReportingPages";
 
 type Dataset = components["schemas"]["BuilderDataset"];
 type Dimension = components["schemas"]["BuilderDimension"];
 type Saved = components["schemas"]["CustomReport"];
-type Output = components["schemas"]["CustomResult"];
 type Op = components["schemas"]["OpEnum"];
 type Filter = { field: string; op: Op; value: string };
 
@@ -114,6 +124,16 @@ function fromSaved(raw: Record<string, unknown>): Definition {
   };
 }
 
+/** A part of the definition form: a legend at 500 over its controls, ruled off from the next. */
+function Section({ legend, children }: { legend: string; children: ReactNode }) {
+  return (
+    <fieldset className="min-w-0 border-t border-rule px-5 py-4 first:border-t-0">
+      <legend className="float-left mb-2 w-full text-sm font-medium">{legend}</legend>
+      <div className="clear-left space-y-3">{children}</div>
+    </fieldset>
+  );
+}
+
 function GroupByPicker({
   dataset,
   value,
@@ -128,55 +148,62 @@ function GroupByPicker({
   const [grain, setGrain] = useState("month");
   const selected = dataset.dimensions.find((d) => d.key === dim);
   return (
-    <fieldset className="space-y-2">
-      <legend className="font-medium">{t("reportBuilder.columns")}</legend>
-      <ul className="flex flex-wrap gap-2">
-        {value.map((key) => {
-          const [base, g] = key.split(":");
-          const d = dataset.dimensions.find((x) => x.key === base);
-          const label = `${d?.label ?? base}${g ? ` (${t(`reportBuilder.grains.${g}`)})` : ""}`;
-          return (
-            <li
-              key={key}
-              className="flex items-center gap-1 rounded-md border border-border px-2 text-sm"
-            >
-              {label}
-              <Button
-                size="sm"
-                variant="ghost"
-                aria-label={t("reportBuilder.removeColumn", { name: label })}
-                onClick={() => onChange(value.filter((v) => v !== key))}
+    <Section legend={t("reportBuilder.columns")}>
+      {value.length ? (
+        <ol className="flex flex-wrap gap-2">
+          {value.map((key) => {
+            const [base, g] = key.split(":");
+            const d = dataset.dimensions.find((x) => x.key === base);
+            const label = `${d?.label ?? base}${g ? ` (${t(`reportBuilder.grains.${g}`)})` : ""}`;
+            return (
+              <li
+                key={key}
+                className="flex h-8 items-center gap-1 rounded-md border border-border bg-surface pl-2.5 text-sm"
               >
-                ×
-              </Button>
-            </li>
-          );
-        })}
-      </ul>
+                {label}
+                <button
+                  type="button"
+                  className="grid size-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label={t("reportBuilder.removeColumn", { name: label })}
+                  onClick={() => onChange(value.filter((v) => v !== key))}
+                >
+                  <X aria-hidden="true" className="size-3.5" strokeWidth={1.75} />
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      ) : null}
       {value.length < 3 ? (
-        <div className="flex flex-wrap items-end gap-2">
+        <div className="flex flex-wrap items-start gap-2">
           <SelectField
+            size="sm"
+            hideLabel
             label={t("reportBuilder.addColumn")}
             value={dim}
             onChange={(e) => setDim(e.target.value)}
             options={[
-              { value: "", label: t("reportBuilder.choose") },
+              { value: "", label: t("designS9a.chooseColumn") },
               ...dataset.dimensions.map((d) => ({ value: d.key, label: d.label })),
             ]}
           />
           {selected?.type === "date" ? (
             <SelectField
+              size="sm"
+              hideLabel
               label={t("reportBuilder.grain")}
               value={grain}
               onChange={(e) => setGrain(e.target.value)}
               options={selected.grains.map((g) => ({
                 value: g,
-                label: t(`reportBuilder.grains.${g}`),
+                label: t("designS9a.byGrain", { grain: t(`reportBuilder.grains.${g}`) }),
               }))}
             />
           ) : null}
           <Button
+            size="sm"
             variant="secondary"
+            className="h-9"
             disabled={!dim}
             onClick={() => {
               const key = selected?.type === "date" ? `${dim}:${grain}` : dim;
@@ -188,9 +215,9 @@ function GroupByPicker({
           </Button>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">{t("reportBuilder.maxColumns")}</p>
+        <p className="text-xs text-muted-foreground">{t("reportBuilder.maxColumns")}</p>
       )}
-    </fieldset>
+    </Section>
   );
 }
 
@@ -207,8 +234,7 @@ function FilterRows({
   const set = (i: number, patch: Partial<Filter>) =>
     onChange(filters.map((f, j) => (j === i ? { ...f, ...patch } : f)));
   return (
-    <fieldset className="space-y-2">
-      <legend className="font-medium">{t("reportBuilder.filters")}</legend>
+    <Section legend={t("reportBuilder.filters")}>
       {filters.map((f, i) => {
         const dim = dataset.dimensions.find((d) => d.key === f.field);
         const ops = (dim?.operators ?? ["eq"]) as Op[];
@@ -217,18 +243,22 @@ function FilterRows({
             key={i}
             role="group"
             aria-label={t("reportBuilder.filterN", { n: i + 1 })}
-            className="flex flex-wrap items-end gap-2"
+            className="flex flex-wrap items-start gap-2"
           >
             <SelectField
+              size="sm"
+              hideLabel
               label={t("reportBuilder.field")}
               value={f.field}
               onChange={(e) => set(i, { field: e.target.value, op: "eq", value: "" })}
               options={[
-                { value: "", label: t("reportBuilder.choose") },
+                { value: "", label: t("designS9a.chooseColumn") },
                 ...dataset.dimensions.map((d) => ({ value: d.key, label: d.label })),
               ]}
             />
             <SelectField
+              size="sm"
+              hideLabel
               label={t("reportBuilder.operator")}
               value={f.op}
               onChange={(e) => set(i, { op: e.target.value as Op })}
@@ -237,16 +267,20 @@ function FilterRows({
             {f.op === "empty" || f.op === "not_empty" ? null : dim?.choices.length &&
               f.op !== "in" ? (
               <SelectField
+                size="sm"
+                hideLabel
                 label={t("reportBuilder.value")}
                 value={f.value}
                 onChange={(e) => set(i, { value: e.target.value })}
                 options={[
-                  { value: "", label: t("reportBuilder.choose") },
+                  { value: "", label: t("designS9a.chooseValue") },
                   ...dim.choices.map((c) => ({ value: c.value, label: c.label })),
                 ]}
               />
             ) : dim?.type === "bool" ? (
               <SelectField
+                size="sm"
+                hideLabel
                 label={t("reportBuilder.value")}
                 value={f.value}
                 onChange={(e) => set(i, { value: e.target.value })}
@@ -257,15 +291,21 @@ function FilterRows({
               />
             ) : (
               <TextField
+                size="sm"
+                hideLabel
                 label={t("reportBuilder.value")}
-                hint={f.op === "in" ? t("reportBuilder.commaHint") : undefined}
+                placeholder={
+                  f.op === "in" ? t("reportBuilder.commaHint") : t("reportBuilder.value")
+                }
                 type={dim?.type === "date" && f.op !== "in" ? "date" : "text"}
                 value={f.value}
                 onChange={(e) => set(i, { value: e.target.value })}
               />
             )}
             <Button
+              size="sm"
               variant="ghost"
+              className="h-9 text-muted-foreground"
               aria-label={t("reportBuilder.removeFilter", { n: i + 1 })}
               onClick={() => onChange(filters.filter((_f, j) => j !== i))}
             >
@@ -276,58 +316,14 @@ function FilterRows({
       })}
       {filters.length < 10 ? (
         <Button
+          size="sm"
           variant="secondary"
           onClick={() => onChange([...filters, { field: "", op: "eq", value: "" }])}
         >
           {t("reportBuilder.addFilter")}
         </Button>
       ) : null}
-    </fieldset>
-  );
-}
-
-function Results({ output, title }: { output: Output; title: string }) {
-  const { t } = useTranslation();
-  const chart = output.chart;
-  const labels = Object.fromEntries(output.columns.map((c) => [c.key, c.label]));
-  const data = chart
-    ? output.rows.map((row) => ({
-        x: [row[chart.x], typeof row.currency === "string" ? row.currency : ""]
-          .filter(Boolean)
-          .join(" "),
-        ...Object.fromEntries(chart.y.map((k) => [k, Number(row[k] ?? 0)])),
-      }))
-    : [];
-  return (
-    <section aria-label={t("reportBuilder.results")} className="space-y-3">
-      {output.period ? (
-        <p className="text-sm text-muted-foreground">
-          {t("reporting.showing", {
-            from: formatDate(String(output.period.from)),
-            to: formatDate(String(output.period.to)),
-          })}
-        </p>
-      ) : null}
-      {chart && data.length ? (
-        <Chart
-          kind={chart.kind}
-          data={data as Array<Record<string, string | number>>}
-          series={chart.y.map((k) => ({ key: k, label: labels[k] ?? k }))}
-          label={t("reporting.chartOf", { name: title })}
-          xLabel={labels[chart.x] ?? chart.x}
-          srTable={false}
-        />
-      ) : null}
-      <ResultTable result={output} caption={title} />
-      {output.notes.map((n) => (
-        <p key={n} className="text-sm text-muted-foreground">
-          {n}
-        </p>
-      ))}
-      <p className="text-xs text-muted-foreground">
-        {t("reportBuilder.generated", { date: formatDateTime(output.generated_at) })}
-      </p>
-    </section>
+    </Section>
   );
 }
 
@@ -345,7 +341,7 @@ function saveBlob(blob: Blob, response: Response, fallback: string) {
 /** E26-T08: build a report from a whitelisted dataset, run it, chart it, save, share and
  * export it. Saved custom reports are listed beside the builder. */
 export function BuilderPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const canExport = usePermission("reporting.export");
   const canSchedule = usePermission("reporting.schedule.manage");
@@ -426,263 +422,343 @@ export function BuilderPage() {
     run.error instanceof ApiError && run.error.status === 403
       ? t("reportBuilder.forbidden")
       : run.error?.message;
+  const title = name || dataset?.label || "";
+  const savedRows = saved.data?.results ?? [];
   return (
-    <section className="space-y-6">
-      <ReportsNav />
-      <h1 className="text-2xl font-semibold">{t("reportBuilder.title")}</h1>
-      <p className="text-muted-foreground">{t("reportBuilder.intro")}</p>
-      {datasets.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      {datasets.data?.length === 0 ? <p>{t("reportBuilder.noDatasets")}</p> : null}
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        {dataset ? (
-          <form
-            className="space-y-4 rounded-lg border border-border p-4"
-            aria-label={t("reportBuilder.form")}
-            onSubmit={(e) => {
-              e.preventDefault();
-              run.mutate();
-            }}
-          >
-            <SelectField
-              label={t("reportBuilder.dataset")}
-              hint={dataset.description}
-              value={def.dataset}
-              onChange={(e) => {
-                const next = datasets.data?.find((d) => d.key === e.target.value);
-                setDef({
-                  ...EMPTY,
-                  dataset: e.target.value,
-                  measures: next ? next.measures.slice(0, 1).map((m) => m.key) : [],
-                });
-                setCurrent(null);
+    <ReportsPage title={t("reportBuilder.title")} description={t("reportBuilder.intro")}>
+      {datasets.data?.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t("reportBuilder.noDatasets")}</p>
+      ) : null}
+      <RecordLayout
+        main={
+          datasets.isPending ? (
+            <RuledPanel label={t("reportBuilder.form")} flush>
+              <PanelLoading label={t("grid.loading")} />
+            </RuledPanel>
+          ) : dataset ? (
+            <form
+              aria-label={t("reportBuilder.form")}
+              onSubmit={(e) => {
+                e.preventDefault();
+                run.mutate();
               }}
-              options={(datasets.data ?? []).map((d) => ({
-                value: d.key,
-                label: `${d.label} (${d.category_label})`,
-              }))}
-            />
-            <GroupByPicker
-              dataset={dataset}
-              value={def.group_by}
-              onChange={(group_by) => setDef({ ...def, group_by })}
-            />
-            <fieldset>
-              <legend className="font-medium">{t("reportBuilder.measures")}</legend>
-              <div className="flex flex-wrap gap-x-4 gap-y-1">
-                {dataset.measures.map((m) => (
-                  <label key={m.key} className="flex items-center gap-2 text-sm">
+            >
+              <RuledPanel title={t("reportBuilder.form")} flush>
+                <div className="px-5 py-4 sm:max-w-md">
+                  <SelectField
+                    label={t("reportBuilder.dataset")}
+                    hint={dataset.description}
+                    value={def.dataset}
+                    onChange={(e) => {
+                      const next = datasets.data?.find((d) => d.key === e.target.value);
+                      setDef({
+                        ...EMPTY,
+                        dataset: e.target.value,
+                        measures: next ? next.measures.slice(0, 1).map((m) => m.key) : [],
+                      });
+                      setCurrent(null);
+                    }}
+                    options={(datasets.data ?? []).map((d) => ({
+                      value: d.key,
+                      label: `${d.label} (${d.category_label})`,
+                    }))}
+                  />
+                </div>
+                <div className="border-t border-rule">
+                  <GroupByPicker
+                    dataset={dataset}
+                    value={def.group_by}
+                    onChange={(group_by) => setDef({ ...def, group_by })}
+                  />
+                </div>
+                <div className="border-t border-rule">
+                  <Section legend={t("reportBuilder.measures")}>
+                    <div className="grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+                      {dataset.measures.map((m) => (
+                        <label key={m.key} className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={def.measures.includes(m.key)}
+                            onChange={(e) =>
+                              setDef({
+                                ...def,
+                                measures: e.target.checked
+                                  ? [...def.measures, m.key]
+                                  : def.measures.filter((x) => x !== m.key),
+                              })
+                            }
+                          />
+                          {m.label}
+                        </label>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{t("reportBuilder.listHint")}</p>
+                  </Section>
+                </div>
+                <div className="border-t border-rule">
+                  <FilterRows
+                    dataset={dataset}
+                    filters={def.filters}
+                    onChange={(filters) => setDef({ ...def, filters })}
+                  />
+                </div>
+                <div className="grid items-start gap-x-4 gap-y-3 border-t border-rule px-5 py-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <SelectField
+                    label={t("reportBuilder.period")}
+                    value={def.period}
+                    onChange={(e) => setDef({ ...def, period: e.target.value })}
+                    options={PRESETS.map((p) => ({
+                      value: p,
+                      label: p === "all" ? t("reportBuilder.allTime") : t(`reporting.periods.${p}`),
+                    }))}
+                  />
+                  {def.period === "custom" ? (
+                    <>
+                      <TextField
+                        label={t("reportBuilder.from")}
+                        type="date"
+                        value={def.from_date}
+                        onChange={(e) => setDef({ ...def, from_date: e.target.value })}
+                      />
+                      <TextField
+                        label={t("reportBuilder.to")}
+                        type="date"
+                        value={def.to_date}
+                        onChange={(e) => setDef({ ...def, to_date: e.target.value })}
+                      />
+                    </>
+                  ) : null}
+                  <SelectField
+                    label={t("reportBuilder.chart")}
+                    value={def.chart}
+                    onChange={(e) =>
+                      setDef({ ...def, chart: e.target.value as Definition["chart"] })
+                    }
+                    options={CHARTS.map((c) => ({
+                      value: c,
+                      label: t(`reportBuilder.charts.${c}`),
+                    }))}
+                  />
+                  <SelectField
+                    label={t("reportBuilder.sortBy")}
+                    value={def.ordering}
+                    onChange={(e) => setDef({ ...def, ordering: e.target.value })}
+                    options={[
+                      { value: "", label: t("reportBuilder.defaultOrder") },
+                      ...[...def.group_by, ...def.measures].flatMap((key) => {
+                        const label =
+                          dataset.measures.find((m) => m.key === key)?.label ??
+                          dataset.dimensions.find((d) => d.key === key.split(":")[0])?.label ??
+                          key;
+                        return [
+                          { value: key, label: t("reportBuilder.ascending", { name: label }) },
+                          {
+                            value: `-${key}`,
+                            label: t("reportBuilder.descending", { name: label }),
+                          },
+                        ];
+                      }),
+                    ]}
+                  />
+                  <TextField
+                    label={t("reportBuilder.limit")}
+                    type="number"
+                    min={1}
+                    max={1000}
+                    className="w-24 text-right tabular-nums"
+                    value={String(def.limit)}
+                    onChange={(e) => setDef({ ...def, limit: Number(e.target.value) || 200 })}
+                  />
+                  <TextField
+                    label={t("reporting.currency")}
+                    hint={t("reporting.currencyHint")}
+                    maxLength={3}
+                    className="w-24"
+                    value={def.currency}
+                    onChange={(e) => setDef({ ...def, currency: e.target.value.toUpperCase() })}
+                  />
+                </div>
+                {Object.keys(errors).length || runError ? (
+                  <div className="px-5 pb-4">
+                    {Object.keys(errors).length ? (
+                      <Alert tone="danger" title={t("reportBuilder.invalid")}>
+                        {Object.values(errors).join(" ")}
+                      </Alert>
+                    ) : (
+                      <Alert tone="danger">{runError}</Alert>
+                    )}
+                  </div>
+                ) : null}
+                <PanelFooter>
+                  <Button type="submit" loading={run.isPending}>
+                    {t("reportBuilder.run")}
+                  </Button>
+                </PanelFooter>
+              </RuledPanel>
+            </form>
+          ) : null
+        }
+        side={
+          <RuledPanel
+            title={t("reportBuilder.saved")}
+            titleId="custom-saved"
+            flush
+            className="lg:sticky lg:top-20"
+          >
+            {scheduledName ? (
+              <p role="status" className="border-b border-rule px-5 py-2.5 text-sm text-success">
+                {t("reportingG5.scheduled", { name: scheduledName })}
+              </p>
+            ) : null}
+            {saved.isPending ? (
+              <PanelLoading label={t("grid.loading")} />
+            ) : savedRows.length ? (
+              <PanelRows>
+                {savedRows.map((r) => (
+                  <PanelRow key={r.id}>
+                    <button
+                      type="button"
+                      className="text-left font-medium hover:underline"
+                      aria-current={current?.id === r.id ? "true" : undefined}
+                      onClick={() => open(r)}
+                    >
+                      {r.name}
+                    </button>
+                    <p className="text-xs text-muted-foreground">
+                      {r.is_mine
+                        ? r.shared
+                          ? t("reportBuilder.sharedByYou")
+                          : t("reportBuilder.private")
+                        : t("reportBuilder.sharedBy", { name: r.owner_name })}
+                    </p>
+                    {r.is_mine ? (
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        {canSchedule && canExport ? (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            aria-expanded={scheduling === r.id}
+                            aria-label={t("reportingG5.scheduleNamed", { name: r.name })}
+                            onClick={() => setScheduling(scheduling === r.id ? null : r.id)}
+                          >
+                            {t("reporting.scheduleEmail")}
+                          </Button>
+                        ) : null}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground"
+                          aria-label={t("reportBuilder.deleteNamed", { name: r.name })}
+                          onClick={() => remove.mutate(r.id)}
+                        >
+                          {t("reportBuilder.delete")}
+                        </Button>
+                      </div>
+                    ) : null}
+                    {scheduling === r.id ? (
+                      <ScheduleForm
+                        narrow
+                        saved={{ id: r.id, name: r.name, kind: "custom" }}
+                        onCancel={() => setScheduling(null)}
+                        onDone={() => {
+                          setScheduling(null);
+                          setScheduled(r.name);
+                          void queryClient.invalidateQueries({ queryKey: ["scheduled-reports"] });
+                        }}
+                      />
+                    ) : null}
+                  </PanelRow>
+                ))}
+              </PanelRows>
+            ) : (
+              <PanelEmpty>{t("reportBuilder.noneSaved")}</PanelEmpty>
+            )}
+          </RuledPanel>
+        }
+      />
+      {run.data ? (
+        <section aria-label={t("reportBuilder.results")} className="space-y-3">
+          <ResultPanel
+            result={run.data}
+            title={title}
+            aside={
+              <span className="text-muted-foreground tabular-nums">
+                {t("reportBuilder.generated", {
+                  date: formatDateTime(run.data.generated_at, i18n.language),
+                })}
+              </span>
+            }
+            footer={
+              <div className="flex w-full flex-wrap items-start justify-between gap-x-6 gap-y-3">
+                <form
+                  className="flex flex-wrap items-start gap-x-3 gap-y-2"
+                  aria-label={t("reportBuilder.saveForm")}
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    save.mutate();
+                  }}
+                >
+                  <div className="w-full sm:w-56">
+                    <TextField
+                      size="sm"
+                      hideLabel
+                      label={t("reportBuilder.name")}
+                      placeholder={t("reportBuilder.name")}
+                      value={name}
+                      required
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <label className="flex h-9 items-center gap-2 text-sm">
                     <input
                       type="checkbox"
-                      checked={def.measures.includes(m.key)}
-                      onChange={(e) =>
-                        setDef({
-                          ...def,
-                          measures: e.target.checked
-                            ? [...def.measures, m.key]
-                            : def.measures.filter((x) => x !== m.key),
-                        })
-                      }
+                      checked={shared}
+                      onChange={(e) => setShared(e.target.checked)}
                     />
-                    {m.label}
+                    {t("reportBuilder.share")}
                   </label>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">{t("reportBuilder.listHint")}</p>
-            </fieldset>
-            <FilterRows
-              dataset={dataset}
-              filters={def.filters}
-              onChange={(filters) => setDef({ ...def, filters })}
-            />
-            <div className="flex flex-wrap items-end gap-3">
-              <SelectField
-                label={t("reportBuilder.period")}
-                value={def.period}
-                onChange={(e) => setDef({ ...def, period: e.target.value })}
-                options={PRESETS.map((p) => ({
-                  value: p,
-                  label: p === "all" ? t("reportBuilder.allTime") : t(`reporting.periods.${p}`),
-                }))}
-              />
-              {def.period === "custom" ? (
-                <>
-                  <TextField
-                    label={t("reportBuilder.from")}
-                    type="date"
-                    value={def.from_date}
-                    onChange={(e) => setDef({ ...def, from_date: e.target.value })}
-                  />
-                  <TextField
-                    label={t("reportBuilder.to")}
-                    type="date"
-                    value={def.to_date}
-                    onChange={(e) => setDef({ ...def, to_date: e.target.value })}
-                  />
-                </>
-              ) : null}
-              <SelectField
-                label={t("reportBuilder.chart")}
-                value={def.chart}
-                onChange={(e) => setDef({ ...def, chart: e.target.value as Definition["chart"] })}
-                options={CHARTS.map((c) => ({ value: c, label: t(`reportBuilder.charts.${c}`) }))}
-              />
-              <SelectField
-                label={t("reportBuilder.sortBy")}
-                value={def.ordering}
-                onChange={(e) => setDef({ ...def, ordering: e.target.value })}
-                options={[
-                  { value: "", label: t("reportBuilder.defaultOrder") },
-                  ...[...def.group_by, ...def.measures].flatMap((key) => {
-                    const label =
-                      dataset.measures.find((m) => m.key === key)?.label ??
-                      dataset.dimensions.find((d) => d.key === key.split(":")[0])?.label ??
-                      key;
-                    return [
-                      { value: key, label: t("reportBuilder.ascending", { name: label }) },
-                      { value: `-${key}`, label: t("reportBuilder.descending", { name: label }) },
-                    ];
-                  }),
-                ]}
-              />
-              <TextField
-                label={t("reportBuilder.limit")}
-                type="number"
-                min={1}
-                max={1000}
-                value={String(def.limit)}
-                onChange={(e) => setDef({ ...def, limit: Number(e.target.value) || 200 })}
-              />
-              <TextField
-                label={t("reporting.currency")}
-                hint={t("reporting.currencyHint")}
-                maxLength={3}
-                value={def.currency}
-                onChange={(e) => setDef({ ...def, currency: e.target.value.toUpperCase() })}
-              />
-            </div>
-            {Object.keys(errors).length ? (
-              <Alert tone="danger" title={t("reportBuilder.invalid")}>
-                {Object.values(errors).join(" ")}
-              </Alert>
-            ) : runError ? (
-              <Alert tone="danger">{runError}</Alert>
-            ) : null}
-            <Button type="submit" disabled={run.isPending}>
-              {t("reportBuilder.run")}
-            </Button>
-          </form>
-        ) : null}
-        <aside className="space-y-3" aria-labelledby="custom-saved">
-          <h2 id="custom-saved" className="text-lg font-semibold">
-            {t("reportBuilder.saved")}
-          </h2>
-          {scheduledName ? (
-            <p role="status" className="text-sm">
-              {t("reportingG5.scheduled", { name: scheduledName })}
-            </p>
-          ) : null}
-          {saved.data?.results.length ? (
-            <ul className="space-y-2 text-sm">
-              {saved.data.results.map((r) => (
-                <li key={r.id} className="rounded-md border border-border p-2">
-                  <Button variant="ghost" size="sm" onClick={() => open(r)}>
-                    {r.name}
+                  <Button
+                    type="submit"
+                    size="sm"
+                    variant="secondary"
+                    className="h-9"
+                    loading={save.isPending}
+                    disabled={!name.trim()}
+                  >
+                    {current?.is_mine ? t("reportBuilder.update") : t("reportBuilder.save")}
                   </Button>
-                  <p className="text-muted-foreground">
-                    {r.is_mine
-                      ? r.shared
-                        ? t("reportBuilder.sharedByYou")
-                        : t("reportBuilder.private")
-                      : t("reportBuilder.sharedBy", { name: r.owner_name })}
-                  </p>
-                  {r.is_mine ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      aria-label={t("reportBuilder.deleteNamed", { name: r.name })}
-                      onClick={() => remove.mutate(r.id)}
-                    >
-                      {t("reportBuilder.delete")}
-                    </Button>
+                  {save.isSuccess ? (
+                    <p role="status" className="flex h-9 items-center text-success">
+                      {t("reportBuilder.savedOk")}
+                    </p>
                   ) : null}
-                  {r.is_mine && canSchedule && canExport ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      aria-expanded={scheduling === r.id}
-                      aria-label={t("reportingG5.scheduleNamed", { name: r.name })}
-                      onClick={() => setScheduling(scheduling === r.id ? null : r.id)}
-                    >
-                      {t("reporting.scheduleEmail")}
-                    </Button>
-                  ) : null}
-                  {scheduling === r.id ? (
-                    <ScheduleForm
-                      saved={{ id: r.id, name: r.name, kind: "custom" }}
-                      onDone={() => {
-                        setScheduling(null);
-                        setScheduled(r.name);
-                        void queryClient.invalidateQueries({ queryKey: ["scheduled-reports"] });
-                      }}
-                    />
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm">{t("reportBuilder.noneSaved")}</p>
-          )}
-        </aside>
-      </div>
-      {run.data ? (
-        <>
-          <Results output={run.data} title={name || dataset?.label || ""} />
-          <form
-            className="flex flex-wrap items-end gap-3"
-            aria-label={t("reportBuilder.saveForm")}
-            onSubmit={(e) => {
-              e.preventDefault();
-              save.mutate();
-            }}
-          >
-            <TextField
-              label={t("reportBuilder.name")}
-              value={name}
-              required
-              onChange={(e) => setName(e.target.value)}
-            />
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={shared}
-                onChange={(e) => setShared(e.target.checked)}
-              />
-              {t("reportBuilder.share")}
-            </label>
-            <Button type="submit" variant="secondary" disabled={save.isPending || !name.trim()}>
-              {current?.is_mine ? t("reportBuilder.update") : t("reportBuilder.save")}
-            </Button>
-            {save.isSuccess ? <p role="status">{t("reportBuilder.savedOk")}</p> : null}
-          </form>
-          {canExport ? (
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              <span>{t("reporting.export")}:</span>
-              {(["csv", "xlsx", "pdf"] as const).map((fmt) => (
-                <Button
-                  key={fmt}
-                  variant="secondary"
-                  size="sm"
-                  disabled={exportFile.isPending}
-                  onClick={() => exportFile.mutate(fmt)}
-                >
-                  {t(`reporting.formats.${fmt}`)}
-                </Button>
-              ))}
-              {exportFile.error ? <Alert tone="danger">{exportFile.error.message}</Alert> : null}
-            </div>
-          ) : null}
-        </>
+                </form>
+                {canExport ? (
+                  <div
+                    role="group"
+                    aria-label={t("reporting.export")}
+                    className="flex flex-wrap items-center gap-2"
+                  >
+                    <span className="text-muted-foreground">{t("reporting.export")}</span>
+                    {(["csv", "xlsx", "pdf"] as const).map((fmt) => (
+                      <Button
+                        key={fmt}
+                        variant="secondary"
+                        size="sm"
+                        disabled={exportFile.isPending}
+                        onClick={() => exportFile.mutate(fmt)}
+                      >
+                        {t(`reporting.formats.${fmt}`)}
+                      </Button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            }
+          />
+          {exportFile.error ? <Alert tone="danger">{exportFile.error.message}</Alert> : null}
+        </section>
       ) : null}
-    </section>
+    </ReportsPage>
   );
 }

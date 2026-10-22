@@ -1,12 +1,26 @@
 import { ApiError, unwrap, type components, type paths } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  Disclosure,
+  FormPanel,
+  figureCell,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api, useFeature, usePermission } from "../api";
+import { PanelLoading } from "../billing/moneyUi";
+import { useIsPhone } from "../billing/useIsPhone";
 import { ErrorList } from "../calendar/ErrorList";
+import { ReportsPage } from "./ReportingPages";
 
 type Destination = components["schemas"]["WarehouseDestination"];
 type Kind = Destination["kind"];
@@ -61,70 +75,63 @@ function NewDestinationForm({ onDone }: { onDone: () => void }) {
     },
   });
   return (
-    <form
-      className="space-y-3 rounded-md border border-border p-4"
-      aria-labelledby="new-destination"
-      onSubmit={(e) => {
-        e.preventDefault();
-        create.mutate();
-      }}
+    <FormPanel
+      title={t("warehouse.newDestination")}
+      submit={t("warehouse.save")}
+      pending={create.isPending}
+      onSubmit={() => create.mutate()}
+      error={create.error ? <ErrorList error={create.error} /> : null}
     >
-      <h2 id="new-destination" className="text-lg font-semibold">
-        {t("warehouse.newDestination")}
-      </h2>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <SelectField
-          label={t("warehouse.kind")}
-          value={kind}
-          options={KINDS.map((k) => ({ value: k, label: t(`warehouse.kinds.${k}`) }))}
-          onChange={(e) => setKind(e.target.value as Kind)}
-        />
+      <SelectField
+        label={t("warehouse.kind")}
+        value={kind}
+        options={KINDS.map((k) => ({ value: k, label: t(`warehouse.kinds.${k}`) }))}
+        onChange={(e) => setKind(e.target.value as Kind)}
+      />
+      <TextField
+        label={t("warehouse.name")}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <SelectField
+        label={t("warehouse.hour")}
+        hint={t("warehouse.hourHint")}
+        className="tabular-nums"
+        value={hour}
+        options={Array.from({ length: 24 }, (_, h) => ({
+          value: String(h),
+          label: `${String(h).padStart(2, "0")}:00`,
+        }))}
+        onChange={(e) => setHour(e.target.value)}
+      />
+      {CONFIG[kind].map((field) => (
         <TextField
-          label={t("warehouse.name")}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          key={field}
+          label={t(`warehouse.fields.${field}`)}
+          value={config[field] ?? ""}
+          required={field !== "prefix"}
+          onChange={(e) => setConfig({ ...config, [field]: e.target.value })}
         />
-        <SelectField
-          label={t("warehouse.hour")}
-          hint={t("warehouse.hourHint")}
-          value={hour}
-          options={Array.from({ length: 24 }, (_, h) => ({
-            value: String(h),
-            label: `${String(h).padStart(2, "0")}:00`,
-          }))}
-          onChange={(e) => setHour(e.target.value)}
+      ))}
+      {SECRETS[kind].map((field) => (
+        <TextField
+          key={field}
+          label={t(`warehouse.fields.${field}`)}
+          type="password"
+          autoComplete="off"
+          required
+          value={secrets[field] ?? ""}
+          onChange={(e) => setSecrets({ ...secrets, [field]: e.target.value })}
         />
-        {CONFIG[kind].map((field) => (
-          <TextField
-            key={field}
-            label={t(`warehouse.fields.${field}`)}
-            value={config[field] ?? ""}
-            required={field !== "prefix"}
-            onChange={(e) => setConfig({ ...config, [field]: e.target.value })}
-          />
-        ))}
-        {SECRETS[kind].map((field) => (
-          <TextField
-            key={field}
-            label={t(`warehouse.fields.${field}`)}
-            type="password"
-            autoComplete="off"
-            required
-            value={secrets[field] ?? ""}
-            onChange={(e) => setSecrets({ ...secrets, [field]: e.target.value })}
-          />
-        ))}
-      </div>
-      <Button type="submit" loading={create.isPending}>
-        {t("warehouse.save")}
-      </Button>
-      <ErrorList error={create.error} />
-    </form>
+      ))}
+    </FormPanel>
   );
 }
 
-function ExportsList({ destination }: { destination: Destination }) {
+/** A destination's exports: when, the status in words, rows and (for downloads) the files. */
+function ExportsTable({ destination }: { destination: Destination }) {
   const { t, i18n } = useTranslation();
+  const phone = useIsPhone();
   const exports = useQuery({
     queryKey: ["warehouse", "exports", destination.id],
     queryFn: async () =>
@@ -149,42 +156,80 @@ function ExportsList({ destination }: { destination: Destination }) {
     onSuccess: (data) => window.location.assign(data.url),
   });
   const rows = exports.data ?? [];
-  if (!rows.length)
-    return <p className="text-sm text-muted-foreground">{t("warehouse.noExports")}</p>;
+  const files = destination.kind === "platform";
   return (
-    <ul className="space-y-2 text-sm">
-      {rows.map((run) => (
-        <li key={run.id} className="rounded-md border border-border p-2">
-          <p>
-            {formatDateTime(run.until, i18n.language)} · {t(`warehouse.status.${run.status}`)} ·{" "}
-            {t("warehouse.rows", { count: run.row_count })}
-            {run.full ? ` · ${t("warehouse.full")}` : ""}
-          </p>
-          {run.error ? <p className="text-danger">{run.error}</p> : null}
-          {destination.kind === "platform" && run.status === "succeeded" ? (
-            <p className="flex flex-wrap gap-2">
-              {(run.manifest as { dataset: string; rows: number }[])
-                .filter((m) => m.rows > 0)
-                .map((m) => (
-                  <Button
-                    key={m.dataset}
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => download.mutate({ id: run.id, dataset: m.dataset })}
-                  >
-                    {t("warehouse.download", { dataset: m.dataset })}
-                  </Button>
-                ))}
-            </p>
-          ) : null}
-        </li>
-      ))}
-      <ErrorList error={download.error} />
-    </ul>
+    <>
+      <RuledTable
+        caption={t("designS9a.exportsOf", { name: destination.name })}
+        loading={exports.isPending}
+        loadingLabel={t("grid.loading")}
+        empty={!exports.isPending && !rows.length ? t("warehouse.noExports") : undefined}
+        columns={[
+          { key: "when", header: t("designS9a.until"), width: "min-w-40" },
+          { key: "status", header: t("designS9a.status") },
+          ...(phone ? [] : [{ key: "rows", header: t("designS9a.rowsHeading"), end: true }]),
+          ...(files && !phone ? [{ key: "files", header: t("designS9a.files") }] : []),
+        ]}
+      >
+        {rows.map((run) => {
+          const datasets =
+            files && run.status === "succeeded"
+              ? (run.manifest as { dataset: string; rows: number }[]).filter((m) => m.rows > 0)
+              : [];
+          const links = datasets.length ? (
+            <span className="flex flex-wrap gap-x-3 gap-y-1">
+              {datasets.map((m) => (
+                <button
+                  key={m.dataset}
+                  type="button"
+                  className="text-link hover:underline"
+                  onClick={() => download.mutate({ id: run.id, dataset: m.dataset })}
+                >
+                  {t("warehouse.download", { dataset: m.dataset })}
+                </button>
+              ))}
+            </span>
+          ) : null;
+          return (
+            <tr key={run.id}>
+              <td>
+                <span className="whitespace-nowrap tabular-nums">
+                  {formatDateTime(run.until, i18n.language)}
+                </span>
+                {run.full || phone ? (
+                  <span className="block text-xs text-muted-foreground">
+                    {[
+                      run.full ? t("designS9a.fullExport") : null,
+                      phone ? t("warehouse.rows", { count: run.row_count }) : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                ) : null}
+                {phone && links ? <span className="mt-1 block">{links}</span> : null}
+              </td>
+              <td>
+                <span className={run.status === "failed" ? "font-medium text-danger" : undefined}>
+                  {t(`warehouse.status.${run.status}`)}
+                </span>
+                {run.error ? <span className="block text-xs text-danger">{run.error}</span> : null}
+              </td>
+              {phone ? null : <td className={figureCell}>{run.row_count}</td>}
+              {files && !phone ? <td>{links}</td> : null}
+            </tr>
+          );
+        })}
+      </RuledTable>
+      {download.error ? (
+        <div className="px-5 pb-4">
+          <ErrorList error={download.error} />
+        </div>
+      ) : null}
+    </>
   );
 }
 
-function DestinationCard({ destination }: { destination: Destination }) {
+function DestinationPanel({ destination }: { destination: Destination }) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ["warehouse"] });
@@ -213,43 +258,66 @@ function DestinationCard({ destination }: { destination: Destination }) {
       }),
     onSuccess: refresh,
   });
+  const error = run.error ?? check.error ?? remove.error;
   return (
-    <section
-      className="space-y-2 rounded-md border border-border p-4"
-      aria-label={destination.name}
+    <RuledPanel
+      title={destination.name}
+      description={[
+        t(`warehouse.kinds.${destination.kind}`),
+        t("warehouse.nightlyAt", { hour: `${String(destination.hour).padStart(2, "0")}:00` }),
+        destination.last_export_at
+          ? t("warehouse.lastExport", {
+              when: formatDateTime(destination.last_export_at, i18n.language),
+            })
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" · ")}
+      flush
+      footer={
+        <>
+          <Button size="sm" variant="secondary" onClick={() => run.mutate(true)}>
+            {t("warehouse.fullExport")}
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => check.mutate()}
+            loading={check.isPending}
+          >
+            {t("warehouse.check")}
+          </Button>
+          <Button size="sm" onClick={() => run.mutate(false)} loading={run.isPending}>
+            {t("warehouse.exportNow")}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-muted-foreground"
+            onClick={() => remove.mutate()}
+          >
+            {t("warehouse.delete")}
+          </Button>
+          {run.isSuccess ? (
+            <span role="status" className="text-success">
+              {t("warehouse.started")}
+            </span>
+          ) : null}
+          {check.isSuccess ? (
+            <span role="status" className="text-success">
+              {t("warehouse.checkOk")}
+            </span>
+          ) : null}
+        </>
+      }
     >
-      <h2 className="text-lg font-semibold">{destination.name}</h2>
-      <p className="text-sm text-muted-foreground">
-        {t(`warehouse.kinds.${destination.kind}`)} ·{" "}
-        {t("warehouse.nightlyAt", { hour: `${String(destination.hour).padStart(2, "0")}:00` })}
-        {destination.last_export_at
-          ? ` · ${t("warehouse.lastExport", { when: formatDateTime(destination.last_export_at, i18n.language) })}`
-          : ""}
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <Button size="sm" onClick={() => run.mutate(false)} loading={run.isPending}>
-          {t("warehouse.exportNow")}
-        </Button>
-        <Button size="sm" variant="secondary" onClick={() => run.mutate(true)}>
-          {t("warehouse.fullExport")}
-        </Button>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => check.mutate()}
-          loading={check.isPending}
-        >
-          {t("warehouse.check")}
-        </Button>
-        <Button size="sm" variant="ghost" onClick={() => remove.mutate()}>
-          {t("warehouse.delete")}
-        </Button>
-      </div>
-      {run.isSuccess ? <Alert tone="success">{t("warehouse.started")}</Alert> : null}
-      {check.isSuccess ? <Alert tone="success">{t("warehouse.checkOk")}</Alert> : null}
-      <ErrorList error={run.error ?? check.error ?? remove.error} />
-      <ExportsList destination={destination} />
-    </section>
+      <ExportsTable destination={destination} />
+      {error ? (
+        <div className="px-5 pb-4">
+          <ErrorList error={error} />
+        </div>
+      ) : null}
+    </RuledPanel>
   );
 }
 
@@ -269,48 +337,53 @@ export function WarehousePage() {
     queryFn: async () => unwrap(await api.GET("/api/v1/reporting/warehouse/schema")),
     enabled: canManage,
   });
-  if (!canManage) {
-    return <Alert tone="warning">{t("warehouse.noPermission")}</Alert>;
-  }
   const forbidden = destinations.error instanceof ApiError && destinations.error.status === 403;
   return (
-    <div className="max-w-4xl space-y-6">
-      <header className="space-y-1">
-        <p className="text-sm">
-          <Link to="/analytics" className="underline">
-            {t("reporting.library")}
-          </Link>
-        </p>
-        <h1 className="text-2xl font-semibold">{t("warehouse.title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("warehouse.help")}</p>
-      </header>
-      {!entitled ? <Alert tone="warning">{t("warehouse.enterpriseOnly")}</Alert> : null}
-      {destinations.isPending ? <Spinner label={t("common.loading")} /> : null}
-      {!forbidden ? <ErrorList error={destinations.error} /> : null}
-      {(destinations.data?.results ?? []).map((d) => (
-        <DestinationCard key={d.id} destination={d} />
-      ))}
-      {entitled ? (
-        <NewDestinationForm
-          onDone={() => void queryClient.invalidateQueries({ queryKey: ["warehouse"] })}
-        />
-      ) : null}
-      {schema.data ? (
-        <details className="rounded-md border border-border p-4 text-sm">
-          <summary className="cursor-pointer font-medium">{t("warehouse.schemas")}</summary>
-          {schema.data.map((d) => (
-            <div key={d.dataset} className="mt-3">
-              <h3 className="font-mono font-medium">{d.dataset}</h3>
-              <p className="text-muted-foreground">{d.description}</p>
-              <p className="font-mono text-xs">
-                {(d.columns as { name: string; type: string }[])
-                  .map((c) => `${c.name} ${c.type}`)
-                  .join(", ")}
-              </p>
-            </div>
+    <ReportsPage title={t("warehouse.title")} description={t("warehouse.help")}>
+      {!canManage ? (
+        <Alert tone="warning">{t("warehouse.noPermission")}</Alert>
+      ) : (
+        <>
+          {!entitled ? <Alert tone="warning">{t("warehouse.enterpriseOnly")}</Alert> : null}
+          {destinations.isPending ? (
+            <RuledPanel label={t("warehouse.title")} flush>
+              <PanelLoading label={t("common.loading")} />
+            </RuledPanel>
+          ) : null}
+          {!forbidden ? <ErrorList error={destinations.error} /> : null}
+          {(destinations.data?.results ?? []).map((d) => (
+            <DestinationPanel key={d.id} destination={d} />
           ))}
-        </details>
-      ) : null}
-    </div>
+          {entitled ? (
+            <NewDestinationForm
+              onDone={() => void queryClient.invalidateQueries({ queryKey: ["warehouse"] })}
+            />
+          ) : null}
+          {schema.data ? (
+            <RuledPanel label={t("warehouse.schemas")} flush>
+              <Disclosure
+                summary={t("warehouse.schemas")}
+                className="px-5 py-3.5"
+                bodyClassName="-mx-5 -mb-3.5 border-t border-border"
+              >
+                <PanelRows>
+                  {schema.data.map((d) => (
+                    <PanelRow key={d.dataset}>
+                      <h3 className="font-mono font-medium">{d.dataset}</h3>
+                      <p className="text-muted-foreground">{d.description}</p>
+                      <p className="mt-1 font-mono text-xs break-words text-muted-foreground">
+                        {(d.columns as { name: string; type: string }[])
+                          .map((c) => `${c.name} ${c.type}`)
+                          .join(", ")}
+                      </p>
+                    </PanelRow>
+                  ))}
+                </PanelRows>
+              </Disclosure>
+            </RuledPanel>
+          ) : null}
+        </>
+      )}
+    </ReportsPage>
   );
 }

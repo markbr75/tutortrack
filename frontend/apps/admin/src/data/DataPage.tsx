@@ -1,11 +1,27 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  cn,
+  FormPanel,
+  figureCell,
+  PageHeader,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  Tabs,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 
 import { api, usePermission } from "../api";
+import { PanelEmpty, PanelLoading } from "../billing/moneyUi";
+import { useIsPhone } from "../billing/useIsPhone";
 import { ErrorList } from "../calendar/ErrorList";
 import {
   statsOf,
@@ -38,6 +54,12 @@ const STEP_ENTITIES: Record<string, string[]> = {
   balances: ["opening_balances", "invoices", "payments", "packages", "charges", "payment_requests"],
   growth: ["affiliates", "reviews"],
 };
+/** Batch states that are failures (danger) or closed (faded ink). */
+const FAILED = new Set(["failed"]);
+const CLOSED = new Set(["cancelled", "rolled_back"]);
+/** The native file button, dressed as a small secondary button. */
+const fileInput =
+  "block w-full text-sm text-muted-foreground file:mr-3 file:h-9 file:cursor-pointer file:rounded-md file:border file:border-solid file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted";
 
 export function DataPage({ initialTab = "imports" }: { initialTab?: TabKey }) {
   const { t } = useTranslation();
@@ -52,11 +74,8 @@ export function DataPage({ initialTab = "imports" }: { initialTab?: TabKey }) {
     ...(canExport ? [{ key: "export" as const, label: t("dataTransfer.tabs.export") }] : []),
   ];
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">{t("dataTransfer.title")}</h1>
-        <p className="text-muted-foreground">{t("dataTransfer.intro")}</p>
-      </header>
+    <div>
+      <PageHeader title={t("dataTransfer.title")} description={t("dataTransfer.intro")} />
       <Tabs label={t("dataTransfer.title")} tabs={tabs} value={tab} onChange={setTab}>
         {tab === "imports" ? <ImportsTab /> : null}
         {tab === "migrations" ? <MigrationsTab /> : null}
@@ -72,10 +91,12 @@ export function NewImportForm({
   project,
   step,
   entities,
+  level,
 }: {
   project?: string;
   step?: string;
   entities?: string[];
+  level?: 2 | 3;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -116,129 +137,175 @@ export function NewImportForm({
     onSuccess: (batch) =>
       void navigate({ to: "/data/imports/$batchId", params: { batchId: batch.id } }),
   });
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
-    create.mutate();
-  };
-  if (!catalogue) return <Spinner />;
-  if (!allowed.length) return <p>{t("dataTransfer.noImportRights")}</p>;
+  if (!catalogue) {
+    return (
+      <RuledPanel label={t("dataTransfer.newImport")} flush>
+        <PanelLoading label={t("grid.loading")} />
+      </RuledPanel>
+    );
+  }
+  if (!allowed.length) {
+    return <p className="text-sm text-muted-foreground">{t("dataTransfer.noImportRights")}</p>;
+  }
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-md border border-border p-4">
-      <h2 className="text-lg font-semibold">{t("dataTransfer.newImport")}</h2>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <SelectField
-          label={t("dataTransfer.entity")}
-          value={chosen}
-          onChange={(e) => setEntity(e.target.value)}
-          options={allowed.map((e) => ({ value: e.key, label: e.label }))}
-          hint={allowed.find((e) => e.key === chosen)?.description}
-        />
-        <SelectField
-          label={t("dataTransfer.preset")}
-          value={preset}
-          onChange={(e) => setPreset(e.target.value)}
-          options={PRESETS.map((p) => ({
-            value: p,
-            label: t(`dataTransfer.presets.${p || "none"}`),
-          }))}
-        />
-      </div>
-      <fieldset className="space-y-2">
-        <legend className="text-sm font-medium">{t("dataTransfer.from")}</legend>
-        <label className="mr-4 inline-flex items-center gap-2 text-sm">
-          <input
-            type="radio"
-            name="source"
-            checked={mode === "file"}
-            onChange={() => setMode("file")}
-          />
-          {t("dataTransfer.fromFile")}
-        </label>
-        <label className="inline-flex items-center gap-2 text-sm">
-          <input
-            type="radio"
-            name="source"
-            checked={mode === "sheet"}
-            onChange={() => setMode("sheet")}
-          />
-          {t("dataTransfer.fromSheet")}
-        </label>
+    <FormPanel
+      title={t("dataTransfer.newImport")}
+      level={level}
+      submit={t("dataTransfer.upload")}
+      pending={create.isPending}
+      disabled={mode === "file" ? !file : !url}
+      onSubmit={() => create.mutate()}
+      error={create.error ? <ErrorList error={create.error} /> : null}
+      trail={
+        create.isPending ? (
+          <span role="status" className="text-muted-foreground">
+            {t("dataTransfer.uploading")}
+          </span>
+        ) : null
+      }
+    >
+      <SelectField
+        label={t("dataTransfer.entity")}
+        value={chosen}
+        onChange={(e) => setEntity(e.target.value)}
+        options={allowed.map((e) => ({ value: e.key, label: e.label }))}
+        hint={allowed.find((e) => e.key === chosen)?.description}
+      />
+      <SelectField
+        label={t("dataTransfer.preset")}
+        value={preset}
+        onChange={(e) => setPreset(e.target.value)}
+        options={PRESETS.map((p) => ({
+          value: p,
+          label: t(`dataTransfer.presets.${p || "none"}`),
+        }))}
+      />
+      <fieldset className="sm:col-span-2">
+        <legend className="mb-1 text-sm font-medium">{t("dataTransfer.from")}</legend>
+        <div className="flex flex-wrap gap-x-6 gap-y-1">
+          <label className="inline-flex items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name={`source-${project ?? ""}${step ?? ""}`}
+              checked={mode === "file"}
+              onChange={() => setMode("file")}
+            />
+            {t("dataTransfer.fromFile")}
+          </label>
+          <label className="inline-flex items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name={`source-${project ?? ""}${step ?? ""}`}
+              checked={mode === "sheet"}
+              onChange={() => setMode("sheet")}
+            />
+            {t("dataTransfer.fromSheet")}
+          </label>
+        </div>
       </fieldset>
       {mode === "file" ? (
-        <div className="space-y-1">
-          <label htmlFor="import-file" className="block text-sm font-medium">
+        <div className="flex flex-col gap-1 sm:col-span-2">
+          <label htmlFor={`import-file-${step ?? ""}`} className="text-sm font-medium">
             {t("dataTransfer.file")}
           </label>
           <input
-            id="import-file"
+            id={`import-file-${step ?? ""}`}
             type="file"
             accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="block text-sm"
+            className={fileInput}
           />
-          <p className="text-sm text-muted-foreground">
-            <a className="underline" href={`/api/v1/import-templates/${chosen}`} download>
+          <p className="text-xs">
+            <a className="text-link hover:underline" href={`/api/v1/import-templates/${chosen}`} download>
               {t("dataTransfer.template")}
             </a>
           </p>
         </div>
       ) : (
-        <TextField
-          label={t("dataTransfer.sheetUrl")}
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          hint={t("dataTransfer.sheetHint")}
-          type="url"
-        />
+        <div className="sm:col-span-2">
+          <TextField
+            label={t("dataTransfer.sheetUrl")}
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            hint={t("dataTransfer.sheetHint")}
+            type="url"
+          />
+        </div>
       )}
-      <Button
-        type="submit"
-        disabled={create.isPending || (mode === "file" ? !file : !url)}
-        aria-busy={create.isPending}
-      >
-        {create.isPending ? t("dataTransfer.uploading") : t("dataTransfer.upload")}
-      </Button>
-      <ErrorList error={create.error} />
-    </form>
+    </FormPanel>
   );
 }
 
-export function BatchTable({ batches }: { batches: ImportBatch[] }) {
-  const { t, i18n } = useTranslation();
-  if (!batches.length)
-    return <p className="text-muted-foreground">{t("dataTransfer.noImports")}</p>;
+/** A batch's status in words: failures in danger, cancelled and rolled back in faded ink. */
+export function BatchStatus({ status }: { status: string }) {
+  const { t } = useTranslation();
   return (
-    <table className="w-full text-sm">
-      <caption className="sr-only">{t("dataTransfer.history")}</caption>
-      <thead>
-        <tr className="text-left">
-          <th scope="col">{t("dataTransfer.columns.file")}</th>
-          <th scope="col">{t("dataTransfer.columns.entity")}</th>
-          <th scope="col">{t("dataTransfer.columns.status")}</th>
-          <th scope="col">{t("dataTransfer.columns.rows")}</th>
-          <th scope="col">{t("dataTransfer.columns.when")}</th>
+    <span
+      className={cn(
+        FAILED.has(status) && "font-medium text-danger",
+        CLOSED.has(status) && "text-muted-foreground",
+      )}
+    >
+      {t(`dataTransfer.status.${status}`)}
+    </span>
+  );
+}
+
+function useEntityName() {
+  const { t } = useTranslation();
+  return (entity: string): string =>
+    t(`dataTransfer.entities.${entity}`, {
+      defaultValue: t(`gapG6.entities.${entity}`, { defaultValue: entity }),
+    });
+}
+
+export function BatchTable({ batches, loading }: { batches: ImportBatch[]; loading?: boolean }) {
+  const { t, i18n } = useTranslation();
+  const phone = useIsPhone();
+  const entityName = useEntityName();
+  return (
+    <RuledTable
+      caption={t("dataTransfer.history")}
+      loading={loading}
+      loadingLabel={t("grid.loading")}
+      empty={!loading && !batches.length ? t("dataTransfer.noImports") : undefined}
+      columns={[
+        { key: "file", header: t("dataTransfer.columns.file"), width: "min-w-40" },
+        ...(phone ? [] : [{ key: "entity", header: t("dataTransfer.columns.entity") }]),
+        { key: "status", header: t("dataTransfer.columns.status") },
+        { key: "rows", header: t("dataTransfer.columns.rows"), end: true },
+        ...(phone ? [] : [{ key: "when", header: t("dataTransfer.columns.when") }]),
+      ]}
+    >
+      {batches.map((b) => (
+        <tr key={b.id}>
+          <td className="break-words">
+            <Link
+              to="/data/imports/$batchId"
+              params={{ batchId: b.id }}
+              className="font-medium hover:underline"
+            >
+              {b.filename || b.entity}
+            </Link>
+            {phone ? (
+              <span className="block text-xs text-muted-foreground">
+                {entityName(b.entity)} · {formatDateTime(b.created_at, i18n.language)}
+              </span>
+            ) : null}
+          </td>
+          {phone ? null : <td>{entityName(b.entity)}</td>}
+          <td>
+            <BatchStatus status={b.status} />
+          </td>
+          <td className={figureCell}>{statsOf(b).rows ?? 0}</td>
+          {phone ? null : (
+            <td className="whitespace-nowrap tabular-nums">
+              {formatDateTime(b.created_at, i18n.language)}
+            </td>
+          )}
         </tr>
-      </thead>
-      <tbody>
-        {batches.map((b) => (
-          <tr key={b.id} className="border-t border-border">
-            <td>
-              <Link to="/data/imports/$batchId" params={{ batchId: b.id }} className="underline">
-                {b.filename || b.entity}
-              </Link>
-            </td>
-            <td>
-              {t(`dataTransfer.entities.${b.entity}`, {
-                defaultValue: t(`gapG6.entities.${b.entity}`, { defaultValue: b.entity }),
-              })}
-            </td>
-            <td>{t(`dataTransfer.status.${b.status}`)}</td>
-            <td>{statsOf(b).rows ?? 0}</td>
-            <td>{formatDateTime(b.created_at, i18n.language)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+      ))}
+    </RuledTable>
   );
 }
 
@@ -251,11 +318,10 @@ function ImportsTab() {
   });
   return (
     <div className="space-y-6">
+      <RuledPanel title={t("dataTransfer.history")} flush>
+        <BatchTable batches={data?.results ?? []} loading={!data} />
+      </RuledPanel>
       {canImport ? <NewImportForm /> : null}
-      <section className="space-y-2">
-        <h2 className="text-lg font-semibold">{t("dataTransfer.history")}</h2>
-        {data ? <BatchTable batches={data.results} /> : <Spinner />}
-      </section>
     </div>
   );
 }
@@ -279,47 +345,42 @@ function NewProjectForm() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["migration-projects"] }),
   });
   return (
-    <form
-      className="space-y-3 rounded-md border border-border p-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        create.mutate();
-      }}
+    <FormPanel
+      title={t("dataTransfer.migration.start")}
+      description={t("dataTransfer.migration.intro")}
+      submit={t("dataTransfer.migration.begin")}
+      pending={create.isPending}
+      disabled={!cutover || (needsKey && !apiKey)}
+      onSubmit={() => create.mutate()}
+      error={create.error ? <ErrorList error={create.error} /> : null}
     >
-      <h2 className="text-lg font-semibold">{t("dataTransfer.migration.start")}</h2>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <SelectField
-          label={t("dataTransfer.migration.origin")}
-          value={origin}
-          onChange={(e) => setOrigin(e.target.value as Origin)}
-          options={["tutorcruncher", "tutorbird", "teachworks", "csv"].map((o) => ({
-            value: o,
-            label: t(`dataTransfer.sources.${o}`),
-          }))}
-        />
+      <SelectField
+        label={t("dataTransfer.migration.origin")}
+        value={origin}
+        onChange={(e) => setOrigin(e.target.value as Origin)}
+        options={["tutorcruncher", "tutorbird", "teachworks", "csv"].map((o) => ({
+          value: o,
+          label: t(`dataTransfer.sources.${o}`),
+        }))}
+      />
+      <TextField
+        label={t("dataTransfer.migration.cutover")}
+        type="date"
+        required
+        value={cutover}
+        onChange={(e) => setCutover(e.target.value)}
+        hint={t("dataTransfer.migration.cutoverHint")}
+      />
+      {needsKey ? (
         <TextField
-          label={t("dataTransfer.migration.cutover")}
-          type="date"
-          required
-          value={cutover}
-          onChange={(e) => setCutover(e.target.value)}
-          hint={t("dataTransfer.migration.cutoverHint")}
+          label={t("dataTransfer.migration.apiKey")}
+          type="password"
+          autoComplete="off"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
         />
-        {needsKey ? (
-          <TextField
-            label={t("dataTransfer.migration.apiKey")}
-            type="password"
-            autoComplete="off"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-          />
-        ) : null}
-      </div>
-      <Button type="submit" disabled={!cutover || (needsKey && !apiKey) || create.isPending}>
-        {t("dataTransfer.migration.begin")}
-      </Button>
-      <ErrorList error={create.error} />
-    </form>
+      ) : null}
+    </FormPanel>
   );
 }
 
@@ -345,118 +406,154 @@ function ProjectView({ project }: { project: MigrationProject }) {
   });
   const report = (project.reconciliation ?? {}) as { lines?: ReconciliationLine[]; ok?: boolean };
   return (
-    <section
-      className="space-y-4 rounded-md border border-border p-4"
-      aria-labelledby={`project-${project.id}`}
-    >
-      <h2 id={`project-${project.id}`} className="text-lg font-semibold">
-        {project.name}
-      </h2>
-      <p className="text-sm text-muted-foreground">
-        {t("dataTransfer.migration.summary", {
+    <div className="space-y-6">
+      <RuledPanel
+        title={project.name}
+        titleId={`project-${project.id}`}
+        description={t("dataTransfer.migration.summary", {
           source: t(`dataTransfer.sources.${project.origin}`),
           date: formatDate(project.cutover_date, i18n.language),
           status: t(`dataTransfer.migration.status.${project.status}`),
         })}
-      </p>
-      <ol className="space-y-3">
-        {STEPS.map((step, index) => {
-          const state = steps[step]?.status ?? "pending";
-          const current = project.status === "active" && project.current_step === step;
-          const batches = project.batches.filter((b) => b.project_step === step);
-          return (
-            <li
-              key={step}
-              aria-current={current ? "step" : undefined}
-              className="rounded-md border border-border p-3 aria-[current=step]:border-foreground"
-            >
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="font-medium">
-                  {index + 1}.{" "}
-                  {t(`dataTransfer.steps.${step}.title`, {
-                    defaultValue: t(`gapG6.steps.${step}.title`),
-                  })}
-                </h3>
-                <span className="text-sm">{t(`dataTransfer.stepStatus.${state}`)}</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {t(`dataTransfer.steps.${step}.help`, {
-                  defaultValue: t(`gapG6.steps.${step}.help`),
-                })}
-              </p>
-              {batches.length ? <BatchTable batches={batches} /> : null}
-              {current ? (
-                <div className="mt-2 space-y-2">
-                  {STEP_ENTITIES[step] ? (
-                    <NewImportForm
-                      project={project.id}
-                      step={step}
-                      entities={STEP_ENTITIES[step]}
-                    />
-                  ) : null}
-                  {step === "invite_users" ? (
-                    <div className="space-y-1">
-                      <Button variant="secondary" onClick={() => invite.mutate()}>
-                        {t("dataTransfer.migration.invite")}
-                      </Button>
-                      {invite.data ? (
-                        <p role="status">
-                          {t("dataTransfer.migration.invited", { count: invite.data.sent })}
-                        </p>
-                      ) : null}
+        flush
+      >
+        <ol className="divide-y divide-rule">
+          {STEPS.map((step, index) => {
+            const state = steps[step]?.status ?? "pending";
+            const current = project.status === "active" && project.current_step === step;
+            const batches = project.batches.filter((b) => b.project_step === step);
+            return (
+              <li
+                key={step}
+                aria-current={current ? "step" : undefined}
+                className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-x-2 px-5 py-2.5 text-sm"
+              >
+                <span className="text-muted-foreground tabular-nums">{index + 1}</span>
+                <div className="min-w-0 space-y-2">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                    <div className="min-w-0">
+                      <h3 className={current ? "font-semibold" : "font-medium"}>
+                        {t(`dataTransfer.steps.${step}.title`, {
+                          defaultValue: t(`gapG6.steps.${step}.title`),
+                        })}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {t(`dataTransfer.steps.${step}.help`, {
+                          defaultValue: t(`gapG6.steps.${step}.help`),
+                        })}
+                      </p>
+                    </div>
+                    <span
+                      className={cn(
+                        state === "pending" || state === "skipped"
+                          ? "text-muted-foreground"
+                          : undefined,
+                        current && "font-semibold",
+                      )}
+                    >
+                      {t(`dataTransfer.stepStatus.${state}`)}
+                    </span>
+                  </div>
+                  {batches.length ? (
+                    <div className="rounded-md border border-border">
+                      <BatchTable batches={batches} />
                     </div>
                   ) : null}
-                  <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => complete.mutate({ step, skip: false })}>
-                      {t("dataTransfer.migration.done")}
-                    </Button>
-                    <Button variant="ghost" onClick={() => complete.mutate({ step, skip: true })}>
-                      {t("dataTransfer.migration.skip")}
-                    </Button>
-                  </div>
-                  <ErrorList error={complete.error} />
+                  {current ? (
+                    <div className="space-y-3 pt-1">
+                      {STEP_ENTITIES[step] ? (
+                        <NewImportForm
+                          project={project.id}
+                          step={step}
+                          entities={STEP_ENTITIES[step]}
+                          level={3}
+                        />
+                      ) : null}
+                      <div className="flex flex-wrap items-center gap-2">
+                        {step === "invite_users" ? (
+                          <Button size="sm" variant="secondary" onClick={() => invite.mutate()}>
+                            {t("dataTransfer.migration.invite")}
+                          </Button>
+                        ) : null}
+                        <Button size="sm" onClick={() => complete.mutate({ step, skip: false })}>
+                          {t("dataTransfer.migration.done")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-muted-foreground"
+                          onClick={() => complete.mutate({ step, skip: true })}
+                        >
+                          {t("dataTransfer.migration.skip")}
+                        </Button>
+                        {invite.data ? (
+                          <span role="status" className="text-success">
+                            {t("dataTransfer.migration.invited", { count: invite.data.sent })}
+                          </span>
+                        ) : null}
+                      </div>
+                      <ErrorList error={complete.error} />
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
-            </li>
-          );
-        })}
-      </ol>
+              </li>
+            );
+          })}
+        </ol>
+      </RuledPanel>
       {report.lines?.length ? (
-        <div className="space-y-2">
-          <h3 className="font-medium">{t("dataTransfer.migration.reconciliation")}</h3>
-          {report.ok ? (
-            <Alert tone="success">{t("dataTransfer.migration.reconciled")}</Alert>
-          ) : (
-            <Alert tone="warning">{t("dataTransfer.migration.differences")}</Alert>
+        <RuledPanel
+          title={t("dataTransfer.migration.reconciliation")}
+          level={3}
+          flush
+          aside={
+            report.ok ? (
+              <span className="text-success">{t("dataTransfer.migration.reconciled")}</span>
+            ) : null
+          }
+        >
+          {report.ok ? null : (
+            <div className="px-5 pt-4">
+              <Alert tone="warning">{t("dataTransfer.migration.differences")}</Alert>
+            </div>
           )}
-          <table className="w-full text-sm">
-            <caption className="sr-only">{t("dataTransfer.migration.reconciliation")}</caption>
-            <thead>
-              <tr className="text-left">
-                <th scope="col">{t("dataTransfer.migration.metric")}</th>
-                <th scope="col">{t("dataTransfer.migration.source")}</th>
-                <th scope="col">{t("dataTransfer.migration.imported")}</th>
-                <th scope="col">{t("dataTransfer.migration.difference")}</th>
+          <RuledTable
+            caption={t("dataTransfer.migration.reconciliation")}
+            columns={[
+              { key: "metric", header: t("dataTransfer.migration.metric"), width: "min-w-40" },
+              { key: "source", header: t("dataTransfer.migration.source"), end: true, width: "w-32" },
+              {
+                key: "imported",
+                header: t("dataTransfer.migration.imported"),
+                end: true,
+                width: "w-32",
+              },
+              {
+                key: "difference",
+                header: t("dataTransfer.migration.difference"),
+                end: true,
+                width: "w-32",
+              },
+            ]}
+          >
+            {report.lines.map((line) => (
+              <tr key={line.metric}>
+                <th scope="row" className="py-2.5 font-normal">
+                  {t(`dataTransfer.metrics.${line.metric}`, {
+                    defaultValue: t(`gapG6.entities.${line.metric}`),
+                  })}
+                </th>
+                <td className={figureCell}>{line.source}</td>
+                <td className={figureCell}>{line.imported}</td>
+                <td className={cn(figureCell, !line.ok && "font-semibold text-danger")}>
+                  {line.difference}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {report.lines.map((line) => (
-                <tr key={line.metric} className="border-t border-border">
-                  <th scope="row" className="font-normal">
-                    {t(`dataTransfer.metrics.${line.metric}`, {
-                      defaultValue: t(`gapG6.entities.${line.metric}`),
-                    })}
-                  </th>
-                  <td>{line.source}</td>
-                  <td>{line.imported}</td>
-                  <td className={line.ok ? "" : "font-semibold text-danger"}>{line.difference}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </RuledTable>
+        </RuledPanel>
       ) : null}
-    </section>
+    </div>
   );
 }
 
@@ -467,12 +564,21 @@ function MigrationsTab() {
     queryFn: async () => unwrap(await api.GET("/api/v1/migration-projects")),
     refetchInterval: 5000,
   });
-  if (!data) return <Spinner />;
+  if (!data) {
+    return (
+      <RuledPanel label={t("dataTransfer.tabs.migrations")} flush>
+        <PanelLoading label={t("grid.loading")} />
+      </RuledPanel>
+    );
+  }
   const active = data.results.filter((p) => p.status === "active");
   return (
     <div className="space-y-6">
-      <p>{t("dataTransfer.migration.intro")}</p>
-      {active.length ? null : <NewProjectForm />}
+      {active.length ? (
+        <p className="text-sm text-muted-foreground">{t("dataTransfer.migration.intro")}</p>
+      ) : (
+        <NewProjectForm />
+      )}
       {data.results.map((p) => (
         <ProjectView key={p.id} project={p} />
       ))}
@@ -497,22 +603,35 @@ function DownloadExport({ job }: { job: ExportJob }) {
   });
   return (
     <form
-      className="flex flex-wrap items-end gap-2"
+      className="mt-2 space-y-2"
       onSubmit={(e) => {
         e.preventDefault();
         download.mutate();
       }}
     >
-      <TextField
-        label={t("dataTransfer.export.password")}
-        type="password"
-        autoComplete="current-password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <Button type="submit" disabled={!password || download.isPending}>
-        {t("dataTransfer.export.download")}
-      </Button>
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="w-full sm:w-64">
+          <TextField
+            size="sm"
+            hideLabel
+            label={t("dataTransfer.export.password")}
+            placeholder={t("dataTransfer.export.password")}
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <Button
+          type="submit"
+          size="sm"
+          className="h-9"
+          disabled={!password}
+          loading={download.isPending}
+        >
+          {t("dataTransfer.export.download")}
+        </Button>
+      </div>
       <ErrorList error={download.error} />
     </form>
   );
@@ -534,33 +653,57 @@ function ExportTab() {
       unwrap(await api.POST("/api/v1/data-exports", { body: { reason: "owner" } })),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["data-exports"] }),
   });
+  const jobs = data?.results ?? [];
   return (
-    <div className="space-y-4">
-      <p>{t("dataTransfer.export.intro")}</p>
-      <Button onClick={() => request.mutate()} disabled={request.isPending}>
-        {t("dataTransfer.export.request")}
-      </Button>
-      <ErrorList error={request.error} />
+    <RuledPanel
+      title={t("designS9a.exports")}
+      description={t("dataTransfer.export.intro")}
+      flush
+      footer={
+        <Button size="sm" onClick={() => request.mutate()} loading={request.isPending}>
+          {t("dataTransfer.export.request")}
+        </Button>
+      }
+    >
+      {request.error ? (
+        <div className="px-5 pt-4">
+          <ErrorList error={request.error} />
+        </div>
+      ) : null}
       {!data ? (
-        <Spinner />
+        <PanelLoading label={t("grid.loading")} />
+      ) : jobs.length === 0 ? (
+        <PanelEmpty>{t("designS9a.noExports")}</PanelEmpty>
       ) : (
-        <ul className="space-y-3">
-          {data.results.map((job) => (
-            <li key={job.id} className="space-y-2 rounded-md border border-border p-3">
-              <p>
-                {formatDateTime(job.created_at, i18n.language)} ·{" "}
-                <span role="status">{t(`dataTransfer.export.status.${job.status}`)}</span>
-                {job.expires_at && job.status === "ready"
-                  ? ` · ${t("dataTransfer.export.expires", {
-                      date: formatDate(job.expires_at, i18n.language),
-                    })}`
-                  : ""}
+        <PanelRows>
+          {jobs.map((job) => (
+            <PanelRow key={job.id}>
+              <p className="flex flex-wrap items-baseline justify-between gap-x-3">
+                <span className="tabular-nums">{formatDateTime(job.created_at, i18n.language)}</span>
+                <span
+                  role="status"
+                  className={cn(
+                    job.status === "failed" && "font-medium text-danger",
+                    (job.status === "cancelled" || job.status === "expired") &&
+                      "text-muted-foreground",
+                    job.status === "ready" && "font-medium",
+                  )}
+                >
+                  {t(`dataTransfer.export.status.${job.status}`)}
+                </span>
               </p>
+              {job.expires_at && job.status === "ready" ? (
+                <p className="text-xs text-muted-foreground">
+                  {t("dataTransfer.export.expires", {
+                    date: formatDate(job.expires_at, i18n.language),
+                  })}
+                </p>
+              ) : null}
               {job.status === "ready" ? <DownloadExport job={job} /> : null}
-            </li>
+            </PanelRow>
           ))}
-        </ul>
+        </PanelRows>
       )}
-    </div>
+    </RuledPanel>
   );
 }

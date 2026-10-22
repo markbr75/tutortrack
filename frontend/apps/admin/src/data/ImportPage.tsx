@@ -1,12 +1,27 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FigureStrip,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { api } from "../api";
+import { PanelLoading } from "../billing/moneyUi";
+import { useIsPhone } from "../billing/useIsPhone";
 import { ErrorList } from "../calendar/ErrorList";
+import { RecordHeader } from "../components/RecordHeader";
 import {
   BUSY,
   statsOf,
@@ -15,8 +30,10 @@ import {
   type ImportField,
   type ImportPreview,
 } from "./api";
+import { BatchStatus } from "./DataPage";
 
 const DATE_ORDERS = ["DMY", "MDY", "YMD"] as const;
+const quietGhost = "text-muted-foreground";
 
 function usePreview(id: string, enabled: boolean) {
   return useQuery({
@@ -40,6 +57,7 @@ function MappingWizard({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const phone = useIsPhone();
   const [columns, setColumns] = useState<Record<string, string>>(preview.column_map);
   const [values, setValues] = useState<Record<string, Record<string, string>>>(
     preview.value_map as Record<string, Record<string, string>>,
@@ -88,6 +106,12 @@ function MappingWizard({
     const spec = fields.get(key);
     return spec && spec.choices.length > 0 && (preview.distinct[column] ?? []).length > 0;
   });
+  const example = (header: string) =>
+    preview.sample
+      .map((row) => row[header])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join(", ");
   return (
     <form
       className="space-y-6"
@@ -96,118 +120,136 @@ function MappingWizard({
         save.mutate();
       }}
     >
-      <section className="space-y-2">
-        <h2 className="text-lg font-semibold">{t("dataTransfer.mapping.columns")}</h2>
-        <p className="text-sm text-muted-foreground">{t("dataTransfer.mapping.help")}</p>
-        <table className="w-full text-sm">
-          <caption className="sr-only">{t("dataTransfer.mapping.columns")}</caption>
-          <thead>
-            <tr className="text-left">
-              <th scope="col">{t("dataTransfer.mapping.column")}</th>
-              <th scope="col">{t("dataTransfer.mapping.example")}</th>
-              <th scope="col">{t("dataTransfer.mapping.field")}</th>
+      <RuledPanel
+        title={t("dataTransfer.mapping.columns")}
+        description={t("dataTransfer.mapping.help")}
+        flush
+      >
+        <RuledTable
+          caption={t("dataTransfer.mapping.columns")}
+          columns={[
+            { key: "column", header: t("dataTransfer.mapping.column"), width: "min-w-36" },
+            ...(phone ? [] : [{ key: "example", header: t("dataTransfer.mapping.example") }]),
+            { key: "field", header: t("dataTransfer.mapping.field"), width: "w-1/3 min-w-44" },
+          ]}
+        >
+          {preview.headers.map((header) => (
+            <tr key={header}>
+              <th scope="row" className="py-2.5 font-medium break-words">
+                {header}
+                {phone && example(header) ? (
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {example(header)}
+                  </span>
+                ) : null}
+              </th>
+              {phone ? null : (
+                <td className="break-words text-muted-foreground">{example(header)}</td>
+              )}
+              <td className="py-1.5">
+                <SelectField
+                  size="sm"
+                  hideLabel
+                  label={t("dataTransfer.mapping.fieldFor", { column: header })}
+                  value={columns[header] ?? ""}
+                  onChange={(e) => setColumns({ ...columns, [header]: e.target.value })}
+                  options={fieldOptions}
+                />
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {preview.headers.map((header) => (
-              <tr key={header} className="border-t border-border align-top">
-                <th scope="row" className="py-1 font-medium">
-                  {header}
-                </th>
-                <td className="py-1 text-muted-foreground">
-                  {preview.sample
-                    .map((row) => row[header])
-                    .filter(Boolean)
-                    .slice(0, 2)
-                    .join(", ")}
-                </td>
-                <td className="py-1">
-                  <SelectField
-                    label={t("dataTransfer.mapping.fieldFor", { column: header })}
-                    value={columns[header] ?? ""}
-                    onChange={(e) => setColumns({ ...columns, [header]: e.target.value })}
-                    options={fieldOptions}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          ))}
+        </RuledTable>
         {missing.length ? (
-          <Alert tone="warning">
-            {t("dataTransfer.mapping.missing", { fields: missing.map((f) => f.label).join(", ") })}
-          </Alert>
+          <div className="border-t border-rule px-5 py-4">
+            <Alert tone="warning">
+              {t("dataTransfer.mapping.missing", {
+                fields: missing.map((f) => f.label).join(", "),
+              })}
+            </Alert>
+          </div>
         ) : null}
-      </section>
+      </RuledPanel>
       {choiceColumns.length ? (
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">{t("dataTransfer.mapping.values")}</h2>
-          {choiceColumns.map(([column, key]) => {
-            const spec = fields.get(key);
-            if (!spec) return null;
-            return (
-              <fieldset key={column} className="space-y-2">
-                <legend className="font-medium">{column}</legend>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {(preview.distinct[column] ?? []).map((value) => (
-                    <SelectField
-                      key={value}
-                      label={value}
-                      value={values[key]?.[value] ?? ""}
-                      onChange={(e) =>
-                        setValues({ ...values, [key]: { ...values[key], [value]: e.target.value } })
-                      }
-                      options={[
-                        { value: "", label: t("dataTransfer.mapping.asIs") },
-                        ...spec.choices.map((c) => ({
-                          value: c,
-                          label: t(`dataTransfer.choices.${c}`, { defaultValue: c }),
-                        })),
-                      ]}
-                    />
-                  ))}
-                </div>
-              </fieldset>
-            );
-          })}
-        </section>
+        <RuledPanel title={t("dataTransfer.mapping.values")} flush>
+          <div className="divide-y divide-rule">
+            {choiceColumns.map(([column, key]) => {
+              const spec = fields.get(key);
+              if (!spec) return null;
+              return (
+                <fieldset key={column} className="min-w-0 px-5 py-4">
+                  <legend className="float-left mb-2 w-full text-sm font-medium">{column}</legend>
+                  <div className="clear-left grid items-start gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {(preview.distinct[column] ?? []).map((value) => (
+                      <SelectField
+                        key={value}
+                        label={value}
+                        value={values[key]?.[value] ?? ""}
+                        onChange={(e) =>
+                          setValues({
+                            ...values,
+                            [key]: { ...values[key], [value]: e.target.value },
+                          })
+                        }
+                        options={[
+                          { value: "", label: t("dataTransfer.mapping.asIs") },
+                          ...spec.choices.map((c) => ({
+                            value: c,
+                            label: t(`dataTransfer.choices.${c}`, { defaultValue: c }),
+                          })),
+                        ]}
+                      />
+                    ))}
+                  </div>
+                </fieldset>
+              );
+            })}
+          </div>
+        </RuledPanel>
       ) : null}
-      <section className="grid gap-3 sm:grid-cols-3">
-        {preview.upsert_keys.length > 1 ? (
+      <RuledPanel title={t("designS9a.importOptions")} flush>
+        <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3">
+          {preview.upsert_keys.length > 1 ? (
+            <SelectField
+              label={t("dataTransfer.mapping.upsert")}
+              value={upsert}
+              onChange={(e) => setUpsert(e.target.value)}
+              options={[
+                { value: "", label: t("dataTransfer.mapping.upsertDefault") },
+                ...preview.upsert_keys.map((k) => ({
+                  value: k,
+                  label: t(`dataTransfer.upsert.${k}`),
+                })),
+              ]}
+            />
+          ) : null}
           <SelectField
-            label={t("dataTransfer.mapping.upsert")}
-            value={upsert}
-            onChange={(e) => setUpsert(e.target.value)}
+            label={t("dataTransfer.mapping.dateOrder")}
+            value={dateOrder}
+            onChange={(e) => setDateOrder(e.target.value)}
             options={[
-              { value: "", label: t("dataTransfer.mapping.upsertDefault") },
-              ...preview.upsert_keys.map((k) => ({
-                value: k,
-                label: t(`dataTransfer.upsert.${k}`),
-              })),
+              { value: "", label: t("dataTransfer.mapping.dateDefault") },
+              ...DATE_ORDERS.map((d) => ({ value: d, label: t(`dataTransfer.dates.${d}`) })),
             ]}
           />
+          <TextField
+            label={t("dataTransfer.mapping.cutover")}
+            type="date"
+            value={cutover}
+            onChange={(e) => setCutover(e.target.value)}
+            hint={t("dataTransfer.mapping.cutoverHint")}
+          />
+        </div>
+        {save.error ? (
+          <div className="px-5 pb-4">
+            <ErrorList error={save.error} />
+          </div>
         ) : null}
-        <SelectField
-          label={t("dataTransfer.mapping.dateOrder")}
-          value={dateOrder}
-          onChange={(e) => setDateOrder(e.target.value)}
-          options={[
-            { value: "", label: t("dataTransfer.mapping.dateDefault") },
-            ...DATE_ORDERS.map((d) => ({ value: d, label: t(`dataTransfer.dates.${d}`) })),
-          ]}
-        />
-        <TextField
-          label={t("dataTransfer.mapping.cutover")}
-          type="date"
-          value={cutover}
-          onChange={(e) => setCutover(e.target.value)}
-          hint={t("dataTransfer.mapping.cutoverHint")}
-        />
-      </section>
-      <Button type="submit" disabled={save.isPending || missing.length > 0}>
-        {t("dataTransfer.mapping.check")}
-      </Button>
-      <ErrorList error={save.error} />
+        <PanelFooter>
+          <Button type="submit" loading={save.isPending} disabled={missing.length > 0}>
+            {t("dataTransfer.mapping.check")}
+          </Button>
+        </PanelFooter>
+      </RuledPanel>
     </form>
   );
 }
@@ -216,6 +258,7 @@ function MappingWizard({
 
 function PreviewGrid({ batch }: { batch: ImportBatch }) {
   const { t } = useTranslation();
+  const phone = useIsPhone();
   const [problems, setProblems] = useState(true);
   const { data } = useQuery({
     queryKey: ["imports", batch.id, "rows", problems, batch.status],
@@ -226,13 +269,20 @@ function PreviewGrid({ batch }: { batch: ImportBatch }) {
         }),
       ),
   });
+  const rows = data?.results ?? [];
+  const valuesOf = (raw: unknown) =>
+    Object.entries(raw as Record<string, string>)
+      .filter(([, v]) => v)
+      .slice(0, 4)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(" · ");
   return (
-    <section className="space-y-2" aria-labelledby="preview-heading">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="preview-heading" className="text-lg font-semibold">
-          {t("dataTransfer.preview.title")}
-        </h2>
-        <label className="inline-flex items-center gap-2 text-sm">
+    <RuledPanel
+      title={t("dataTransfer.preview.title")}
+      titleId="preview-heading"
+      flush
+      aside={
+        <label className="inline-flex items-center gap-2">
           <input
             type="checkbox"
             checked={problems}
@@ -240,95 +290,96 @@ function PreviewGrid({ batch }: { batch: ImportBatch }) {
           />
           {t("dataTransfer.preview.onlyProblems")}
         </label>
-      </div>
-      {!data ? (
-        <Spinner />
-      ) : data.results.length === 0 ? (
-        <p className="text-muted-foreground">{t("dataTransfer.preview.none")}</p>
-      ) : (
-        <div className="overflow-x-auto" tabIndex={0} aria-label={t("dataTransfer.preview.title")}>
-          <table className="w-full text-sm">
-            <caption className="sr-only">{t("dataTransfer.preview.caption")}</caption>
-            <thead>
-              <tr className="text-left">
-                <th scope="col">{t("dataTransfer.preview.row")}</th>
-                <th scope="col">{t("dataTransfer.preview.status")}</th>
-                <th scope="col">{t("dataTransfer.preview.values")}</th>
-                <th scope="col">{t("dataTransfer.preview.problems")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.results.map((row) => (
-                <tr key={row.id} className="border-t border-border align-top">
-                  <th scope="row" className="font-normal">
-                    {row.row_number}
-                  </th>
-                  <td>
-                    {t(`dataTransfer.rowStatus.${row.status}`)}
-                    {row.action ? ` · ${t(`dataTransfer.actions.${row.action}`)}` : ""}
-                  </td>
-                  <td className="max-w-md truncate">
-                    {Object.entries(row.raw as Record<string, string>)
-                      .filter(([, v]) => v)
-                      .slice(0, 4)
-                      .map(([k, v]) => `${k}: ${v}`)
-                      .join(" · ")}
-                  </td>
-                  <td>
-                    <ul>
-                      {row.row_errors.map((e, i) => (
-                        <li key={`e${i}`} className="text-danger">
-                          {e.message}
-                        </li>
-                      ))}
-                      {row.row_warnings.map((w, i) => (
-                        <li key={`w${i}`} className="text-muted-foreground">
-                          {w.message}
-                        </li>
-                      ))}
-                    </ul>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
+      }
+    >
+      <RuledTable
+        caption={t("dataTransfer.preview.caption")}
+        loading={!data}
+        loadingLabel={t("grid.loading")}
+        empty={data && rows.length === 0 ? t("dataTransfer.preview.none") : undefined}
+        columns={[
+          { key: "row", header: t("dataTransfer.preview.row"), end: true, width: "w-16" },
+          { key: "status", header: t("dataTransfer.preview.status"), width: "min-w-32" },
+          ...(phone ? [] : [{ key: "values", header: t("dataTransfer.preview.values") }]),
+          { key: "problems", header: t("dataTransfer.preview.problems"), width: "min-w-40" },
+        ]}
+      >
+        {rows.map((row) => (
+          <tr key={row.id}>
+            <th scope="row" className="py-2.5 text-right font-normal tabular-nums">
+              {row.row_number}
+            </th>
+            <td>
+              <span className={row.status === "invalid" || row.status === "failed" ? "font-medium text-danger" : undefined}>
+                {t(`dataTransfer.rowStatus.${row.status}`)}
+              </span>
+              {row.action ? (
+                <span className="block text-xs text-muted-foreground">
+                  {t(`dataTransfer.actions.${row.action}`)}
+                </span>
+              ) : null}
+              {phone ? (
+                <span className="block text-xs break-words text-muted-foreground">
+                  {valuesOf(row.raw)}
+                </span>
+              ) : null}
+            </td>
+            {phone ? null : (
+              <td className="max-w-md truncate text-muted-foreground" title={valuesOf(row.raw)}>
+                {valuesOf(row.raw)}
+              </td>
+            )}
+            <td>
+              <ul>
+                {row.row_errors.map((e, i) => (
+                  <li key={`e${i}`} className="text-danger">
+                    {e.message}
+                  </li>
+                ))}
+                {row.row_warnings.map((w, i) => (
+                  <li key={`w${i}`} className="text-muted-foreground">
+                    {w.message}
+                  </li>
+                ))}
+              </ul>
+            </td>
+          </tr>
+        ))}
+      </RuledTable>
+    </RuledPanel>
   );
 }
 
 function DryRun({ batch }: { batch: ImportBatch }) {
   const { t } = useTranslation();
   const stats = statsOf(batch);
-  const will = Object.entries(stats.will ?? {});
+  const will = Object.entries(stats.will ?? {}).flatMap(([target, verbs]) =>
+    Object.entries(verbs).map(([verb, count]) => ({ target, verb, count })),
+  );
   return (
-    <section className="space-y-2" aria-labelledby="dry-run-heading">
-      <h2 id="dry-run-heading" className="text-lg font-semibold">
-        {t("dataTransfer.dryRun.title")}
-      </h2>
-      <p>
-        {t("dataTransfer.dryRun.rows", {
-          valid: stats.valid ?? 0,
-          invalid: stats.invalid ?? 0,
-          warnings: stats.warnings ?? 0,
-        })}
-      </p>
+    <RuledPanel
+      title={t("dataTransfer.dryRun.title")}
+      titleId="dry-run-heading"
+      description={t("dataTransfer.dryRun.rows", {
+        valid: stats.valid ?? 0,
+        invalid: stats.invalid ?? 0,
+        warnings: stats.warnings ?? 0,
+      })}
+      flush
+    >
       {will.length ? (
-        <ul className="list-disc pl-5">
-          {will.map(([target, verbs]) =>
-            Object.entries(verbs).map(([verb, count]) => (
-              <li key={`${target}-${verb}`}>
-                {t(`dataTransfer.dryRun.${verb}`, {
-                  count,
-                  what: t(`dataTransfer.targets.${target}`, { defaultValue: target }),
-                })}
-              </li>
-            )),
-          )}
-        </ul>
+        <PanelRows>
+          {will.map(({ target, verb, count }) => (
+            <PanelRow key={`${target}-${verb}`}>
+              {t(`dataTransfer.dryRun.${verb}`, {
+                count,
+                what: t(`dataTransfer.targets.${target}`, { defaultValue: target }),
+              })}
+            </PanelRow>
+          ))}
+        </PanelRows>
       ) : null}
-    </section>
+    </RuledPanel>
   );
 }
 
@@ -358,94 +409,135 @@ export function ImportPage({ batchId }: { batchId: string }) {
   useEffect(() => {
     if (batch && batch.status !== "validated") setEditing(false);
   }, [batch]);
-  if (error) return <ErrorList error={error} />;
-  if (!batch) return <Spinner />;
+  const back = <Link to="/data">{t("dataTransfer.title")}</Link>;
+  if (error) {
+    return (
+      <div>
+        <RecordHeader back={back} title={t("dataTransfer.title")} />
+        <ErrorList error={error} />
+      </div>
+    );
+  }
+  if (!batch) return <Spinner label={t("common.loading")} />;
   const stats = statsOf(batch);
+  const ready = batch.status === "validated" && !editing;
+  const finished = ["completed", "finalised", "rolled_back"].includes(batch.status);
+  const failed = stats.failed ?? 0;
+  const invalid = stats.invalid ?? 0;
   return (
-    <div className="space-y-6">
-      <nav aria-label={t("dataTransfer.title")}>
-        <Link to="/data" className="text-sm underline">
-          {t("dataTransfer.back")}
-        </Link>
-      </nav>
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold">
-          {t("dataTransfer.importOf", {
-            what: t(`dataTransfer.entities.${batch.entity}`, { defaultValue: batch.entity }),
-          })}
-        </h1>
-        <p className="text-muted-foreground">
-          {batch.filename} · {formatDateTime(batch.created_at, i18n.language)}
-        </p>
-        <p role="status" aria-live="polite" className="font-medium">
-          {t(`dataTransfer.status.${batch.status}`)}
-          {BUSY.has(batch.status) ? <Spinner /> : null}
-        </p>
-      </header>
-      {batch.error ? <Alert tone="danger">{batch.error}</Alert> : null}
-      {mapping && preview ? (
-        <MappingWizard batch={batch} preview={preview} onDone={() => setEditing(false)} />
-      ) : null}
-      {batch.status === "validated" && !editing ? (
-        <>
-          <DryRun batch={batch} />
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={() => act.mutate("confirm")} disabled={!stats.valid || act.isPending}>
-              {t("dataTransfer.confirm", { count: stats.valid ?? 0 })}
-            </Button>
-            <Button variant="secondary" onClick={() => setEditing(true)}>
-              {t("dataTransfer.changeMapping")}
-            </Button>
-            <Button variant="ghost" onClick={() => act.mutate("cancel")}>
-              {t("dataTransfer.cancel")}
-            </Button>
-          </div>
-          <PreviewGrid batch={batch} />
-        </>
-      ) : null}
-      {["completed", "finalised", "rolled_back"].includes(batch.status) ? (
-        <section className="space-y-3" aria-labelledby="results-heading">
-          <h2 id="results-heading" className="text-lg font-semibold">
-            {t("dataTransfer.results.title")}
-          </h2>
-          <dl className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {(["created", "updated", "skipped", "failed", "invalid"] as const).map((key) => (
-              <div key={key} className="rounded-md border border-border p-2">
-                <dt className="text-sm text-muted-foreground">
-                  {t(`dataTransfer.results.${key}`)}
-                </dt>
-                <dd className="text-xl font-semibold">{stats[key] ?? 0}</dd>
-              </div>
-            ))}
-          </dl>
-          {batch.status === "rolled_back" ? (
-            <Alert tone="info">
-              {t("dataTransfer.results.rolledBack", {
-                reverted: stats.reverted ?? 0,
-                kept: stats.kept ?? 0,
-              })}
-            </Alert>
-          ) : null}
-          <div className="flex flex-wrap gap-2">
-            {batch.error_file ? (
-              <Button variant="secondary" onClick={() => report.mutate()}>
-                {t("dataTransfer.results.errorReport")}
+    <div>
+      <RecordHeader
+        back={back}
+        title={t("dataTransfer.importOf", {
+          what: t(`dataTransfer.entities.${batch.entity}`, { defaultValue: batch.entity }),
+        })}
+        description={
+          <span className="inline-flex flex-wrap items-center gap-x-1.5">
+            <span role="status" aria-live="polite" className="inline-flex items-center gap-1.5">
+              <BatchStatus status={batch.status} />
+              {BUSY.has(batch.status) ? <Spinner /> : null}
+            </span>
+            <span aria-hidden="true">·</span>
+            <span className="break-all">{batch.filename}</span>
+            <span aria-hidden="true">·</span>
+            <span className="tabular-nums">{formatDateTime(batch.created_at, i18n.language)}</span>
+          </span>
+        }
+        actions={
+          ready ? (
+            <>
+              <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>
+                {t("dataTransfer.changeMapping")}
               </Button>
-            ) : null}
-            {batch.can_rollback ? (
-              <Button variant="ghost" onClick={() => act.mutate("rollback")}>
-                {t("dataTransfer.results.rollback", {
-                  date: batch.rollback_until
-                    ? formatDateTime(batch.rollback_until, i18n.language)
-                    : "",
+              <Button
+                onClick={() => act.mutate("confirm")}
+                disabled={!stats.valid}
+                loading={act.isPending && act.variables === "confirm"}
+              >
+                {t("dataTransfer.confirm", { count: stats.valid ?? 0 })}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className={quietGhost}
+                onClick={() => act.mutate("cancel")}
+              >
+                {t("dataTransfer.cancel")}
+              </Button>
+            </>
+          ) : finished && (batch.error_file || batch.can_rollback) ? (
+            <>
+              {batch.error_file ? (
+                <Button size="sm" variant="secondary" onClick={() => report.mutate()}>
+                  {t("dataTransfer.results.errorReport")}
+                </Button>
+              ) : null}
+              {batch.can_rollback ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className={quietGhost}
+                  onClick={() => act.mutate("rollback")}
+                >
+                  {t("dataTransfer.results.rollback", {
+                    date: batch.rollback_until
+                      ? formatDateTime(batch.rollback_until, i18n.language)
+                      : "",
+                  })}
+                </Button>
+              ) : null}
+            </>
+          ) : null
+        }
+      />
+      <div className="space-y-6">
+        <ErrorList error={act.error ?? report.error} />
+        {batch.error ? <Alert tone="danger">{batch.error}</Alert> : null}
+        {mapping && !preview ? (
+          <RuledPanel label={t("dataTransfer.mapping.columns")} flush>
+            <PanelLoading label={t("grid.loading")} />
+          </RuledPanel>
+        ) : null}
+        {mapping && preview ? (
+          <MappingWizard batch={batch} preview={preview} onDone={() => setEditing(false)} />
+        ) : null}
+        {ready ? (
+          <>
+            <DryRun batch={batch} />
+            <PreviewGrid batch={batch} />
+          </>
+        ) : null}
+        {finished ? (
+          <section className="space-y-6" aria-labelledby="results-heading">
+            <h2 id="results-heading" className="sr-only">
+              {t("dataTransfer.results.title")}
+            </h2>
+            <FigureStrip
+              label={t("dataTransfer.results.title")}
+              figures={(["created", "updated", "skipped", "failed", "invalid"] as const).map(
+                (key) => ({
+                  key,
+                  label: t(`dataTransfer.results.${key}`),
+                  value: stats[key] ?? 0,
+                  tone:
+                    (key === "failed" && failed > 0) || (key === "invalid" && invalid > 0)
+                      ? "danger"
+                      : "default",
+                }),
+              )}
+            />
+            {batch.status === "rolled_back" ? (
+              <Alert tone="info">
+                {t("dataTransfer.results.rolledBack", {
+                  reverted: stats.reverted ?? 0,
+                  kept: stats.kept ?? 0,
                 })}
-              </Button>
+              </Alert>
             ) : null}
-          </div>
-          <PreviewGrid batch={batch} />
-        </section>
-      ) : null}
-      <ErrorList error={act.error ?? report.error} />
+            <PreviewGrid batch={batch} />
+          </section>
+        ) : null}
+      </div>
     </div>
   );
 }
