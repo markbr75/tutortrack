@@ -163,7 +163,7 @@ export function AvailabilityPage() {
                   // Labels show on the first row only; later rows keep them for screen readers.
                   <li
                     key={i}
-                    className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_2rem] items-end gap-x-2 px-5 py-2 sm:grid-cols-[minmax(0,1fr)_8rem_8rem_auto] sm:gap-x-3"
+                    className="grid grid-cols-[4.75rem_minmax(0,1fr)_minmax(0,1fr)_2rem] items-end gap-x-2 px-5 py-2 sm:grid-cols-[minmax(0,1fr)_8rem_8rem_auto] sm:gap-x-3"
                   >
                     <SelectField
                       size="sm"
@@ -184,7 +184,7 @@ export function AvailabilityPage() {
                     />
                     <TextField
                       size="sm"
-                      className="min-w-0 px-2 tabular-nums"
+                      className="min-w-0 px-2 tabular-nums max-sm:[&::-webkit-calendar-picker-indicator]:hidden"
                       type="time"
                       hideLabel={i > 0}
                       label={t("tutor.from")}
@@ -199,7 +199,7 @@ export function AvailabilityPage() {
                     />
                     <TextField
                       size="sm"
-                      className="min-w-0 px-2 tabular-nums"
+                      className="min-w-0 px-2 tabular-nums max-sm:[&::-webkit-calendar-picker-indicator]:hidden"
                       type="time"
                       hideLabel={i > 0}
                       label={t("tutor.to")}
