@@ -185,9 +185,7 @@ function TakeTest({ quizId, onDone }: { quizId: string; onDone: () => void }) {
                               const list = Array.isArray(chosen) ? chosen : [];
                               set(
                                 q.id,
-                                e.target.checked
-                                  ? [...list, c.id]
-                                  : list.filter((x) => x !== c.id),
+                                e.target.checked ? [...list, c.id] : list.filter((x) => x !== c.id),
                               );
                             }}
                           />

@@ -18,13 +18,7 @@ import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 import { api } from "../api";
-import {
-  PanelEmpty,
-  PanelLoading,
-  PortalHeader,
-  TextAreaField,
-  Word,
-} from "../layout/PortalPage";
+import { PanelEmpty, PanelLoading, PortalHeader, TextAreaField, Word } from "../layout/PortalPage";
 
 type Assignment = components["schemas"]["Assignment"];
 

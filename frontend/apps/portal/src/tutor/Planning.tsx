@@ -16,7 +16,8 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api } from "../api";
-import { PanelEmpty, PortalHeader, useIsPhone } from "../layout/PortalPage";
+import { PanelEmpty, PortalHeader } from "../layout/PortalPage";
+import { useIsPhone } from "../layout/useIsPhone";
 import { useTutorMe } from "./useTutorMe";
 
 type Conflict = components["schemas"]["Conflict"];
@@ -128,21 +129,21 @@ export function PlanLessonForm({ onDone }: { onDone: () => void }) {
         <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_7rem]">
           <div className="sm:col-span-3">
             <SelectField
-            label={t("tutorPlan.job")}
-            required
-            value={job}
-            onChange={(e) => {
-              setJob(e.target.value);
-              check.reset();
-            }}
-            options={[
-              { value: "", label: t("designS10.chooseJob") },
-              ...jobs.data.map((j) => ({
-                value: j.id,
-                label: `${j.name} · ${j.students.map((s) => s.name).join(", ")}`,
-              })),
-            ]}
-          />
+              label={t("tutorPlan.job")}
+              required
+              value={job}
+              onChange={(e) => {
+                setJob(e.target.value);
+                check.reset();
+              }}
+              options={[
+                { value: "", label: t("designS10.chooseJob") },
+                ...jobs.data.map((j) => ({
+                  value: j.id,
+                  label: `${j.name} · ${j.students.map((s) => s.name).join(", ")}`,
+                })),
+              ]}
+            />
           </div>
           <TextField
             className="tabular-nums"
@@ -263,11 +264,7 @@ export function MoveLessonForm({
         if (times) move.mutate();
       }}
     >
-      <RuledPanel
-        title={title}
-        description={direct ? undefined : t("tutorPlan.askHelp")}
-        flush
-      >
+      <RuledPanel title={title} description={direct ? undefined : t("tutorPlan.askHelp")} flush>
         <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
           <TextField
             className="tabular-nums"

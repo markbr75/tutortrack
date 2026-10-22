@@ -3,7 +3,6 @@ import { cn } from "@tutortrack/ui";
 import { ChevronLeft } from "lucide-react";
 import {
   useId,
-  useSyncExternalStore,
   type InputHTMLAttributes,
   type ReactNode,
   type TextareaHTMLAttributes,
@@ -202,21 +201,6 @@ export function CheckField({
       <input type="checkbox" className="mt-0.5 size-4 shrink-0" {...props} />
       <span>{label}</span>
     </label>
-  );
-}
-
-const PHONE = "(max-width: 767px)";
-
-/** True below 768px, where tables fold their secondary columns into one caption. */
-export function useIsPhone(): boolean {
-  return useSyncExternalStore(
-    (notify) => {
-      const query = window.matchMedia?.(PHONE);
-      query?.addEventListener("change", notify);
-      return () => query?.removeEventListener("change", notify);
-    },
-    () => window.matchMedia?.(PHONE).matches ?? false,
-    () => false,
   );
 }
 

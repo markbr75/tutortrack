@@ -16,7 +16,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
-import { PanelLoading, PortalHeader, TextAreaField, useIsPhone } from "../layout/PortalPage";
+import { PanelLoading, PortalHeader, TextAreaField } from "../layout/PortalPage";
+import { useIsPhone } from "../layout/useIsPhone";
 
 const quiet = "text-muted-foreground hover:text-foreground";
 
@@ -172,7 +173,12 @@ export function InvoiceReviewPage() {
                     ...(phone ? [] : [{ key: "date", header: t("g3.tutorReview.date") }]),
                     { key: "lesson", header: t("g3.tutorReview.lesson") },
                     ...(phone ? [] : [{ key: "student", header: t("g3.tutorReview.student") }]),
-                    { key: "minutes", header: t("g3.tutorReview.minutes"), end: true, width: "w-24" },
+                    {
+                      key: "minutes",
+                      header: t("g3.tutorReview.minutes"),
+                      end: true,
+                      width: "w-24",
+                    },
                   ]}
                 >
                   {review.lessons.map((l, i) => (

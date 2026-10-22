@@ -47,10 +47,7 @@ export function OfflineIndicator() {
             </Button>
           ) : null}
           {auth.length ? (
-            <a
-              className="font-medium text-link underline-offset-2 hover:underline"
-              href="/portal/"
-            >
+            <a className="font-medium text-link underline-offset-2 hover:underline" href="/portal/">
               {t("pwa.signIn")}
             </a>
           ) : null}

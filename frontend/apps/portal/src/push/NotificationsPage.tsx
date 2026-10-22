@@ -130,7 +130,12 @@ function ThisDevice() {
   }
   const error = turnOn.error ?? turnOff.error ?? test.error;
   return (
-    <RuledPanel title={t("pwa.thisDevice")} titleId="this-device" flush footer={footer ?? undefined}>
+    <RuledPanel
+      title={t("pwa.thisDevice")}
+      titleId="this-device"
+      flush
+      footer={footer ?? undefined}
+    >
       <div className="space-y-3 px-5 py-4">
         {body}
         {error ? <Alert tone="danger">{error.message}</Alert> : null}

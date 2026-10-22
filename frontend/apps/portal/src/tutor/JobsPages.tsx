@@ -51,7 +51,10 @@ function BriefView({ brief }: { brief: Brief }) {
                 .join(", ")
             : "",
         ],
-        [t("tutorJobs.starts"), brief.start_date ? formatDate(brief.start_date, i18n.language) : ""],
+        [
+          t("tutorJobs.starts"),
+          brief.start_date ? formatDate(brief.start_date, i18n.language) : "",
+        ],
         [
           t("tutorJobs.pay"),
           brief.pay_rate ? (

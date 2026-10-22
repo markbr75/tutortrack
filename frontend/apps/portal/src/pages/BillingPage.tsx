@@ -361,7 +361,7 @@ export function BillingPage() {
                 actions={
                   <>
                     <a
-                      className={buttonClass({ variant: "ghost", size: "sm" })}
+                      className="inline-flex h-8 items-center text-sm font-medium text-link underline-offset-2 hover:underline"
                       href={`/api/v1/pay/${inv.pdf_token}/pdf`}
                       target="_blank"
                       rel="noreferrer"

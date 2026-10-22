@@ -18,7 +18,8 @@ import { useEffect, useState } from "react";
 import { api, problemStatus } from "../api";
 import { BrandMark, PoweredBy } from "../branding";
 import { PortalFrame } from "../layout/PortalFrame";
-import { PortalHeader, useIsPhone, Word } from "../layout/PortalPage";
+import { PortalHeader, Word } from "../layout/PortalPage";
+import { useIsPhone } from "../layout/useIsPhone";
 import { CopyLink } from "../pages/ReferralsPage";
 
 function useAffiliate() {
@@ -150,7 +151,12 @@ export function AffiliateClientsPage() {
                 { key: "joined", header: t("referrals.partner.joined") },
                 { key: "first", header: t("referrals.partner.firstPayment") },
               ]),
-          { key: "commission", header: t("referrals.partner.commission"), end: true, width: "w-32" },
+          {
+            key: "commission",
+            header: t("referrals.partner.commission"),
+            end: true,
+            width: "w-32",
+          },
         ]}
         empty={clients.data.length ? undefined : t("referrals.partner.noClients")}
       >
@@ -160,10 +166,7 @@ export function AffiliateClientsPage() {
               <span className="font-medium">{c.name}</span>
               {phone ? (
                 <span className="block text-xs text-muted-foreground tabular-nums">
-                  {[
-                    date(c.attributed_at),
-                    c.converted_at ? date(c.converted_at) : "",
-                  ]
+                  {[date(c.attributed_at), c.converted_at ? date(c.converted_at) : ""]
                     .filter(Boolean)
                     .join(" · ")}
                 </span>
@@ -213,9 +216,7 @@ export function AffiliateStatementsPage() {
               </span>
             }
             aside={
-              <Word className="text-foreground">
-                {t(`referrals.statementStatus.${st.status}`)}
-              </Word>
+              <Word className="text-foreground">{t(`referrals.statementStatus.${st.status}`)}</Word>
             }
             flush
           >

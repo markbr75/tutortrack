@@ -56,35 +56,37 @@ export function DigestPreferences() {
       <RuledPanel title={t("digests.title")} titleId="digests-title" flush>
         <div className="divide-y divide-rule">
           {current.map((row) => (
-            <fieldset key={row.kind} className="px-5 py-4">
-              <legend className="text-sm font-medium">{t(`digests.kind.${row.kind}`)}</legend>
-              {!row.org_enabled ? (
-                <p className="text-xs text-muted-foreground">{t("digests.notSent")}</p>
-              ) : null}
-              <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-3">
-                <CheckField
-                  className="min-h-10 items-center"
-                  label={t("digests.wantIt")}
-                  checked={row.enabled}
-                  onChange={(e) => change(row, { enabled: e.target.checked })}
-                />
-                <TextField
-                  className="w-32 tabular-nums"
-                  type="time"
-                  label={t("digests.time")}
-                  value={row.send_time}
-                  onChange={(e) => change(row, { send_time: e.target.value })}
-                />
-                {row.weekday !== null && row.weekday !== undefined ? (
-                  <SelectField
-                    label={t("digests.day")}
-                    value={String(row.weekday)}
-                    onChange={(e) => change(row, { weekday: Number(e.target.value) })}
-                    options={DAYS.map((d) => ({ value: String(d), label: weekday(d) }))}
-                  />
+            <div key={row.kind} className="px-5 py-4">
+              <fieldset>
+                <legend className="text-sm font-medium">{t(`digests.kind.${row.kind}`)}</legend>
+                {!row.org_enabled ? (
+                  <p className="text-xs text-muted-foreground">{t("digests.notSent")}</p>
                 ) : null}
-              </div>
-            </fieldset>
+                <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-3">
+                  <CheckField
+                    className="min-h-10 items-center"
+                    label={t("digests.wantIt")}
+                    checked={row.enabled}
+                    onChange={(e) => change(row, { enabled: e.target.checked })}
+                  />
+                  <TextField
+                    className="w-32 tabular-nums"
+                    type="time"
+                    label={t("digests.time")}
+                    value={row.send_time}
+                    onChange={(e) => change(row, { send_time: e.target.value })}
+                  />
+                  {row.weekday !== null && row.weekday !== undefined ? (
+                    <SelectField
+                      label={t("digests.day")}
+                      value={String(row.weekday)}
+                      onChange={(e) => change(row, { weekday: Number(e.target.value) })}
+                      options={DAYS.map((d) => ({ value: String(d), label: weekday(d) }))}
+                    />
+                  ) : null}
+                </div>
+              </fieldset>
+            </div>
           ))}
         </div>
         {save.error ? (

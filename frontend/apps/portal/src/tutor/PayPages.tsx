@@ -16,7 +16,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent, type ReactNode } from "react";
 
 import { api, uploadFile } from "../api";
-import { FileField, PanelEmpty, PortalHeader, useIsPhone, Word } from "../layout/PortalPage";
+import { FileField, PanelEmpty, PortalHeader, Word } from "../layout/PortalPage";
+import { useIsPhone } from "../layout/useIsPhone";
 import { AnnualEarnings } from "./G3Pages";
 import { MyUsTaxInfo } from "./Phase3";
 
@@ -72,8 +73,16 @@ export function EarningsPage() {
         <FigureStrip
           label={t("tutor.nav.earnings")}
           figures={[
-            { key: "upcoming", label: t("pay.upcoming"), value: <TotalsLine totals={e.upcoming_total} /> },
-            { key: "ytd", label: t("pay.yearToDate"), value: <TotalsLine totals={e.year_to_date} /> },
+            {
+              key: "upcoming",
+              label: t("pay.upcoming"),
+              value: <TotalsLine totals={e.upcoming_total} />,
+            },
+            {
+              key: "ytd",
+              label: t("pay.yearToDate"),
+              value: <TotalsLine totals={e.year_to_date} />,
+            },
           ]}
         />
         {e.held.length ? (
@@ -110,7 +119,9 @@ export function EarningsPage() {
           >
             {e.upcoming.map((item) => (
               <tr key={item.id}>
-                {phone ? null : <td className="whitespace-nowrap tabular-nums">{date(item.date)}</td>}
+                {phone ? null : (
+                  <td className="whitespace-nowrap tabular-nums">{date(item.date)}</td>
+                )}
                 <td>
                   {item.description}
                   {phone ? (
@@ -327,9 +338,7 @@ export function ExpensesPage() {
                   primary={claim.description}
                   caption={
                     <>
-                      <span className="tabular-nums">
-                        {formatDate(claim.date, i18n.language)}
-                      </span>{" "}
+                      <span className="tabular-nums">{formatDate(claim.date, i18n.language)}</span>{" "}
                       ·{" "}
                       <Word
                         tone={
@@ -435,12 +444,7 @@ export function PayDetailsSection() {
             ) : (
               <>
                 <p className="text-muted-foreground">{t("pay.selfBillingText")}</p>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => agree.mutate()}
-                >
+                <Button type="button" size="sm" variant="secondary" onClick={() => agree.mutate()}>
                   {t("pay.agreeSelfBilling")}
                 </Button>
               </>

@@ -7188,6 +7188,8 @@
     "steps": "Steps",
     "doneOf": "{{done}} of {{total}} done",
     "required": "Required",
+    "minutesLateUnit": "minutes late",
+    "noSteps": "Nothing to do here yet.",
     "noResources": "No resources yet. Add a link below.",
     "connections": "Your connected accounts",
     "noConnections": "Nothing connected yet.",

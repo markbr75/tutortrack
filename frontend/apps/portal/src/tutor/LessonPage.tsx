@@ -329,17 +329,21 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
                           }))}
                         />
                         {outcome === "late" ? (
-                          <TextField
-                            size="sm"
-                            className="w-24 text-right tabular-nums"
-                            type="number"
-                            min={0}
-                            label={t("tutor.minutesLate")}
-                            hideLabel
-                            placeholder={t("tutor.minutesLate")}
-                            value={late[a.id] ?? ""}
-                            onChange={(e) => setLate((v) => ({ ...v, [a.id]: e.target.value }))}
-                          />
+                          <span className="flex items-center gap-2">
+                            <TextField
+                              size="sm"
+                              className="w-20 text-right tabular-nums"
+                              type="number"
+                              min={0}
+                              label={t("tutor.minutesLate")}
+                              hideLabel
+                              value={late[a.id] ?? ""}
+                              onChange={(e) => setLate((v) => ({ ...v, [a.id]: e.target.value }))}
+                            />
+                            <span aria-hidden="true" className="text-sm text-muted-foreground">
+                              {t("designS10.minutesLateUnit")}
+                            </span>
+                          </span>
                         ) : null}
                       </div>
                     </li>

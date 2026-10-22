@@ -161,9 +161,7 @@ export function HomeworkPage({ assignmentId }: { assignmentId: string }) {
                 h.student_name,
                 h.tutor_name,
                 t("learning.portal.due", { when: formatDateTime(h.due_at, i18n.language) }),
-                h.expected_minutes
-                  ? t("learning.portal.minutes", { n: h.expected_minutes })
-                  : "",
+                h.expected_minutes ? t("learning.portal.minutes", { n: h.expected_minutes }) : "",
               ]
                 .filter(Boolean)
                 .join(" · ")}
@@ -196,9 +194,7 @@ export function HomeworkPage({ assignmentId }: { assignmentId: string }) {
         ) : null}
         {h.grade || h.feedback ? (
           <RuledPanel title={t("learning.portal.feedback")} flush>
-            {h.grade ? (
-              <FactList items={[[t("learning.homework.grade"), h.grade]]} />
-            ) : null}
+            {h.grade ? <FactList items={[[t("learning.homework.grade"), h.grade]]} /> : null}
             {h.feedback ? (
               <p
                 className={
@@ -502,7 +498,9 @@ function Results() {
   const students = [...new Map(rows.map((r) => [r.student, r.student_name])).entries()];
   if (!rows.length) {
     return (
-      <TabPanel label={t("learning.portal.tabs.results")} loading={false}
+      <TabPanel
+        label={t("learning.portal.tabs.results")}
+        loading={false}
         empty={t("learning.portal.noResults")}
       />
     );
@@ -565,7 +563,8 @@ function Progress() {
               </a>
             </div>
             <p className="text-xs text-muted-foreground tabular-nums">
-              {formatDate(r.period_start, i18n.language)} – {formatDate(r.period_end, i18n.language)}
+              {formatDate(r.period_start, i18n.language)} –{" "}
+              {formatDate(r.period_end, i18n.language)}
             </p>
             <p className="whitespace-pre-wrap">{r.summary}</p>
           </PanelRow>

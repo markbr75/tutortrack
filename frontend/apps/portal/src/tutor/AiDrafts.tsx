@@ -118,7 +118,10 @@ export function AiReportDrafter({
       <div className="space-y-3 px-5 empty:hidden [&:has(>*)]:pb-4">
         <AiProblem error={draft.error} />
         {draft.data ? (
-          <div role="status" className="space-y-1 rounded-md border border-border px-4 py-3 text-sm">
+          <div
+            role="status"
+            className="space-y-1 rounded-md border border-border px-4 py-3 text-sm"
+          >
             <p>{t("ai.report.drafted")}</p>
             {draft.data.suggested_topics.length ? (
               <p>
@@ -193,7 +196,12 @@ export function AiBioHelper({ tutorId, onUse }: { tutorId: string; onUse: (bio: 
             {write.data.body}
           </p>
           <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" size="sm" variant="secondary" onClick={() => onUse(write.data.body)}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => onUse(write.data.body)}
+            >
               {t("ai.useDraft")}
             </Button>
             <Feedback request={write.data.request} />

@@ -16,7 +16,7 @@ import { useState } from "react";
 
 import { api, uploadFile } from "../api";
 import { SignForm } from "../esign/SignForm";
-import { FileField, PortalHeader, Word } from "../layout/PortalPage";
+import { FileField, PanelEmpty, PortalHeader, Word } from "../layout/PortalPage";
 import { DocumentList } from "../pages/DocumentsPage";
 import { MyBackgroundChecks } from "./Phase3";
 
@@ -59,12 +59,15 @@ export function OnboardingPage() {
         <RuledPanel
           title={t("designS10.steps")}
           aside={
-            <span className="text-muted-foreground tabular-nums">
-              {t("designS10.doneOf", { done, total: items.length })}
-            </span>
+            items.length ? (
+              <span className="text-muted-foreground tabular-nums">
+                {t("designS10.doneOf", { done, total: items.length })}
+              </span>
+            ) : undefined
           }
           flush
         >
+          {items.length ? null : <PanelEmpty>{t("designS10.noSteps")}</PanelEmpty>}
           <PanelRows>
             {items.map((item) => (
               <PanelRow key={item.key}>

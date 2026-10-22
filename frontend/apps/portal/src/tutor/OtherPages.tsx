@@ -17,12 +17,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api } from "../api";
-import {
-  PanelEmpty,
-  PortalHeader,
-  SavedNote,
-  TextAreaField,
-} from "../layout/PortalPage";
+import { PanelEmpty, PortalHeader, SavedNote, TextAreaField } from "../layout/PortalPage";
 import { PayDetailsSection } from "./PayPages";
 import { PublicProfileSection } from "./PublicProfile";
 import { useTutorMe } from "./useTutorMe";
@@ -209,7 +204,7 @@ export function AvailabilityPage() {
                       type="button"
                       size="sm"
                       variant="ghost"
-                      className={`${quiet} col-span-2 justify-self-start sm:col-span-1`}
+                      className={`${quiet} col-span-2 -ml-3 justify-self-start sm:col-span-1 sm:ml-0`}
                       onClick={() => setWindows(current.filter((_x, n) => n !== i))}
                     >
                       {t("tutor.remove")}

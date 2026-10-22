@@ -300,7 +300,6 @@ export function MessagesView({ who, canChoose }: { who: Who; canChoose: boolean 
   return (
     <div className="space-y-6">
       <PortalHeader
-        className="mb-0"
         title={t("portalMessages.title")}
         actions={
           selected ? null : (

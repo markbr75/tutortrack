@@ -259,7 +259,8 @@ function ClassRow({
               {item.course.name}: {item.name}
             </h3>
             <p className="font-semibold tabular-nums">
-              {item.price} <span className="font-normal text-muted-foreground">({item.pricing_label})</span>
+              {item.price}{" "}
+              <span className="font-normal text-muted-foreground">({item.pricing_label})</span>
             </p>
           </div>
           <p className="text-xs text-muted-foreground tabular-nums">

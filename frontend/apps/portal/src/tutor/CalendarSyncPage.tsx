@@ -269,7 +269,7 @@ export function CalendarSyncPage() {
             <PanelEmpty>{t("designS10.noConnections")}</PanelEmpty>
           )}
           <div className="flex flex-wrap items-end gap-2 border-t border-border px-5 py-3">
-            <div className="w-full max-w-72">
+            <div className="min-w-40 flex-1 sm:max-w-72">
               <SelectField
                 size="sm"
                 label={t("designS10.addConnection")}

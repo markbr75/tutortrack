@@ -127,7 +127,11 @@ export function BookingPage() {
                     <Button onClick={() => submit.mutate(hold.id)} disabled={submit.isPending}>
                       {t("portalBooking.book")}
                     </Button>
-                    <Button variant="ghost" className={quiet} onClick={() => cancel.mutate(hold.id)}>
+                    <Button
+                      variant="ghost"
+                      className={quiet}
+                      onClick={() => cancel.mutate(hold.id)}
+                    >
                       {t("portalBooking.changeTime")}
                     </Button>
                   </>

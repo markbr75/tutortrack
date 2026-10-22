@@ -45,12 +45,20 @@ export function CheckInButtons({ lessonId, online }: { lessonId: string; online:
     return <p className="text-sm text-muted-foreground">{act.error.message}</p>;
   }
   return (
-    <RuledPanel
-      title={t("safeguarding.tutor.loneWorking")}
-      titleId="lone-working"
-      flush
-      footer={
-        !visit ? (
+    <RuledPanel title={t("safeguarding.tutor.loneWorking")} titleId="lone-working" flush>
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+        {visit ? (
+          <p role="status" className="text-sm tabular-nums">
+            {visit.checked_out_at
+              ? t("safeguarding.tutor.checkedOutAt", {
+                  time: formatDateTime(visit.checked_out_at, i18n.language),
+                })
+              : t("safeguarding.tutor.checkedInAt", {
+                  time: formatDateTime(visit.checked_in_at, i18n.language),
+                })}
+          </p>
+        ) : null}
+        {!visit ? (
           <Button variant="secondary" onClick={() => act.mutate("in")} disabled={act.isPending}>
             {t("safeguarding.tutor.arrived")}
           </Button>
@@ -58,22 +66,10 @@ export function CheckInButtons({ lessonId, online }: { lessonId: string; online:
           <Button variant="secondary" onClick={() => act.mutate("out")} disabled={act.isPending}>
             {t("safeguarding.tutor.left")}
           </Button>
-        ) : undefined
-      }
-    >
-      {visit ? (
-        <p role="status" className="px-5 py-2.5 text-sm tabular-nums">
-          {visit.checked_out_at
-            ? t("safeguarding.tutor.checkedOutAt", {
-                time: formatDateTime(visit.checked_out_at, i18n.language),
-              })
-            : t("safeguarding.tutor.checkedInAt", {
-                time: formatDateTime(visit.checked_in_at, i18n.language),
-              })}
-        </p>
-      ) : null}
+        ) : null}
+      </div>
       {act.error && !(act.error instanceof ApiError && act.error.status === 422) ? (
-        <div className="px-5 py-3">
+        <div className="px-5 pb-3">
           <Alert tone="danger">{act.error.message}</Alert>
         </div>
       ) : null}

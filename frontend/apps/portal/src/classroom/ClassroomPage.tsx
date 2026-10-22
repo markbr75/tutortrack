@@ -181,10 +181,7 @@ function ClassroomResources({
       {resources.length ? (
         <PanelRows>
           {resources.map((r) => (
-            <PanelRow
-              key={r.id}
-              className="flex flex-wrap items-center justify-between gap-2"
-            >
+            <PanelRow key={r.id} className="flex flex-wrap items-center justify-between gap-2">
               <span>
                 <span className="font-medium">{r.title}</span>
                 {r.message ? (

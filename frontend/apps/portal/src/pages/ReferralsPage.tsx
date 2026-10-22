@@ -6,7 +6,8 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 
 import { api } from "../api";
-import { PortalHeader, useIsPhone } from "../layout/PortalPage";
+import { PortalHeader } from "../layout/PortalPage";
+import { useIsPhone } from "../layout/useIsPhone";
 
 /** Copy a link to the clipboard, announcing the result to screen readers. */
 export function CopyLink({ label, url }: { label: string; url: string }) {
