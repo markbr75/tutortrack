@@ -1,11 +1,28 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  NamePlate,
+  PageHeader,
+  Panel,
+  PanelRow,
+  PanelRows,
+  RuledTable,
+  SelectField,
+  Spinner,
+  Tabs,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
+import { RecordHeader } from "../components/RecordHeader";
 
 type Schema = components["schemas"]["AutomationSchema"];
 type Automation = components["schemas"]["Automation"];
@@ -26,7 +43,7 @@ export type Step = {
 };
 
 const NO_VALUE = ["is_empty", "is_not_empty", "changed"];
-const linkClass = "underline underline-offset-2";
+const linkClass = "underline-offset-2 hover:underline";
 
 function useSchema() {
   return useQuery({
@@ -38,10 +55,9 @@ function useSchema() {
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section aria-label={title} className="space-y-3 rounded-lg border border-border p-4">
-      <h2 className="font-semibold">{title}</h2>
+    <Panel title={title} bodyClassName="space-y-4">
       {children}
-    </section>
+    </Panel>
   );
 }
 
@@ -60,15 +76,20 @@ type Tab = "automations" | "recipes" | "runs";
 /** Automations, the recipe library and the run log (FR-14-4..6). */
 export function AutomationsPage() {
   const { t } = useTranslation();
+  const canManage = usePermission("automation.manage");
   const [tab, setTab] = useState<Tab>("automations");
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">{t("automations.title")}</h1>
-        <Link to="/automations/$id" params={{ id: "new" }} className={linkClass}>
-          {t("automations.new")}
-        </Link>
-      </div>
+    <div>
+      <PageHeader
+        title={t("automations.title")}
+        actions={
+          canManage ? (
+            <Link to="/automations/$id" params={{ id: "new" }} className={buttonClass()}>
+              {t("automations.new")}
+            </Link>
+          ) : null
+        }
+      />
       <Tabs
         label={t("automations.title")}
         tabs={[
@@ -108,40 +129,47 @@ function AutomationList() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["automations"] }),
   });
   if (!list.data) return <Spinner label={t("grid.loading")} />;
-  if (list.data.length === 0)
-    return <p className="text-sm text-muted-foreground">{t("automations.none")}</p>;
   return (
-    <ul className="divide-y divide-border rounded-lg border border-border">
-      {list.data.map((a) => (
-        <li key={a.id} className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm">
-          <span>
-            <Link
-              to="/automations/$id"
-              params={{ id: a.id }}
-              className={`font-medium ${linkClass}`}
-            >
-              {a.name}
-            </Link>
-            <span className="block text-xs text-muted-foreground">
-              {describeTrigger(a, schema.data, t)} · {t("automations.version", { n: a.version })}
-            </span>
-          </span>
-          {canManage ? (
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={a.enabled}
-                onChange={() => toggle.mutate(a)}
-                aria-label={t("automations.enabledFor", { name: a.name })}
+    <Panel label={t("automations.title")} flush>
+      {list.data.length === 0 ? (
+        <p className="px-5 py-6 text-sm text-muted-foreground">{t("automations.none")}</p>
+      ) : (
+        <PanelRows>
+          {list.data.map((a) => (
+            <PanelRow key={a.id} className="hover:bg-muted/60">
+              <NamePlate
+                name={
+                  <Link to="/automations/$id" params={{ id: a.id }} className={linkClass}>
+                    {a.name}
+                  </Link>
+                }
+                context={`${describeTrigger(a, schema.data, t)} · ${t("automations.version", { n: a.version })}`}
+                aside={
+                  canManage ? (
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        className="size-4"
+                        checked={a.enabled}
+                        onChange={() => toggle.mutate(a)}
+                        aria-label={t("automations.enabledFor", { name: a.name })}
+                      />
+                      <span className={a.enabled ? undefined : "text-muted-foreground"}>
+                        {a.enabled ? t("automations.on") : t("automations.off")}
+                      </span>
+                    </label>
+                  ) : (
+                    <span className={a.enabled ? "text-sm" : "text-sm text-muted-foreground"}>
+                      {a.enabled ? t("automations.on") : t("automations.off")}
+                    </span>
+                  )
+                }
               />
-              {a.enabled ? t("automations.on") : t("automations.off")}
-            </label>
-          ) : (
-            <span>{a.enabled ? t("automations.on") : t("automations.off")}</span>
-          )}
-        </li>
-      ))}
-    </ul>
+            </PanelRow>
+          ))}
+        </PanelRows>
+      )}
+    </Panel>
   );
 }
 
@@ -166,75 +194,102 @@ function RecipeList({ onInstalled }: { onInstalled: () => void }) {
   });
   if (!recipes.data) return <Spinner label={t("grid.loading")} />;
   return (
-    <ul className="grid gap-3 md:grid-cols-2">
-      {recipes.data.map((r) => (
-        <li key={r.key} className="space-y-2 rounded-lg border border-border p-3 text-sm">
-          <h3 className="font-medium">{r.name}</h3>
-          <p className="text-muted-foreground">{r.description}</p>
-          {r.installed ? (
-            <span className="text-xs">{t("automations.installed")}</span>
-          ) : canManage ? (
-            <Button size="sm" onClick={() => install.mutate(r.key)} disabled={install.isPending}>
-              {t("automations.install")}
-            </Button>
-          ) : null}
-        </li>
-      ))}
+    <div className="space-y-4">
       {install.error ? <Alert tone="danger">{install.error.message}</Alert> : null}
-    </ul>
+      <Panel label={t("automations.recipes")} flush>
+        <PanelRows>
+          {recipes.data.map((r) => (
+            <PanelRow key={r.key}>
+              <NamePlate
+                name={r.name}
+                context={r.description}
+                aside={
+                  r.installed ? (
+                    <span className="text-sm text-muted-foreground">
+                      {t("automations.installed")}
+                    </span>
+                  ) : canManage ? (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => install.mutate(r.key)}
+                      disabled={install.isPending}
+                    >
+                      {t("automations.install")}
+                    </Button>
+                  ) : null
+                }
+              />
+            </PanelRow>
+          ))}
+        </PanelRows>
+      </Panel>
+    </div>
   );
 }
 
-function RunRows({ runs }: { runs: Run[] }) {
+function RunRows({ runs, bare = false }: { runs: Run[]; bare?: boolean }) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
+  const schema = useSchema();
+  const phone = useIsPhone();
   const retry = useMutation({
     mutationFn: async (id: string) =>
       unwrap(await api.POST("/api/v1/automation-runs/{id}/retry", { params: { path: { id } } })),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["automation-runs"] }),
   });
-  if (runs.length === 0)
-    return <p className="text-sm text-muted-foreground">{t("automations.noRuns")}</p>;
+  const record = (r: Run) =>
+    [
+      schema.data?.subjects.find((x) => x.key === r.subject_type)?.label ?? r.subject_type,
+      (r.subject_id ?? "").slice(0, 8),
+    ]
+      .filter(Boolean)
+      .join(" ");
+  const started = (r: Run) => formatDateTime(r.started_at, i18n.language);
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-left text-muted-foreground">
-            <th scope="col">{t("automations.automation")}</th>
-            <th scope="col">{t("automations.record")}</th>
-            <th scope="col">{t("automations.started")}</th>
-            <th scope="col">{t("automations.status")}</th>
-            <th scope="col">
-              <span className="sr-only">{t("automations.actions")}</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {runs.map((r) => (
-            <tr key={r.id} className="border-t border-border align-top">
-              <td>
-                {r.automation_name} (v{r.version})
-              </td>
-              <td>
-                {r.subject_type} {(r.subject_id ?? "").slice(0, 8)}
-              </td>
-              <td>{formatDateTime(r.started_at, i18n.language)}</td>
-              <td>
-                {t(`automations.runStatus.${r.status}`)}
-                {r.error ? <span className="block text-xs text-red-700">{r.error}</span> : null}
-              </td>
-              <td>
-                {r.status === "failed" ? (
-                  <Button size="sm" variant="secondary" onClick={() => retry.mutate(r.id)}>
-                    {t("automations.retry")}
-                  </Button>
-                ) : null}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <RuledTable
+      bare={bare}
+      caption={t("automations.runs")}
+      empty={runs.length === 0 ? t("automations.noRuns") : undefined}
+      columns={[
+        { label: t("automations.automation") },
+        ...(phone ? [] : [{ label: t("automations.record") }, { label: t("automations.started") }]),
+        { label: t("automations.status") },
+        { label: t("automations.actions"), srOnly: true },
+      ]}
+    >
+      {runs.map((r) => (
+        <tr key={r.id}>
+          <td>
+            <span className="font-medium">{r.automation_name}</span>
+            <span className="block text-xs text-muted-foreground tabular-nums">
+              {phone
+                ? [record(r), started(r)].join(" · ")
+                : t("automations.version", { n: r.version })}
+            </span>
+          </td>
+          {phone ? null : (
+            <>
+              <td className="tabular-nums">{record(r)}</td>
+              <td className="whitespace-nowrap tabular-nums">{started(r)}</td>
+            </>
+          )}
+          <td>
+            <span className={r.status === "failed" ? "font-medium text-danger" : undefined}>
+              {t(`automations.runStatus.${r.status}`)}
+            </span>
+            {r.error ? <span className="block text-xs text-danger">{r.error}</span> : null}
+          </td>
+          <td className="text-right">
+            {r.status === "failed" ? (
+              <Button size="sm" variant="secondary" onClick={() => retry.mutate(r.id)}>
+                {t("automations.retry")}
+              </Button>
+            ) : null}
+          </td>
+        </tr>
+      ))}
+    </RuledTable>
   );
 }
 
@@ -267,6 +322,7 @@ function ConditionRow({
   return (
     <div className="flex flex-wrap items-end gap-2">
       <SelectField
+        size="sm"
         label={t("automations.field")}
         value={value.field}
         onChange={(e) => onChange({ ...value, field: e.target.value })}
@@ -276,6 +332,7 @@ function ConditionRow({
         ]}
       />
       <SelectField
+        size="sm"
         label={t("automations.operator")}
         value={value.op}
         onChange={(e) => onChange({ ...value, op: e.target.value })}
@@ -283,13 +340,14 @@ function ConditionRow({
       />
       {NO_VALUE.includes(value.op) ? null : (
         <TextField
+          size="sm"
           label={t("automations.value")}
           value={String(value.value ?? "")}
           onChange={(e) => onChange({ ...value, value: e.target.value })}
         />
       )}
       {onRemove ? (
-        <Button size="sm" variant="secondary" onClick={onRemove}>
+        <Button size="sm" variant="ghost" className="h-9 text-muted-foreground" onClick={onRemove}>
           {t("automations.remove")}
         </Button>
       ) : null}
@@ -343,11 +401,12 @@ function ActionForm({
           const chosen = (config[f.name] as string[] | undefined) ?? [];
           return (
             <fieldset key={f.name} className="text-sm">
-              <legend>{label}</legend>
+              <legend className="mb-1 font-medium">{label}</legend>
               {options.map((o) => (
-                <label key={o} className="mr-3 inline-flex items-center gap-1">
+                <label key={o} className="mr-4 inline-flex items-center gap-2">
                   <input
                     type="checkbox"
+                    className="size-4"
                     checked={chosen.includes(o)}
                     onChange={(e) =>
                       set(f.name, e.target.checked ? [...chosen, o] : chosen.filter((c) => c !== o))
@@ -381,7 +440,7 @@ function ActionForm({
               </label>
               <textarea
                 id={`f-${f.name}`}
-                className="w-full rounded-md border border-border p-2 text-sm"
+                className="w-full rounded-md border border-field bg-surface px-3 py-2 text-sm"
                 rows={f.name === "body" ? 4 : 1}
                 value={String(config[f.name] ?? "")}
                 onChange={(e) => set(f.name, e.target.value)}
@@ -511,26 +570,40 @@ function StepList({
           : { type, if: { field: "", op: "equals", value: "" }, then: [], else: [] },
     ]);
   return (
-    <ol className="space-y-3">
+    <ol className="divide-y divide-rule">
       {steps.map((step, i) => (
-        <li key={i} className="space-y-2 rounded-md border border-border p-3">
+        <li key={i} className="space-y-3 py-4 first:pt-0">
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-            <strong>
+            <span className="font-semibold">
               {i + 1}. {t(`automations.stepTypes.${step.type}`)}
-            </strong>
-            <span className="flex gap-1">
-              <Button size="sm" variant="secondary" onClick={() => move(i, -1)} disabled={i === 0}>
-                {t("automations.up")}
+            </span>
+            <span className="flex items-center gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-8 px-0"
+                aria-label={t("automations.up")}
+                onClick={() => move(i, -1)}
+                disabled={i === 0}
+              >
+                <ArrowUp aria-hidden="true" className="size-4" strokeWidth={1.75} />
               </Button>
               <Button
                 size="sm"
-                variant="secondary"
+                variant="ghost"
+                className="w-8 px-0"
+                aria-label={t("automations.down")}
                 onClick={() => move(i, 1)}
                 disabled={i === steps.length - 1}
               >
-                {t("automations.down")}
+                <ArrowDown aria-hidden="true" className="size-4" strokeWidth={1.75} />
               </Button>
-              <Button size="sm" variant="secondary" onClick={() => remove(i)}>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={() => remove(i)}
+              >
                 {t("automations.remove")}
               </Button>
             </span>
@@ -549,6 +622,7 @@ function StepList({
                 label={t("automations.hours")}
                 type="number"
                 min={0}
+                className="w-24 text-right"
                 value={String(step.hours ?? "")}
                 onChange={(e) =>
                   replace(i, { ...step, hours: Number(e.target.value) || 0, until: undefined })
@@ -558,6 +632,7 @@ function StepList({
                 label={t("automations.days")}
                 type="number"
                 min={0}
+                className="w-24 text-right"
                 value={String(step.days ?? "")}
                 onChange={(e) =>
                   replace(i, { ...step, days: Number(e.target.value) || 0, until: undefined })
@@ -566,7 +641,7 @@ function StepList({
             </div>
           ) : null}
           {step.type === "branch" ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <ConditionRow
                 value={step.if ?? { field: "", op: "equals" }}
                 onChange={(c) => replace(i, { ...step, if: c })}
@@ -574,8 +649,8 @@ function StepList({
                 operators={schema.operators}
               />
               {(["then", "else"] as const).map((arm) => (
-                <div key={arm} className="border-l-2 border-border pl-3">
-                  <p className="text-sm font-medium">{t(`automations.${arm}`)}</p>
+                <div key={arm} className="space-y-2 border-l border-border pl-4">
+                  <p className="text-sm font-semibold">{t(`automations.${arm}`)}</p>
                   <StepList
                     steps={step[arm] ?? []}
                     onChange={(s) => replace(i, { ...step, [arm]: s })}
@@ -589,7 +664,7 @@ function StepList({
           ) : null}
         </li>
       ))}
-      <li className="flex flex-wrap gap-2">
+      <li className="flex flex-wrap gap-2 py-4 first:pt-0 last:pb-0">
         <Button size="sm" variant="secondary" onClick={() => add("action")}>
           {t("automations.addAction")}
         </Button>
@@ -870,128 +945,141 @@ function Builder({
     enabled: Boolean(automation),
   });
   return (
-    <div className="space-y-4">
-      <p className="text-sm">
-        <Link to="/automations" className={linkClass}>
-          {t("automations.title")}
-        </Link>
-      </p>
-      <h1 className="text-2xl font-semibold">
-        {automation ? automation.name : t("automations.new")}
-        {automation ? (
-          <span className="ml-2 text-sm font-normal text-muted-foreground">
-            {t("automations.version", { n: automation.version })} ·{" "}
-            {automation.enabled ? t("automations.on") : t("automations.off")}
-          </span>
-        ) : null}
-      </h1>
-      <TextField
-        label={t("automations.name")}
-        value={draft.name}
-        onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+    <article>
+      <RecordHeader
+        back={<Link to="/automations">{t("automations.title")}</Link>}
+        title={automation ? automation.name : t("automations.new")}
+        description={
+          automation
+            ? `${t("automations.version", { n: automation.version })} · ${
+                automation.enabled ? t("automations.on") : t("automations.off")
+              }`
+            : undefined
+        }
       />
-      <Card title={t("automations.when")}>
-        <TriggerForm draft={draft} set={setDraft} schema={schema} />
-      </Card>
-      <Card title={t("automations.if")}>
-        <SelectField
-          label={t("automations.match")}
-          value={draft.match}
-          onChange={(e) => setDraft({ ...draft, match: e.target.value as Draft["match"] })}
-          options={[
-            { value: "all", label: t("automations.matchAll") },
-            { value: "any", label: t("automations.matchAny") },
-          ]}
-        />
-        {draft.conditions.map((c, i) => (
-          <ConditionRow
-            key={i}
-            value={c}
-            fields={fields}
-            operators={schema.operators}
-            onChange={(next) =>
+      <div className="max-w-4xl space-y-6">
+        <div className="max-w-md">
+          <TextField
+            label={t("automations.name")}
+            value={draft.name}
+            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+          />
+        </div>
+        <Card title={t("automations.when")}>
+          <TriggerForm draft={draft} set={setDraft} schema={schema} />
+        </Card>
+        <Card title={t("automations.if")}>
+          <div className="max-w-xs">
+            <SelectField
+              label={t("automations.match")}
+              value={draft.match}
+              onChange={(e) => setDraft({ ...draft, match: e.target.value as Draft["match"] })}
+              options={[
+                { value: "all", label: t("automations.matchAll") },
+                { value: "any", label: t("automations.matchAny") },
+              ]}
+            />
+          </div>
+          {draft.conditions.map((c, i) => (
+            <ConditionRow
+              key={i}
+              value={c}
+              fields={fields}
+              operators={schema.operators}
+              onChange={(next) =>
+                setDraft({
+                  ...draft,
+                  conditions: draft.conditions.map((x, j) => (j === i ? next : x)),
+                })
+              }
+              onRemove={() =>
+                setDraft({ ...draft, conditions: draft.conditions.filter((_x, j) => j !== i) })
+              }
+            />
+          ))}
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() =>
               setDraft({
                 ...draft,
-                conditions: draft.conditions.map((x, j) => (j === i ? next : x)),
+                conditions: [...draft.conditions, { field: "", op: "equals", value: "" }],
               })
             }
-            onRemove={() =>
-              setDraft({ ...draft, conditions: draft.conditions.filter((_x, j) => j !== i) })
-            }
-          />
-        ))}
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() =>
-            setDraft({
-              ...draft,
-              conditions: [...draft.conditions, { field: "", op: "equals", value: "" }],
-            })
-          }
-        >
-          {t("automations.addCondition")}
-        </Button>
-      </Card>
-      <Card title={t("automations.then")}>
-        {subject ? (
-          <StepList
-            steps={draft.steps}
-            onChange={(steps) => setDraft({ ...draft, steps })}
-            schema={schema}
-            subject={subject}
-          />
-        ) : (
-          <p className="text-sm text-muted-foreground">{t("automations.chooseTriggerFirst")}</p>
-        )}
-      </Card>
-      {canManage ? (
-        <div className="space-y-2">
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>
-            {automation ? t("automations.saveVersion") : t("automations.create")}
-          </Button>
-          {save.isSuccess ? <Alert tone="success">{t("automations.saved")}</Alert> : null}
-          {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
-        </div>
-      ) : null}
-      {automation ? (
-        <Card title={t("automations.dryRun")}>
-          <form
-            className="flex flex-wrap items-end gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              test.mutate();
-            }}
           >
-            <TextField
-              label={t("automations.recordId")}
-              value={record}
-              onChange={(e) => setRecord(e.target.value)}
-            />
-            <Button type="submit" variant="secondary" disabled={!record}>
-              {t("automations.test")}
-            </Button>
-          </form>
-          {test.error ? <Alert tone="danger">{test.error.message}</Alert> : null}
-          {test.data ? (
-            <div className="space-y-1 text-sm">
-              <p className="font-medium">
-                {test.data.matched ? t("automations.wouldRun") : t("automations.wouldNotRun")}
-              </p>
-              <ol className="list-decimal pl-5">
-                {test.data.steps.map((s) => (
-                  <li key={s.key} className={s.ok ? "" : "text-red-700"}>
-                    {s.description}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          ) : null}
+            {t("automations.addCondition")}
+          </Button>
         </Card>
-      ) : null}
-      {automation ? (
-        <Card title={t("automations.runs")}>{runs.data ? <RunRows runs={runs.data} /> : null}</Card>
-      ) : null}
-    </div>
+        <Card title={t("automations.then")}>
+          {subject ? (
+            <StepList
+              steps={draft.steps}
+              onChange={(steps) => setDraft({ ...draft, steps })}
+              schema={schema}
+              subject={subject}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">{t("automations.chooseTriggerFirst")}</p>
+          )}
+        </Card>
+        {canManage ? (
+          <div className="space-y-3">
+            {save.isSuccess ? <Alert tone="success">{t("automations.saved")}</Alert> : null}
+            {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
+            <Button onClick={() => save.mutate()} loading={save.isPending}>
+              {automation ? t("automations.saveVersion") : t("automations.create")}
+            </Button>
+          </div>
+        ) : null}
+        {automation ? (
+          <Card title={t("automations.dryRun")}>
+            <form
+              className="flex flex-wrap items-end gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                test.mutate();
+              }}
+            >
+              <div className="min-w-56 flex-1 sm:max-w-sm">
+                <TextField
+                  label={t("automations.recordId")}
+                  value={record}
+                  onChange={(e) => setRecord(e.target.value)}
+                />
+              </div>
+              <Button type="submit" variant="secondary" disabled={!record} loading={test.isPending}>
+                {t("automations.test")}
+              </Button>
+            </form>
+            {test.error ? <Alert tone="danger">{test.error.message}</Alert> : null}
+            {test.data ? (
+              <div className="space-y-1 text-sm" aria-live="polite">
+                <p className="font-semibold">
+                  {test.data.matched ? t("automations.wouldRun") : t("automations.wouldNotRun")}
+                </p>
+                <ol className="list-decimal space-y-0.5 pl-5">
+                  {test.data.steps.map((s) => (
+                    <li key={s.key} className={s.ok ? "" : "font-medium text-danger"}>
+                      {s.description}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ) : null}
+          </Card>
+        ) : null}
+        {automation ? (
+          <Panel title={t("automations.runs")} flush>
+            {runs.data ? (
+              <RunRows runs={runs.data} bare />
+            ) : (
+              <div className="px-5 py-4">
+                <Spinner label={t("grid.loading")} />
+              </div>
+            )}
+          </Panel>
+        ) : null}
+      </div>
+    </article>
   );
 }

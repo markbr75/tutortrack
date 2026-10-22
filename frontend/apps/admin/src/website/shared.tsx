@@ -1,10 +1,29 @@
+import { RuledPanel } from "@tutortrack/ui";
 import type { ReactNode } from "react";
 
-export function Card({ title, children }: { title: string; children: ReactNode }) {
+/** A ruled panel for one part of the website screens (its title names the section). */
+export function Card({
+  title,
+  description,
+  aside,
+  footer,
+  children,
+}: {
+  title: string;
+  description?: ReactNode;
+  aside?: ReactNode;
+  footer?: ReactNode;
+  children: ReactNode;
+}) {
   return (
-    <section aria-label={title} className="space-y-3 rounded-lg border border-border p-4">
-      <h2 className="font-semibold">{title}</h2>
+    <RuledPanel
+      title={title}
+      description={description}
+      aside={aside}
+      footer={footer}
+      bodyClassName="space-y-4"
+    >
       {children}
-    </section>
+    </RuledPanel>
   );
 }

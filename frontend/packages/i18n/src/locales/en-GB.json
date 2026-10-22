@@ -53,6 +53,9 @@
     },
     "broadcasts": {
       "figures": "Delivery figures"
+    },
+    "website": {
+      "noTestimonials": "No reviews added yet."
     }
   },
   "app": {
