@@ -7923,5 +7923,20 @@
     "auth": {
       "sendNewLink": "Send a new sign-in link"
     }
+  },
+  "followUps": {
+    "orgPicker": {
+      "label": "Find an organisation",
+      "placeholder": "Search by name or subdomain",
+      "noMatches": "No organisation matches “{{search}}”.",
+      "noticeLabel": "Organisations",
+      "noticeHint": "Leave empty to send to every open organisation.",
+      "chosen": "Chosen organisations",
+      "remove": "Remove {{name}}"
+    },
+    "policy": {
+      "charge": "Client charged",
+      "pay": "Tutor paid"
+    }
   }
 }

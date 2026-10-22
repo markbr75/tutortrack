@@ -120,6 +120,57 @@ describe("platform console", () => {
     );
   });
 
+  it("signs staff out from the account menu", async () => {
+    window.history.pushState(null, "", "/platform");
+    const calls = mockApi(platform({ "POST /api/v1/auth/logout": { status: 204, body: null } }));
+    render(<App />);
+    const menu = await screen.findByRole("button", { name: "Account menu for pat@tutortrack.app" });
+    const assign = vi.fn();
+    vi.stubGlobal("location", { ...window.location, assign });
+    fireEvent.click(menu);
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await vi.waitFor(() => expect(assign).toHaveBeenCalledWith("/login?next=%2Fplatform"));
+    expect(calls.some((c) => c.method === "POST" && c.path === "/api/v1/auth/logout")).toBe(true);
+  });
+
+  it("finds an organisation by name to turn a flag on for", async () => {
+    window.history.pushState(null, "", "/platform/flags");
+    const flag = {
+      key: "new-calendar", description: "", enabled_globally: false, plan_keys: [],
+      rollout_percent: 0, overrides: [], updated_at: "2026-10-01T00:00:00Z",
+    }; // prettier-ignore
+    const calls = mockApi(
+      platform({
+        "GET /api/v1/platform/flags": { body: [flag] },
+        "PUT /api/v1/platform/flags/new-calendar/overrides": { body: flag },
+      }),
+    );
+    render(<App />);
+    const turnOn = await screen.findByRole("button", { name: "Turn on for organisation" });
+    expect(turnOn).toBeDisabled();
+    const field = screen.getByRole("combobox", { name: "Find an organisation" });
+    fireEvent.focus(field);
+    fireEvent.change(field, { target: { value: "bright" } });
+    const option = await screen.findByRole("option", { name: /Bright Minds/ });
+    expect(option).toHaveTextContent("brightminds");
+    fireEvent.keyDown(field, { key: "Enter" });
+    expect(field).toHaveValue("Bright Minds");
+    await vi.waitFor(() =>
+      expect(
+        calls.find(
+          (c) =>
+            c.method === "GET" &&
+            c.path === "/api/v1/platform/tenants" &&
+            c.search.includes("search=bright"),
+        ),
+      ).toBeTruthy(),
+    );
+    fireEvent.click(turnOn);
+    await vi.waitFor(() =>
+      expect(calls.find((c) => c.method === "PUT")?.body).toMatchObject({ organisation: "o1" }),
+    );
+  });
+
   it("replays a dead-lettered event", async () => {
     window.history.pushState(null, "", "/platform/operations");
     const calls = mockApi(

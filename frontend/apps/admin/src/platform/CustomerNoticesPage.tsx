@@ -17,6 +17,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
+import { OrganisationPicker, type OrganisationChoice } from "./OrganisationPicker";
 
 type Notice = components["schemas"]["CustomerNotice"];
 
@@ -35,7 +36,7 @@ export function CustomerNoticesPage() {
   });
   const [template, setTemplate] = useState("breach");
   const [variables, setVariables] = useState<Record<string, string>>({});
-  const [orgIds, setOrgIds] = useState("");
+  const [organisations, setOrganisations] = useState<OrganisationChoice[]>([]);
   const [draft, setDraft] = useState<Notice | null>(null);
   const chosen = templates.data?.find((row) => row.key === template);
 
@@ -46,10 +47,7 @@ export function CustomerNoticesPage() {
           body: {
             template,
             variables,
-            organisation_ids: orgIds
-              .split(/[\s,]+/)
-              .map((id) => id.trim())
-              .filter(Boolean),
+            organisation_ids: organisations.map((organisation) => organisation.id),
           },
         }),
       ),
@@ -66,6 +64,7 @@ export function CustomerNoticesPage() {
           onDone={() => {
             setDraft(null);
             setVariables({});
+            setOrganisations([]);
             void queryClient.invalidateQueries({ queryKey: ["platform", "customer-notices"] });
           }}
         />
@@ -92,13 +91,51 @@ export function CustomerNoticesPage() {
               onChange={(e) => setVariables({ ...variables, [name]: e.target.value })}
             />
           ))}
-          <TextField
-            label={t("customerNotices.organisations")}
-            hint={t("customerNotices.organisationsHint")}
-            className="font-mono"
-            value={orgIds}
-            onChange={(e) => setOrgIds(e.target.value)}
-          />
+          <div>
+            <OrganisationPicker
+              label={t("followUps.orgPicker.noticeLabel")}
+              hint={t("followUps.orgPicker.noticeHint")}
+              showLabel
+              multiple
+              value={null}
+              exclude={organisations.map((organisation) => organisation.id)}
+              onChange={(organisation) =>
+                organisation && setOrganisations([...organisations, organisation])
+              }
+            />
+            {organisations.length ? (
+              <ul
+                aria-label={t("followUps.orgPicker.chosen")}
+                className="mt-2 divide-y divide-rule rounded-lg border border-border"
+              >
+                {organisations.map((organisation) => (
+                  <li
+                    key={organisation.id}
+                    className="flex items-center justify-between gap-3 py-1.5 pr-1.5 pl-3"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium">{organisation.name}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {organisation.slug}
+                      </span>
+                    </span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="text-muted-foreground"
+                      aria-label={t("followUps.orgPicker.remove", { name: organisation.name })}
+                      onClick={() =>
+                        setOrganisations(organisations.filter((o) => o.id !== organisation.id))
+                      }
+                    >
+                      {t("platform.remove")}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
         </FormPanel>
       ) : null}
       <RuledPanel title={t("customerNotices.history")} flush>

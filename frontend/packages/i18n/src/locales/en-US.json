@@ -209,5 +209,14 @@
       "noScores": "No organizations have been scored yet.",
       "organisations": "Organizations"
     }
+  },
+  "followUps": {
+    "orgPicker": {
+      "label": "Find an organization",
+      "noMatches": "No organization matches “{{search}}”.",
+      "noticeLabel": "Organizations",
+      "noticeHint": "Leave empty to send to every open organization.",
+      "chosen": "Chosen organizations"
+    }
   }
 }
