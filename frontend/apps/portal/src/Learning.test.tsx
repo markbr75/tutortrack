@@ -45,7 +45,7 @@ describe("goals in the family portal", () => {
     window.history.pushState(null, "", "/portal/learning");
     const goal = {
       id: "g1", student: "s1", student_name: "Arjun Patel", title: "Grade 7 in Maths",
-      status: "in_progress", progress_percent: 50, achieved_at: null, created_at: "2026-09-01T00:00:00Z",
+      status: "active", progress_percent: 50, achieved_at: null, created_at: "2026-09-01T00:00:00Z",
       milestones: [
         { id: "m1", title: "Algebra", done: true },
         { id: "m2", title: "Geometry", done: false },
