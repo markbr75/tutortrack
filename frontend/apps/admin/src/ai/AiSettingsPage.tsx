@@ -1,9 +1,19 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  CheckboxField,
+  figureCell,
+  PageHeader,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  UnitField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api, usePermission } from "../api";
+import { SavedNote } from "../components/SavedNote";
 import { useAiStatus } from "./ai";
 import { AiError } from "./AiParts";
 
@@ -31,74 +41,77 @@ function FeatureRows({ canManage }: { canManage: boolean }) {
       void queryClient.invalidateQueries({ queryKey: ["ai", "status"] });
     },
   });
-  if (!features.data) return <Spinner label={t("grid.loading")} />;
   return (
-    <section aria-labelledby="ai-features" className="space-y-2">
-      <h2 id="ai-features" className="text-lg font-semibold">
-        {t("ai.settings.features")}
-      </h2>
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-left">
-            <th scope="col">{t("ai.settings.feature")}</th>
-            <th scope="col">{t("ai.settings.enabled")}</th>
-            <th scope="col">{t("ai.settings.tone")}</th>
-            <th scope="col">{t("ai.settings.language")}</th>
+    <RuledPanel flush titleId="ai-features" title={t("ai.settings.features")}>
+      <RuledTable
+        caption={t("ai.settings.features")}
+        loading={features.isPending}
+        loadingLabel={t("grid.loading")}
+        columns={[
+          { key: "feature", header: t("ai.settings.feature") },
+          { key: "on", header: t("ai.settings.enabled"), center: true, width: "w-20" },
+          { key: "tone", header: t("ai.settings.tone"), width: "w-52" },
+          { key: "language", header: t("ai.settings.language"), width: "w-52" },
+        ]}
+      >
+        {(features.data ?? []).map((row) => (
+          <tr key={row.feature}>
+            <th scope="row" className="min-w-44 py-2.5 text-left align-middle font-normal">
+              {row.title}
+            </th>
+            <td className="py-1.5 text-center align-middle">
+              <input
+                type="checkbox"
+                className="size-4 align-middle"
+                aria-label={t("ai.settings.turnOn", { feature: row.title })}
+                checked={row.enabled}
+                disabled={!canManage || update.isPending}
+                onChange={(e) => update.mutate({ feature: row.feature, enabled: e.target.checked })}
+              />
+            </td>
+            <td className="py-1.5 align-middle">
+              <SelectField
+                label={t("ai.settings.toneFor", { feature: row.title })}
+                hideLabel
+                size="sm"
+                value={row.tone}
+                disabled={!canManage}
+                onChange={(e) =>
+                  update.mutate({ feature: row.feature, tone: e.target.value as Tone })
+                }
+                options={[
+                  { value: "", label: t("ai.settings.inherit") },
+                  { value: "friendly", label: t("ai.settings.tones.friendly") },
+                  { value: "formal", label: t("ai.settings.tones.formal") },
+                ]}
+              />
+            </td>
+            <td className="py-1.5 align-middle">
+              <SelectField
+                label={t("ai.settings.languageFor", { feature: row.title })}
+                hideLabel
+                size="sm"
+                value={row.language}
+                disabled={!canManage}
+                onChange={(e) =>
+                  update.mutate({ feature: row.feature, language: e.target.value as Language })
+                }
+                options={[
+                  { value: "", label: t("ai.settings.inherit") },
+                  { value: "en-GB", label: t("ai.settings.languages.en-GB") },
+                  { value: "en-US", label: t("ai.settings.languages.en-US") },
+                ]}
+              />
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {features.data.map((row) => (
-            <tr key={row.feature} className="border-t border-border align-middle">
-              <th scope="row" className="py-2 pr-2 text-left font-normal">
-                {row.title}
-              </th>
-              <td>
-                <input
-                  type="checkbox"
-                  aria-label={t("ai.settings.turnOn", { feature: row.title })}
-                  checked={row.enabled}
-                  disabled={!canManage || update.isPending}
-                  onChange={(e) =>
-                    update.mutate({ feature: row.feature, enabled: e.target.checked })
-                  }
-                />
-              </td>
-              <td>
-                <SelectField
-                  label={t("ai.settings.toneFor", { feature: row.title })}
-                  value={row.tone}
-                  disabled={!canManage}
-                  onChange={(e) =>
-                    update.mutate({ feature: row.feature, tone: e.target.value as Tone })
-                  }
-                  options={[
-                    { value: "", label: t("ai.settings.inherit") },
-                    { value: "friendly", label: t("ai.settings.tones.friendly") },
-                    { value: "formal", label: t("ai.settings.tones.formal") },
-                  ]}
-                />
-              </td>
-              <td>
-                <SelectField
-                  label={t("ai.settings.languageFor", { feature: row.title })}
-                  value={row.language}
-                  disabled={!canManage}
-                  onChange={(e) =>
-                    update.mutate({ feature: row.feature, language: e.target.value as Language })
-                  }
-                  options={[
-                    { value: "", label: t("ai.settings.inherit") },
-                    { value: "en-GB", label: t("ai.settings.languages.en-GB") },
-                    { value: "en-US", label: t("ai.settings.languages.en-US") },
-                  ]}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <AiError error={update.error} />
-    </section>
+        ))}
+      </RuledTable>
+      {update.error ? (
+        <div className="px-5 py-4">
+          <AiError error={update.error} />
+        </div>
+      ) : null}
+    </RuledPanel>
   );
 }
 
@@ -123,49 +136,64 @@ function OrganisationDefaults({ canManage }: { canManage: boolean }) {
   const values = settings.data?.values as Record<string, unknown> | undefined;
   if (!values) return null;
   return (
-    <section aria-labelledby="ai-org" className="max-w-md space-y-3">
-      <h2 id="ai-org" className="text-lg font-semibold">
-        {t("ai.settings.org")}
-      </h2>
-      <SelectField
-        label={t("ai.settings.tone")}
-        value={String(values["ai.tone"])}
-        disabled={!canManage}
-        onChange={(e) => save.mutate({ "ai.tone": e.target.value })}
-        options={[
-          { value: "friendly", label: t("ai.settings.tones.friendly") },
-          { value: "formal", label: t("ai.settings.tones.formal") },
-        ]}
-      />
-      <SelectField
-        label={t("ai.settings.language")}
-        value={String(values["ai.spelling"])}
-        disabled={!canManage}
-        onChange={(e) => save.mutate({ "ai.spelling": e.target.value })}
-        options={[
-          { value: "en-GB", label: t("ai.settings.languages.en-GB") },
-          { value: "en-US", label: t("ai.settings.languages.en-US") },
-        ]}
-      />
-      <TextField
-        type="number"
-        min={0}
-        label={t("ai.settings.cap")}
-        defaultValue={String(values["ai.monthly_credit_cap"])}
-        disabled={!canManage}
-        onBlur={(e) => save.mutate({ "ai.monthly_credit_cap": Number(e.target.value) || 0 })}
-      />
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
+    <RuledPanel
+      flush
+      titleId="ai-org"
+      title={t("ai.settings.org")}
+      description={canManage ? t("designS9b.ai.autosave") : undefined}
+      footer={
+        save.isSuccess || save.isPending ? (
+          save.isPending ? (
+            <p className="text-muted-foreground">{t("designS9b.ai.saving")}</p>
+          ) : (
+            <SavedNote show />
+          )
+        ) : undefined
+      }
+    >
+      <div className="grid gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
+        <SelectField
+          label={t("ai.settings.tone")}
+          value={String(values["ai.tone"])}
+          disabled={!canManage}
+          onChange={(e) => save.mutate({ "ai.tone": e.target.value })}
+          options={[
+            { value: "friendly", label: t("ai.settings.tones.friendly") },
+            { value: "formal", label: t("ai.settings.tones.formal") },
+          ]}
+        />
+        <SelectField
+          label={t("ai.settings.language")}
+          value={String(values["ai.spelling"])}
+          disabled={!canManage}
+          onChange={(e) => save.mutate({ "ai.spelling": e.target.value })}
+          options={[
+            { value: "en-GB", label: t("ai.settings.languages.en-GB") },
+            { value: "en-US", label: t("ai.settings.languages.en-US") },
+          ]}
+        />
+        <UnitField
+          min={0}
+          label={t("ai.settings.cap")}
+          unit={t("designS9b.ai.credits")}
+          defaultValue={String(values["ai.monthly_credit_cap"])}
+          disabled={!canManage}
+          onBlur={(e) => save.mutate({ "ai.monthly_credit_cap": Number(e.target.value) || 0 })}
+        />
+        <CheckboxField
+          className="self-end pb-2.5"
+          label={t("ai.settings.autoClassify")}
           checked={Boolean(values["ai.inbox_auto_classify"])}
           disabled={!canManage}
           onChange={(e) => save.mutate({ "ai.inbox_auto_classify": e.target.checked })}
         />
-        {t("ai.settings.autoClassify")}
-      </label>
-      {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
-    </section>
+        {save.error ? (
+          <Alert tone="danger" className="sm:col-span-2">
+            {save.error.message}
+          </Alert>
+        ) : null}
+      </div>
+    </RuledPanel>
   );
 }
 
@@ -175,32 +203,55 @@ function Usage() {
     queryKey: ["ai", "usage"],
     queryFn: async () => unwrap(await api.GET("/api/v1/ai/usage")),
   });
+  const features = useQuery({
+    queryKey: ["ai", "features"],
+    queryFn: async () => unwrap(await api.GET("/api/v1/ai/features")),
+  });
   if (!usage.data) return null;
   const { totals, by_feature: byFeature, credits, feedback } = usage.data;
+  const titleOf = (feature: string) =>
+    features.data?.find((f) => f.feature === feature)?.title ?? feature;
   return (
-    <section aria-labelledby="ai-usage" className="space-y-2">
-      <h2 id="ai-usage" className="text-lg font-semibold">
-        {t("ai.settings.usage")}
-      </h2>
-      <p className="text-sm">
-        {t("ai.settings.totals", { requests: totals.requests ?? 0, credits: totals.credits ?? 0 })}
-        {" · "}
-        {credits.metered
-          ? t("ai.settings.balance", { balance: credits.balance ?? 0 })
-          : t("ai.settings.unmetered")}
-      </p>
-      <ul className="text-sm">
+    <RuledPanel
+      flush
+      titleId="ai-usage"
+      title={t("ai.settings.usage")}
+      description={
+        <span className="tabular-nums">
+          {t("ai.settings.totals", {
+            requests: totals.requests ?? 0,
+            credits: totals.credits ?? 0,
+          })}
+          {" · "}
+          {credits.metered
+            ? t("ai.settings.balance", { balance: credits.balance ?? 0 })
+            : t("ai.settings.unmetered")}
+        </span>
+      }
+      footer={
+        <p className="text-xs text-muted-foreground tabular-nums">
+          {t("ai.settings.feedback", { up: feedback.up ?? 0, down: feedback.down ?? 0 })}
+        </p>
+      }
+    >
+      <RuledTable
+        caption={t("designS9b.ai.byFeature")}
+        empty={byFeature.length ? undefined : t("designS9b.ai.noUsage")}
+        columns={[
+          { key: "feature", header: t("ai.settings.feature") },
+          { key: "requests", header: t("designS9b.ai.requests"), end: true, width: "w-28" },
+          { key: "credits", header: t("designS9b.ai.creditsHeading"), end: true, width: "w-28" },
+        ]}
+      >
         {byFeature.map((row) => (
-          <li key={row.feature}>
-            {row.feature}:{" "}
-            {t("ai.settings.totals", { requests: row.requests, credits: row.credits })}
-          </li>
+          <tr key={row.feature}>
+            <td>{titleOf(row.feature)}</td>
+            <td className={figureCell}>{row.requests}</td>
+            <td className={figureCell}>{row.credits}</td>
+          </tr>
         ))}
-      </ul>
-      <p className="text-xs text-muted-foreground">
-        {t("ai.settings.feedback", { up: feedback.up ?? 0, down: feedback.down ?? 0 })}
-      </p>
-    </section>
+      </RuledTable>
+    </RuledPanel>
   );
 }
 
@@ -212,15 +263,16 @@ export function AiSettingsPage() {
   const canManage = usePermission("ai.settings.manage");
   const canSeeUsage = usePermission("ai.usage.view");
   return (
-    <div className="max-w-4xl space-y-6">
-      <h1 className="text-2xl font-semibold">{t("ai.settings.title")}</h1>
-      <p className="text-sm text-muted-foreground">{t("ai.settings.privacy")}</p>
-      {status.data && !status.data.available ? (
-        <Alert tone="warning">{t("ai.settings.notAvailable")}</Alert>
-      ) : null}
-      <FeatureRows canManage={canManage} />
-      <OrganisationDefaults canManage={canManage} />
-      {canSeeUsage ? <Usage /> : null}
+    <div className="max-w-4xl">
+      <PageHeader title={t("ai.settings.title")} description={t("ai.settings.privacy")} />
+      <div className="space-y-6">
+        {status.data && !status.data.available ? (
+          <Alert tone="warning">{t("ai.settings.notAvailable")}</Alert>
+        ) : null}
+        <FeatureRows canManage={canManage} />
+        <OrganisationDefaults canManage={canManage} />
+        {canSeeUsage ? <Usage /> : null}
+      </div>
     </div>
   );
 }

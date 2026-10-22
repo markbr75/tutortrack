@@ -2,6 +2,7 @@ import { useTranslation } from "@tutortrack/i18n";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { CircleHelp } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { useMe } from "../api";
 import { routePattern, setOrganisationAllowsAnalytics, track } from "./analytics";
@@ -110,8 +111,14 @@ export function SuccessLayer() {
           initialTab={fromSupportLink || data?.support_unread ? "support" : "articles"}
         />
       ) : null}
-      {tour ? <Tour key={tour.key} tour={tour} onFinish={finishTour} /> : null}
-      {npsOpen && !tour ? <NpsPrompt onClose={() => setNpsOpen(false)} /> : null}
+      {/* Portalled to the body: the top bar's backdrop blur would otherwise become the
+          containing block of these fixed-position layers and pin them inside the bar. */}
+      {tour
+        ? createPortal(<Tour key={tour.key} tour={tour} onFinish={finishTour} />, document.body)
+        : null}
+      {npsOpen && !tour
+        ? createPortal(<NpsPrompt onClose={() => setNpsOpen(false)} />, document.body)
+        : null}
     </>
   );
 }

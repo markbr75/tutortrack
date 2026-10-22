@@ -492,7 +492,7 @@
           <li>Under <span class="ui">Invite someone</span>, enter the <span class="ui">Email</span>.</li>
           <li>Choose the <span class="ui">Role</span> (default Tutor). Only an owner can invite another owner.</li>
           <li>Select <span class="ui">Send invitation</span>. The link is valid for 7 days and opens on your subdomain; people who already have a TutorTrack account sign in with the invited email.</li>
-          <li>Manage open invitations under <span class="ui">Pending invitations</span>: <span class="ui">Resend</span> creates a new link (the old one stops working) and <span class="ui">Revoke</span> cancels it.</li>
+          <li>Manage open invitations under <span class="ui">Pending invitations</span> (the five most recent show; <span class="ui">Show all</span> lists the rest): <span class="ui">Resend</span> creates a new link (the old one stops working) and <span class="ui">Revoke</span> cancels it.</li>
         </ol>
         <p>Tutors, clients and students are usually invited from their records (see the
           <a href="user-guide.html">user guide</a>); the Team page is mostly for staff.</p>
@@ -562,8 +562,8 @@
 
         <h3 id="roles-custom">Custom roles</h3>
         <ol class="steps">
-          <li>Enter a <span class="ui">Role name</span> and choose what to <span class="ui">Start from</span> (Admin, Branch manager, Coordinator, Finance or Tutor), then select <span class="ui">Create role</span>.</li>
-          <li>In the matrix, set each permission to <span class="ui">No</span>, <span class="ui">Their own</span>, <span class="ui">Their branches</span> or <span class="ui">Everyone</span>, and select <span class="ui">Save changes</span>.</li>
+          <li>Under <span class="ui">New role</span>, enter a <span class="ui">Role name</span> and choose what to <span class="ui">Start from</span> (Admin, Branch manager, Coordinator, Finance or Tutor), then select <span class="ui">Create role</span>.</li>
+          <li>Choose the role under <span class="ui">Custom roles</span>. Its permissions are grouped by area, each saying how many are allowed (for example "2 of 4 allowed"); open an area to change it. Set each permission to <span class="ui">No</span>, <span class="ui">Their own</span>, <span class="ui">Their branches</span> or <span class="ui">Everyone</span>, and select <span class="ui">Save changes</span> at the foot of the list, which counts your unsaved changes. Areas you changed stay open. Hover a permission to see its code name (for example <code>people.client.view</code>).</li>
           <li>Under <span class="ui">Team members with this role</span>, tick the staff and tutors who should have it.</li>
         </ol>
         <ul>
@@ -613,7 +613,7 @@
         <ol class="steps">
           <li>Choose the <span class="ui">Protocol</span> and a <span class="ui">Sign-in button label</span>.</li>
           <li>Enter your <span class="ui">Email domains</span>, separated by commas (up to 20).</li>
-          <li>For SAML, copy the <span class="ui">Entity ID (audience)</span> and <span class="ui">Reply URL (ACS)</span> into your identity provider, then enter its entity ID, sign-in URL and signing certificate (PEM). For OpenID Connect, give the provider the callback URL shown, then enter the <span class="ui">Issuer URL</span>, <span class="ui">Client ID</span> and <span class="ui">Client secret</span>.</li>
+          <li>For SAML, copy the <span class="ui">Entity ID (audience)</span> and <span class="ui">Reply URL (ACS)</span> from the <span class="ui">Give your identity provider</span> panel below the form into your identity provider, then enter its entity ID, sign-in URL and signing certificate (PEM). For OpenID Connect, give the provider the <span class="ui">Redirect URL</span> shown in that panel, then enter the <span class="ui">Issuer URL</span>, <span class="ui">Client ID</span> and <span class="ui">Client secret</span>.</li>
           <li>Optionally tick <span class="ui">Add new people automatically</span> (new people join as Tutor unless you change the default role through the API) and <span class="ui">Require single sign-on for these domains (no passwords or email links)</span>.</li>
           <li>Tick <span class="ui">Turn on single sign-on</span> and select <span class="ui">Save</span>. Test with a second browser before you require it.</li>
         </ol>
@@ -639,8 +639,9 @@
           record and the field-level changes. It is append-only: nobody, including TutorTrack
           staff, can edit or delete entries. Needs <code>audit.view</code> (owner and admin).</p>
         <ul>
-          <li><strong>Filter</strong> by <span class="ui">Search</span> (record description), <span class="ui">Who</span> (email), <span class="ui">Action</span>, <span class="ui">From</span> and <span class="ui">To</span>, then <span class="ui">Apply</span>.</li>
-          <li><strong>Export</strong> with <span class="ui">Export CSV</span> (needs <code>audit.export</code>; up to 50,000 rows). Exports are audited too, and five exports by one person in an hour sends the owners a security alert.</li>
+          <li><strong>Filter</strong> by <span class="ui">Search</span> (record description), <span class="ui">Who</span> (email), <span class="ui">Action</span>, <span class="ui">From</span> and <span class="ui">To</span>, then <span class="ui">Apply</span>, in the filter row above the log.</li>
+          <li><strong>Reading an entry:</strong> each row shows the action with who made it and when beneath, the record (with its type) and the changes, one "field before → after" line each (the first six). On phones the record joins that line too.</li>
+          <li><strong>Export</strong> with <span class="ui">Export CSV</span> at the top right (needs <code>audit.export</code>; up to 50,000 rows). Exports are audited too, and five exports by one person in an hour sends the owners a security alert.</li>
           <li><strong>Sensitive values</strong> such as bank details are shown as <code>[REDACTED]</code>.</li>
           <li><strong>Reads</strong> of sensitive data are logged with the action <code>read</code>: tax IDs, login history, student sensitive data, tutor bank and tax details, payment files, background-check results, data-request exports, safeguarding cases, data exports, webhook secrets and lesson recordings.</li>
           <li>Safeguarding entries are only shown to Designated Safeguarding Leads.</li>
@@ -1457,7 +1458,8 @@
         </div>
         <p>A <span class="ui">legal hold</span> on a person (<span class="ui">Place a legal
           hold</span>, with a reason) blocks erasure and every retention purge for them until it is
-          released.</p>
+          released: select <span class="ui">Release</span> on its row, type why it can be released
+          in the field that opens there, and select <span class="ui">Release</span> again.</p>
         <p>When someone deletes their own TutorTrack account, their records in your organisation
           are erased straight away by default (financial records kept), or logged as an erasure
           request for you to review (<code>privacy.account_deletion</code>).</p>
@@ -1528,7 +1530,7 @@
         <h3 id="safeguarding-messages">Flagged messages and lone working</h3>
         <ul>
           <li><span class="ui">Flagged messages</span> lists messages caught by flagged words, personal contact details, messaging rules or children's privacy rules. <span class="ui">Dismiss</span> or <span class="ui">Raise a concern</span>.</li>
-          <li><span class="ui">Lone working</span> tracks tutors' check-ins at in-person lessons when it is on (off by default; for lessons at a client's home or all in-person lessons). After 30 minutes without a check-out an alert goes out, and 30 minutes later it escalates to the DSLs. <span class="ui">Confirm safe</span> records how you confirmed it.</li>
+          <li><span class="ui">Lone working</span> tracks tutors' check-ins at in-person lessons when it is on (off by default; for lessons at a client's home or all in-person lessons). After 30 minutes without a check-out an alert goes out, and 30 minutes later it escalates to the DSLs. <span class="ui">Confirm safe</span> opens a field in the row for how you confirmed the tutor is safe; an overdue visit is marked in red and counted at the top of the list.</li>
         </ul>
 
         <h3 id="safeguarding-settings">Safeguarding settings</h3>

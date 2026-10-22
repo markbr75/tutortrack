@@ -278,7 +278,7 @@ describe("custom roles (E03-T11)", () => {
       ),
     );
     render(<App />);
-    fireEvent.click(await screen.findByRole("button", { name: "Scheduler (0)" }));
+    fireEvent.click(await screen.findByRole("button", { name: /^Scheduler/ }));
     const scope = await screen.findByLabelText("Who Edit lessons applies to");
     expect(scope).toHaveValue("all");
     fireEvent.change(scope, { target: { value: "own" } });

@@ -89,7 +89,7 @@ export function AiThreadTools({ threadId }: { threadId: string }) {
   if (!enabled) return null;
   const current = classify.data ?? insight.data?.results[0];
   return (
-    <div className="space-y-2 rounded-md border border-violet-200 p-2 text-sm">
+    <div className="space-y-2 rounded-md border border-border bg-surface p-3 text-sm">
       <div className="flex flex-wrap items-center gap-2">
         <Button
           type="button"
@@ -110,7 +110,7 @@ export function AiThreadTools({ threadId }: { threadId: string }) {
           {t("ai.inbox.classify")}
         </Button>
         {current ? (
-          <span className="rounded bg-violet-100 px-1.5 py-0.5 text-xs font-medium text-violet-900">
+          <span className="text-xs text-muted-foreground tabular-nums">
             {t("ai.inbox.intent", {
               intent: t(`ai.inbox.intents.${current.intent}`),
               confidence: current.confidence,
@@ -167,7 +167,7 @@ export function AiEnquiryExtract({ onExtract }: { onExtract: (data: Extracted) =
         rows={3}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        className="w-full rounded-md border border-border bg-background p-2 text-sm"
+        className="w-full rounded-md border border-field bg-surface px-3 py-2 text-sm"
       />
       <div className="flex flex-wrap items-center gap-2">
         <Button
@@ -321,7 +321,9 @@ export function AiExplainToParent({
       <AiError error={rewrite.error} />
       {rewrite.data ? (
         <div aria-live="polite" className="space-y-1">
-          <p className="whitespace-pre-wrap rounded-md bg-muted p-2">{rewrite.data.text}</p>
+          <p className="rounded-md border border-border px-3 py-2 whitespace-pre-wrap">
+            {rewrite.data.text}
+          </p>
           <div className="flex flex-wrap items-center gap-2">
             <Button type="button" size="sm" onClick={() => onUse(rewrite.data.text)}>
               {t("ai.useDraft")}
@@ -342,16 +344,17 @@ export function AiJobAdvert() {
   const [chosen, setChosen] = useState<{ title: string; body: string } | null>(null);
   return (
     <section aria-label={t("ai.jobAd.title")} className="space-y-2 text-sm">
-      <h2 className="font-semibold">{t("ai.jobAd.title")}</h2>
+      <h2 className="text-base font-semibold">{t("ai.jobAd.title")}</h2>
       <AiContentHelper kind="job_ad" onUse={(d) => setChosen({ title: d.title, body: d.body })} />
       {chosen ? (
-        <div className="space-y-1 rounded-md border border-border p-2">
+        <div className="space-y-1 rounded-md border border-border px-3 py-2">
           <p className="font-medium">{chosen.title}</p>
           <p className="whitespace-pre-wrap">{chosen.body}</p>
           <Button
             type="button"
             size="sm"
             variant="ghost"
+            className="-ml-3"
             onClick={() => void navigator.clipboard?.writeText(`${chosen.title}\n\n${chosen.body}`)}
           >
             {t("ai.copy")}
@@ -390,7 +393,7 @@ export function AiMatchExplain({ jobId, tutorId }: { jobId: string; tutorId: str
         <div aria-live="polite" className="space-y-1">
           <p>{explain.data.explanation}</p>
           <p className="font-medium">{t("ai.matching.intro")}</p>
-          <p className="whitespace-pre-wrap rounded-md bg-muted p-2">
+          <p className="rounded-md border border-border px-3 py-2 whitespace-pre-wrap">
             {explain.data.intro_message}
           </p>
           <AiFeedback request={explain.data.request} />

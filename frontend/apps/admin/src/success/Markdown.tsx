@@ -21,7 +21,11 @@ function inline(text: string, keyPrefix: string): ReactNode[] {
       const safe = (href.startsWith("/") && !href.startsWith("//")) || href.startsWith("https://");
       out.push(
         safe ? (
-          <a key={key} href={href} className="underline">
+          <a
+            key={key}
+            href={href}
+            className="font-medium text-link underline-offset-2 hover:underline"
+          >
             {match[2]}
           </a>
         ) : (

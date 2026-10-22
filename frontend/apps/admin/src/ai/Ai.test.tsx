@@ -105,7 +105,7 @@ describe("command bar (FR-31-5)", () => {
     render(<App />);
     await screen.findByRole("button", { name: /Ask AI/ });
     fireEvent.keyDown(window, { key: "j", ctrlKey: true });
-    const dialog = await screen.findByRole("dialog", { name: "Command bar" });
+    const dialog = await screen.findByRole("dialog", { name: "Ask AI" });
     fireEvent.change(within(dialog).getByLabelText("What would you like to do?"), {
       target: { value: "Move Sam's Thursday maths to 5pm from next week" },
     });
@@ -154,7 +154,7 @@ describe("command bar (FR-31-5)", () => {
     );
     render(<App />);
     fireEvent.click(await screen.findByRole("button", { name: /Ask AI/ }));
-    const dialog = await screen.findByRole("dialog", { name: "Command bar" });
+    const dialog = await screen.findByRole("dialog", { name: "Ask AI" });
     fireEvent.change(within(dialog).getByLabelText("What would you like to do?"), {
       target: { value: "Find a GCSE chemistry tutor free Tuesday evenings near LS6" },
     });

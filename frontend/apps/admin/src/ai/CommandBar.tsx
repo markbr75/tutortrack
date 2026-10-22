@@ -44,7 +44,7 @@ function TutorSearch({ search }: { search: Search }) {
     t(`ai.modes.${search.mode}`),
   ].filter(Boolean);
   return (
-    <li className="space-y-1 rounded-md border border-border p-2 text-sm">
+    <li className="space-y-2 rounded-md border border-border px-3 py-2 text-sm">
       <p>{parts.join(" · ")}</p>
       <Button size="sm" variant="secondary" loading={run.isPending} onClick={() => run.mutate()}>
         {t("ai.command.runSearch")}
@@ -58,11 +58,11 @@ function TutorSearch({ search }: { search: Search }) {
                 <Link
                   to="/tutors/$tutorId"
                   params={{ tutorId: row.tutor.id }}
-                  className="underline"
+                  className="font-medium text-link underline-offset-2 hover:underline"
                 >
                   {row.tutor.name}
                 </Link>{" "}
-                <span className="text-muted-foreground">({row.score})</span>
+                <span className="text-muted-foreground tabular-nums">({row.score})</span>
               </li>
             ))}
           </ol>
@@ -130,17 +130,22 @@ export function CommandBar() {
       <dialog
         ref={dialogRef}
         aria-labelledby={titleId}
-        className="mt-24 w-full max-w-xl rounded-lg border border-border bg-background p-0 shadow-lg backdrop:bg-black/40"
+        className="mx-auto mt-24 w-[calc(100%-2rem)] max-w-xl rounded-xl border border-border bg-surface p-0 text-foreground shadow-[0_8px_24px_-8px_rgb(15_23_42/0.25)] backdrop:bg-black/40"
       >
-        <div className="space-y-3 p-4">
-          <div className="flex items-center justify-between">
-            <h2 id={titleId} className="font-semibold">
-              {t("ai.command.title")}
-            </h2>
-            <Button size="sm" variant="ghost" onClick={() => dialogRef.current?.close()}>
-              {t("ai.command.close")}
-            </Button>
-          </div>
+        <div className="flex items-center justify-between border-b border-border px-5 py-2.5">
+          <h2 id={titleId} className="text-base font-semibold">
+            {t("ai.command.open")}
+          </h2>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="-mr-3 text-muted-foreground"
+            onClick={() => dialogRef.current?.close()}
+          >
+            {t("ai.command.close")}
+          </Button>
+        </div>
+        <div className="space-y-3 px-5 py-4">
           <form
             className="flex gap-2"
             onSubmit={(e: FormEvent) => {
@@ -157,7 +162,7 @@ export function CommandBar() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder={t("ai.command.placeholder")}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+              className="h-10 w-full rounded-md border border-field bg-surface px-3 text-sm"
             />
             <Button type="submit" loading={command.isPending} disabled={!text.trim()}>
               {t("ai.command.run")}

@@ -6,21 +6,26 @@ import { cn } from "./cn";
  * A `<details>` section for secondary content ("Show as a table", dataset schemas): the
  * summary in link ink at 500 with a 14px chevron that turns a quarter when open, never the
  * browser's marker. `ruled` sets it off above and below with faint row rules when it stands
- * alone; inside a panel it takes the panel's 14×20 row inset (`inPanel`).
+ * alone; inside a panel it takes the panel's 14×20 row inset (`inPanel`). `open` opens it
+ * (a roles area with unsaved changes); `summaryClassName` lets a summary span its row.
  */
 export function Disclosure({
   summary,
   children,
   ruled = false,
   inPanel = false,
+  open,
   className,
+  summaryClassName,
   bodyClassName,
 }: {
   summary: ReactNode;
   children: ReactNode;
   ruled?: boolean;
   inPanel?: boolean;
+  open?: boolean;
   className?: string;
+  summaryClassName?: string;
   bodyClassName?: string;
 }) {
   return (
@@ -31,12 +36,18 @@ export function Disclosure({
         inPanel && "border-t border-border px-5 py-3.5",
         className,
       )}
+      open={open}
     >
-      <summary className="flex w-fit cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-link [&::-webkit-details-marker]:hidden">
+      <summary
+        className={cn(
+          "flex w-fit cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-link [&::-webkit-details-marker]:hidden",
+          summaryClassName,
+        )}
+      >
         <svg
           viewBox="0 0 24 24"
           aria-hidden="true"
-          className="size-3.5 shrink-0 transition-transform duration-150 group-open:rotate-90"
+          className="size-3.5 shrink-0 transition-transform duration-150 group-open:rotate-90 motion-reduce:transition-none"
           fill="none"
           stroke="currentColor"
           strokeWidth={1.75}
