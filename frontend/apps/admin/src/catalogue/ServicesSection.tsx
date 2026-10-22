@@ -135,7 +135,7 @@ export function ServicesSection() {
   const formRef = useRef<HTMLDivElement>(null);
   const isPhone = useIsPhone();
   const columns = [
-    { header: t("catalogue.name") },
+    { header: t("catalogue.name"), width: isPhone ? undefined : "min-w-48" },
     ...(isPhone ? [] : [{ header: t("catalogue.services.pricing") }]),
     ...(canSeeCharge ? [{ header: t("catalogue.services.charge"), end: true, width: "w-32" }] : []),
     ...(canSeePay && !isPhone

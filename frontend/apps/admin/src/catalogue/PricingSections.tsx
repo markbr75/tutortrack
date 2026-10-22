@@ -72,6 +72,11 @@ function money(amount: string, currency: string) {
 
 const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
 
+/** The first letter in upper case ("booked less than…" opens a sentence). */
+function capitalise(text: string): string {
+  return text ? text.charAt(0).toLocaleUpperCase() + text.slice(1) : text;
+}
+
 /** A file picker whose button matches a small secondary button. */
 const fileInput =
   "max-w-full text-sm text-muted-foreground file:mr-3 file:h-8 file:cursor-pointer file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted";
@@ -460,7 +465,7 @@ export function PremiumsSection() {
             }
             columns={[
               { header: t("catalogue.name") },
-              { header: t("pricing.premiums.when") },
+              { header: t("pricing.premiums.when"), width: "min-w-48" },
               { header: t("pricing.premiums.charge"), end: true, width: "w-28" },
               { header: t("pricing.premiums.pay"), end: true, width: "w-28" },
             ]}
@@ -469,18 +474,20 @@ export function PremiumsSection() {
               <tr key={rule.id}>
                 <td className="font-medium">{rule.name}</td>
                 <td>
-                  {[
-                    (rule.weekdays ?? []).map(dayName).join(" "),
-                    rule.time_from
-                      ? t("pricing.premiums.from", { time: rule.time_from.slice(0, 5) })
-                      : "",
-                    rule.public_holidays ? t("pricing.premiums.holidays") : "",
-                    rule.short_notice_hours
-                      ? t("pricing.premiums.notice", { hours: rule.short_notice_hours })
-                      : "",
-                  ]
-                    .filter(Boolean)
-                    .join(", ") || t("pricing.premiums.always")}
+                  {capitalise(
+                    [
+                      (rule.weekdays ?? []).map(dayName).join(" "),
+                      rule.time_from
+                        ? t("pricing.premiums.from", { time: rule.time_from.slice(0, 5) })
+                        : "",
+                      rule.public_holidays ? t("pricing.premiums.holidays") : "",
+                      rule.short_notice_hours
+                        ? t("pricing.premiums.notice", { hours: rule.short_notice_hours })
+                        : "",
+                    ]
+                      .filter(Boolean)
+                      .join(", ") || t("pricing.premiums.always"),
+                  )}
                 </td>
                 <td className={figureCell}>
                   {[
@@ -624,24 +631,22 @@ function HolidaysSection() {
           titleId="holidays-heading"
           title={t("pricing.holidays.title")}
           description={t("pricing.holidays.intro")}
-          footer={
-            canManage && list.length ? (
-              <div className="flex items-end gap-2">
-                <TextField
-                  label={t("pricing.holidays.year")}
-                  size="sm"
-                  type="number"
-                  className="w-24 text-right tabular-nums"
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                />
-                <p className="pb-2 text-xs text-muted-foreground">
-                  {t("designS6.catalogue.yearHint")}
-                </p>
-              </div>
-            ) : null
-          }
         >
+          {canManage && list.length ? (
+            // The year the Add buttons import, read before the buttons it drives.
+            <div className="flex items-center gap-3 border-b border-rule px-5 py-2.5">
+              <label htmlFor="holiday-year" className="text-sm font-medium">
+                {t("pricing.holidays.year")}
+              </label>
+              <input
+                id="holiday-year"
+                type="number"
+                className="h-9 w-24 rounded-md border border-field bg-surface px-3 text-right text-sm tabular-nums"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+              />
+            </div>
+          ) : null}
           {calendars.isPending ? (
             <PanelLoading label={t("grid.loading")} />
           ) : !list.length ? (

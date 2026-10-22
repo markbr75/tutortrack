@@ -20,7 +20,7 @@ import {
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { api, useOrganisation, usePermission } from "../api";
 import { PanelEmpty, PanelLoading } from "../billing/moneyUi";
@@ -717,6 +717,7 @@ function TermsSection() {
 
 function RolloverSection() {
   const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const queryClient = useQueryClient();
   const canRun = usePermission("courses.rollover.manage");
   const terms = useTerms();
@@ -778,54 +779,61 @@ function RolloverSection() {
           loadingLabel={t("grid.loading")}
           empty={rollovers.data && !rows.length ? t("designS6.courses.noRollovers") : undefined}
           columns={[
-            { header: t("courses.fromTo") },
-            { header: t("courses.deadline") },
+            { header: t("courses.fromTo"), width: isPhone ? undefined : "min-w-48" },
+            ...(isPhone ? [] : [{ header: t("courses.deadline") }]),
             { header: t("courses.statusLabel") },
-            { header: t("courses.answers") },
+            ...(isPhone ? [] : [{ header: t("courses.answers") }]),
             ...(canRun ? [{ header: t("common.actions"), hidden: true }] : []),
           ]}
         >
-          {rows.map((r) => (
-            <tr key={r.id}>
-              <td className="font-medium">
-                {t("designS6.courses.fromTo", { from: r.from_term_name, to: r.to_term_name })}
-              </td>
-              <td className="tabular-nums whitespace-nowrap">
-                {formatDateTime(r.deadline, i18n.language)}
-              </td>
-              <td className={r.status === "running" ? undefined : "text-muted-foreground"}>
-                {t(`courses.rolloverStatus.${r.status}`)}
-              </td>
-              <td className="tabular-nums">
-                {Object.entries(r.counts)
-                  .map(([k, n]) => `${t(`courses.offerStatus.${k}`)}: ${n}`)
-                  .join(", ")}
-              </td>
-              {canRun ? (
-                <td className="py-1.5 text-right whitespace-nowrap">
-                  {r.status === "running" ? (
-                    <span className="inline-flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => act.mutate({ id: r.id, action: "finalise" })}
-                      >
-                        {t("courses.finishNow")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-muted-foreground"
-                        onClick={() => act.mutate({ id: r.id, action: "cancel" })}
-                      >
-                        {t("courses.cancel")}
-                      </Button>
+          {rows.map((r) => {
+            const answers = Object.entries(r.counts)
+              .map(([k, n]) => `${t(`courses.offerStatus.${k}`)}: ${n}`)
+              .join(", ");
+            const deadline = formatDateTime(r.deadline, i18n.language);
+            return (
+              <tr key={r.id}>
+                <td className="font-medium">
+                  {t("designS6.courses.fromTo", { from: r.from_term_name, to: r.to_term_name })}
+                  {isPhone ? (
+                    <span className={`${caption} tabular-nums`}>
+                      {[deadline, answers].filter(Boolean).join(" · ")}
                     </span>
                   ) : null}
                 </td>
-              ) : null}
-            </tr>
-          ))}
+                {isPhone ? null : <td className="tabular-nums whitespace-nowrap">{deadline}</td>}
+                <td
+                  className={`${isPhone ? "" : "whitespace-nowrap"} ${r.status === "running" ? "" : "text-muted-foreground"}`}
+                >
+                  {t(`courses.rolloverStatus.${r.status}`)}
+                </td>
+                {isPhone ? null : <td className="tabular-nums">{answers}</td>}
+                {canRun ? (
+                  <td className="py-1.5 text-right whitespace-nowrap">
+                    {r.status === "running" ? (
+                      <span className={`inline-flex gap-2 ${isPhone ? "flex-col items-end" : ""}`}>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => act.mutate({ id: r.id, action: "finalise" })}
+                        >
+                          {t("courses.finishNow")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-muted-foreground"
+                          onClick={() => act.mutate({ id: r.id, action: "cancel" })}
+                        >
+                          {t("courses.cancel")}
+                        </Button>
+                      </span>
+                    ) : null}
+                  </td>
+                ) : null}
+              </tr>
+            );
+          })}
         </RuledTable>
         {act.error ? (
           <div className="border-t border-rule px-5 py-4">
@@ -945,6 +953,19 @@ export function ClassPage({ classId }: { classId: string }) {
   const place = c.room_name || c.location_name || (c.online ? t("designS6.courses.online") : "");
   const now = new Date();
   const firstAction = c.status !== "draft";
+  const sessionRows = sessions.data ?? [];
+  // The red NOW rule sits before the first session that has not ended yet (none after the last).
+  const nowIndex = sessionRows.findIndex((x) => new Date(x.end) > now);
+  const nowRule = (
+    <tr aria-hidden="true" className="border-t-2 border-margin">
+      <td
+        colSpan={isPhone ? 4 : 5}
+        className="py-1 text-xs font-semibold tracking-wider text-margin uppercase"
+      >
+        {t("home.register.now", { time: formatDate(now.toISOString(), i18n.language) })}
+      </td>
+    </tr>
+  );
 
   const main = (
     <>
@@ -992,10 +1013,8 @@ export function ClassPage({ classId }: { classId: string }) {
           loadingLabel={t("grid.loading")}
           empty={roster.data && !rosterRows.length ? t("courses.nobodyEnrolled") : undefined}
           columns={[
-            { header: t("courses.student") },
-            ...(isPhone
-              ? []
-              : [{ header: t("courses.statusLabel") }, { header: t("courses.dates") }]),
+            { header: t("courses.student"), width: isPhone ? undefined : "min-w-48" },
+            ...(isPhone ? [] : [{ header: t("courses.statusLabel") }]),
             ...(canEnrol ? [{ header: t("common.actions"), hidden: true }] : []),
           ]}
         >
@@ -1026,34 +1045,38 @@ export function ClassPage({ classId }: { classId: string }) {
             { header: t("courses.register"), hidden: true },
           ]}
         >
-          {(sessions.data ?? []).map((s) => {
+          {sessionRows.map((s, index) => {
             const kind = registerMarkFor(s.lesson_status, s.end, now);
             return (
-              <tr key={s.id}>
-                <td className={figureCell}>{s.number}</td>
-                <td className="tabular-nums whitespace-nowrap">
-                  {formatDateTime(s.start, i18n.language)}
-                </td>
-                {isPhone ? null : <td className={figureCell}>{s.attendees}</td>}
-                <td className="py-2">
-                  <RegisterMark kind={kind} label={t(MARK_LABEL[kind])} className="mx-auto" />
-                </td>
-                <td className="text-right">
-                  {s.lesson_status === "cancelled" ? (
-                    <span className="text-muted-foreground">{t("courses.cancelled")}</span>
-                  ) : (
-                    <Link
-                      to="/class-sessions/$sessionId/register"
-                      params={{ sessionId: s.id }}
-                      className={`${linkClass} text-link`}
-                    >
-                      {t("courses.register")}
-                    </Link>
-                  )}
-                </td>
-              </tr>
+              <Fragment key={s.id}>
+                {index === nowIndex ? nowRule : null}
+                <tr>
+                  <td className={figureCell}>{s.number}</td>
+                  <td className="tabular-nums whitespace-nowrap">
+                    {formatDateTime(s.start, i18n.language)}
+                  </td>
+                  {isPhone ? null : <td className={figureCell}>{s.attendees}</td>}
+                  <td className="py-2">
+                    <RegisterMark kind={kind} label={t(MARK_LABEL[kind])} className="mx-auto" />
+                  </td>
+                  <td className="text-right">
+                    {s.lesson_status === "cancelled" ? (
+                      <span className="text-muted-foreground">{t("courses.cancelled")}</span>
+                    ) : (
+                      <Link
+                        to="/class-sessions/$sessionId/register"
+                        params={{ sessionId: s.id }}
+                        className={`${linkClass} text-link`}
+                      >
+                        {t("courses.register")}
+                      </Link>
+                    )}
+                  </td>
+                </tr>
+              </Fragment>
             );
           })}
+          {nowIndex === -1 && sessionRows.length ? nowRule : null}
         </RuledTable>
       </RuledPanel>
     </>
@@ -1236,19 +1259,18 @@ function RosterLine({
       <td>
         <span className="font-medium">{row.student_name}</span>
         <span className={`${caption} tabular-nums`}>
-          {isPhone ? [status, dates].join(" · ") : row.client_name}
+          {(isPhone ? [status, dates] : [row.client_name, dates]).join(" · ")}
         </span>
       </td>
       {isPhone ? null : (
         <>
           <td
-            className={
-              attending || row.status === "pending_payment" ? undefined : "text-muted-foreground"
-            }
+            className={`whitespace-nowrap ${
+              attending || row.status === "pending_payment" ? "" : "text-muted-foreground"
+            }`}
           >
             {status}
           </td>
-          <td className="tabular-nums">{dates}</td>
         </>
       )}
       {canEnrol ? (
@@ -1469,6 +1491,7 @@ function EnrolForm({ groupClass, onDone }: { groupClass: GroupClass; onDone: () 
 /** The class register: everyone at once, with absence reasons (FR-20-6). */
 export function RegisterPage({ sessionId }: { sessionId: string }) {
   const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const queryClient = useQueryClient();
   const register = useQuery({
     queryKey: ["courses", "register", sessionId],
@@ -1563,57 +1586,103 @@ export function RegisterPage({ sessionId }: { sessionId: string }) {
             <RuledTable
               caption={t("courses.register")}
               columns={[
-                { header: t("courses.student") },
-                { header: t("designS6.courses.attendance"), width: "w-56" },
-                { header: t("designS6.courses.absenceReason") },
+                { header: t("courses.student"), width: isPhone ? undefined : "min-w-48" },
+                {
+                  header: t("designS6.courses.mark"),
+                  center: true,
+                  width: isPhone ? "w-14" : "w-20",
+                },
+                ...(isPhone
+                  ? []
+                  : [
+                      { header: t("designS6.courses.attendance"), width: "w-56" },
+                      { header: t("designS6.courses.absenceReason") },
+                    ]),
               ]}
             >
               {register.data.rows.map((r) => {
-                const current = rows[r.student] ?? {
+                const changed = rows[r.student];
+                const current = changed ?? {
                   outcome: r.outcome,
                   reason: r.absence_reason ?? "",
                 };
                 const absent = !["present", "late"].includes(current.outcome);
-                return (
+                const kind: RegisterMarkKind =
+                  !changed && status === "planned"
+                    ? registerMarkFor("planned", s?.end ?? new Date().toISOString())
+                    : current.outcome === "present" || current.outcome === "late"
+                      ? "completed"
+                      : current.outcome.startsWith("cancelled")
+                        ? "cancelled"
+                        : "missed";
+                const reasonField = absent ? (
+                  <TextField
+                    label={t("courses.absenceReasonFor", { student: r.student_name })}
+                    hideLabel
+                    size="sm"
+                    placeholder={isPhone ? t("designS6.courses.absenceReason") : undefined}
+                    value={current.reason}
+                    onChange={(e) =>
+                      setRows({
+                        ...rows,
+                        [r.student]: { ...current, reason: e.target.value },
+                      })
+                    }
+                  />
+                ) : null;
+                const select = (
+                  <SelectField
+                    label={t("courses.outcomeFor", { student: r.student_name })}
+                    hideLabel
+                    size="sm"
+                    value={current.outcome}
+                    onChange={(e) =>
+                      setRows({
+                        ...rows,
+                        [r.student]: { ...current, outcome: e.target.value as Outcome },
+                      })
+                    }
+                    options={OUTCOMES.map((o) => ({
+                      value: o,
+                      label: t(`courses.outcomes.${o}`),
+                    }))}
+                  />
+                );
+                const name = (
+                  <>
+                    <span className="font-medium">{r.student_name}</span>
+                    {r.makeup ? <span className={caption}>{t("courses.makeup")}</span> : null}
+                  </>
+                );
+                const mark = (
+                  <td className="py-3">
+                    <RegisterMark
+                      kind={kind}
+                      label={
+                        kind === "due" || kind === "upcoming"
+                          ? t(MARK_LABEL[kind])
+                          : t(`courses.outcomes.${current.outcome}`)
+                      }
+                      className="mx-auto"
+                    />
+                  </td>
+                );
+                // On phones the controls stack under the name, so each select has the row's width.
+                return isPhone ? (
                   <tr key={r.student}>
-                    <td className="py-3">
-                      <span className="font-medium">{r.student_name}</span>
-                      {r.makeup ? <span className={caption}>{t("courses.makeup")}</span> : null}
+                    <td className="space-y-2 py-3">
+                      <div>{name}</div>
+                      {select}
+                      {reasonField}
                     </td>
-                    <td className="py-1.5">
-                      <SelectField
-                        label={t("courses.outcomeFor", { student: r.student_name })}
-                        hideLabel
-                        size="sm"
-                        value={current.outcome}
-                        onChange={(e) =>
-                          setRows({
-                            ...rows,
-                            [r.student]: { ...current, outcome: e.target.value as Outcome },
-                          })
-                        }
-                        options={OUTCOMES.map((o) => ({
-                          value: o,
-                          label: t(`courses.outcomes.${o}`),
-                        }))}
-                      />
-                    </td>
-                    <td className="py-1.5">
-                      {absent ? (
-                        <TextField
-                          label={t("courses.absenceReasonFor", { student: r.student_name })}
-                          hideLabel
-                          size="sm"
-                          value={current.reason}
-                          onChange={(e) =>
-                            setRows({
-                              ...rows,
-                              [r.student]: { ...current, reason: e.target.value },
-                            })
-                          }
-                        />
-                      ) : null}
-                    </td>
+                    {mark}
+                  </tr>
+                ) : (
+                  <tr key={r.student}>
+                    <td className="py-3">{name}</td>
+                    {mark}
+                    <td className="py-1.5">{select}</td>
+                    <td className="py-1.5">{reasonField}</td>
                   </tr>
                 );
               })}
@@ -1690,7 +1759,9 @@ export function ReEnrolPage({ token }: { token: string }) {
           </p>
           <p className="text-sm text-muted-foreground tabular-nums">
             {p.mode === "opt_out" ? t("courses.reEnrol.optOut") : t("courses.reEnrol.confirm")}{" "}
-            {t("courses.reEnrol.deadline", { date: formatDateTime(p.deadline, i18n.language) })}
+            {t(p.mode === "opt_out" ? "courses.reEnrol.deadline" : "designS6.courses.answerBy", {
+              date: formatDateTime(p.deadline, i18n.language),
+            })}
           </p>
         </div>
         <div className="border-y border-border py-3">

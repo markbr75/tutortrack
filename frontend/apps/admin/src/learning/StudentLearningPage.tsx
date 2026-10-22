@@ -135,8 +135,12 @@ export function StudentLearningPage({ studentId }: { studentId: string }) {
         description={
           stats.data
             ? stats.data.completion_rate
-              ? t("learning.homework.rate", {
-                  rate: stats.data.completion_rate,
+              ? t("designS6.learning.rate", {
+                  rate: new Intl.NumberFormat(i18n.language, {
+                    style: "percent",
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  }).format(Number(stats.data.completion_rate) / 100),
                   due: stats.data.due,
                   overdue: stats.data.overdue,
                 })

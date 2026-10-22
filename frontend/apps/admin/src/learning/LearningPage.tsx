@@ -4,6 +4,7 @@ import {
   Alert,
   Button,
   buttonClass,
+  PanelFooter,
   figureCell,
   NamePlate,
   PageHeader,
@@ -147,7 +148,7 @@ function HomeworkSection() {
         ) : (
           <PanelRows>
             {waiting.map((a) => (
-              <PanelRow key={a.id} className="py-4">
+              <PanelRow key={a.id} className="p-0">
                 <ReviewCard assignment={a} />
               </PanelRow>
             ))}
@@ -181,12 +182,19 @@ function HomeworkSection() {
               </td>
             )}
             <td className="tabular-nums">
-              {t("learning.homework.counts", {
+              {t("designS6.learning.counts", {
                 submitted: h.counts.submitted,
                 completed: h.counts.completed,
                 total: h.counts.total,
-                overdue: h.counts.overdue,
               })}
+              {h.counts.overdue ? (
+                <>
+                  {" "}
+                  <span className="font-semibold text-margin">
+                    {t("designS6.learning.overdue", { count: h.counts.overdue })}
+                  </span>
+                </>
+              ) : null}
             </td>
             {isPhone ? null : <td>{h.set_by_name}</td>}
           </tr>
@@ -214,59 +222,57 @@ export function ReviewCard({ assignment }: { assignment: Assignment }) {
   });
   const latest = assignment.submissions[assignment.submissions.length - 1];
   return (
-    <article
-      aria-label={`${assignment.homework_title} – ${assignment.student_name}`}
-      className="space-y-3"
-    >
-      <NamePlate
-        name={`${assignment.homework_title} · ${assignment.student_name}`}
-        context={
-          latest ? (
-            <span className="tabular-nums">
-              {t("learning.homework.handedIn", {
-                when: formatDateTime(latest.created_at, i18n.language),
-              })}
-              {latest.is_late ? ` · ${t("learning.homework.late")}` : ""}
-            </span>
-          ) : null
-        }
-      />
-      {latest ? (
-        <div className="space-y-1 text-sm">
-          {latest.body ? <p className="whitespace-pre-wrap">{latest.body}</p> : null}
-          {latest.link ? (
-            <a
-              className="break-all text-link underline-offset-2 hover:underline"
-              href={latest.link}
-              rel="noreferrer noopener"
-              target="_blank"
-            >
-              {latest.link}
-            </a>
-          ) : null}
-          {latest.files.map((f) => (
-            <p key={f.id}>{f.filename}</p>
-          ))}
+    <article aria-label={`${assignment.homework_title} – ${assignment.student_name}`}>
+      <div className="space-y-3 px-5 py-4">
+        <NamePlate
+          name={`${assignment.homework_title} · ${assignment.student_name}`}
+          context={
+            latest ? (
+              <span className="tabular-nums">
+                {t("learning.homework.handedIn", {
+                  when: formatDateTime(latest.created_at, i18n.language),
+                })}
+                {latest.is_late ? ` · ${t("learning.homework.late")}` : ""}
+              </span>
+            ) : null
+          }
+        />
+        {latest ? (
+          <div className="space-y-1 text-sm">
+            {latest.body ? <p className="whitespace-pre-wrap">{latest.body}</p> : null}
+            {latest.link ? (
+              <a
+                className="break-all text-link underline-offset-2 hover:underline"
+                href={latest.link}
+                rel="noreferrer noopener"
+                target="_blank"
+              >
+                {latest.link}
+              </a>
+            ) : null}
+            {latest.files.map((f) => (
+              <p key={f.id}>{f.filename}</p>
+            ))}
+          </div>
+        ) : null}
+        <div className="grid max-w-2xl gap-x-4 gap-y-3 sm:grid-cols-3">
+          <TextField
+            label={t("learning.homework.grade")}
+            value={grade}
+            onChange={(e) => setGrade(e.target.value)}
+          />
+          <TextArea
+            label={t("learning.homework.feedback")}
+            value={feedback}
+            onChange={setFeedback}
+            rows={2}
+          />
         </div>
-      ) : null}
-      <div className="grid max-w-2xl gap-x-4 gap-y-3 sm:grid-cols-3">
-        <TextField
-          label={t("learning.homework.grade")}
-          value={grade}
-          onChange={(e) => setGrade(e.target.value)}
-        />
-        <TextArea
-          label={t("learning.homework.feedback")}
-          value={feedback}
-          onChange={setFeedback}
-          rows={2}
-        />
+        {review.error ? <Alert tone="danger">{review.error.message}</Alert> : null}
       </div>
-      {review.error ? <Alert tone="danger">{review.error.message}</Alert> : null}
-      <div className="flex flex-wrap gap-2">
+      <PanelFooter>
         <Button
           type="button"
-          size="sm"
           variant="secondary"
           disabled={review.isPending}
           onClick={() => review.mutate("resubmit")}
@@ -275,14 +281,13 @@ export function ReviewCard({ assignment }: { assignment: Assignment }) {
         </Button>
         <Button
           type="button"
-          size="sm"
           loading={review.isPending && review.variables === "complete"}
           disabled={review.isPending}
           onClick={() => review.mutate("complete")}
         >
           {t("learning.homework.markComplete")}
         </Button>
-      </div>
+      </PanelFooter>
     </article>
   );
 }
@@ -1189,15 +1194,12 @@ function ProgressSection() {
         </FormCard>
       ) : null}
       {canSchedule ? (
-        <RuledPanel
-          titleId="progress-schedule"
-          title={t("g5c.progressSchedule.title")}
-          description={t("g5c.progressSchedule.intro")}
-        >
+        <RuledPanel flush titleId="progress-schedule" title={t("g5c.progressSchedule.title")}>
           <KeyedSettings
             area="learning"
             keys={["learning.progress_schedule"]}
             label={t("g5c.progressSchedule.title")}
+            inPanel
           />
         </RuledPanel>
       ) : null}
@@ -1379,13 +1381,16 @@ export function ProgressEditor({ report }: { report: ProgressReport }) {
             finalText={summary}
           />
         ) : null}
-        {editable ? (
-          <AiExplainToParent text={summary} student={report.student} onUse={setSummary} />
-        ) : null}
         {save.error || act.error || draft.error ? (
           <Alert tone="danger">{(save.error ?? act.error ?? draft.error)?.message}</Alert>
         ) : null}
       </div>
+      {editable ? (
+        // The explain-to-parent helper is its own ruled row; it renders nothing when AI is off.
+        <div className="border-t border-rule px-5 py-3.5 empty:hidden">
+          <AiExplainToParent text={summary} student={report.student} onUse={setSummary} />
+        </div>
+      ) : null}
     </RuledPanel>
   );
 }

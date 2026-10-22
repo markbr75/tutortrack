@@ -7493,7 +7493,6 @@
       "noRooms": "No rooms yet. Add one below.",
       "noTiers": "No pay tiers yet. Add a tier below, then set its pay for each service here.",
       "noPremiums": "No premiums yet. Add one below.",
-      "yearHint": "The year the Add buttons import.",
       "noCalendars": "No holiday calendars yet. Add one below.",
       "holidayCount_one": "{{count}} holiday",
       "holidayCount_other": "{{count}} holidays",
@@ -7526,14 +7525,19 @@
       "nobodyWaiting": "Nobody is waiting.",
       "withdraw": "Withdraw",
       "attendance": "Attendance",
-      "absenceReason": "Reason for absence"
+      "absenceReason": "Reason for absence",
+      "answerBy": "Answer by {{date}}."
     },
     "learning": {
       "findResources": "Find resources",
       "install": "Install",
       "nothingOnLoan": "Nothing is on loan.",
       "progressDone": "{{percent}}% done",
-      "milestonesDone": "{{done}} of {{total}} milestones"
+      "milestonesDone": "{{done}} of {{total}} milestones",
+      "counts": "{{submitted}} handed in, {{completed}} marked of {{total}}",
+      "overdue_one": "({{count}} overdue)",
+      "overdue_other": "({{count}} overdue)",
+      "rate": "Homework handed in on time: {{rate}} of {{due}} due ({{overdue}} overdue)."
     }
   }
 }

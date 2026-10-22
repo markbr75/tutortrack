@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { cn } from "./cn";
 import { MASTERY_LEVELS, type MasteryLevel } from "./masteryLevels";
@@ -21,7 +21,8 @@ export interface TrendChartLabels {
   empty: string;
 }
 
-const W = 600;
+/** The drawing width follows the container (up to 672px), so 12px labels stay 12px on phones. */
+const MAX_W = 672;
 const H = 220;
 const PAD = { top: 12, right: 16, bottom: 28, left: 40 };
 const TICKS = [0, 25, 50, 75, 100];
@@ -42,7 +43,28 @@ export function TrendChart({
 }) {
   const titleId = useId();
   const [active, setActive] = useState<number | null>(null);
-  if (!points.length) return <p className="text-sm text-muted-foreground">{labels.empty}</p>;
+  const box = useRef<HTMLDivElement>(null);
+  const hasPoints = points.length > 0;
+  const [W, setW] = useState(320);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const measure = () => {
+      const width = Math.round(el.getBoundingClientRect().width);
+      if (width > 0) setW(Math.min(Math.max(width, 240), MAX_W));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasPoints]);
+  if (!points.length) {
+    return (
+      <div ref={box}>
+        <p className="text-sm text-muted-foreground">{labels.empty}</p>
+      </div>
+    );
+  }
   const innerW = W - PAD.left - PAD.right;
   const innerH = H - PAD.top - PAD.bottom;
   const times = points.map((p) => new Date(p.date).getTime());
@@ -60,10 +82,12 @@ export function TrendChart({
       <figcaption id={titleId} className={hideTitle ? "sr-only" : "text-sm font-semibold"}>
         {labels.title}
       </figcaption>
-      <div className="relative">
+      <div ref={box} className="relative max-w-2xl overflow-hidden">
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          className="h-auto w-full max-w-2xl"
+          width={W}
+          height={H}
+          className="block"
           role="img"
           aria-labelledby={titleId}
         >
