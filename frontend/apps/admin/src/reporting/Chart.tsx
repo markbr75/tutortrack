@@ -1,10 +1,11 @@
 import { useTranslation } from "@tutortrack/i18n";
+import { cn, Disclosure, figureCell, RuledTable } from "@tutortrack/ui";
+import type { ReactNode } from "react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
-  Legend,
   Line,
   LineChart,
   Pie,
@@ -15,8 +16,66 @@ import {
   YAxis,
 } from "recharts";
 
-/** Colour-blind-safe palette (Okabe-Ito), distinguishable in light and dark themes. */
-const PALETTE = ["#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00"];
+import { useIsPhone } from "../billing/useIsPhone";
+
+/**
+ * Charts draw in link ink, never the tenant colour (the Tenant Fills, the Register Inks
+ * Rule). Series are told apart by strength and, for lines, by dash, so colour is never the
+ * only cue; a legend names them and the numbers are always available as a table.
+ */
+const STRENGTH = [1, 0.7, 0.45, 0.26, 0.12];
+/**
+ * Filled marks (bars, pie slices) take tokens that all keep 3:1 or better against the clean
+ * leaf in both schemes: link ink, ink, faded ink and the field edge. Series whose meaning has
+ * a register colour keep it (One Red: overdue and missed in margin red). Ageing buckets run
+ * from link ink (not yet due) into margin red at 40%, 60%, 80% and full strength, so older
+ * debt reads stronger; the two lightest steps are outlined in full margin red so each mark
+ * still keeps 3:1 against the leaf.
+ */
+interface Fill {
+  fill: string;
+  opacity?: number;
+  /** A 1px outline in the full colour, for a fill too pale to hold 3:1 on its own. */
+  outline?: boolean;
+}
+const LINK = "hsl(var(--tt-link))";
+const MARGIN = "hsl(var(--tt-margin))";
+const FILLS: Fill[] = [
+  { fill: LINK },
+  { fill: "hsl(var(--tt-foreground))" },
+  { fill: "hsl(var(--tt-muted-foreground))" },
+  { fill: "hsl(var(--tt-field))" },
+];
+const SERIES_FILLS: Record<string, Fill> = {
+  // Aged debtors.
+  current: { fill: LINK },
+  "1_30": { fill: MARGIN, opacity: 0.4, outline: true },
+  "31_60": { fill: MARGIN, opacity: 0.6, outline: true },
+  "61_90": { fill: MARGIN, opacity: 0.8 },
+  "90_plus": { fill: MARGIN },
+  // Lessons by status, as the register marks them.
+  completed: { fill: "hsl(var(--tt-foreground))" },
+  cancelled: { fill: "hsl(var(--tt-field))" },
+  missed: { fill: MARGIN },
+  // Lesson report deadlines.
+  on_time: { fill: LINK },
+  late: { fill: "hsl(var(--tt-muted-foreground))" },
+  outstanding: { fill: MARGIN },
+};
+
+/** The fill of series `key` at position `index` (or of pie slice `index`). */
+function fillOf(key: string | undefined, index: number): Fill {
+  return (key && SERIES_FILLS[key]) || FILLS[index % FILLS.length] || FILLS[0]!;
+}
+
+const DASH = [undefined, "6 4", "2 3", "8 3 2 3", "1 4"];
+/** Axis text, grid and cursor take the register's tokens through CSS (it beats SVG attributes). */
+const SKIN = cn(
+  "text-link",
+  "[&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-axis-tick_text]:text-xs",
+  "[&_.recharts-cartesian-grid_line]:stroke-rule",
+  "[&_.recharts-text]:tabular-nums",
+);
 
 export interface ChartSeries {
   key: string;
@@ -28,18 +87,132 @@ export interface ChartProps {
   /** One object per category: `{x: "Nia", net: 40}`. */
   data: Array<Record<string, string | number>>;
   series: ChartSeries[];
-  /** Accessible name; the data is also given as a table for screen readers. */
+  /** Accessible name of the figure. */
   label: string;
   xLabel: string;
   stacked?: boolean;
   height?: number;
-  /** Also give the data as a hidden table (off when a visible table follows). */
+  /** Offer the numbers as a table under a "Show as a table" disclosure (off when a visible
+   * table of the same data follows the chart). */
   srTable?: boolean;
+  /** Writes a value for the tooltip, the table and the axis (money with its currency). */
+  formatValue?: (value: number, seriesKey: string, row: Record<string, string | number>) => string;
+}
+
+function strength(i: number): number {
+  return STRENGTH[i % STRENGTH.length] ?? 1;
+}
+
+function Swatch({
+  kind,
+  index,
+  seriesKey,
+}: {
+  kind: ChartProps["kind"];
+  index: number;
+  seriesKey?: string;
+}) {
+  if (kind === "line") {
+    return (
+      <svg width="20" height="8" aria-hidden="true" className="shrink-0 text-link">
+        <line
+          x1="0"
+          x2="20"
+          y1="4"
+          y2="4"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeDasharray={DASH[index % DASH.length]}
+          strokeOpacity={index >= DASH.length ? strength(index) : 1}
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg width="10" height="10" aria-hidden="true" className="shrink-0 text-link">
+      <rect
+        x="0.5"
+        y="0.5"
+        width="9"
+        height="9"
+        rx="2"
+        fill={fillOf(seriesKey, index).fill}
+        fillOpacity={fillOf(seriesKey, index).opacity ?? 1}
+        stroke={fillOf(seriesKey, index).outline ? fillOf(seriesKey, index).fill : "none"}
+      />
+    </svg>
+  );
+}
+
+function Legend({ items }: { items: Array<{ key: string; label: ReactNode; swatch: ReactNode }> }) {
+  return (
+    <ul aria-hidden="true" className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+      {items.map((item) => (
+        <li key={item.key} className="flex items-center gap-1.5">
+          {item.swatch}
+          {item.label}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** A category label beside a bar that runs across: one line, shortened with an ellipsis. */
+function CategoryTick({
+  x,
+  y,
+  payload,
+}: {
+  x?: number;
+  y?: number;
+  payload?: { value?: string | number };
+}) {
+  const full = String(payload?.value ?? "");
+  const short = full.length > 15 ? `${full.slice(0, 14)}…` : full;
+  return (
+    <text x={x} y={y} dy={4} textAnchor="end">
+      <title>{full}</title>
+      {short}
+    </text>
+  );
+}
+
+/** The tooltip: a small clean leaf with a register-rule edge and no shadow. */
+function Tip({
+  active,
+  payload,
+  label,
+  format,
+}: {
+  active?: boolean;
+  payload?: Array<{
+    name?: string;
+    value?: number | string;
+    dataKey?: string | number;
+    payload?: Record<string, string | number>;
+  }>;
+  label?: string | number;
+  format: (value: number, key: string, row: Record<string, string | number>) => string;
+}) {
+  if (!active || !payload?.length) return null;
+  const row = payload[0]?.payload ?? {};
+  return (
+    <div className="rounded-md border border-border bg-surface px-2 py-1 text-xs text-foreground">
+      <p className="font-medium">{label ?? row.x}</p>
+      {payload.map((p) => (
+        <p key={String(p.dataKey ?? p.name)} className="tabular-nums">
+          {payload.length > 1 || p.name !== undefined ? `${p.name}: ` : ""}
+          {format(Number(p.value ?? 0), String(p.dataKey ?? ""), p.payload ?? row)}
+        </p>
+      ))}
+    </div>
+  );
 }
 
 /**
- * A chart with a screen-reader table of the same data (WCAG 1.1.1): the drawing is
- * decorative to assistive technology, the table carries the numbers.
+ * A chart of report figures. The drawing takes its width from its container, so its 12px
+ * text stays 12px on phones; the drawing itself is hidden from assistive technology, and the
+ * same numbers are a table (under "Show as a table", or the report's own table).
  */
 export function Chart({
   kind,
@@ -50,57 +223,145 @@ export function Chart({
   stacked,
   height = 240,
   srTable = true,
+  formatValue,
 }: ChartProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const phone = useIsPhone();
   // jsdom (tests) has no ResizeObserver; the table still renders.
   const canDraw = typeof window !== "undefined" && "ResizeObserver" in window;
+  const plain = new Intl.NumberFormat(i18n.language || "en-GB");
+  const compact = new Intl.NumberFormat(i18n.language || "en-GB", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  });
+  const format = formatValue ?? ((value: number) => plain.format(value));
+  const across = kind === "bar" && phone;
+  const tip = (props: object) => <Tip {...(props as Parameters<typeof Tip>[0])} format={format} />;
+  const axis = { axisLine: false, tickLine: false, tickMargin: 6 } as const;
+  const legendItems =
+    kind === "pie"
+      ? data.map((row, i) => ({
+          key: `${row.x}-${i}`,
+          label: String(row.x),
+          swatch: <Swatch kind="pie" index={i} />,
+        }))
+      : series.length > 1
+        ? series.map((s, i) => ({
+            key: s.key,
+            label: s.label,
+            swatch: <Swatch kind={kind} index={i} seriesKey={s.key} />,
+          }))
+        : [];
   return (
-    <figure className="space-y-2" aria-label={label}>
+    <figure className="min-w-0 space-y-3" aria-label={label}>
       {canDraw && data.length > 0 ? (
-        <div aria-hidden="true" style={{ height }}>
+        <div
+          aria-hidden="true"
+          className={SKIN}
+          style={{ height: across ? Math.max(120, data.length * 36 + 32) : height }}
+        >
           <ResponsiveContainer width="100%" height="100%">
             {kind === "pie" ? (
               <PieChart>
-                <Pie data={data} dataKey={series[0]?.key ?? "value"} nameKey="x" outerRadius="80%">
+                <Pie
+                  data={data}
+                  dataKey={series[0]?.key ?? "value"}
+                  nameKey="x"
+                  outerRadius="85%"
+                  innerRadius="45%"
+                  isAnimationActive={false}
+                  stroke="hsl(var(--tt-surface))"
+                  strokeWidth={2}
+                >
                   {data.map((_, i) => (
-                    <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+                    <Cell key={i} fill={fillOf(undefined, i).fill} />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip content={tip} />
               </PieChart>
             ) : kind === "line" ? (
-              <LineChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="x" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
+              <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="x" {...axis} minTickGap={24} interval="preserveStartEnd" />
+                <YAxis {...axis} width={48} tickFormatter={(v: number) => compact.format(v)} />
+                <Tooltip
+                  content={tip}
+                  cursor={{ stroke: "currentColor", strokeOpacity: 0.3 }}
+                  isAnimationActive={false}
+                />
                 {series.map((s, i) => (
                   <Line
                     key={s.key}
                     dataKey={s.key}
                     name={s.label}
-                    stroke={PALETTE[i % PALETTE.length]}
+                    stroke="currentColor"
                     strokeWidth={2}
-                    dot={false}
+                    strokeDasharray={DASH[i % DASH.length]}
+                    strokeOpacity={i >= DASH.length ? strength(i) : 1}
+                    dot={data.length <= 12 ? { r: 3, fill: "currentColor", strokeWidth: 0 } : false}
+                    activeDot={{
+                      r: 5,
+                      fill: "currentColor",
+                      stroke: "hsl(var(--tt-surface))",
+                      strokeWidth: 2,
+                    }}
+                    isAnimationActive={false}
                   />
                 ))}
               </LineChart>
             ) : (
-              <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="x" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
+              <BarChart
+                data={data}
+                layout={across ? "vertical" : "horizontal"}
+                margin={{ top: 8, right: 12, bottom: 0, left: 0 }}
+              >
+                <CartesianGrid vertical={across} horizontal={!across} />
+                {across ? (
+                  <>
+                    {/* Phones: bars run across, so every category keeps its label. */}
+                    <XAxis
+                      type="number"
+                      {...axis}
+                      tickFormatter={(v: number) => compact.format(v)}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="x"
+                      {...axis}
+                      width={120}
+                      interval={0}
+                      tick={<CategoryTick />}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <XAxis dataKey="x" {...axis} minTickGap={12} interval="preserveStartEnd" />
+                    <YAxis {...axis} width={48} tickFormatter={(v: number) => compact.format(v)} />
+                  </>
+                )}
+                <Tooltip
+                  content={tip}
+                  cursor={{ fill: "currentColor", fillOpacity: 0.08 }}
+                  isAnimationActive={false}
+                />
                 {series.map((s, i) => (
                   <Bar
                     key={s.key}
                     dataKey={s.key}
                     name={s.label}
-                    fill={PALETTE[i % PALETTE.length]}
+                    fill={fillOf(s.key, i).fill}
+                    fillOpacity={fillOf(s.key, i).opacity ?? 1}
+                    stroke={
+                      fillOf(s.key, i).outline
+                        ? fillOf(s.key, i).fill
+                        : stacked
+                          ? "hsl(var(--tt-surface))"
+                          : undefined
+                    }
+                    maxBarSize={across ? 24 : 56}
+                    radius={stacked ? 0 : across ? [0, 2, 2, 0] : [2, 2, 0, 0]}
                     stackId={stacked ? "stack" : undefined}
+                    isAnimationActive={false}
                   />
                 ))}
               </BarChart>
@@ -108,32 +369,31 @@ export function Chart({
           </ResponsiveContainer>
         </div>
       ) : null}
+      {legendItems.length ? <Legend items={legendItems} /> : null}
       {srTable ? (
-        <figcaption className="sr-only">
-          <table>
-            <caption>{t("reporting.chartData", { name: label })}</caption>
-            <thead>
-              <tr>
-                <th scope="col">{xLabel}</th>
+        <Disclosure summary={t("designS9a.showTable")}>
+          <RuledTable
+            caption={t("reporting.chartData", { name: label })}
+            columns={[
+              { key: "x", header: xLabel },
+              ...series.map((s) => ({ key: s.key, header: s.label, end: true })),
+            ]}
+            className="rounded-md border border-border"
+          >
+            {data.map((row, i) => (
+              <tr key={i}>
+                <th scope="row" className="py-2.5 font-normal">
+                  {row.x}
+                </th>
                 {series.map((s) => (
-                  <th key={s.key} scope="col">
-                    {s.label}
-                  </th>
+                  <td key={s.key} className={figureCell}>
+                    {format(Number(row[s.key] ?? 0), s.key, row)}
+                  </td>
                 ))}
               </tr>
-            </thead>
-            <tbody>
-              {data.map((row, i) => (
-                <tr key={i}>
-                  <th scope="row">{row.x}</th>
-                  {series.map((s) => (
-                    <td key={s.key}>{row[s.key]}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </figcaption>
+            ))}
+          </RuledTable>
+        </Disclosure>
       ) : null}
     </figure>
   );

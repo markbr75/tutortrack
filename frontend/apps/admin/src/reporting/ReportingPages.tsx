@@ -1,11 +1,30 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  cn,
+  FigureStrip,
+  figureCell,
+  PageHeader,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  TextField,
+  type RuledColumn,
+  type StripFigure,
+} from "@tutortrack/ui";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
+import { PanelEmpty, PanelLoading } from "../billing/moneyUi";
+import { useIsPhone } from "../billing/useIsPhone";
+import { RecordHeader } from "../components/RecordHeader";
 import { Chart } from "./Chart";
 
 type ReportDef = components["schemas"]["ReportDefinition"];
@@ -35,25 +54,53 @@ const PRESETS = [
   "custom",
 ] as const;
 const COMPARISONS = ["previous_period", "previous_year", "none"] as const;
-const SIZES = { s: "md:col-span-1", m: "md:col-span-2", l: "md:col-span-3" } as const;
-const linkClass = "underline underline-offset-2";
+/** Widths on the dashboard's six-column grid: a third, a half or the full width. */
+const SIZES = {
+  s: "lg:col-span-2",
+  m: "lg:col-span-3",
+  l: "md:col-span-2 lg:col-span-6",
+} as const;
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+/** A faded-ink label that leads to its report (as on Home's money strip). */
+const figureLink = "hover:text-foreground hover:underline";
+const quietGhost = "text-muted-foreground";
 
 function useLocale(): string {
   const { i18n } = useTranslation();
   return i18n.language || "en-GB";
 }
 
-/** Displays a report or widget value: money with its currency, otherwise as given. */
+/**
+ * Displays a report or widget value: money with its currency, dates in the locale's words
+ * (a month group as "Oct 2026"), counts with the locale's separators, otherwise as given.
+ */
 function useFormat() {
   const locale = useLocale();
-  return (value: unknown, type: string, currency?: string): string => {
+  return (value: unknown, type: string, currency?: string, grain?: string): string => {
     if (value === null || value === undefined || value === "") return "";
     const text = String(value);
     if (type === "money" && currency && /^-?\d+(\.\d+)?$/.test(text)) {
       return formatMoney({ amount: text, currency }, locale);
     }
-    if (type === "percent") return `${text}%`;
-    if (type === "date" && /^\d{4}-\d{2}-\d{2}$/.test(text)) return formatDate(text, locale);
+    if (type === "percent") {
+      return /^-?\d+(\.\d+)?$/.test(text)
+        ? new Intl.NumberFormat(locale, {
+            style: "percent",
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          }).format(Number(text) / 100)
+        : `${text}%`;
+    }
+    if ((type === "date" || type === "text") && ISO_DAY.test(text)) {
+      if (grain === "month" || grain === "quarter" || grain === "year") {
+        return new Intl.DateTimeFormat(locale, {
+          month: grain === "year" ? undefined : "short",
+          year: "numeric",
+          timeZone: "UTC",
+        }).format(new Date(text));
+      }
+      return formatDate(text, locale);
+    }
     if (
       /^-?\d+(\.\d+)?$/.test(text) &&
       (type === "count" || type === "number" || type === "hours")
@@ -64,6 +111,7 @@ function useFormat() {
   };
 }
 
+/** The period choice as compact filter controls (labels kept for screen readers). */
 function PeriodFields({
   period,
   from,
@@ -79,6 +127,8 @@ function PeriodFields({
   return (
     <>
       <SelectField
+        size="sm"
+        hideLabel
         label={t("reporting.period")}
         value={period}
         onChange={(e) => onChange({ period: e.target.value, from, to })}
@@ -87,14 +137,20 @@ function PeriodFields({
       {period === "custom" ? (
         <>
           <TextField
+            size="sm"
+            hideLabel
             type="date"
             label={t("reporting.from")}
+            title={t("reporting.from")}
             value={from}
             onChange={(e) => onChange({ period, from: e.target.value, to })}
           />
           <TextField
+            size="sm"
+            hideLabel
             type="date"
             label={t("reporting.to")}
+            title={t("reporting.to")}
             value={to}
             onChange={(e) => onChange({ period, from, to: e.target.value })}
           />
@@ -112,21 +168,20 @@ function periodQuery(p: { period: string; from: string; to: string }): Record<st
 
 // --- dashboard ------------------------------------------------------------------------------
 
-function Change({ value, previous }: { value: string; previous: string | null }) {
+/** A comparison in words ("Up 20% on the previous period"), or nothing without one. */
+function useChange() {
   const { t } = useTranslation();
-  if (previous === null) return null;
-  const now = Number(value);
-  const before = Number(previous);
-  if (Number.isNaN(now) || Number.isNaN(before)) return null;
-  if (before === 0) {
-    return <span className="text-xs text-muted-foreground">{t("reporting.noComparison")}</span>;
-  }
-  const change = ((now - before) / Math.abs(before)) * 100;
-  const rounded = Math.round(change * 10) / 10;
-  const key = rounded > 0 ? "reporting.up" : rounded < 0 ? "reporting.down" : "reporting.same";
-  return (
-    <span className="text-xs text-muted-foreground">{t(key, { percent: Math.abs(rounded) })}</span>
-  );
+  return (value: string, previous: string | null): string | null => {
+    if (previous === null) return null;
+    const now = Number(value);
+    const before = Number(previous);
+    if (Number.isNaN(now) || Number.isNaN(before)) return null;
+    if (before === 0) return t("reporting.noComparison");
+    const change = ((now - before) / Math.abs(before)) * 100;
+    const rounded = Math.round(change * 10) / 10;
+    const key = rounded > 0 ? "reporting.up" : rounded < 0 ? "reporting.down" : "reporting.same";
+    return t(key, { percent: Math.abs(rounded) });
+  };
 }
 
 function reportLink(data: WidgetData): string | null {
@@ -135,117 +190,130 @@ function reportLink(data: WidgetData): string | null {
   return `/analytics/${data.widget.report}?${search.toString()}`;
 }
 
-function WidgetTile({
+/** A list widget (outstanding, cash forecast, people counts) as a ruled panel. */
+function ListWidget({
+  data,
   item,
-  query,
   editing,
-  controls,
 }: {
+  data: WidgetData;
   item: LayoutItem;
-  query: Record<string, string>;
   editing: boolean;
-  controls: ReactNode;
 }) {
   const { t } = useTranslation();
   const format = useFormat();
-  const widget = useQuery({
-    queryKey: ["widget", item.widget, query],
-    queryFn: async () =>
-      unwrap(
-        await api.GET("/api/v1/reporting/widgets/{key}", {
-          params: { path: { key: item.widget }, query },
-        }),
-      ),
-  });
-  const data = widget.data;
-  const title = data?.widget.title ?? item.widget;
-  const href = data ? reportLink(data) : null;
-  const series = data?.series ?? [];
-  const seriesKeys = series.length ? Object.keys(series[0]?.y ?? {}) : [];
+  const href = reportLink(data);
+  const title = data.widget.title;
   return (
-    <section
-      aria-label={title}
-      className={`space-y-2 rounded-lg border border-border p-4 ${SIZES[item.size ?? "s"]}`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <h2 className="text-sm font-medium text-muted-foreground">{title}</h2>
-        {href && !editing ? (
+    <RuledPanel
+      title={title}
+      flush
+      className={SIZES[item.size ?? "s"]}
+      aside={
+        href && !editing ? (
           <a
             href={href}
-            className={`${linkClass} text-xs`}
+            className="text-link hover:underline"
             aria-label={t("reporting.openReportFor", { name: title })}
           >
             {t("reporting.openReport")}
           </a>
-        ) : null}
-      </div>
-      {widget.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      {widget.isError ? <p className="text-sm">{t("reporting.widgetError")}</p> : null}
-      {data ? (
-        <>
-          {data.values.length === 0 && data.rows.length === 0 && series.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("reporting.nothing")}</p>
-          ) : null}
-          {data.values.length ? (
-            <dl className="space-y-1">
-              {data.values.map((v, i) => (
-                <div key={i}>
-                  {v.label ? <dt className="text-xs text-muted-foreground">{v.label}</dt> : null}
-                  <dd className="flex flex-wrap items-baseline gap-2">
-                    <span className="text-2xl font-semibold">
-                      {format(v.value, data.unit, v.currency)}
-                    </span>
-                    <Change value={v.value} previous={v.previous} />
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
-          {data.rows.length ? (
-            <ul className="divide-y divide-border text-sm">
-              {data.rows.map((r, i) => (
-                <li key={i} className="flex justify-between gap-2 py-1">
-                  <span>{r.label}</span>
-                  <span className="text-right">
-                    {data.unit === "money" && r.detail
-                      ? format(r.value, "money", r.detail)
-                      : r.value}
-                    {data.unit !== "money" && r.detail ? (
-                      <span className="block text-xs text-muted-foreground">{r.detail}</span>
-                    ) : null}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {series.length ? (
-            <Chart
-              kind="line"
-              label={title}
-              xLabel={t("reporting.date")}
-              data={series.map((p) => ({
-                x: p.currency ? `${p.x} ${p.currency}` : p.x,
-                ...Object.fromEntries(Object.entries(p.y).map(([k, v]) => [k, Number(v)])),
-              }))}
-              series={seriesKeys.map((k) => ({ key: k, label: t(`reporting.series.${k}`) }))}
-              height={180}
-            />
-          ) : null}
-        </>
-      ) : null}
-      {editing ? controls : null}
-    </section>
+        ) : null
+      }
+    >
+      {data.rows.length ? (
+        <PanelRows>
+          {data.rows.map((r, i) => (
+            <PanelRow key={i} className="flex items-baseline justify-between gap-3">
+              <span className="min-w-0">{r.label}</span>
+              <span className="text-right tabular-nums whitespace-nowrap">
+                {data.unit === "money" && r.detail ? format(r.value, "money", r.detail) : r.value}
+                {data.unit !== "money" && r.detail ? (
+                  <span className="block text-xs text-muted-foreground">{r.detail}</span>
+                ) : null}
+              </span>
+            </PanelRow>
+          ))}
+        </PanelRows>
+      ) : (
+        <PanelEmpty>{t("reporting.nothing")}</PanelEmpty>
+      )}
+    </RuledPanel>
   );
 }
 
-/** The configurable dashboard (FR-26-1): KPI tiles, lists and charts for a period. */
+/** A chart widget (revenue trend) in a ruled panel, with its numbers under "Show as a table". */
+function ChartWidget({
+  data,
+  item,
+  editing,
+}: {
+  data: WidgetData;
+  item: LayoutItem;
+  editing: boolean;
+}) {
+  const { t } = useTranslation();
+  const locale = useLocale();
+  const href = reportLink(data);
+  const title = data.widget.title;
+  const series = data.series;
+  const keys = series.length ? Object.keys(series[0]?.y ?? {}) : [];
+  const currencies = new Set(series.map((p) => p.currency).filter(Boolean));
+  const rows = series.map((p) => ({
+    x: [ISO_DAY.test(p.x) ? formatDate(p.x, locale) : p.x, currencies.size > 1 ? p.currency : ""]
+      .filter(Boolean)
+      .join(" "),
+    currency: p.currency ?? "",
+    ...Object.fromEntries(Object.entries(p.y).map(([k, v]) => [k, Number(v)])),
+  }));
+  return (
+    <RuledPanel
+      title={title}
+      className={SIZES[item.size ?? "l"]}
+      aside={
+        href && !editing ? (
+          <a
+            href={href}
+            className="text-link hover:underline"
+            aria-label={t("reporting.openReportFor", { name: title })}
+          >
+            {t("reporting.openReport")}
+          </a>
+        ) : null
+      }
+    >
+      {rows.length ? (
+        <Chart
+          kind="line"
+          label={title}
+          xLabel={t("reporting.date")}
+          data={rows}
+          series={keys.map((k) => ({ key: k, label: t(`reporting.series.${k}`) }))}
+          height={200}
+          formatValue={(value, _key, row) =>
+            data.unit === "money" && row.currency
+              ? formatMoney({ amount: String(value), currency: String(row.currency) }, locale)
+              : new Intl.NumberFormat(locale).format(value)
+          }
+        />
+      ) : (
+        <p className="text-sm text-muted-foreground">{t("reporting.nothing")}</p>
+      )}
+    </RuledPanel>
+  );
+}
+
 /**
- * The customisable figures. `hide` drops widgets the page already shows elsewhere (Home's
- * money strip and register), except while customising, when every widget stays arrangeable.
+ * The customisable figures below Home (FR-26-1). Single figures read as ruled strips with
+ * their comparison in words (never tiles); lists and charts are ruled panels. `hide` drops
+ * widgets Home already shows (its money strip and register), except while customising, when
+ * every widget stays arrangeable.
  */
 export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const format = useFormat();
+  const change = useChange();
   const [period, setPeriod] = useState({ period: "this_month", from: "", to: "" });
   const [compare, setCompare] = useState("previous_period");
   const [editing, setEditing] = useState(false);
@@ -275,9 +343,24 @@ export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
       setEditing(false);
     },
   });
-  if (!layout.data) return <Spinner label={t("grid.loading")} />;
-  const query = { ...periodQuery(period), compare };
-  const items = editing ? draft : layout.data.widgets.filter((w) => !hide.includes(w.widget));
+  const query = {
+    ...periodQuery(period),
+    compare: compare as (typeof COMPARISONS)[number],
+  };
+  const items = editing
+    ? draft
+    : (layout.data?.widgets ?? []).filter((w) => !hide.includes(w.widget));
+  const widgets = useQueries({
+    queries: items.map((item) => ({
+      queryKey: ["widget", item.widget, query],
+      queryFn: async () =>
+        unwrap(
+          await api.GET("/api/v1/reporting/widgets/{key}", {
+            params: { path: { key: item.widget }, query },
+          }),
+        ),
+    })),
+  });
   const titles = Object.fromEntries((library.data ?? []).map((w: WidgetInfo) => [w.key, w.title]));
   const move = (index: number, by: number) => {
     const next = [...draft];
@@ -285,160 +368,340 @@ export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
     if (item) next.splice(index + by, 0, item);
     setDraft(next);
   };
+
+  const loading = !layout.data || widgets.some((w) => w.isPending);
+  const figures: StripFigure[] = [];
+  const notes: { context: string | null; comparison: string | null }[] = [];
+  const panels: ReactNode[] = [];
+  items.forEach((item, index) => {
+    const result = widgets[index];
+    const data = result?.data;
+    if (!data) {
+      if (result?.isError) {
+        figures.push({
+          key: item.widget,
+          label: titles[item.widget] ?? item.widget,
+          value: "–",
+          note: t("reporting.widgetError"),
+          tone: "danger",
+        });
+      }
+      return;
+    }
+    const title = data.widget.title;
+    if (data.series.length || data.widget.kind === "chart") {
+      panels.push(<ChartWidget key={item.widget} data={data} item={item} editing={editing} />);
+      return;
+    }
+    if (data.rows.length || data.widget.kind === "list") {
+      panels.push(<ListWidget key={item.widget} data={data} item={item} editing={editing} />);
+      return;
+    }
+    const href = reportLink(data);
+    const named =
+      href && !editing ? (
+        <a
+          href={href}
+          className={figureLink}
+          aria-label={t("reporting.openReportFor", { name: title })}
+        >
+          {title}
+        </a>
+      ) : (
+        title
+      );
+    if (!data.values.length) {
+      figures.push({ key: item.widget, label: named, value: "–", note: t("reporting.nothing") });
+      return;
+    }
+    data.values.forEach((v, i) => {
+      const single = data.values.length === 1;
+      const comparison = change(v.value, v.previous);
+      // A lone value's label is either its unit ("Lessons", said by the title already) or a
+      // figure of its own ("56.4%" margin), which reads as context before the comparison.
+      const context = single && v.label && /\d/.test(v.label) ? v.label : null;
+      // A value labelled "… %" (the win rate) is a percentage whatever the widget's unit:
+      // written like every other percentage, with the sign on the figure, not the label.
+      // (Not a figure that is itself a percentage, such as the margin's "56.4%".)
+      const percent = /[^\d.,\s]\s*%$/.test(v.label);
+      notes.push({ context, comparison });
+      figures.push({
+        key: `${item.widget}-${i}`,
+        label: i === 0 ? named : percent ? v.label.replace(/\s*%$/, "") : v.label,
+        value: format(v.value, percent ? "percent" : data.unit, v.currency),
+      });
+    });
+  });
+  // Say It Once: when no figure has anything to compare with, one sentence says so under
+  // the strip instead of the same note under every figure.
+  const nothingToCompare = t("reporting.noComparison");
+  const compareOnce =
+    notes.length > 1 &&
+    notes.every((n) => n.comparison === null || n.comparison === nothingToCompare) &&
+    notes.some((n) => n.comparison === nothingToCompare);
+  let n = 0;
+  for (const figure of figures) {
+    if (figure.note !== undefined || figure.tone) continue;
+    const { context, comparison } = notes[n++] ?? { context: null, comparison: null };
+    const note = [context, compareOnce ? null : comparison].filter(Boolean).join(" · ");
+    figure.note = note || undefined;
+  }
+
   return (
-    <section
-      aria-labelledby="dashboard-title"
-      className="mt-6 space-y-4 border-t border-border pt-6"
-    >
-      <div className="flex flex-wrap items-end gap-3">
-        <h2 id="dashboard-title" className="w-full text-base font-semibold sm:mr-auto sm:w-auto">
+    <section aria-labelledby="dashboard-title" className="space-y-4 border-t border-border pt-6">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <h2 id="dashboard-title" className="text-base font-semibold">
           {t("reporting.dashboard")}
         </h2>
-        <PeriodFields {...period} onChange={setPeriod} />
-        <SelectField
-          label={t("reporting.compare")}
-          value={compare}
-          onChange={(e) => setCompare(e.target.value)}
-          options={COMPARISONS.map((c) => ({ value: c, label: t(`reporting.comparisons.${c}`) }))}
-        />
-        {editing ? (
-          <>
-            <Button onClick={() => save.mutate(draft)} disabled={save.isPending}>
-              {t("reporting.saveLayout")}
-            </Button>
-            <Button variant="secondary" onClick={() => setEditing(false)}>
-              {t("common.cancel")}
-            </Button>
-            {layout.data.customised ? (
-              <Button variant="secondary" onClick={() => reset.mutate()}>
-                {t("reporting.resetLayout")}
-              </Button>
-            ) : null}
-          </>
-        ) : (
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setDraft(layout.data.widgets);
-              setEditing(true);
-            }}
-          >
-            {t("reporting.customise")}
-          </Button>
-        )}
-      </div>
-      {save.isError ? <Alert tone="danger">{fieldErrors(save.error).widgets}</Alert> : null}
-      {editing ? (
-        <div className="flex flex-wrap items-end gap-2">
+        <div className="flex flex-wrap items-start gap-2">
+          <PeriodFields {...period} onChange={setPeriod} />
           <SelectField
-            label={t("reporting.addWidget")}
-            value={adding}
-            onChange={(e) => setAdding(e.target.value)}
-            options={[
-              { value: "", label: t("reporting.chooseWidget") },
-              ...(library.data ?? [])
-                .filter((w) => !draft.some((d) => d.widget === w.key))
-                .map((w) => ({ value: w.key, label: w.title })),
-            ]}
+            size="sm"
+            hideLabel
+            label={t("reporting.compare")}
+            value={compare}
+            onChange={(e) => setCompare(e.target.value)}
+            options={COMPARISONS.map((c) => ({
+              value: c,
+              label: t(`reporting.comparisons.${c}`),
+            }))}
           />
-          <Button
-            variant="secondary"
-            disabled={!adding}
-            onClick={() => {
-              const info = library.data?.find((w) => w.key === adding);
-              setDraft([...draft, { widget: adding, size: (info?.default_size ?? "s") as "s" }]);
-              setAdding("");
-            }}
-          >
-            {t("reporting.add")}
-          </Button>
+          {!editing && layout.data ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="h-9"
+              onClick={() => {
+                setDraft(layout.data.widgets);
+                setEditing(true);
+              }}
+            >
+              {t("reporting.customise")}
+            </Button>
+          ) : null}
         </div>
-      ) : null}
-      {items.length === 0 ? <p>{t("reporting.emptyDashboard")}</p> : null}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {items.map((item, index) => {
-          const name = titles[item.widget] ?? item.widget;
-          return (
-            <WidgetTile
-              key={item.widget}
-              item={item}
-              query={query}
-              editing={editing}
-              controls={
-                <div className="flex flex-wrap items-end gap-2 border-t border-border pt-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    disabled={index === 0}
-                    onClick={() => move(index, -1)}
-                    aria-label={t("reporting.moveEarlier", { name })}
-                  >
-                    {t("reporting.earlier")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    disabled={index === items.length - 1}
-                    onClick={() => move(index, 1)}
-                    aria-label={t("reporting.moveLater", { name })}
-                  >
-                    {t("reporting.later")}
-                  </Button>
-                  <SelectField
-                    label={t("reporting.size", { name })}
-                    value={item.size ?? "s"}
-                    onChange={(e) =>
-                      setDraft(
-                        draft.map((d, i) =>
-                          i === index ? { ...d, size: e.target.value as "s" | "m" | "l" } : d,
-                        ),
-                      )
-                    }
-                    options={(["s", "m", "l"] as const).map((s) => ({
-                      value: s,
-                      label: t(`reporting.sizes.${s}`),
-                    }))}
-                  />
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => setDraft(draft.filter((_, i) => i !== index))}
-                    aria-label={t("reporting.remove", { name })}
-                  >
-                    {t("reporting.removeShort")}
-                  </Button>
-                </div>
-              }
-            />
-          );
-        })}
       </div>
+      {editing ? (
+        <RuledPanel
+          title={t("designS9a.arrange")}
+          description={t("designS9a.arrangeHelp")}
+          flush
+          footer={
+            <>
+              {layout.data?.customised ? (
+                <Button size="sm" variant="secondary" onClick={() => reset.mutate()}>
+                  {t("reporting.resetLayout")}
+                </Button>
+              ) : null}
+              <Button size="sm" onClick={() => save.mutate(draft)} loading={save.isPending}>
+                {t("reporting.saveLayout")}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className={quietGhost}
+                onClick={() => setEditing(false)}
+              >
+                {t("common.cancel")}
+              </Button>
+            </>
+          }
+        >
+          <PanelRows>
+            {draft.map((item, index) => {
+              const name = titles[item.widget] ?? item.widget;
+              return (
+                <PanelRow
+                  key={item.widget}
+                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2"
+                >
+                  <span className="font-medium">{name}</span>
+                  <span className="flex flex-wrap items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={index === 0}
+                      onClick={() => move(index, -1)}
+                      aria-label={t("reporting.moveEarlier", { name })}
+                    >
+                      {t("reporting.earlier")}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={index === draft.length - 1}
+                      onClick={() => move(index, 1)}
+                      aria-label={t("reporting.moveLater", { name })}
+                    >
+                      {t("reporting.later")}
+                    </Button>
+                    <SelectField
+                      size="sm"
+                      hideLabel
+                      className="h-8"
+                      label={t("reporting.size", { name })}
+                      value={item.size ?? "s"}
+                      onChange={(e) =>
+                        setDraft(
+                          draft.map((d, i) =>
+                            i === index ? { ...d, size: e.target.value as "s" | "m" | "l" } : d,
+                          ),
+                        )
+                      }
+                      options={(["s", "m", "l"] as const).map((s) => ({
+                        value: s,
+                        label: t(`reporting.sizes.${s}`),
+                      }))}
+                    />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className={quietGhost}
+                      onClick={() => setDraft(draft.filter((_, i) => i !== index))}
+                      aria-label={t("reporting.remove", { name })}
+                    >
+                      {t("reporting.removeShort")}
+                    </Button>
+                  </span>
+                </PanelRow>
+              );
+            })}
+            <PanelRow className="flex flex-wrap items-start gap-2">
+              <SelectField
+                size="sm"
+                hideLabel
+                label={t("reporting.addWidget")}
+                value={adding}
+                onChange={(e) => setAdding(e.target.value)}
+                options={[
+                  { value: "", label: t("designS9a.addFigure") },
+                  ...(library.data ?? [])
+                    .filter((w) => !draft.some((d) => d.widget === w.key))
+                    .map((w) => ({ value: w.key, label: w.title })),
+                ]}
+              />
+              <Button
+                size="sm"
+                variant="secondary"
+                className="h-9"
+                disabled={!adding}
+                onClick={() => {
+                  const info = library.data?.find((w) => w.key === adding);
+                  setDraft([
+                    ...draft,
+                    { widget: adding, size: (info?.default_size ?? "s") as "s" },
+                  ]);
+                  setAdding("");
+                }}
+              >
+                {t("reporting.add")}
+              </Button>
+            </PanelRow>
+          </PanelRows>
+          {save.isError ? (
+            <div className="px-5 pb-4">
+              <Alert tone="danger">{fieldErrors(save.error).widgets}</Alert>
+            </div>
+          ) : null}
+        </RuledPanel>
+      ) : null}
+      {loading ? (
+        <div aria-busy="true" className="space-y-4">
+          <span role="status" className="sr-only">
+            {t("grid.loading")}
+          </span>
+          <div aria-hidden="true" className="flex gap-6 border-y border-border py-4">
+            <div className="h-14 w-40 animate-pulse rounded bg-muted" />
+            <div className="h-14 w-40 animate-pulse rounded bg-muted" />
+            <div className="h-14 w-40 animate-pulse rounded bg-muted" />
+          </div>
+        </div>
+      ) : items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t("reporting.emptyDashboard")}</p>
+      ) : (
+        <>
+          {figures.length ? (
+            <div aria-label={t("designS9a.figures")} role="group">
+              {/* One ruled grid of up to four columns (two on phones), so the vertical rules
+                  line up from row to row. */}
+              <FigureStrip figures={figures} columns={Math.min(figures.length, 4)} />
+              {compareOnce ? (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {t("designS9a.nothingToCompare")}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+          {panels.length ? (
+            <div className="grid grid-flow-row-dense grid-cols-[minmax(0,1fr)] items-start gap-6 md:grid-cols-2 lg:grid-cols-6">
+              {panels}
+            </div>
+          ) : null}
+        </>
+      )}
     </section>
   );
 }
 
 // --- report library -------------------------------------------------------------------------
 
+/** The reports area's own pages, as a row of links ruled like tabs. */
 export function ReportsNav() {
   const { t } = useTranslation();
   const canBuild = usePermission("reporting.builder.use");
+  const navRef = useRef<HTMLElement>(null);
+  // On phones the row scrolls sideways: bring the current page's link into view.
+  useEffect(() => {
+    const nav = navRef.current;
+    const active = nav?.querySelector<HTMLElement>("a.active");
+    if (nav && active && active.offsetLeft + active.offsetWidth > nav.clientWidth) {
+      nav.scrollLeft = active.offsetLeft - 16;
+    }
+  }, []);
+  const links = [
+    { to: "/analytics", label: t("reporting.library") },
+    { to: "/analytics/saved", label: t("reporting.savedTitle") },
+    ...(canBuild ? [{ to: "/analytics/builder", label: t("reportBuilder.nav") }] : []),
+    { to: "/analytics/warehouse", label: t("warehouse.navLink") },
+  ] as const;
   return (
-    <nav aria-label={t("reporting.sections")} className="flex gap-4 text-sm">
-      <Link to="/analytics" className={linkClass} activeOptions={{ exact: true }}>
-        {t("reporting.library")}
-      </Link>
-      <Link to="/analytics/saved" className={linkClass}>
-        {t("reporting.savedTitle")}
-      </Link>
-      {canBuild ? (
-        <Link to="/analytics/builder" className={linkClass}>
-          {t("reportBuilder.nav")}
+    <nav
+      ref={navRef}
+      aria-label={t("reporting.sections")}
+      className="relative mb-6 flex gap-1 overflow-x-auto border-b border-border [scrollbar-width:none]"
+    >
+      {links.map((l) => (
+        <Link
+          key={l.to}
+          to={l.to}
+          activeOptions={{ exact: true }}
+          className="-mb-px shrink-0 border-b-2 border-transparent px-3 py-2 text-sm whitespace-nowrap text-muted-foreground hover:text-foreground [&.active]:border-foreground [&.active]:font-semibold [&.active]:text-foreground"
+        >
+          {l.label}
         </Link>
-      ) : null}
-      <Link to="/analytics/warehouse" className={linkClass}>
-        {t("warehouse.navLink")}
-      </Link>
+      ))}
     </nav>
+  );
+}
+
+/** A page of the reports area: the page header, then the area's row of links. */
+export function ReportsPage({
+  title,
+  description,
+  actions,
+  children,
+}: {
+  title: string;
+  description?: ReactNode;
+  actions?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div>
+      <PageHeader title={title} description={description} actions={actions} className="mb-4" />
+      <ReportsNav />
+      <div className="space-y-6">{children}</div>
+    </div>
   );
 }
 
@@ -458,32 +721,45 @@ export function ReportsLibraryPage() {
     return [...out.entries()];
   }, [reports.data]);
   return (
-    <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">{t("reporting.title")}</h1>
-      <ReportsNav />
-      {reports.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      {reports.data?.length === 0 ? <p>{t("reporting.noReports")}</p> : null}
-      {groups.map(([key, group]) => (
-        <section key={key} aria-labelledby={`cat-${key}`} className="space-y-2">
-          <h2 id={`cat-${key}`} className="text-base font-semibold">
-            {group.label}
-          </h2>
-          <ul className="grid gap-3 md:grid-cols-2">
-            {group.items.map((r) => (
-              <li key={r.key} className="rounded-lg border border-border p-3">
-                <a
-                  href={`/analytics/${r.key}`}
-                  className="font-medium underline-offset-2 hover:underline"
-                >
-                  {r.title}
-                </a>
-                <p className="text-sm text-muted-foreground">{r.description}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-    </section>
+    <ReportsPage title={t("reporting.title")} description={t("designS9a.libraryHelp")}>
+      {reports.isPending ? (
+        <RuledPanel label={t("reporting.title")} flush>
+          <PanelLoading label={t("grid.loading")} />
+        </RuledPanel>
+      ) : null}
+      {reports.data?.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t("reporting.noReports")}</p>
+      ) : null}
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 xl:grid-cols-2">
+        {groups.map(([key, group]) => (
+          <RuledPanel
+            key={key}
+            title={group.label}
+            titleId={`cat-${key}`}
+            flush
+            aside={
+              <span className="text-muted-foreground tabular-nums">
+                {t("designS9a.reportCount", { count: group.items.length })}
+              </span>
+            }
+          >
+            <PanelRows>
+              {group.items.map((r) => (
+                <li key={r.key} className="relative px-5 py-2.5 text-sm hover:bg-muted/60">
+                  <a
+                    href={`/analytics/${r.key}`}
+                    className="font-medium after:absolute after:inset-0 hover:underline"
+                  >
+                    {r.title}
+                  </a>
+                  <p className="text-xs text-muted-foreground">{r.description}</p>
+                </li>
+              ))}
+            </PanelRows>
+          </RuledPanel>
+        ))}
+      </div>
+    </ReportsPage>
   );
 }
 
@@ -536,10 +812,12 @@ function FilterSelect({
   const options = useFilterOptions(filter, true);
   return (
     <SelectField
+      size="sm"
+      hideLabel
       label={t(`reporting.filters.${filter}`)}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      options={[{ value: "", label: t("reporting.all") }, ...(options.data ?? [])]}
+      options={[{ value: "", label: t(`designS9a.any.${filter}`) }, ...(options.data ?? [])]}
     />
   );
 }
@@ -563,10 +841,15 @@ function CustomFieldFilter({
   entities,
   value,
   onChange,
+  hintId,
+  onKeyChange,
 }: {
   entities: string[];
   value: string;
   onChange: (v: string) => void;
+  /** The shared hint line under the filter row. */
+  hintId: string;
+  onKeyChange: (chosen: boolean) => void;
 }) {
   const { t } = useTranslation();
   const initial = parseCustomField(value, entities[0] ?? "client");
@@ -586,122 +869,260 @@ function CustomFieldFilter({
   });
   const apply = (e: string, k: string, v: string) =>
     onChange(k && v.trim() ? `${e}.${k}=${v.trim()}` : "");
+  const entityName = t(`reportingG5.entities.${entity}`);
   return (
-    <fieldset className="flex flex-wrap items-end gap-3">
+    <fieldset className="flex min-w-0 flex-wrap items-start gap-2">
       <legend className="sr-only">{t("reportingG5.customFieldFilter")}</legend>
       {entities.length > 1 ? (
         <SelectField
+          size="sm"
+          hideLabel
           label={t("reportingG5.customFieldOf")}
           value={entity}
           onChange={(e) => {
             setEntity(e.target.value);
             setKey("");
+            onKeyChange(false);
             apply(e.target.value, "", text);
           }}
-          options={entities.map((v) => ({ value: v, label: t(`reportingG5.entities.${v}`) }))}
+          options={entities.map((v) => ({
+            value: v,
+            label: t("designS9a.fieldsOf", { entity: t(`reportingG5.entities.${v}`) }),
+          }))}
         />
       ) : null}
       <SelectField
-        label={t("reportingG5.customField", {
-          entity: t(`reportingG5.entities.${entity}`),
-        })}
+        size="sm"
+        hideLabel
+        label={t("reportingG5.customField", { entity: entityName })}
         value={key}
         onChange={(e) => {
           setKey(e.target.value);
+          onKeyChange(Boolean(e.target.value));
           apply(entity, e.target.value, text);
         }}
         options={[
-          { value: "", label: t("reporting.all") },
+          { value: "", label: t("designS9a.anyField", { entity: entityName }) },
           ...(fields.data ?? [])
             .filter((f) => f.active !== false)
             .map((f) => ({ value: f.key, label: f.label })),
         ]}
       />
-      <TextField
-        label={t("reportingG5.customFieldValue")}
-        hint={t("reportingG5.customFieldHint")}
-        value={text}
-        disabled={!key}
-        onChange={(e) => setText(e.target.value)}
-        onBlur={() => apply(entity, key, text)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") apply(entity, key, text);
-        }}
-      />
+      {key ? (
+        <TextField
+          size="sm"
+          hideLabel
+          label={t("reportingG5.customFieldValue")}
+          placeholder={t("designS9a.equals")}
+          aria-describedby={hintId}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onBlur={() => apply(entity, key, text)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") apply(entity, key, text);
+          }}
+        />
+      ) : null}
     </fieldset>
   );
 }
 
+/** The grain of a grouped date column: "month" for `group` by month or `date:month`. */
+function grainOf(col: Column, params: Record<string, unknown> | undefined): string | undefined {
+  const [, grain] = col.key.split(":");
+  if (grain) return grain;
+  if (col.key === "group" && typeof params?.group_by === "string") return params.group_by;
+  return undefined;
+}
+
+const FIGURE_TYPES = new Set(["money", "count", "number", "hours", "percent"]);
+
+/**
+ * A report's rows as a register table: figure columns right-aligned and tabular (money in a
+ * fixed 8rem amount column), totals in the footer under the figures they add up. On phones
+ * the currency column folds away (each amount carries its own symbol) and a wide table
+ * scrolls inside its labelled region under a one-line hint.
+ */
 export function ResultTable({
   result,
   caption,
 }: {
-  result: Pick<Result, "columns" | "rows" | "totals">;
+  result: Pick<Result, "columns" | "rows" | "totals"> & { params?: unknown };
   caption: string;
 }) {
+  const { t } = useTranslation();
   const format = useFormat();
+  const phone = useIsPhone();
   const rows = result.rows as Cell[];
   const totals = result.totals as Cell[];
-  const cols = result.columns;
-  const { t } = useTranslation();
+  const params = result.params as Record<string, unknown> | undefined;
+  const hasMoney = result.columns.some((c) => c.type === "money");
+  const cols = result.columns.filter((c) => !(phone && hasMoney && c.key === "currency"));
+  const figure = (c: Column) => FIGURE_TYPES.has(c.type);
   const show = (col: Column, row: Cell) =>
-    format(row[col.key], col.type, typeof row.currency === "string" ? row.currency : undefined);
+    format(
+      row[col.key],
+      col.type,
+      typeof row.currency === "string" ? row.currency : undefined,
+      grainOf(col, params),
+    );
+  const columns: RuledColumn[] = cols.map((c, i) => ({
+    key: c.key,
+    header: c.label,
+    end: figure(c),
+    width: c.type === "money" ? "w-32" : i === 0 ? "min-w-48" : undefined,
+  }));
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <caption className="text-left font-semibold">{caption}</caption>
-        <thead>
-          <tr className="text-left">
+    <>
+      {phone && cols.length > 3 && rows.length ? (
+        <p className="px-5 pt-3 text-xs text-muted-foreground">{t("designS9a.scrollHint")}</p>
+      ) : null}
+      <RuledTable
+        caption={caption}
+        columns={columns}
+        empty={rows.length === 0 ? t("reporting.nothing") : undefined}
+        footer={
+          totals.length
+            ? totals.map((row, i) => (
+                <tr key={i} className={cn("font-semibold", i > 0 && "border-t border-rule")}>
+                  {cols.map((c, j) => (
+                    <td
+                      key={c.key}
+                      className={cn(
+                        figure(c) && figureCell,
+                        overdue(c.key, row[c.key]) && "text-margin",
+                      )}
+                    >
+                      {j === 0 && !figure(c) ? (
+                        t("reporting.total")
+                      ) : (
+                        <>
+                          {j === 0 ? (
+                            <span className="sr-only">{t("reporting.total")} </span>
+                          ) : null}
+                          {c.key in row ? show(c, row) : ""}
+                        </>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            : undefined
+        }
+      >
+        {rows.map((row, i) => (
+          <tr key={i}>
             {cols.map((c) => (
-              <th
+              <td
                 key={c.key}
-                scope="col"
-                className={`px-2 py-1 ${c.type === "text" || c.type === "date" ? "" : "text-right"}`}
+                className={cn(
+                  figure(c) && figureCell,
+                  overdue(c.key, row[c.key]) && "font-medium text-margin",
+                )}
               >
-                {c.label}
-              </th>
+                {show(c, row)}
+              </td>
             ))}
           </tr>
-        </thead>
-        <tbody>
-          {rows.length === 0 ? (
-            <tr>
-              <td colSpan={cols.length} className="px-2 py-3 text-muted-foreground">
-                {t("reporting.nothing")}
-              </td>
-            </tr>
-          ) : null}
-          {rows.map((row, i) => (
-            <tr key={i} className="border-t border-border">
-              {cols.map((c) => (
-                <td
-                  key={c.key}
-                  className={`px-2 py-1 ${c.type === "text" || c.type === "date" ? "" : "text-right"}`}
-                >
-                  {show(c, row)}
-                </td>
-              ))}
-            </tr>
+        ))}
+      </RuledTable>
+    </>
+  );
+}
+
+/** Aged debtors' overdue buckets: a non-zero amount is overdue, in margin red (One Red). */
+const OVERDUE_BUCKETS = new Set(["1_30", "31_60", "61_90", "90_plus"]);
+function overdue(key: string, value: unknown): boolean {
+  return OVERDUE_BUCKETS.has(key) && Number(value) > 0;
+}
+
+/**
+ * A run report in one flush ruled panel: the period it covers as the title, the row count as
+ * the aside, the chart (in link ink) above the table, notes, and a footer for its actions.
+ */
+export function ResultPanel({
+  result,
+  title,
+  aside,
+  footer,
+}: {
+  result: Pick<
+    Result,
+    "columns" | "rows" | "totals" | "chart" | "notes" | "period" | "generated_at"
+  > & { params?: unknown };
+  title: string;
+  aside?: ReactNode;
+  footer?: ReactNode;
+}) {
+  const { t } = useTranslation();
+  const locale = useLocale();
+  const format = useFormat();
+  const chart = result.chart;
+  const columns = result.columns;
+  const params = result.params as Record<string, unknown> | undefined;
+  const xCol = chart ? columns.find((c) => c.key === chart.x) : undefined;
+  const currencies = new Set(
+    (result.rows as Cell[]).map((r) => (typeof r.currency === "string" ? r.currency : "")),
+  );
+  const chartData =
+    chart && xCol
+      ? (result.rows as Cell[]).map((row) => ({
+          x: [
+            format(row[chart.x], xCol.type, undefined, grainOf(xCol, params)),
+            currencies.size > 1 && typeof row.currency === "string" ? row.currency : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+          currency: typeof row.currency === "string" ? row.currency : "",
+          ...Object.fromEntries(chart.y.map((k) => [k, Number(row[k] ?? 0)])),
+        }))
+      : [];
+  const types = Object.fromEntries(columns.map((c) => [c.key, c.type]));
+  const labels = Object.fromEntries(columns.map((c) => [c.key, c.label]));
+  const period = result.period
+    ? t("reporting.showing", {
+        from: formatDate(String(result.period.from), locale),
+        to: formatDate(String(result.period.to), locale),
+      })
+    : t("designS9a.asAt", { date: formatDate(String(result.generated_at), locale) });
+  return (
+    <RuledPanel
+      title={period}
+      flush
+      aside={
+        aside ?? (
+          <span className="text-muted-foreground tabular-nums">
+            {t("reporting.rows", { count: result.rows.length })}
+          </span>
+        )
+      }
+      footer={footer}
+    >
+      {chart && chartData.length ? (
+        <div className="border-b border-border px-5 py-4">
+          <Chart
+            kind={chart.kind}
+            data={chartData as Array<Record<string, string | number>>}
+            series={chart.y.map((k) => ({ key: k, label: labels[k] ?? k }))}
+            label={t("reporting.chartOf", { name: title })}
+            xLabel={labels[chart.x] ?? chart.x}
+            stacked={chart.stacked}
+            srTable={false}
+            formatValue={(value, key, row) =>
+              format(String(value), types[key] ?? "number", String(row.currency ?? ""))
+            }
+          />
+        </div>
+      ) : null}
+      <ResultTable result={result} caption={title} />
+      {result.notes.length ? (
+        <div className="space-y-1 border-t border-rule px-5 py-3 text-xs text-muted-foreground">
+          {result.notes.map((n) => (
+            <p key={n}>{n}</p>
           ))}
-        </tbody>
-        {totals.length ? (
-          <tfoot>
-            {totals.map((row, i) => (
-              <tr key={i} className="border-t-2 border-border font-semibold">
-                {cols.map((c, j) => (
-                  <td
-                    key={c.key}
-                    className={`px-2 py-1 ${c.type === "text" || c.type === "date" ? "" : "text-right"}`}
-                  >
-                    {j === 0 ? t("reporting.total") : c.key in row ? show(c, row) : ""}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tfoot>
-        ) : null}
-      </table>
-    </div>
+        </div>
+      ) : null}
+    </RuledPanel>
   );
 }
 
@@ -726,24 +1147,33 @@ function SaveView({ reportKey, params }: { reportKey: string; params: Record<str
   return (
     <form
       onSubmit={submit}
-      className="flex flex-wrap items-end gap-3"
+      className="flex w-full flex-wrap items-start gap-x-3 gap-y-2"
       aria-label={t("reporting.saveView")}
     >
-      <TextField
-        label={t("reporting.viewName")}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        error={errors.name}
-        required
-      />
-      <label className="flex items-center gap-2 text-sm">
+      <div className="w-full sm:w-56">
+        <TextField
+          size="sm"
+          hideLabel
+          label={t("reporting.viewName")}
+          placeholder={t("reporting.viewName")}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          error={errors.name}
+          required
+        />
+      </div>
+      <label className="flex h-9 items-center gap-2 text-sm">
         <input type="checkbox" checked={shared} onChange={(e) => setShared(e.target.checked)} />
         {t("reporting.shareView")}
       </label>
-      <Button type="submit" variant="secondary" disabled={save.isPending}>
+      <Button type="submit" size="sm" variant="secondary" className="h-9" disabled={save.isPending}>
         {t("reporting.saveView")}
       </Button>
-      {save.isSuccess ? <p role="status">{t("reporting.viewSaved")}</p> : null}
+      {save.isSuccess ? (
+        <p role="status" className="flex h-9 items-center text-success">
+          {t("reporting.viewSaved")}
+        </p>
+      ) : null}
     </form>
   );
 }
@@ -751,8 +1181,11 @@ function SaveView({ reportKey, params }: { reportKey: string; params: Record<str
 export function ReportViewPage({ reportKey }: { reportKey: string }) {
   const { t } = useTranslation();
   const canExport = usePermission("reporting.export");
+  const hintId = useId();
   const initial = useMemo(initialParams, []);
   const [params, setParams] = useState<Record<string, string>>(initial);
+  const [currency, setCurrency] = useState(initial.currency ?? "");
+  const [fieldChosen, setFieldChosen] = useState(Boolean(initial.custom_field));
   const defs = useQuery({
     queryKey: ["reports"],
     queryFn: async () => unwrap(await api.GET("/api/v1/reporting/reports")),
@@ -782,118 +1215,120 @@ export function ReportViewPage({ reportKey }: { reportKey: string }) {
     }).toString()}`;
   const errors = fieldErrors(report.error);
   const title = def?.title ?? reportKey;
-  const chart = result?.chart;
-  const chartData =
-    chart && result
-      ? (result.rows as Cell[]).map((row) => ({
-          x: [row[chart.x], typeof row.currency === "string" ? row.currency : ""]
-            .filter(Boolean)
-            .join(" "),
-          ...Object.fromEntries(chart.y.map((k) => [k, Number(row[k] ?? 0)])),
-        }))
-      : [];
-  const labels = Object.fromEntries((result?.columns ?? []).map((c) => [c.key, c.label]));
   return (
-    <section className="space-y-4">
-      <ReportsNav />
-      <h1 className="text-2xl font-semibold">{title}</h1>
-      {def ? <p className="text-muted-foreground">{def.description}</p> : null}
-      {def ? (
-        <form
-          aria-label={t("reporting.filtersLabel")}
-          className="flex flex-wrap items-end gap-3"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          {def.period ? (
-            <PeriodFields
-              period={params.period ?? def.default_period}
-              from={params.from ?? ""}
-              to={params.to ?? ""}
-              onChange={(p) => set({ period: p.period, from: p.from, to: p.to })}
-            />
-          ) : null}
-          {def.group_by.length ? (
-            <SelectField
-              label={t("reporting.groupBy")}
-              value={params.group_by ?? def.group_by[0]?.value ?? ""}
-              onChange={(e) => set({ group_by: e.target.value })}
-              options={def.group_by}
-            />
-          ) : null}
-          {FILTER_KEYS.filter((f) => def.filters.includes(f)).map((f) => (
-            <FilterSelect
-              key={f}
-              filter={f}
-              value={params[f] ?? ""}
-              onChange={(v) => set({ [f]: v })}
-            />
-          ))}
-          {def.custom_field_entities?.length ? (
-            <CustomFieldFilter
-              entities={def.custom_field_entities}
-              value={params.custom_field ?? ""}
-              onChange={(v) => set({ custom_field: v })}
-            />
-          ) : null}
-          <TextField
-            label={t("reporting.currency")}
-            hint={t("reporting.currencyHint")}
-            value={params.currency ?? ""}
-            maxLength={3}
-            onChange={(e) => {
-              const v = e.target.value.toUpperCase();
-              if (v.length === 0 || v.length === 3) set({ currency: v });
-            }}
-          />
-        </form>
-      ) : null}
-      {report.isError ? (
-        <Alert tone="danger" title={t("reporting.runError")}>
-          {Object.values(errors).join(" ")}
-        </Alert>
-      ) : null}
-      {report.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      {result ? (
-        <>
-          {result.period ? (
-            <p className="text-sm text-muted-foreground">
-              {t("reporting.showing", {
-                from: formatDate(String(result.period.from)),
-                to: formatDate(String(result.period.to)),
-              })}
-            </p>
-          ) : null}
-          {chart && chartData.length ? (
-            <Chart
-              kind={chart.kind}
-              data={chartData}
-              series={chart.y.map((k) => ({ key: k, label: labels[k] ?? k }))}
-              label={t("reporting.chartOf", { name: title })}
-              xLabel={labels[chart.x] ?? chart.x}
-              stacked={chart.stacked}
-              srTable={false}
-            />
-          ) : null}
-          <ResultTable result={result} caption={title} />
-          {result.notes.map((n) => (
-            <p key={n} className="text-sm text-muted-foreground">
-              {n}
-            </p>
-          ))}
-          {canExport ? (
-            <div className="flex flex-wrap gap-3 text-sm">
-              <span>{t("reporting.export")}:</span>
+    <div>
+      <RecordHeader
+        back={<a href="/analytics">{t("reporting.library")}</a>}
+        title={title}
+        description={def?.description}
+        actions={
+          canExport && result ? (
+            <div
+              role="group"
+              aria-label={t("reporting.export")}
+              className="flex flex-wrap items-center gap-2"
+            >
+              <span className="text-sm text-muted-foreground">{t("reporting.export")}</span>
               {(["csv", "xlsx", "pdf"] as const).map((fmt) => (
-                <a key={fmt} href={exportHref(fmt)} className={linkClass} download>
+                <a
+                  key={fmt}
+                  href={exportHref(fmt)}
+                  className={buttonClass({ variant: "secondary", size: "sm" })}
+                  download
+                >
                   {t(`reporting.formats.${fmt}`)}
                 </a>
               ))}
             </div>
-          ) : null}
-          <SaveView reportKey={reportKey} params={result.params as Record<string, string>} />
-        </>
-      ) : null}
-    </section>
+          ) : null
+        }
+      />
+      <div className="space-y-6">
+        {def ? (
+          <form aria-label={t("reporting.filtersLabel")} onSubmit={(e) => e.preventDefault()}>
+            <div className="flex flex-wrap items-start gap-2">
+              {def.period ? (
+                <PeriodFields
+                  period={params.period ?? def.default_period}
+                  from={params.from ?? ""}
+                  to={params.to ?? ""}
+                  onChange={(p) => set({ period: p.period, from: p.from, to: p.to })}
+                />
+              ) : null}
+              {def.group_by.length ? (
+                <SelectField
+                  size="sm"
+                  hideLabel
+                  label={t("reporting.groupBy")}
+                  value={params.group_by ?? def.group_by[0]?.value ?? ""}
+                  onChange={(e) => set({ group_by: e.target.value })}
+                  options={def.group_by.map((g) => ({
+                    value: g.value,
+                    label: t("designS9a.groupByOption", { name: g.label }),
+                  }))}
+                />
+              ) : null}
+              {FILTER_KEYS.filter((f) => def.filters.includes(f)).map((f) => (
+                <FilterSelect
+                  key={f}
+                  filter={f}
+                  value={params[f] ?? ""}
+                  onChange={(v) => set({ [f]: v })}
+                />
+              ))}
+              {def.custom_field_entities?.length ? (
+                <CustomFieldFilter
+                  entities={def.custom_field_entities}
+                  value={params.custom_field ?? ""}
+                  onChange={(v) => set({ custom_field: v })}
+                  hintId={hintId}
+                  onKeyChange={setFieldChosen}
+                />
+              ) : null}
+              <div className="w-44">
+                <TextField
+                  size="sm"
+                  hideLabel
+                  label={t("reporting.currency")}
+                  placeholder={t("designS9a.currencyPlaceholder")}
+                  aria-describedby={hintId}
+                  value={currency}
+                  maxLength={3}
+                  onChange={(e) => {
+                    const v = e.target.value.toUpperCase();
+                    setCurrency(v);
+                    if (v.length === 0 || v.length === 3) set({ currency: v });
+                  }}
+                />
+              </div>
+            </div>
+            <p id={hintId} className="mt-2 text-xs text-muted-foreground">
+              {t("reporting.currencyHint")}
+              {fieldChosen ? ` ${t("reportingG5.customFieldHint")}` : ""}
+            </p>
+          </form>
+        ) : null}
+        {report.isError ? (
+          <Alert tone="danger" title={t("reporting.runError")}>
+            {Object.values(errors).join(" ")}
+          </Alert>
+        ) : null}
+        {report.isPending ? (
+          <RuledPanel label={title} flush>
+            <PanelLoading label={t("grid.loading")} />
+          </RuledPanel>
+        ) : null}
+        {result ? (
+          <ResultPanel
+            result={result}
+            title={title}
+            footer={
+              <SaveView reportKey={reportKey} params={result.params as Record<string, string>} />
+            }
+          />
+        ) : null}
+      </div>
+    </div>
   );
 }
 
@@ -901,13 +1336,19 @@ export function ReportViewPage({ reportKey }: { reportKey: string }) {
 
 const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 
-/** Schedule a saved report view or (gap G5) a custom report (``kind: "custom"``). */
+/** Schedule a saved report view or (gap G5) a custom report (``kind: "custom"``), opened in
+ * place under the report's row. */
 export function ScheduleForm({
   saved,
   onDone,
+  onCancel,
+  narrow = false,
 }: {
   saved: { id: string; name: string; kind?: "saved" | "custom" };
   onDone: () => void;
+  onCancel?: () => void;
+  /** One field per line (in a side column). */
+  narrow?: boolean;
 }) {
   const { t } = useTranslation();
   const [frequency, setFrequency] = useState("weekly");
@@ -941,13 +1382,18 @@ export function ScheduleForm({
   return (
     <form
       aria-label={t("reporting.scheduleFor", { name: saved.name })}
-      className="space-y-3 rounded-md border border-border p-3"
+      className="mt-3 space-y-3 border-t border-rule pt-3"
       onSubmit={(e) => {
         e.preventDefault();
         create.mutate();
       }}
     >
-      <div className="flex flex-wrap items-end gap-3">
+      <div
+        className={cn(
+          "grid items-start gap-x-4 gap-y-3",
+          !narrow && "sm:grid-cols-2 lg:grid-cols-4",
+        )}
+      >
         <SelectField
           label={t("reporting.frequency")}
           value={frequency}
@@ -973,6 +1419,7 @@ export function ScheduleForm({
             type="number"
             min={1}
             max={28}
+            className="w-24 text-right tabular-nums"
             label={t("reporting.dayOfMonth")}
             value={day}
             onChange={(e) => setDay(e.target.value)}
@@ -981,6 +1428,7 @@ export function ScheduleForm({
         ) : null}
         <TextField
           type="time"
+          className="tabular-nums"
           label={t("reporting.time")}
           value={time}
           onChange={(e) => setTime(e.target.value)}
@@ -997,30 +1445,41 @@ export function ScheduleForm({
         />
       </div>
       <fieldset>
-        <legend className="text-sm font-medium">{t("reporting.recipients")}</legend>
-        {(staff.data ?? []).map((s) => (
-          <label key={s.id} className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={recipients.includes(s.id)}
-              onChange={(e) =>
-                setRecipients(
-                  e.target.checked ? [...recipients, s.id] : recipients.filter((r) => r !== s.id),
-                )
-              }
-            />
-            {s.name} ({s.email})
-          </label>
-        ))}
+        <legend className="mb-1 text-sm font-medium">{t("reporting.recipients")}</legend>
+        <div className={cn("grid gap-x-4 gap-y-1", !narrow && "sm:grid-cols-2")}>
+          {(staff.data ?? []).map((s) => (
+            <label key={s.id} className="flex min-w-0 items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={recipients.includes(s.id)}
+                onChange={(e) =>
+                  setRecipients(
+                    e.target.checked ? [...recipients, s.id] : recipients.filter((r) => r !== s.id),
+                  )
+                }
+              />
+              <span className="min-w-0 break-words">
+                {s.name} ({s.email})
+              </span>
+            </label>
+          ))}
+        </div>
         {errors.recipients ? (
-          <p className="text-sm text-destructive" role="alert">
+          <p className="mt-1 text-xs text-danger" role="alert">
             {errors.recipients}
           </p>
         ) : null}
       </fieldset>
-      <Button type="submit" disabled={create.isPending}>
-        {t("reporting.schedule")}
-      </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button type="submit" size="sm" loading={create.isPending}>
+          {t("reporting.schedule")}
+        </Button>
+        {onCancel ? (
+          <Button type="button" size="sm" variant="ghost" className={quietGhost} onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        ) : null}
+      </div>
     </form>
   );
 }
@@ -1029,6 +1488,7 @@ export function SavedReportsPage() {
   const { t } = useTranslation();
   const locale = useLocale();
   const queryClient = useQueryClient();
+  const phone = useIsPhone();
   const canSchedule = usePermission("reporting.schedule.manage");
   const canExport = usePermission("reporting.export");
   const [scheduling, setScheduling] = useState<string | null>(null);
@@ -1041,6 +1501,12 @@ export function SavedReportsPage() {
     enabled: canSchedule,
     queryFn: async () => unwrap(await api.GET("/api/v1/scheduled-reports")),
   });
+  const defs = useQuery({
+    queryKey: ["reports"],
+    enabled: canExport,
+    queryFn: async () => unwrap(await api.GET("/api/v1/reporting/reports")),
+  });
+  const reportTitle = (key: string) => defs.data?.find((d) => d.key === key)?.title ?? key;
   const runs = useQuery({
     queryKey: ["report-runs"],
     enabled: canExport,
@@ -1075,114 +1541,167 @@ export function SavedReportsPage() {
   });
   const viewHref = (s: Saved) =>
     `/analytics/${s.report_key}?${new URLSearchParams((s.params ?? {}) as Record<string, string>).toString()}`;
+  const savedRows = saved.data?.results ?? [];
+  const scheduledRows = scheduled.data?.results ?? [];
+  const runRows = runs.data?.results ?? [];
   return (
-    <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">{t("reporting.savedTitle")}</h1>
-      <ReportsNav />
-      <section aria-labelledby="saved-views" className="space-y-2">
-        <h2 id="saved-views" className="text-base font-semibold">
-          {t("reporting.savedViews")}
-        </h2>
-        {saved.data?.results.length === 0 ? <p>{t("reporting.noSaved")}</p> : null}
-        <ul className="space-y-3">
-          {(saved.data?.results ?? []).map((s) => (
-            <li key={s.id} className="space-y-2 rounded-lg border border-border p-3">
-              <div className="flex flex-wrap items-center gap-3">
-                <a href={viewHref(s)} className={`${linkClass} font-medium`}>
-                  {s.name}
-                </a>
-                <span className="text-sm text-muted-foreground">
-                  {s.shared
-                    ? t("reporting.sharedBy", { name: s.owner_name })
-                    : t("reporting.private")}
-                </span>
-                {canSchedule && s.is_mine ? (
-                  <Button size="sm" variant="secondary" onClick={() => setScheduling(s.id)}>
-                    {t("reporting.scheduleEmail")}
-                  </Button>
+    <ReportsPage title={t("reporting.savedTitle")} description={t("designS9a.savedHelp")}>
+      <RuledPanel title={t("reporting.savedViews")} titleId="saved-views" flush>
+        {saved.isPending ? (
+          <PanelLoading label={t("grid.loading")} />
+        ) : savedRows.length === 0 ? (
+          <PanelEmpty>{t("reporting.noSaved")}</PanelEmpty>
+        ) : (
+          <PanelRows>
+            {savedRows.map((s) => (
+              <PanelRow key={s.id}>
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                  <div className="min-w-0">
+                    <a href={viewHref(s)} className="font-medium hover:underline">
+                      {s.name}
+                    </a>
+                    <p className="text-xs text-muted-foreground">
+                      {s.shared
+                        ? t("reporting.sharedBy", { name: s.owner_name })
+                        : t("reporting.private")}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {canSchedule && s.is_mine ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        aria-expanded={scheduling === s.id}
+                        onClick={() => setScheduling(scheduling === s.id ? null : s.id)}
+                      >
+                        {t("reporting.scheduleEmail")}
+                      </Button>
+                    ) : null}
+                    {s.is_mine ? (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className={quietGhost}
+                        onClick={() => removeSaved.mutate(s.id)}
+                        aria-label={t("reporting.deleteView", { name: s.name })}
+                      >
+                        {t("reporting.delete")}
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
+                {scheduling === s.id ? (
+                  <ScheduleForm
+                    saved={s}
+                    onCancel={() => setScheduling(null)}
+                    onDone={() => {
+                      setScheduling(null);
+                      void queryClient.invalidateQueries({ queryKey: ["scheduled-reports"] });
+                    }}
+                  />
                 ) : null}
-                {s.is_mine ? (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => removeSaved.mutate(s.id)}
-                    aria-label={t("reporting.deleteView", { name: s.name })}
-                  >
-                    {t("reporting.delete")}
-                  </Button>
-                ) : null}
-              </div>
-              {scheduling === s.id ? (
-                <ScheduleForm
-                  saved={s}
-                  onDone={() => {
-                    setScheduling(null);
-                    void queryClient.invalidateQueries({ queryKey: ["scheduled-reports"] });
-                  }}
-                />
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      </section>
-      {canSchedule ? (
-        <section aria-labelledby="scheduled" className="space-y-2">
-          <h2 id="scheduled" className="text-base font-semibold">
-            {t("reporting.scheduledTitle")}
-          </h2>
-          {scheduled.data?.results.length === 0 ? <p>{t("reporting.noScheduled")}</p> : null}
-          <ul className="space-y-2">
-            {(scheduled.data?.results ?? []).map((s) => (
-              <li key={s.id} className="flex flex-wrap items-center gap-3 text-sm">
-                <span className="font-medium">{s.report_name}</span>
-                {s.custom_report ? (
-                  <span className="text-muted-foreground">{t("reportingG5.customReport")}</span>
-                ) : null}
-                <span>
-                  {t(`reporting.frequencies.${s.frequency}`)} · {s.time} ·{" "}
-                  {t(`reporting.formats.${s.format ?? "csv"}`)}
-                </span>
-                <span className="text-muted-foreground">
-                  {s.recipient_details.map((r) => r.name).join(", ")}
-                </span>
-                <Button size="sm" variant="secondary" onClick={() => toggle.mutate(s)}>
-                  {s.enabled ? t("reporting.pause") : t("reporting.resume")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => removeScheduled.mutate(s.id)}
-                  aria-label={t("reporting.deleteSchedule", { name: s.report_name })}
-                >
-                  {t("reporting.delete")}
-                </Button>
-              </li>
+              </PanelRow>
             ))}
-          </ul>
-        </section>
+          </PanelRows>
+        )}
+      </RuledPanel>
+      {canSchedule ? (
+        <RuledPanel title={t("reporting.scheduledTitle")} titleId="scheduled" flush>
+          {scheduled.isPending ? (
+            <PanelLoading label={t("grid.loading")} />
+          ) : scheduledRows.length === 0 ? (
+            <PanelEmpty>{t("reporting.noScheduled")}</PanelEmpty>
+          ) : (
+            <PanelRows>
+              {scheduledRows.map((s) => (
+                <PanelRow
+                  key={s.id}
+                  className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium">{s.report_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {[
+                        s.enabled ? null : t("designS9a.paused"),
+                        s.custom_report ? t("reportingG5.customReport") : null,
+                        t(`reporting.frequencies.${s.frequency}`),
+                        s.time,
+                        t(`reporting.formats.${s.format ?? "csv"}`),
+                        s.recipient_details.map((r) => r.name).join(", "),
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => toggle.mutate(s)}>
+                      {s.enabled ? t("reporting.pause") : t("reporting.resume")}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className={quietGhost}
+                      onClick={() => removeScheduled.mutate(s.id)}
+                      aria-label={t("reporting.deleteSchedule", { name: s.report_name })}
+                    >
+                      {t("reporting.delete")}
+                    </Button>
+                  </div>
+                </PanelRow>
+              ))}
+            </PanelRows>
+          )}
+        </RuledPanel>
       ) : null}
       {canExport ? (
-        <section aria-labelledby="runs" className="space-y-2">
-          <h2 id="runs" className="text-base font-semibold">
-            {t("reporting.runsTitle")}
-          </h2>
-          <ul className="space-y-1 text-sm">
-            {(runs.data?.results ?? []).map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center gap-3">
-                <span>{formatDateTime(r.created_at, locale)}</span>
-                <span>{r.saved_report_name ?? r.report_key}</span>
-                <span>{t(`reporting.runStatus.${r.status}`)}</span>
-                <span>{t("reporting.rows", { count: r.row_count })}</span>
-                {r.file_name ? (
-                  <Button size="sm" variant="secondary" onClick={() => download.mutate(r)}>
-                    {t("reporting.download")}
-                  </Button>
-                ) : null}
-              </li>
+        <RuledPanel title={t("reporting.runsTitle")} titleId="runs" flush>
+          <RuledTable
+            caption={t("reporting.runsTitle")}
+            tableClassName="[&_td]:align-middle"
+            loading={runs.isPending}
+            loadingLabel={t("grid.loading")}
+            empty={!runs.isPending && runRows.length === 0 ? t("designS9a.noRuns") : undefined}
+            columns={[
+              { key: "report", header: t("designS9a.report"), width: "min-w-40" },
+              ...(phone ? [] : [{ key: "when", header: t("designS9a.when") }]),
+              { key: "status", header: t("designS9a.status") },
+              { key: "rows", header: t("designS9a.rowsHeading"), end: true },
+              { key: "actions", header: t("common.actions"), hidden: true },
+            ]}
+          >
+            {runRows.map((r) => (
+              <tr key={r.id}>
+                <td>
+                  <span className="font-medium">
+                    {r.saved_report_name ?? reportTitle(r.report_key)}
+                  </span>
+                  {phone ? (
+                    <span className="block text-xs text-muted-foreground tabular-nums">
+                      {formatDateTime(r.created_at, locale)}
+                    </span>
+                  ) : null}
+                </td>
+                {phone ? null : (
+                  <td className="whitespace-nowrap tabular-nums">
+                    {formatDateTime(r.created_at, locale)}
+                  </td>
+                )}
+                <td className={r.status === "failed" ? "font-medium text-danger" : undefined}>
+                  {t(`reporting.runStatus.${r.status}`)}
+                </td>
+                <td className={figureCell}>{r.row_count}</td>
+                <td className="text-right">
+                  {r.file_name ? (
+                    <Button size="sm" variant="secondary" onClick={() => download.mutate(r)}>
+                      {t("reporting.download")}
+                    </Button>
+                  ) : null}
+                </td>
+              </tr>
             ))}
-          </ul>
-        </section>
+          </RuledTable>
+        </RuledPanel>
       ) : null}
-    </section>
+    </ReportsPage>
   );
 }

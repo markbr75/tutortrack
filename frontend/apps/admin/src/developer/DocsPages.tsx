@@ -1,14 +1,24 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, Tabs } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  cn,
+  PageHeader,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  Spinner,
+  Tabs,
+} from "@tutortrack/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { api } from "../api";
-import { Card } from "./DeveloperPages";
-
-const pre = "overflow-x-auto rounded-md bg-muted p-3 text-xs";
-const linkClass = "underline underline-offset-2";
+import { PanelLoading } from "../billing/moneyUi";
+import { codeBlock, DocPanel } from "./DeveloperPages";
 
 const SAMPLES = {
   curl: `curl https://app.tutortrack.app/api/v1/clients \\
@@ -74,6 +84,25 @@ function download(name: string, data: unknown) {
   URL.revokeObjectURL(url);
 }
 
+/**
+ * Headers, scopes, fields and paths in the guides' prose, set as code like the other
+ * developer tabs. They are API names, so they read the same in every language.
+ */
+const CODE_TOKENS =
+  /(Authorization: Bearer <token>|Idempotency-Key|Webhook-(?:Id|Event|Signature)|X-RateLimit-(?:Limit|Remaining|Reset)|Retry-After|\bDeprecation\b|\bSunset\b|\/api\/v1\/|\b[a-z_]+:(?:read|write)\b|\bpage_size\b|\boccurred_at\b|\bnext\b(?= link)|\bnull\b|\bv1\b(?= value))/g;
+
+function withCode(text: string): ReactNode[] {
+  return text.split(CODE_TOKENS).map((part, i) =>
+    i % 2 === 1 ? (
+      <code key={i} className="rounded-sm bg-muted px-1 font-mono text-xs whitespace-nowrap">
+        {part}
+      </code>
+    ) : (
+      part
+    ),
+  );
+}
+
 /** Developer portal: guides, code samples, the public OpenAPI, Postman and the changelog. */
 export function DeveloperDocsPage() {
   const { t, i18n } = useTranslation();
@@ -91,116 +120,178 @@ export function DeveloperDocsPage() {
     onSuccess: (data) => download("tutortrack-openapi.json", data),
   });
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("developer.docs.title")}</h1>
-      <p className="text-sm text-muted-foreground">{t("developer.docs.intro")}</p>
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="secondary" onClick={() => openapi.mutate()}>
-          {t("developer.docs.openapi")}
-        </Button>
-        <Button type="button" variant="secondary" onClick={() => postman.mutate()}>
-          {t("developer.docs.postman")}
-        </Button>
-        <a className={linkClass} href="/api/v1/redoc/">
-          {t("developer.docs.reference")}
-        </a>
-      </div>
-      <Card title={t("developer.docs.quickstart")}>
-        <Tabs
-          label={t("developer.docs.language")}
-          tabs={[
-            { key: "curl", label: "curl" },
-            { key: "python", label: "Python" },
-            { key: "js", label: "JavaScript" },
-          ]}
-          value={lang}
-          onChange={setLang}
-        >
-          <pre className={pre}>{SAMPLES[lang]}</pre>
-        </Tabs>
-      </Card>
-      {GUIDES.map((key) => (
-        <Card key={key} title={t(`developer.docs.guides.${key}.title`)}>
-          <p className="text-sm">{t(`developer.docs.guides.${key}.body`)}</p>
-          {key === "webhooks" ? (
-            <>
-              <pre className={pre}>
-                Webhook-Signature:
-                t=1760090400,v1=5257a869e7ecebeda32affa62cdca3fa51cad7e77a0e56ff536d0ce8e108d8bd
+    <div>
+      <PageHeader
+        title={t("developer.docs.title")}
+        description={t("developer.docs.intro")}
+        actions={
+          <>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              loading={openapi.isPending}
+              onClick={() => openapi.mutate()}
+            >
+              {t("developer.docs.openapi")}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              loading={postman.isPending}
+              onClick={() => postman.mutate()}
+            >
+              {t("developer.docs.postman")}
+            </Button>
+            <a className={buttonClass({ variant: "secondary", size: "sm" })} href="/api/v1/redoc/">
+              {t("developer.docs.reference")}
+            </a>
+          </>
+        }
+      />
+      <div className="max-w-4xl space-y-6">
+        <RuledPanel title={t("developer.docs.quickstart")} flush>
+          <Tabs
+            label={t("developer.docs.language")}
+            className="pt-1 [&>[role=tablist]]:mb-0 [&>[role=tablist]]:px-5 [&>[role=tablist]]:[mask-image:none]"
+            tabs={[
+              { key: "curl", label: "curl" },
+              { key: "python", label: "Python" },
+              { key: "js", label: "JavaScript" },
+            ]}
+            value={lang}
+            onChange={setLang}
+          >
+            <div className="px-5 py-4">
+              <pre className={codeBlock} tabIndex={0}>
+                {SAMPLES[lang]}
               </pre>
-              <h3 className="text-sm font-medium">Python</h3>
-              <pre className={pre}>{VERIFY.python}</pre>
-              <h3 className="text-sm font-medium">Node.js</h3>
-              <pre className={pre}>{VERIFY.js}</pre>
-            </>
-          ) : null}
-        </Card>
-      ))}
-      <Card title={t("developer.docs.changelog")}>
-        {!changelog.data ? (
-          <Spinner label={t("grid.loading")} />
-        ) : (
-          <ul className="space-y-2 text-sm">
-            {changelog.data.map((entry) => (
-              <li key={`${entry.released_on}-${entry.title}`}>
-                <span className="font-medium">{formatDate(entry.released_on, i18n.language)}</span>{" "}
-                · {entry.title} — {entry.description}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+            </div>
+          </Tabs>
+        </RuledPanel>
+        {GUIDES.map((key) => (
+          <DocPanel key={key} title={t(`developer.docs.guides.${key}.title`)}>
+            <p className="max-w-prose">{withCode(t(`developer.docs.guides.${key}.body`))}</p>
+            {key === "webhooks" ? (
+              <>
+                <pre className={codeBlock} tabIndex={0}>
+                  {
+                    "Webhook-Signature: t=1760090400,v1=5257a869e7ecebeda32affa62cdca3fa51cad7e77a0e56ff536d0ce8e108d8bd"
+                  }
+                </pre>
+                <h3 className="pt-1 font-medium">Python</h3>
+                <pre className={codeBlock} tabIndex={0}>
+                  {VERIFY.python}
+                </pre>
+                <h3 className="pt-1 font-medium">Node.js</h3>
+                <pre className={codeBlock} tabIndex={0}>
+                  {VERIFY.js}
+                </pre>
+              </>
+            ) : null}
+          </DocPanel>
+        ))}
+        <RuledPanel title={t("developer.docs.changelog")} flush>
+          {!changelog.data ? (
+            <PanelLoading label={t("grid.loading")} />
+          ) : (
+            <PanelRows>
+              {changelog.data.map((entry) => (
+                <PanelRow key={`${entry.released_on}-${entry.title}`}>
+                  <p className="font-medium">{entry.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="tabular-nums">
+                      {formatDate(entry.released_on, i18n.language)}
+                    </span>
+                    {" · "}
+                    {entry.description}
+                  </p>
+                </PanelRow>
+              ))}
+            </PanelRows>
+          )}
+        </RuledPanel>
+      </div>
     </div>
   );
 }
 
-/** Settings → Integrations marketplace (FR-27-5). */
+/** Settings → Integrations directory (FR-27-5): each category a ruled panel of integrations,
+ * each with its status in words and the way to connect or manage it. */
 export function MarketplacePage() {
   const { t } = useTranslation();
   const entries = useQuery({
     queryKey: ["marketplace"],
     queryFn: async () => unwrap(await api.GET("/api/v1/developer/marketplace")),
   });
-  if (!entries.data) return <Spinner label={t("grid.loading")} />;
-  const categories = Array.from(new Set(entries.data.map((e) => e.category)));
+  const categories = Array.from(new Set((entries.data ?? []).map((e) => e.category)));
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("marketplace.title")}</h1>
-      <p className="text-sm text-muted-foreground">{t("marketplace.intro")}</p>
-      {categories.map((category) => (
-        <section key={category} aria-labelledby={`mk-${category}`} className="space-y-2">
-          <h2 id={`mk-${category}`} className="font-semibold">
-            {t(`marketplace.categories.${category}`, {
-              defaultValue: t(`gapG6.categories.${category}`, { defaultValue: category }),
-            })}
-          </h2>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {entries.data
-              .filter((e) => e.category === category)
-              .map((entry) => (
-                <li key={entry.key} className="space-y-1 rounded-lg border border-border p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium">{entry.name}</span>
-                    <span className="rounded bg-muted px-2 py-0.5 text-xs">
-                      {entry.status === "needs_attention"
-                        ? t("gapG6.needsAttention")
-                        : t(`marketplace.status.${entry.status}`)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{entry.description}</p>
-                  {entry.detail ? <p className="text-sm">{entry.detail}</p> : null}
-                  {entry.settings_path && entry.status !== "coming_soon" ? (
-                    <a href={entry.settings_path} className={`${linkClass} text-sm`}>
-                      {entry.status === "connected"
-                        ? t("marketplace.manage", { name: entry.name })
-                        : t("marketplace.connect", { name: entry.name })}
-                    </a>
-                  ) : null}
-                </li>
-              ))}
-          </ul>
-        </section>
-      ))}
+    <div>
+      <PageHeader title={t("settingsNav.marketplace")} description={t("marketplace.intro")} />
+      <div className="space-y-6">
+        {!entries.data ? (
+          <RuledPanel label={t("marketplace.title")} flush>
+            <PanelLoading label={t("grid.loading")} />
+          </RuledPanel>
+        ) : null}
+        {categories.map((category) => {
+          const items = (entries.data ?? []).filter((e) => e.category === category);
+          return (
+            <RuledPanel
+              key={category}
+              titleId={`mk-${category}`}
+              title={t(`marketplace.categories.${category}`, {
+                defaultValue: t(`gapG6.categories.${category}`, { defaultValue: category }),
+              })}
+              flush
+            >
+              <PanelRows>
+                {items.map((entry) => (
+                  <PanelRow
+                    key={entry.key}
+                    className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium">{entry.name}</p>
+                      {/* The status leads the one caption line, so it sits in the same place
+                          on every row whatever the width of the button beside it. */}
+                      <p className="text-xs text-muted-foreground">
+                        <span
+                          className={cn(
+                            entry.status === "needs_attention" && "font-semibold text-margin",
+                            entry.status === "connected" && "font-medium text-foreground",
+                          )}
+                        >
+                          {entry.status === "needs_attention"
+                            ? t("gapG6.needsAttention")
+                            : t(`marketplace.status.${entry.status}`)}
+                        </span>
+                        {" · "}
+                        {entry.description}
+                        {entry.detail ? ` ${entry.detail}` : ""}
+                      </p>
+                    </div>
+                    {entry.settings_path && entry.status !== "coming_soon" ? (
+                      <a
+                        href={entry.settings_path}
+                        className={cn(
+                          buttonClass({ variant: "secondary", size: "sm" }),
+                          "shrink-0 self-start sm:self-auto sm:whitespace-nowrap",
+                        )}
+                      >
+                        {entry.status === "connected"
+                          ? t("marketplace.manage", { name: entry.name })
+                          : t("marketplace.connect", { name: entry.name })}
+                      </a>
+                    ) : null}
+                  </PanelRow>
+                ))}
+              </PanelRows>
+            </RuledPanel>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -239,44 +330,48 @@ export function OAuthConsentPage() {
   });
   if (consent.error)
     return (
-      <Alert tone="danger" title={t("oauth.invalidTitle")}>
-        {consent.error.message}
-      </Alert>
+      <div className="mx-auto max-w-lg">
+        <Alert tone="danger" title={t("oauth.invalidTitle")}>
+          {consent.error.message}
+        </Alert>
+      </div>
     );
   if (!consent.data) return <Spinner label={t("grid.loading")} />;
   const c = consent.data;
   return (
-    <div className="mx-auto max-w-lg space-y-4">
-      <h1 className="text-2xl font-semibold">
-        {t("oauth.title", { app: c.application.name, organisation: c.organisation_name })}
-      </h1>
-      {c.application.description ? <p className="text-sm">{c.application.description}</p> : null}
-      <section aria-labelledby="oauth-scopes">
-        <h2 id="oauth-scopes" className="font-medium">
-          {t("oauth.wants")}
-        </h2>
-        <ul className="list-disc pl-5 text-sm">
+    <div className="mx-auto max-w-lg">
+      <PageHeader
+        title={t("oauth.title", { app: c.application.name, organisation: c.organisation_name })}
+        description={c.application.description || undefined}
+      />
+      <RuledPanel title={t("oauth.wants")} titleId="oauth-scopes" flush>
+        <PanelRows>
           {c.scopes.map((s) => (
-            <li key={s.key}>{s.description}</li>
+            <PanelRow key={s.key}>{s.description}</PanelRow>
           ))}
-        </ul>
-      </section>
-      <p className="text-xs text-muted-foreground">
-        {t("oauth.redirectNotice", { url: c.redirect_uri })}
-      </p>
-      <div className="flex gap-2">
-        <Button type="button" onClick={() => decide.mutate(true)} disabled={decide.isPending}>
-          {t("oauth.allow")}
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => decide.mutate(false)}
-          disabled={decide.isPending}
-        >
-          {t("oauth.deny")}
-        </Button>
-      </div>
+        </PanelRows>
+        <p className="border-t border-rule px-5 py-3 text-xs break-words text-muted-foreground">
+          {t("oauth.redirectNotice", { url: c.redirect_uri })}
+        </p>
+        <PanelFooter>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => decide.mutate(false)}
+            disabled={decide.isPending}
+          >
+            {t("oauth.deny")}
+          </Button>
+          <Button
+            type="button"
+            onClick={() => decide.mutate(true)}
+            loading={decide.isPending && decide.variables === true}
+            disabled={decide.isPending}
+          >
+            {t("oauth.allow")}
+          </Button>
+        </PanelFooter>
+      </RuledPanel>
     </div>
   );
 }
