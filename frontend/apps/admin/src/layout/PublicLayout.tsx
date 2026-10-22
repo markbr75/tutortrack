@@ -1,6 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { applyBrandTheme, cn, CookieBanner, Spinner } from "@tutortrack/ui";
+import { applyBrandFavicon, applyBrandTheme, cn, CookieBanner, Spinner } from "@tutortrack/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, type ReactNode } from "react";
 
@@ -41,6 +41,10 @@ export function BrandLine({
   const brand = usePublicBranding(!tutortrack);
   const data = tutortrack ? undefined : brand.data;
   const waiting = !tutortrack && brand.isPending;
+  // The tab carries the tenant's favicon (and only that: the page keeps Source Sans); leaving
+  // for one of TutorTrack's own pages puts TutorTrack's back.
+  const favicon = data?.favicon_url;
+  useEffect(() => (favicon ? applyBrandFavicon(favicon) : undefined), [favicon]);
   return (
     <div className="mb-5 flex min-h-8 items-center border-b border-border pb-4">
       {waiting ? null : data?.logo_url ? (

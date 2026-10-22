@@ -1,5 +1,7 @@
 import { css, html, LitElement } from "lit";
 
+import { t } from "./strings";
+
 const COOKIE = "tt_consent";
 const VERSION = 1;
 
@@ -27,8 +29,10 @@ export function readChoice(): CookieChoice | null {
 /**
  * `<tt-cookie-consent>`: cookie banner for tenant websites embedding TutorTrack widgets
  * (E29 FR-29-3). Same cookie as the apps; emits `tt-cookie-consent` on window with the
- * choice so host pages can load analytics only when allowed. Text is configurable through
- * attributes so tenants can translate it.
+ * choice so host pages can load analytics only when allowed. The text follows the page's
+ * locale (see strings.ts: `data-locale` on the loader script, else the page's `lang`), and the
+ * `heading`, `body`, `accept-label` and `reject-label` attributes, or
+ * `window.TutorTrackWidgets.messages`, can still replace any of it.
  */
 export class TtCookieConsent extends LitElement {
   static properties = {
@@ -83,19 +87,14 @@ export class TtCookieConsent extends LitElement {
     }
   `;
 
-  declare heading: string;
-  declare body: string;
-  declare acceptLabel: string;
-  declare rejectLabel: string;
+  declare heading: string | undefined;
+  declare body: string | undefined;
+  declare acceptLabel: string | undefined;
+  declare rejectLabel: string | undefined;
   declare open: boolean;
 
   constructor() {
     super();
-    this.heading = "Cookies";
-    this.body =
-      "We use necessary cookies to make this site work. With your permission we also use analytics and marketing cookies.";
-    this.acceptLabel = "Accept all";
-    this.rejectLabel = "Reject non-essential";
     this.open = false;
   }
 
@@ -120,12 +119,13 @@ export class TtCookieConsent extends LitElement {
 
   render() {
     if (!this.open) return html``;
-    return html`<section role="region" aria-label=${this.heading}>
-      <strong>${this.heading}</strong>
-      <div>${this.body}</div>
+    const heading = this.heading || t("cookieHeading");
+    return html`<section role="region" aria-label=${heading}>
+      <strong>${heading}</strong>
+      <div>${this.body || t("cookieBody")}</div>
       <div class="actions">
-        <button @click=${() => this.choose(true)}>${this.acceptLabel}</button>
-        <button @click=${() => this.choose(false)}>${this.rejectLabel}</button>
+        <button @click=${() => this.choose(true)}>${this.acceptLabel || t("cookieAccept")}</button>
+        <button @click=${() => this.choose(false)}>${this.rejectLabel || t("cookieReject")}</button>
       </div>
     </section>`;
   }

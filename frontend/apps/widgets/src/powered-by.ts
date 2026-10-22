@@ -1,5 +1,7 @@
 import { css, html, LitElement } from "lit";
 
+import { t } from "./strings";
+
 /** `<tt-powered-by org="Bright Minds">`: reference widget proving the build and theming. */
 export class TtPoweredBy extends LitElement {
   static properties = { org: { type: String } };
@@ -27,7 +29,7 @@ export class TtPoweredBy extends LitElement {
   render() {
     const label = this.org ? `${this.org} · ` : "";
     return html`<span
-      >${label}Powered by
+      >${label}${t("poweredBy")}
       <a href="https://tutortrack.app" target="_blank" rel="noopener">TutorTrack</a></span
     >`;
   }

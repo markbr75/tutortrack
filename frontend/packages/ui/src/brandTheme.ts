@@ -36,10 +36,43 @@ export function hexToHslTriplet(hex: string): string | null {
   return `${Math.round(h)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 }
 
-/** Apply the brand; `full` also sets the font and favicon (portals and public pages). */
+/**
+ * Point the browser tab's icon at the tenant's favicon. Returns a function that puts the
+ * previous icon back (or takes away the one it added), for pages that hand back to TutorTrack.
+ */
+export function applyBrandFavicon(url: string): () => void {
+  const existing = document.querySelector<HTMLLinkElement>("link[rel~=icon]");
+  const icon = existing ?? document.createElement("link");
+  const previous = { href: icon.getAttribute("href"), type: icon.getAttribute("type") };
+  if (!existing) {
+    icon.rel = "icon";
+    document.head.append(icon);
+  }
+  // The tenant's file may be an .ico, .png or .svg: let the browser sniff it.
+  icon.removeAttribute("type");
+  icon.href = url;
+  return () => {
+    if (!existing) {
+      icon.remove();
+      return;
+    }
+    if (previous.href === null) icon.removeAttribute("href");
+    else icon.setAttribute("href", previous.href);
+    if (previous.type !== null) icon.setAttribute("type", previous.type);
+  };
+}
+
+/**
+ * Apply the brand's colour. `full` also sets the font and favicon (the portal); `favicon`
+ * sets the favicon alone (public pages, which keep Source Sans).
+ */
 export function applyBrandTheme(
   brand: BrandTheme,
-  { full = false, root = document.documentElement }: { full?: boolean; root?: HTMLElement } = {},
+  {
+    full = false,
+    favicon = false,
+    root = document.documentElement,
+  }: { full?: boolean; favicon?: boolean; root?: HTMLElement } = {},
 ): void {
   const primary = hexToHslTriplet(brand.primary_colour);
   const on = hexToHslTriplet(brand.on_primary);
@@ -47,6 +80,7 @@ export function applyBrandTheme(
     root.style.setProperty("--tt-brand", primary);
     root.style.setProperty("--tt-brand-foreground", on);
   }
+  if ((full || favicon) && brand.favicon_url) applyBrandFavicon(brand.favicon_url);
   if (!full) return;
   if (brand.font_family) root.style.setProperty("font-family", brand.font_family);
   if (brand.font_css_url && !document.querySelector(`link[href="${brand.font_css_url}"]`)) {
@@ -54,14 +88,5 @@ export function applyBrandTheme(
     link.rel = "stylesheet";
     link.href = brand.font_css_url;
     document.head.append(link);
-  }
-  if (brand.favicon_url) {
-    let icon = document.querySelector<HTMLLinkElement>("link[rel=icon]");
-    if (!icon) {
-      icon = document.createElement("link");
-      icon.rel = "icon";
-      document.head.append(icon);
-    }
-    icon.href = brand.favicon_url;
   }
 }
