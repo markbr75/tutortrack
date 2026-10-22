@@ -6,12 +6,13 @@ import {
   PageHeader,
   Panel,
   PanelFooter,
+  figureCell,
   RuledTable,
   SelectField,
   Spinner,
   Tabs,
   TextField,
-  type RuledTableColumn,
+  type RuledColumn,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
@@ -41,7 +42,7 @@ function TablePanel({
   children,
 }: {
   caption: string;
-  columns: RuledTableColumn[];
+  columns: RuledColumn[];
   empty?: string | false;
   aside?: ReactNode;
   footer?: ReactNode;
@@ -49,7 +50,7 @@ function TablePanel({
 }) {
   return (
     <Panel title={caption} aside={aside} footer={footer} flush>
-      <RuledTable bare caption={caption} columns={columns} empty={empty || undefined}>
+      <RuledTable caption={caption} columns={columns} empty={empty || undefined}>
         {children}
       </RuledTable>
     </Panel>
@@ -272,13 +273,13 @@ function ReviewsSection() {
           empty={!rows.length && t("reviews.empty")}
           columns={
             phone
-              ? [{ label: t("reviews.review") }]
+              ? [{ header: t("reviews.review") }]
               : [
-                  { label: t("reviews.rating") },
-                  { label: t("reviews.review"), className: "min-w-64" },
-                  { label: t("reviews.tutor") },
-                  { label: t("reviews.status.label") },
-                  { label: t("referrals.actions"), srOnly: true },
+                  { header: t("reviews.rating") },
+                  { header: t("reviews.review"), width: "min-w-64" },
+                  { header: t("reviews.tutor") },
+                  { header: t("reviews.status.label") },
+                  { header: t("referrals.actions"), hidden: true },
                 ]
           }
         >
@@ -481,15 +482,15 @@ function RequestsSection() {
             caption={t("reviews.requestsTitle")}
             empty={!rows.length && t("reviews.noRequests")}
             columns={[
-              { label: t("reviews.client") },
+              { header: t("reviews.client") },
               ...(phone
                 ? []
                 : [
-                    { label: t("reviews.trigger.label") },
-                    { label: t("reviews.status.label") },
-                    { label: t("reviews.expires") },
+                    { header: t("reviews.trigger.label") },
+                    { header: t("reviews.status.label") },
+                    { header: t("reviews.expires") },
                   ]),
-              { label: t("referrals.actions"), srOnly: true },
+              { header: t("referrals.actions"), hidden: true },
             ]}
           >
             {rows.map((r) => (
@@ -747,10 +748,10 @@ function ReferralsSection() {
               caption={t("referrals.listTitle")}
               empty={!rows.length && t("referrals.empty")}
               columns={[
-                { label: t("referrals.referee") },
-                ...(phone ? [] : [{ label: t("referrals.statusLabel") }]),
-                { label: t("referrals.rewardLabel"), align: "right" },
-                { label: t("referrals.actions"), srOnly: true },
+                { header: t("referrals.referee") },
+                ...(phone ? [] : [{ header: t("referrals.statusLabel") }]),
+                { header: t("referrals.rewardLabel"), end: true, width: "w-32" },
+                { header: t("referrals.actions"), hidden: true },
               ]}
             >
               {rows.map((r: Referral) => (
@@ -789,9 +790,7 @@ function ReferralsSection() {
                       ) : null}
                     </td>
                   )}
-                  <td className="w-32 text-right whitespace-nowrap tabular-nums">
-                    {money(r.referrer_credit, i18n.language)}
-                  </td>
+                  <td className={figureCell}>{money(r.referrer_credit, i18n.language)}</td>
                   <td className="text-right">
                     {canManage ? (
                       <div className="flex justify-end gap-1 whitespace-nowrap">
@@ -921,11 +920,11 @@ function AffiliatesSection() {
             caption={t("referrals.affiliatesTitle")}
             empty={!people.length && t("referrals.noAffiliates")}
             columns={[
-              { label: t("referrals.name") },
+              { header: t("referrals.name") },
               ...(phone
                 ? []
-                : [{ label: t("referrals.statusLabel") }, { label: t("referrals.payout") }]),
-              { label: t("referrals.actions"), srOnly: true },
+                : [{ header: t("referrals.statusLabel") }, { header: t("referrals.payout") }]),
+              { header: t("referrals.actions"), hidden: true },
             ]}
           >
             {people.map((a) => (
@@ -971,11 +970,11 @@ function AffiliatesSection() {
             caption={t("referrals.linksTitle")}
             empty={!links.data?.results.length && t("designS8.growth.noLinks")}
             columns={[
-              { label: t("referrals.code") },
+              { header: t("referrals.code") },
               ...(phone
                 ? []
-                : [{ label: t("referrals.affiliate") }, { label: t("referrals.landingPath") }]),
-              { label: t("referrals.clicks"), align: "right" as const },
+                : [{ header: t("referrals.affiliate") }, { header: t("referrals.landingPath") }]),
+              { header: t("referrals.clicks"), end: true },
             ]}
           >
             {links.data?.results.map((l) => (
@@ -994,7 +993,7 @@ function AffiliatesSection() {
                     <td className="break-all">{l.landing_path}</td>
                   </>
                 )}
-                <td className="text-right tabular-nums">{l.clicks}</td>
+                <td className={figureCell}>{l.clicks}</td>
               </tr>
             ))}
           </TablePanel>
@@ -1002,10 +1001,10 @@ function AffiliatesSection() {
             caption={t("referrals.rulesTitle")}
             empty={!rules.data?.results.length && t("designS8.growth.noRules")}
             columns={[
-              { label: t("referrals.name") },
-              ...(phone ? [] : [{ label: t("referrals.ruleKind") }]),
-              { label: t("designS8.growth.rate"), align: "right" as const },
-              ...(phone ? [] : [{ label: t("referrals.months"), align: "right" as const }]),
+              { header: t("referrals.name") },
+              ...(phone ? [] : [{ header: t("referrals.ruleKind") }]),
+              { header: t("designS8.growth.rate"), end: true },
+              ...(phone ? [] : [{ header: t("referrals.months"), end: true }]),
             ]}
           >
             {rules.data?.results.map((r) => (
@@ -1022,15 +1021,13 @@ function AffiliatesSection() {
                   ) : null}
                 </td>
                 {phone ? null : <td>{t(`referrals.ruleKinds.${r.kind ?? "percent"}`)}</td>}
-                <td className="text-right whitespace-nowrap tabular-nums">
+                <td className={figureCell}>
                   {r.kind === "bounty"
                     ? money(r.bounty, "en-GB")
                     : t("designS8.growth.percent", { value: r.percent })}
                 </td>
                 {phone ? null : (
-                  <td className="text-right tabular-nums">
-                    {r.duration_months ?? t("referrals.lifetime")}
-                  </td>
+                  <td className={figureCell}>{r.duration_months ?? t("referrals.lifetime")}</td>
                 )}
               </tr>
             ))}
@@ -1244,15 +1241,15 @@ function StatementsSection() {
                 ) : undefined
               }
               columns={[
-                { label: t("referrals.select"), srOnly: true, className: "w-10" },
-                { label: t("referrals.number") },
-                ...(phone ? [] : [{ label: t("referrals.period") }]),
-                { label: t("referrals.total"), align: "right" as const },
+                { header: t("referrals.select"), hidden: true, width: "w-10" },
+                { header: t("referrals.number") },
+                ...(phone ? [] : [{ header: t("referrals.period") }]),
+                { header: t("referrals.total"), end: true, width: "w-32" },
                 ...(phone
                   ? []
                   : [
-                      { label: t("referrals.statusLabel") },
-                      { label: t("referrals.actions"), srOnly: true },
+                      { header: t("referrals.statusLabel") },
+                      { header: t("referrals.actions"), hidden: true },
                     ]),
               ]}
             >
@@ -1303,9 +1300,7 @@ function StatementsSection() {
                       {formatDate(s.period_end, i18n.language)}
                     </td>
                   )}
-                  <td className="w-32 text-right whitespace-nowrap tabular-nums">
-                    {money(s.total, i18n.language)}
-                  </td>
+                  <td className={figureCell}>{money(s.total, i18n.language)}</td>
                   {phone ? null : (
                     <>
                       <td>
@@ -1394,11 +1389,11 @@ function TutorReferralsSection() {
           caption={t("referrals.tutorTitle")}
           empty={!list.length && t("referrals.noTutorReferrals")}
           columns={[
-            ...(phone ? [] : [{ label: t("referrals.referrer") }]),
-            { label: t("referrals.referred") },
-            ...(phone ? [] : [{ label: t("referrals.statusLabel") }]),
-            { label: t("referrals.bonus"), align: "right" as const },
-            ...(phone ? [] : [{ label: t("referrals.actions"), srOnly: true }]),
+            ...(phone ? [] : [{ header: t("referrals.referrer") }]),
+            { header: t("referrals.referred") },
+            ...(phone ? [] : [{ header: t("referrals.statusLabel") }]),
+            { header: t("referrals.bonus"), end: true, width: "w-32" },
+            ...(phone ? [] : [{ header: t("referrals.actions"), hidden: true }]),
           ]}
         >
           {list.map((r) => (
@@ -1447,9 +1442,7 @@ function TutorReferralsSection() {
                   </span>
                 </td>
               )}
-              <td className="w-32 text-right whitespace-nowrap tabular-nums">
-                {money(r.bonus, i18n.language)}
-              </td>
+              <td className={figureCell}>{money(r.bonus, i18n.language)}</td>
               {phone ? null : (
                 <td className="text-right">
                   {canManage && r.status === "pending" ? (

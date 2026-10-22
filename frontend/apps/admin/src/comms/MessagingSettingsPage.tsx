@@ -173,13 +173,12 @@ function SenderDomains() {
             </div>
           ) : null}
           <RuledTable
-            bare
             caption={t("messaging.domains.records")}
             columns={[
-              { label: t("messaging.domains.type") },
-              { label: t("messaging.domains.host") },
-              { label: t("messaging.domains.value"), className: "min-w-64" },
-              { label: t("messaging.domains.verified") },
+              { header: t("messaging.domains.type") },
+              { header: t("messaging.domains.host") },
+              { header: t("messaging.domains.value"), width: "min-w-64" },
+              { header: t("messaging.domains.verified") },
             ]}
           >
             {row.dns_records.map((r) => (

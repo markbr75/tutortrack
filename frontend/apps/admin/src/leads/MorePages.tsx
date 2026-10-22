@@ -4,15 +4,17 @@ import {
   Alert,
   Button,
   FigureStrip,
+  figureCell,
   NamePlate,
   Panel,
   PanelRow,
   PanelRows,
+  RuledTable,
   Spinner,
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 
 import { api } from "../api";
 import { Turnstile } from "../components/Turnstile";
@@ -476,78 +478,45 @@ export function FunnelPage() {
         ]}
       />
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-2">
-        <RuledTable caption={t("leads.byStage")}>
-          <thead className="border-b border-border">
-            <tr className="text-left">
-              <th scope="col">{t("leads.stage")}</th>
-              <th scope="col" className="text-right">
-                {t("leads.reached")}
-              </th>
-              <th scope="col" className="text-right">
-                %
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+        <Panel title={t("leads.byStage")} flush>
+          <RuledTable
+            caption={t("leads.byStage")}
+            columns={[
+              { header: t("leads.stage") },
+              { header: t("leads.reached"), end: true },
+              { header: "%", end: true },
+            ]}
+          >
             {r.stages.map((s) => (
               <tr key={s.stage}>
                 <td>{s.stage}</td>
-                <td className="text-right tabular-nums">{s.reached}</td>
-                <td className="text-right tabular-nums">{s.rate}</td>
+                <td className={figureCell}>{s.reached}</td>
+                <td className={figureCell}>{s.rate}</td>
               </tr>
             ))}
-          </tbody>
-        </RuledTable>
-        <RuledTable caption={t("leads.bySource")}>
-          <thead className="border-b border-border">
-            <tr className="text-left">
-              <th scope="col">{t("leads.source")}</th>
-              <th scope="col" className="text-right">
-                {t("leads.enquiries")}
-              </th>
-              <th scope="col" className="text-right">
-                {t("leads.won")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+          </RuledTable>
+        </Panel>
+        <Panel title={t("leads.bySource")} flush>
+          <RuledTable
+            caption={t("leads.bySource")}
+            empty={r.by_source.length === 0 ? t("designS5.leads.noSources") : undefined}
+            columns={[
+              { header: t("leads.source") },
+              { header: t("leads.enquiries"), end: true },
+              { header: t("leads.won"), end: true },
+            ]}
+          >
             {r.by_source.map((row) => (
               <tr key={row.key}>
                 <td>{t(`leads.sources.${row.key}`, { defaultValue: row.key })}</td>
-                <td className="text-right tabular-nums">{row.total}</td>
-                <td className="text-right tabular-nums">{row.won}</td>
+                <td className={figureCell}>{row.total}</td>
+                <td className={figureCell}>{row.won}</td>
               </tr>
             ))}
-            {r.by_source.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="text-muted-foreground">
-                  {t("designS5.leads.noSources")}
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </RuledTable>
+          </RuledTable>
+        </Panel>
       </div>
     </LeadsPage>
-  );
-}
-
-/** A hand-built table in a ruled panel, its caption as the panel's heading. */
-function RuledTable({ caption, children }: { caption: string; children: ReactNode }) {
-  return (
-    <div
-      role="region"
-      aria-label={caption}
-      tabIndex={0}
-      className="relative overflow-x-auto rounded-xl border border-border bg-surface"
-    >
-      <table className="w-full text-sm [&_td]:px-5 [&_td]:py-2.5 [&_th]:px-5 [&_th]:py-2.5">
-        <caption className="border-b border-border px-5 py-3.5 text-left text-base font-semibold">
-          {caption}
-        </caption>
-        {children}
-      </table>
-    </div>
   );
 }
 

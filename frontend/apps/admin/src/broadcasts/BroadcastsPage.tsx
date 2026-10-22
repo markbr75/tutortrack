@@ -7,6 +7,7 @@ import {
   PageHeader,
   Panel,
   PanelFooter,
+  figureCell,
   RuledTable,
   SelectField,
   Spinner,
@@ -536,12 +537,11 @@ function Detail({ id }: { id: string }) {
           <div>
             <h3 className="px-5 pt-3.5 pb-1 text-sm font-semibold">{t("broadcasts.recipients")}</h3>
             <RuledTable
-              bare
               caption={t("broadcasts.recipients")}
               columns={[
-                { label: t("broadcasts.person") },
-                ...(phone ? [] : [{ label: t("broadcasts.address") }]),
-                { label: t("broadcasts.outcome") },
+                { header: t("broadcasts.person") },
+                ...(phone ? [] : [{ header: t("broadcasts.address") }]),
+                { header: t("broadcasts.outcome") },
               ]}
             >
               {recipients.data.results.map((r) => (
@@ -628,19 +628,20 @@ export function BroadcastsPage() {
           <Spinner label={t("grid.loading")} />
         ) : (
           <RuledTable
+            framed
             caption={t("broadcasts.title")}
             empty={rows.length ? undefined : t("broadcasts.none")}
             columns={[
-              { label: t("broadcasts.name") },
+              { header: t("broadcasts.name") },
               ...(phone
                 ? []
-                : [{ label: t("broadcasts.channel") }, { label: t("broadcasts.statusLabel") }]),
-              { label: t("broadcasts.stats.recipients"), align: "right" as const },
+                : [{ header: t("broadcasts.channel") }, { header: t("broadcasts.statusLabel") }]),
+              { header: t("broadcasts.stats.recipients"), end: true },
               ...(phone
                 ? []
                 : [
-                    { label: t("broadcasts.stats.opened"), align: "right" as const },
-                    { label: t("broadcasts.when") },
+                    { header: t("broadcasts.stats.opened"), end: true },
+                    { header: t("broadcasts.when") },
                   ]),
             ]}
           >
@@ -681,10 +682,10 @@ export function BroadcastsPage() {
                     </td>
                   </>
                 )}
-                <td className="text-right tabular-nums">{b.stats.recipients}</td>
+                <td className={figureCell}>{b.stats.recipients}</td>
                 {phone ? null : (
                   <>
-                    <td className="text-right tabular-nums">
+                    <td className={figureCell}>
                       {b.channel === "email" ? (
                         b.stats.opened
                       ) : (

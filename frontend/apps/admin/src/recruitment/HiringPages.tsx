@@ -8,6 +8,7 @@ import {
   PanelFooter,
   PanelRow,
   PanelRows,
+  figureCell,
   RuledTable,
   SelectField,
   Spinner,
@@ -95,15 +96,19 @@ export function OpeningsPage() {
         <Spinner label={t("grid.loading")} />
       ) : (
         <RuledTable
+          framed
           caption={t("hiring.openings.title")}
           empty={openings.data?.length ? undefined : t("hiring.openings.none")}
           columns={[
-            { label: t("hiring.openings.role") },
+            { header: t("hiring.openings.role") },
             ...(phone
               ? []
-              : [{ label: t("hiring.openings.location") }, { label: t("hiring.openings.status") }]),
-            { label: t("hiring.openings.applications"), align: "right" as const },
-            { label: t("hiring.openings.actions"), srOnly: true },
+              : [
+                  { header: t("hiring.openings.location") },
+                  { header: t("hiring.openings.status") },
+                ]),
+            { header: t("hiring.openings.applications"), end: true },
+            { header: t("hiring.openings.actions"), hidden: true },
           ]}
         >
           {openings.data?.map((o) => {
@@ -144,7 +149,7 @@ export function OpeningsPage() {
                     </td>
                   </>
                 )}
-                <td className="text-right tabular-nums">{o.applications_open}</td>
+                <td className={figureCell}>{o.applications_open}</td>
                 <td className="text-right">
                   <span className="inline-flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
                     {o.published ? (

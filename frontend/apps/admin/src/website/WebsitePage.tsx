@@ -633,13 +633,12 @@ function DomainsTab() {
             <>
               <p className="text-sm">{t("website.domains.instructions")}</p>
               <RuledTable
-                bare
                 className="rounded-md border border-border"
                 caption={t("website.domains.records")}
                 columns={[
-                  { label: t("website.domains.type") },
-                  { label: t("website.domains.name") },
-                  { label: t("website.domains.value"), className: "min-w-56" },
+                  { header: t("website.domains.type") },
+                  { header: t("website.domains.name") },
+                  { header: t("website.domains.value"), width: "min-w-56" },
                 ]}
               >
                 {domain.dns_records.map((r) => (

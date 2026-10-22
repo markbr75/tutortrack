@@ -1,11 +1,31 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FactList,
+  figureCell,
+  FormPanel,
+  PageHeader,
+  PanelFooter,
+  RegisterMark,
+  registerMarkFor,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  Spinner,
+  Tabs,
+  TextField,
+  type RegisterMarkKind,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { api, useOrganisation, usePermission } from "../api";
+import { PanelEmpty, PanelLoading } from "../billing/moneyUi";
+import { useIsPhone } from "../billing/useIsPhone";
+import { BackSeparator, RecordHeader, RecordLayout } from "../components/RecordHeader";
 import { PublicLayout } from "../layout/PublicLayout";
 
 type GroupClass = components["schemas"]["GroupClass"];
@@ -27,72 +47,19 @@ const OUTCOMES: Outcome[] = [
   "cancelled_tutor",
   "cancelled_admin",
 ];
+/** Class states that need nothing more: shown in faded ink. */
+const QUIET = ["draft", "cancelled", "completed"];
 
-function Table({
-  caption,
-  headers,
-  children,
-}: {
-  caption: string;
-  headers: string[];
-  children: ReactNode;
-}) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <caption className="mb-2 text-left font-semibold">{caption}</caption>
-        <thead>
-          <tr className="text-left">
-            {headers.map((h) => (
-              <th key={h} scope="col" className="px-2 py-1">
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>{children}</tbody>
-      </table>
-    </div>
-  );
-}
+const MARK_LABEL: Record<RegisterMarkKind, string> = {
+  completed: "home.register.marks.completed",
+  missed: "home.register.marks.missed",
+  cancelled: "home.register.marks.cancelled",
+  due: "home.register.marks.due",
+  upcoming: "home.register.marks.upcoming",
+};
 
-function Cell({ children }: { children: ReactNode }) {
-  return <td className="border-t border-border px-2 py-1 align-top">{children}</td>;
-}
-
-function FormCard({
-  title,
-  submit,
-  pending,
-  error,
-  onSubmit,
-  children,
-}: {
-  title: string;
-  submit: string;
-  pending?: boolean;
-  error?: Error | null;
-  onSubmit: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <form
-      className="space-y-3 rounded-md border border-border p-4"
-      aria-label={title}
-      onSubmit={(e: FormEvent) => {
-        e.preventDefault();
-        onSubmit();
-      }}
-    >
-      <h2 className="font-semibold">{title}</h2>
-      <div className="grid gap-3 sm:grid-cols-2">{children}</div>
-      {error ? <Alert tone="danger">{error.message}</Alert> : null}
-      <Button type="submit" disabled={pending}>
-        {submit}
-      </Button>
-    </form>
-  );
-}
+const linkClass = "font-medium underline-offset-2 hover:underline";
+const caption = "block text-xs font-normal text-muted-foreground";
 
 function weekdayNames(days: number[], locale: string): string {
   const monday = new Date(Date.UTC(2024, 0, 1));
@@ -106,6 +73,21 @@ function weekdayNames(days: number[], locale: string): string {
     .join(", ");
 }
 
+/** A form's error, or nothing. */
+function ErrorAlert({ error }: { error?: Error | null }) {
+  return error ? <Alert tone="danger">{error.message}</Alert> : null;
+}
+
+/** A class's state in words: draft, cancelled and completed in faded ink. */
+function ClassStatus({ status }: { status: string }) {
+  const { t } = useTranslation();
+  return (
+    <span className={QUIET.includes(status) ? "text-muted-foreground" : undefined}>
+      {t(`courses.status.${status}`)}
+    </span>
+  );
+}
+
 const TABS = ["classes", "courses", "terms", "rollover"] as const;
 type Tab = (typeof TABS)[number];
 
@@ -115,7 +97,7 @@ export function CoursesPage() {
   const [tab, setTab] = useState<Tab>("classes");
   return (
     <section>
-      <h1 className="mb-4 text-2xl font-semibold">{t("courses.title")}</h1>
+      <PageHeader title={t("courses.title")} />
       <Tabs
         label={t("courses.title")}
         tabs={TABS.map((key) => ({ key, label: t(`courses.tabs.${key}`) }))}
@@ -147,6 +129,7 @@ function useCourses() {
 
 function ClassesSection() {
   const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const canManage = usePermission("courses.manage");
   const [term, setTerm] = useState("");
   const terms = useTerms();
@@ -159,52 +142,77 @@ function ClassesSection() {
         }),
       ),
   });
+  const rows = classes.data?.results ?? [];
+  const when = (c: GroupClass) =>
+    `${weekdayNames(c.weekdays, i18n.language)} ${c.start_time.slice(0, 5)} · ${c.term_name}`;
   return (
     <div className="space-y-6">
-      <SelectField
-        label={t("courses.term")}
-        value={term}
-        onChange={(e) => setTerm(e.target.value)}
-        options={[
-          { value: "", label: t("courses.allTerms") },
-          ...(terms.data?.results ?? []).map((x) => ({ value: x.id, label: x.name })),
-        ]}
-      />
-      {classes.isLoading ? <Spinner label={t("grid.loading")} /> : null}
-      {classes.data && !classes.data.results.length ? (
-        <p className="text-sm">{t("courses.noClasses")}</p>
-      ) : null}
-      {classes.data?.results.length ? (
-        <Table
+      <div>
+        <div
+          role="search"
+          aria-label={t("designS6.courses.filter")}
+          className="mb-4 flex flex-wrap items-center gap-2"
+        >
+          <SelectField
+            label={t("courses.term")}
+            hideLabel
+            size="sm"
+            value={term}
+            onChange={(e) => setTerm(e.target.value)}
+            options={[
+              { value: "", label: t("courses.allTerms") },
+              ...(terms.data?.results ?? []).map((x) => ({ value: x.id, label: x.name })),
+            ]}
+          />
+        </div>
+        <RuledTable
+          framed
           caption={t("courses.tabs.classes")}
-          headers={[
-            t("courses.class"),
-            t("courses.course"),
-            t("courses.when"),
-            t("courses.places"),
-            t("courses.statusLabel"),
+          loading={classes.isPending}
+          loadingLabel={t("grid.loading")}
+          empty={classes.data && !rows.length ? t("courses.noClasses") : undefined}
+          columns={[
+            { header: t("courses.class") },
+            ...(isPhone ? [] : [{ header: t("courses.course") }, { header: t("courses.when") }]),
+            { header: t("courses.places") },
+            ...(isPhone ? [] : [{ header: t("courses.statusLabel") }]),
           ]}
         >
-          {classes.data.results.map((c) => (
+          {rows.map((c) => (
             <tr key={c.id}>
-              <Cell>
-                <Link to="/classes/$classId" params={{ classId: c.id }} className="underline">
+              <td>
+                <Link to="/classes/$classId" params={{ classId: c.id }} className={linkClass}>
                   {c.name}
                 </Link>
-              </Cell>
-              <Cell>{c.course_name}</Cell>
-              <Cell>
-                {weekdayNames(c.weekdays, i18n.language)} {c.start_time.slice(0, 5)} · {c.term_name}
-              </Cell>
-              <Cell>
-                {t("courses.placesTaken", { enrolled: c.enrolled, capacity: c.capacity })}
-                {c.waiting ? ` · ${t("courses.waitingCount", { count: c.waiting })}` : ""}
-              </Cell>
-              <Cell>{t(`courses.status.${c.status}`)}</Cell>
+                {isPhone ? (
+                  <span className={`${caption} tabular-nums`}>
+                    {[c.course_name, when(c), t(`courses.status.${c.status}`)].join(" · ")}
+                  </span>
+                ) : null}
+              </td>
+              {isPhone ? null : (
+                <>
+                  <td>{c.course_name}</td>
+                  <td className="tabular-nums">{when(c)}</td>
+                </>
+              )}
+              <td className="tabular-nums">
+                <span className="block">
+                  {t("courses.placesTaken", { enrolled: c.enrolled, capacity: c.capacity })}
+                </span>
+                {c.waiting ? (
+                  <span className={caption}>{t("courses.waitingCount", { count: c.waiting })}</span>
+                ) : null}
+              </td>
+              {isPhone ? null : (
+                <td>
+                  <ClassStatus status={c.status} />
+                </td>
+              )}
             </tr>
           ))}
-        </Table>
-      ) : null}
+        </RuledTable>
+      </div>
       {canManage ? <NewClassForm /> : null}
     </div>
   );
@@ -262,12 +270,13 @@ function NewClassForm() {
   });
   return (
     <>
-      <FormCard
+      <FormPanel
         title={t("courses.newClass")}
         submit={t("courses.createClass")}
         pending={create.isPending}
-        error={create.error}
+        error={<ErrorAlert error={create.error} />}
         onSubmit={() => create.mutate()}
+        columns={3}
       >
         <SelectField
           label={t("courses.course")}
@@ -332,7 +341,7 @@ function NewClassForm() {
             ...(tutors.data?.results ?? []).map((x) => ({ value: x.id, label: x.full_name })),
           ]}
         />
-      </FormCard>
+      </FormPanel>
       {skipped.length ? (
         <Alert tone="warning">
           {t("courses.skipped", { dates: skipped.map((d) => formatDate(d)).join(", ") })}
@@ -344,6 +353,7 @@ function NewClassForm() {
 
 function CoursesSection() {
   const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const queryClient = useQueryClient();
   const canManage = usePermission("courses.manage");
   const { data: org } = useOrganisation();
@@ -392,40 +402,65 @@ function CoursesSection() {
       void queryClient.invalidateQueries({ queryKey: ["courses"] });
     },
   });
+  const rows = courses.data?.results ?? [];
   return (
     <div className="space-y-6">
-      {courses.data && !courses.data.results.length ? (
-        <p className="text-sm">{t("courses.noCourses")}</p>
-      ) : null}
-      {courses.data?.results.length ? (
-        <Table
-          caption={t("courses.tabs.courses")}
-          headers={[
-            t("courses.name"),
-            t("courses.pricing"),
-            t("courses.price"),
-            t("courses.public"),
-            t("courses.tabs.classes"),
-          ]}
-        >
-          {courses.data.results.map((c: Course) => (
-            <tr key={c.id}>
-              <Cell>{c.name}</Cell>
-              <Cell>{t(`courses.pricingModels.${c.pricing_model}`)}</Cell>
-              <Cell>{formatMoney(c.price, i18n.language)}</Cell>
-              <Cell>{c.is_public ? t("courses.yes") : t("courses.no")}</Cell>
-              <Cell>{c.classes_count}</Cell>
-            </tr>
-          ))}
-        </Table>
-      ) : null}
+      <RuledTable
+        framed
+        caption={t("courses.tabs.courses")}
+        loading={courses.isPending}
+        loadingLabel={t("grid.loading")}
+        empty={courses.data && !rows.length ? t("courses.noCourses") : undefined}
+        columns={[
+          { header: t("courses.name") },
+          ...(isPhone ? [] : [{ header: t("courses.pricing") }]),
+          { header: t("courses.price"), end: true, width: "w-32" },
+          ...(isPhone
+            ? []
+            : [
+                { header: t("courses.public") },
+                { header: t("courses.tabs.classes"), end: true, width: "w-24" },
+              ]),
+        ]}
+      >
+        {rows.map((c: Course) => (
+          <tr key={c.id}>
+            <td className="font-medium">
+              {c.name}
+              {isPhone ? (
+                <span className={caption}>
+                  {[
+                    t(`courses.pricingModels.${c.pricing_model}`),
+                    t("designS6.courses.classCount", { count: c.classes_count }),
+                  ].join(" · ")}
+                </span>
+              ) : null}
+            </td>
+            {isPhone ? null : <td>{t(`courses.pricingModels.${c.pricing_model}`)}</td>}
+            <td className={figureCell}>{formatMoney(c.price, i18n.language)}</td>
+            {isPhone ? null : (
+              <>
+                <td>
+                  {c.is_public ? (
+                    t("courses.yes")
+                  ) : (
+                    <span className="text-muted-foreground">{t("courses.no")}</span>
+                  )}
+                </td>
+                <td className={figureCell}>{c.classes_count}</td>
+              </>
+            )}
+          </tr>
+        ))}
+      </RuledTable>
       {canManage ? (
-        <FormCard
+        <FormPanel
           title={t("courses.newCourse")}
           submit={t("courses.createCourse")}
           pending={create.isPending}
-          error={create.error}
+          error={<ErrorAlert error={create.error} />}
           onSubmit={() => create.mutate()}
+          columns={3}
         >
           <TextField
             label={t("courses.name")}
@@ -455,6 +490,7 @@ function CoursesSection() {
           <TextField
             label={t("courses.priceIn", { currency })}
             inputMode="decimal"
+            className="text-right tabular-nums"
             value={draft.price}
             required
             onChange={(e) => setDraft({ ...draft, price: e.target.value })}
@@ -471,6 +507,7 @@ function CoursesSection() {
           <TextField
             label={t("courses.registrationFee")}
             inputMode="decimal"
+            className="text-right tabular-nums"
             value={draft.registration_fee}
             onChange={(e) => setDraft({ ...draft, registration_fee: e.target.value })}
           />
@@ -479,22 +516,23 @@ function CoursesSection() {
             value={draft.public_description}
             onChange={(e) => setDraft({ ...draft, public_description: e.target.value })}
           />
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex items-center gap-2 text-sm sm:mt-7">
             <input
               type="checkbox"
+              className="size-4"
               checked={draft.is_public}
               onChange={(e) => setDraft({ ...draft, is_public: e.target.checked })}
             />
             {t("courses.showOnWebsite")}
           </label>
-        </FormCard>
+        </FormPanel>
       ) : null}
     </div>
   );
 }
 
 function TermsSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const canManage = usePermission("courses.manage");
   const terms = useTerms();
@@ -549,39 +587,47 @@ function TermsSection() {
       done();
     },
   });
+  const date = (iso: string) => formatDate(iso, i18n.language);
+  const rows = terms.data?.results ?? [];
   return (
     <div className="space-y-6">
-      {terms.data?.results.length ? (
-        <Table
-          caption={t("courses.tabs.terms")}
-          headers={[t("courses.name"), t("courses.year"), t("courses.dates"), t("courses.breaks")]}
-        >
-          {terms.data.results.map((x: Term) => (
-            <tr key={x.id}>
-              <Cell>{x.name}</Cell>
-              <Cell>{x.academic_year_name}</Cell>
-              <Cell>
-                {formatDate(x.start_date)} – {formatDate(x.end_date)}
-              </Cell>
-              <Cell>
-                {(x.breaks ?? [])
-                  .map((b) => `${b.name} (${formatDate(b.start_date)} – ${formatDate(b.end_date)})`)
-                  .join("; ") || "–"}
-              </Cell>
-            </tr>
-          ))}
-        </Table>
-      ) : (
-        <p className="text-sm">{t("courses.noTerms")}</p>
-      )}
+      <RuledTable
+        framed
+        caption={t("courses.tabs.terms")}
+        loading={terms.isPending}
+        loadingLabel={t("grid.loading")}
+        empty={terms.data && !rows.length ? t("courses.noTerms") : undefined}
+        columns={[
+          { header: t("courses.name") },
+          { header: t("courses.year") },
+          { header: t("courses.dates") },
+          { header: t("courses.breaks") },
+        ]}
+      >
+        {rows.map((x: Term) => (
+          <tr key={x.id}>
+            <td className="font-medium">{x.name}</td>
+            <td>{x.academic_year_name}</td>
+            <td className="tabular-nums">
+              {date(x.start_date)} – {date(x.end_date)}
+            </td>
+            <td className="tabular-nums">
+              {(x.breaks ?? [])
+                .map((b) => `${b.name} (${date(b.start_date)} – ${date(b.end_date)})`)
+                .join("; ") || <span className="text-muted-foreground">–</span>}
+            </td>
+          </tr>
+        ))}
+      </RuledTable>
       {canManage ? (
-        <>
-          <FormCard
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <FormPanel
             title={t("courses.newYear")}
             submit={t("courses.addYear")}
             pending={addYear.isPending}
-            error={addYear.error}
+            error={<ErrorAlert error={addYear.error} />}
             onSubmit={() => addYear.mutate()}
+            columns={1}
           >
             <TextField
               label={t("courses.name")}
@@ -589,26 +635,28 @@ function TermsSection() {
               required
               onChange={(e) => setYear({ ...year, name: e.target.value })}
             />
-            <TextField
-              label={t("courses.starts")}
-              type="date"
-              value={year.start_date}
-              required
-              onChange={(e) => setYear({ ...year, start_date: e.target.value })}
-            />
-            <TextField
-              label={t("courses.ends")}
-              type="date"
-              value={year.end_date}
-              required
-              onChange={(e) => setYear({ ...year, end_date: e.target.value })}
-            />
-          </FormCard>
-          <FormCard
+            <div className="grid gap-x-4 gap-y-3 sm:grid-cols-2">
+              <TextField
+                label={t("courses.starts")}
+                type="date"
+                value={year.start_date}
+                required
+                onChange={(e) => setYear({ ...year, start_date: e.target.value })}
+              />
+              <TextField
+                label={t("courses.ends")}
+                type="date"
+                value={year.end_date}
+                required
+                onChange={(e) => setYear({ ...year, end_date: e.target.value })}
+              />
+            </div>
+          </FormPanel>
+          <FormPanel
             title={t("courses.newTerm")}
             submit={t("courses.addTerm")}
             pending={addTerm.isPending}
-            error={addTerm.error}
+            error={<ErrorAlert error={addTerm.error} />}
             onSubmit={() => addTerm.mutate()}
           >
             <SelectField
@@ -641,32 +689,35 @@ function TermsSection() {
               required
               onChange={(e) => setTerm({ ...term, end_date: e.target.value })}
             />
-            <TextField
-              label={t("courses.breakName")}
-              value={term.break_name}
-              onChange={(e) => setTerm({ ...term, break_name: e.target.value })}
-            />
-            <TextField
-              label={t("courses.breakStarts")}
-              type="date"
-              value={term.break_start}
-              onChange={(e) => setTerm({ ...term, break_start: e.target.value })}
-            />
-            <TextField
-              label={t("courses.breakEnds")}
-              type="date"
-              value={term.break_end}
-              onChange={(e) => setTerm({ ...term, break_end: e.target.value })}
-            />
-          </FormCard>
-        </>
+            <div className="-mx-5 grid gap-x-4 gap-y-3 border-t border-rule px-5 pt-4 sm:col-span-full sm:grid-cols-3">
+              <TextField
+                label={t("courses.breakName")}
+                value={term.break_name}
+                onChange={(e) => setTerm({ ...term, break_name: e.target.value })}
+              />
+              <TextField
+                label={t("courses.breakStarts")}
+                type="date"
+                value={term.break_start}
+                onChange={(e) => setTerm({ ...term, break_start: e.target.value })}
+              />
+              <TextField
+                label={t("courses.breakEnds")}
+                type="date"
+                value={term.break_end}
+                onChange={(e) => setTerm({ ...term, break_end: e.target.value })}
+              />
+            </div>
+          </FormPanel>
+        </div>
       ) : null}
     </div>
   );
 }
 
 function RolloverSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const queryClient = useQueryClient();
   const canRun = usePermission("courses.rollover.manage");
   const terms = useTerms();
@@ -714,59 +765,109 @@ function RolloverSection() {
     { value: "", label: "–" },
     ...(terms.data?.results ?? []).map((x) => ({ value: x.id, label: x.name })),
   ];
+  const rows = rollovers.data?.results ?? [];
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">{t("courses.rolloverHelp")}</p>
-      {rollovers.data?.results.length ? (
-        <Table
+      <RuledPanel
+        flush
+        title={t("designS6.courses.reEnrolments")}
+        description={t("courses.rolloverHelp")}
+      >
+        <RuledTable
           caption={t("courses.tabs.rollover")}
-          headers={[
-            t("courses.fromTo"),
-            t("courses.deadline"),
-            t("courses.statusLabel"),
-            t("courses.answers"),
-            "",
-          ]}
+          loading={rollovers.isPending}
+          loadingLabel={t("grid.loading")}
+          empty={rollovers.data && !rows.length ? t("designS6.courses.noRollovers") : undefined}
+          columns={
+            isPhone
+              ? [{ header: t("courses.fromTo") }]
+              : [
+                  { header: t("courses.fromTo"), width: "min-w-64" },
+                  { header: t("courses.deadline") },
+                  { header: t("courses.statusLabel") },
+                  { header: t("courses.answers") },
+                  ...(canRun ? [{ header: t("common.actions"), hidden: true }] : []),
+                ]
+          }
         >
-          {rollovers.data.results.map((r) => (
-            <tr key={r.id}>
-              <Cell>
-                {r.from_term_name} → {r.to_term_name}
-              </Cell>
-              <Cell>{formatDateTime(r.deadline)}</Cell>
-              <Cell>{t(`courses.rolloverStatus.${r.status}`)}</Cell>
-              <Cell>
-                {Object.entries(r.counts)
-                  .map(([k, n]) => `${t(`courses.offerStatus.${k}`)}: ${n}`)
-                  .join(", ")}
-              </Cell>
-              <Cell>
-                {canRun && r.status === "running" ? (
-                  <span className="flex gap-2">
-                    <Button size="sm" onClick={() => act.mutate({ id: r.id, action: "finalise" })}>
-                      {t("courses.finishNow")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => act.mutate({ id: r.id, action: "cancel" })}
-                    >
-                      {t("courses.cancel")}
-                    </Button>
-                  </span>
+          {rows.map((r) => {
+            const answers = Object.entries(r.counts)
+              .map(([k, n]) => `${t(`courses.offerStatus.${k}`)}: ${n}`)
+              .join(", ");
+            const deadline = formatDateTime(r.deadline, i18n.language);
+            const status = t(`courses.rolloverStatus.${r.status}`);
+            const actions =
+              canRun && r.status === "running" ? (
+                <>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => act.mutate({ id: r.id, action: "finalise" })}
+                  >
+                    {t("courses.finishNow")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    onClick={() => act.mutate({ id: r.id, action: "cancel" })}
+                  >
+                    {t("courses.cancel")}
+                  </Button>
+                </>
+              ) : null;
+            // Phones: one full-width cell, the title over one caption, the actions under it.
+            if (isPhone) {
+              return (
+                <tr key={r.id}>
+                  <td>
+                    <span className="font-medium">
+                      {t("designS6.courses.fromTo", {
+                        from: r.from_term_name,
+                        to: r.to_term_name,
+                      })}
+                    </span>
+                    <span className={`${caption} tabular-nums`}>
+                      {[status, deadline, answers].filter(Boolean).join(" · ")}
+                    </span>
+                    {actions ? <div className="mt-2 flex flex-wrap gap-2">{actions}</div> : null}
+                  </td>
+                </tr>
+              );
+            }
+            return (
+              <tr key={r.id}>
+                <td className="font-medium">
+                  {t("designS6.courses.fromTo", { from: r.from_term_name, to: r.to_term_name })}
+                </td>
+                <td className="tabular-nums whitespace-nowrap">{deadline}</td>
+                <td
+                  className={`whitespace-nowrap ${r.status === "running" ? "" : "text-muted-foreground"}`}
+                >
+                  {status}
+                </td>
+                <td className="tabular-nums">{answers}</td>
+                {canRun ? (
+                  <td className="py-1.5 text-right whitespace-nowrap">
+                    {actions ? <span className="inline-flex gap-2">{actions}</span> : null}
+                  </td>
                 ) : null}
-              </Cell>
-            </tr>
-          ))}
-        </Table>
-      ) : null}
-      {act.error ? <Alert tone="danger">{act.error.message}</Alert> : null}
+              </tr>
+            );
+          })}
+        </RuledTable>
+        {act.error ? (
+          <div className="border-t border-rule px-5 py-4">
+            <ErrorAlert error={act.error} />
+          </div>
+        ) : null}
+      </RuledPanel>
       {canRun ? (
-        <FormCard
+        <FormPanel
           title={t("courses.startRollover")}
           submit={t("courses.start")}
           pending={start.isPending}
-          error={start.error}
+          error={<ErrorAlert error={start.error} />}
           onSubmit={() => start.mutate()}
         >
           <SelectField
@@ -799,7 +900,7 @@ function RolloverSection() {
             required
             onChange={(e) => setDraft({ ...draft, deadline: e.target.value })}
           />
-        </FormCard>
+        </FormPanel>
       ) : null}
     </div>
   );
@@ -810,9 +911,14 @@ function RolloverSection() {
 /** A class: places, roster (withdraw, transfer), enrolment, sessions and waitlist. */
 export function ClassPage({ classId }: { classId: string }) {
   const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const queryClient = useQueryClient();
   const canManage = usePermission("courses.manage");
   const canEnrol = usePermission("courses.enrolment.manage");
+  const [cancelling, setCancelling] = useState(false);
+  const [reason, setReason] = useState("");
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const reasonRef = useRef<HTMLInputElement>(null);
   const detail = useQuery({
     queryKey: ["courses", "class", classId],
     queryFn: async () =>
@@ -841,108 +947,276 @@ export function ClassPage({ classId }: { classId: string }) {
         : unwrap(
             await api.POST("/api/v1/classes/{id}/cancel", {
               params: { path: { id: classId } },
-              body: { reason: "" },
+              body: { reason },
             }),
           ),
-    onSuccess: refresh,
+    onSuccess: () => {
+      setCancelling(false);
+      refresh();
+    },
   });
+  const wasCancelling = useRef(false);
+  useEffect(() => {
+    if (cancelling) reasonRef.current?.focus();
+    else if (wasCancelling.current) cancelRef.current?.focus();
+    wasCancelling.current = cancelling;
+  }, [cancelling]);
   if (detail.isLoading) return <Spinner label={t("grid.loading")} />;
   if (!detail.data) return <Alert tone="danger">{t("courses.notFound")}</Alert>;
   const c: GroupClass = detail.data;
-  const active = (roster.data ?? []).filter((r) =>
+  const rosterRows = roster.data ?? [];
+  const active = rosterRows.filter((r) =>
     ["enrolled", "trial", "pending_payment"].includes(r.status),
   );
-  return (
-    <section className="space-y-6">
-      <header>
-        <p className="text-sm text-muted-foreground">
-          <Link to="/courses" className="underline">
-            {t("courses.title")}
-          </Link>{" "}
-          / {c.course_name}
-        </p>
-        <h1 className="text-2xl font-semibold">{c.name}</h1>
-        <p className="text-sm">
-          {weekdayNames(c.weekdays, i18n.language)} {c.start_time.slice(0, 5)} · {c.term_name} ·{" "}
-          {formatDate(c.start_date)} – {formatDate(c.end_date)}
-          {c.room_name ? ` · ${c.room_name}` : c.location_name ? ` · ${c.location_name}` : ""}
-        </p>
-        <p className="mt-1 text-sm" role="status">
-          {t(`courses.status.${c.status}`)} · {t("courses.placesLeft", { count: c.places_left })} ·{" "}
-          {t("courses.placesTaken", { enrolled: c.enrolled, capacity: c.capacity })}
-        </p>
-        {canManage ? (
-          <div className="mt-2 flex gap-2">
-            {c.status === "draft" ? (
-              <Button size="sm" onClick={() => lifecycle.mutate("open")}>
-                {t("courses.openClass")}
-              </Button>
-            ) : null}
-            {!["cancelled", "completed"].includes(c.status) ? (
-              <Button size="sm" variant="secondary" onClick={() => lifecycle.mutate("cancel")}>
+  const live = !["cancelled", "completed"].includes(c.status);
+  const date = (iso: string) => formatDate(iso, i18n.language);
+  const when = `${weekdayNames(c.weekdays, i18n.language)} ${c.start_time.slice(0, 5)}`;
+  const place = c.room_name || c.location_name || (c.online ? t("designS6.courses.online") : "");
+  const now = new Date();
+  const firstAction = c.status !== "draft";
+  const sessionRows = sessions.data ?? [];
+  // The red NOW rule sits before the first session that has not ended yet (none after the last).
+  const nowIndex = sessionRows.findIndex((x) => new Date(x.end) > now);
+  const nowRule = (
+    <tr aria-hidden="true" className="border-t-2 border-margin">
+      <td
+        colSpan={isPhone ? 4 : 5}
+        className="py-1 text-xs font-semibold tracking-wider text-margin uppercase"
+      >
+        {t("home.register.now", { time: formatDate(now.toISOString(), i18n.language) })}
+      </td>
+    </tr>
+  );
+
+  const main = (
+    <>
+      {cancelling ? (
+        <RuledPanel
+          title={t("designS6.courses.cancelTitle")}
+          footer={
+            <>
+              <Button
+                variant="danger"
+                loading={lifecycle.isPending}
+                onClick={() => lifecycle.mutate("cancel")}
+              >
                 {t("courses.cancelClass")}
               </Button>
-            ) : null}
+              <Button
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={() => setCancelling(false)}
+              >
+                {t("designS6.courses.keepClass")}
+              </Button>
+            </>
+          }
+        >
+          <div
+            className="max-w-md"
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setCancelling(false);
+            }}
+          >
+            <TextField
+              ref={reasonRef}
+              label={t("designS6.courses.reason")}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
           </div>
+        </RuledPanel>
+      ) : null}
+      <RuledPanel flush title={t("courses.roster")}>
+        <RuledTable
+          caption={t("courses.roster")}
+          loading={roster.isPending}
+          loadingLabel={t("grid.loading")}
+          empty={roster.data && !rosterRows.length ? t("courses.nobodyEnrolled") : undefined}
+          columns={[
+            { header: t("courses.student"), width: isPhone ? undefined : "min-w-48" },
+            ...(isPhone ? [] : [{ header: t("courses.statusLabel") }]),
+            ...(canEnrol ? [{ header: t("common.actions"), hidden: true }] : []),
+          ]}
+        >
+          {rosterRows.map((r) => (
+            <RosterLine key={r.enrolment} row={r} classId={classId} canEnrol={canEnrol} />
+          ))}
+        </RuledTable>
+        {rosterRows.length && !active.length ? (
+          <p className="border-t border-rule px-5 py-3 text-sm text-muted-foreground">
+            {t("courses.nobodyEnrolled")}
+          </p>
         ) : null}
-        {lifecycle.error ? <Alert tone="danger">{lifecycle.error.message}</Alert> : null}
-      </header>
-      <Table
-        caption={t("courses.roster")}
-        headers={[t("courses.student"), t("courses.statusLabel"), t("courses.dates"), ""]}
+      </RuledPanel>
+      {canEnrol && live ? <EnrolForm groupClass={c} onDone={refresh} /> : null}
+      <RuledPanel flush title={t("courses.sessions")}>
+        <RuledTable
+          caption={t("courses.sessions")}
+          loading={sessions.isPending}
+          loadingLabel={t("grid.loading")}
+          empty={
+            sessions.data && !sessions.data.length ? t("designS6.courses.noSessions") : undefined
+          }
+          columns={[
+            { header: t("courses.number"), end: true, width: "w-12" },
+            { header: t("courses.date") },
+            ...(isPhone ? [] : [{ header: t("courses.students"), end: true, width: "w-24" }]),
+            { header: t("designS6.courses.mark"), center: true, width: "w-20" },
+            { header: t("courses.register"), hidden: true },
+          ]}
+        >
+          {sessionRows.map((s, index) => {
+            const kind = registerMarkFor(s.lesson_status, s.end, now);
+            return (
+              <Fragment key={s.id}>
+                {index === nowIndex ? nowRule : null}
+                <tr>
+                  <td className={figureCell}>{s.number}</td>
+                  <td className="tabular-nums whitespace-nowrap">
+                    {formatDateTime(s.start, i18n.language)}
+                  </td>
+                  {isPhone ? null : <td className={figureCell}>{s.attendees}</td>}
+                  <td className="py-2">
+                    <RegisterMark kind={kind} label={t(MARK_LABEL[kind])} className="mx-auto" />
+                  </td>
+                  <td className="text-right">
+                    {s.lesson_status === "cancelled" ? (
+                      <span className="text-muted-foreground">{t("courses.cancelled")}</span>
+                    ) : (
+                      <Link
+                        to="/class-sessions/$sessionId/register"
+                        params={{ sessionId: s.id }}
+                        className={`${linkClass} text-link`}
+                      >
+                        {t("courses.register")}
+                      </Link>
+                    )}
+                  </td>
+                </tr>
+              </Fragment>
+            );
+          })}
+          {nowIndex === -1 && sessionRows.length ? nowRule : null}
+        </RuledTable>
+      </RuledPanel>
+    </>
+  );
+
+  const waiting = waitlist.data ?? [];
+  const side = (
+    <>
+      <RuledPanel flush title={t("designS6.courses.details")}>
+        <FactList
+          items={[
+            [t("courses.course"), c.course_name],
+            [t("courses.term"), c.term_name],
+            [t("courses.when"), <span className="tabular-nums">{when}</span>],
+            [
+              t("courses.dates"),
+              <span className="tabular-nums">
+                {date(c.start_date)} – {date(c.end_date)}
+              </span>,
+            ],
+            [t("designS6.courses.where"), place],
+            [t("courses.teacher"), (c.teachers ?? []).map((x) => x.tutor_name).join(", ")],
+            [
+              t("courses.places"),
+              <span className="tabular-nums">
+                {t("courses.placesTaken", { enrolled: c.enrolled, capacity: c.capacity })} ·{" "}
+                {t("courses.placesLeft", { count: c.places_left })}
+              </span>,
+            ],
+          ]}
+        />
+      </RuledPanel>
+      <RuledPanel
+        flush
+        title={t("courses.waitlist")}
+        aside={
+          waiting.length ? (
+            <span className="text-muted-foreground tabular-nums">
+              {t("courses.waitingCount", { count: waiting.length })}
+            </span>
+          ) : null
+        }
       >
-        {(roster.data ?? []).map((r) => (
-          <RosterLine key={r.enrolment} row={r} classId={classId} canEnrol={canEnrol} />
-        ))}
-      </Table>
-      {roster.data && !active.length ? (
-        <p className="text-sm">{t("courses.nobodyEnrolled")}</p>
-      ) : null}
-      {canEnrol && !["cancelled", "completed"].includes(c.status) ? (
-        <EnrolForm groupClass={c} onDone={refresh} />
-      ) : null}
-      <Table
-        caption={t("courses.sessions")}
-        headers={[t("courses.number"), t("courses.date"), t("courses.students"), ""]}
-      >
-        {(sessions.data ?? []).map((s) => (
-          <tr key={s.id}>
-            <Cell>{s.number}</Cell>
-            <Cell>{formatDateTime(s.start)}</Cell>
-            <Cell>{s.attendees}</Cell>
-            <Cell>
-              {s.lesson_status === "cancelled" ? (
-                t("courses.cancelled")
-              ) : (
-                <Link
-                  to="/class-sessions/$sessionId/register"
-                  params={{ sessionId: s.id }}
-                  className="underline"
+        {waitlist.isPending ? (
+          <PanelLoading label={t("grid.loading")} />
+        ) : !waiting.length ? (
+          <PanelEmpty>{t("designS6.courses.nobodyWaiting")}</PanelEmpty>
+        ) : (
+          <RuledTable
+            caption={t("courses.waitlist")}
+            columns={[
+              { header: t("courses.position"), end: true, width: "w-14" },
+              { header: t("courses.student") },
+            ]}
+          >
+            {waiting.map((w) => (
+              <tr key={w.id}>
+                <td className={figureCell}>{w.position ?? "–"}</td>
+                <td>
+                  <span className="font-medium">{w.student_name}</span>
+                  <span className={`${caption} tabular-nums`}>
+                    {t(`courses.waitStatus.${w.status}`)}
+                    {w.offer_expires_at
+                      ? ` · ${t("courses.offerUntil", { date: formatDateTime(w.offer_expires_at, i18n.language) })}`
+                      : ""}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </RuledTable>
+        )}
+      </RuledPanel>
+    </>
+  );
+
+  return (
+    <section>
+      <RecordHeader
+        back={<Link to="/courses">{t("courses.title")}</Link>}
+        title={c.name}
+        description={
+          <span className="tabular-nums">
+            <ClassStatus status={c.status} /> · {c.course_name} · {when} · {c.term_name}
+          </span>
+        }
+        actions={
+          canManage ? (
+            <>
+              {c.status === "draft" ? (
+                <Button
+                  size="sm"
+                  loading={lifecycle.isPending && lifecycle.variables === "open"}
+                  onClick={() => lifecycle.mutate("open")}
                 >
-                  {t("courses.register")}
-                </Link>
-              )}
-            </Cell>
-          </tr>
-        ))}
-      </Table>
-      <Table
-        caption={t("courses.waitlist")}
-        headers={[t("courses.position"), t("courses.student"), t("courses.statusLabel")]}
-      >
-        {(waitlist.data ?? []).map((w) => (
-          <tr key={w.id}>
-            <Cell>{w.position ?? "–"}</Cell>
-            <Cell>{w.student_name}</Cell>
-            <Cell>
-              {t(`courses.waitStatus.${w.status}`)}
-              {w.offer_expires_at
-                ? ` · ${t("courses.offerUntil", { date: formatDateTime(w.offer_expires_at) })}`
-                : ""}
-            </Cell>
-          </tr>
-        ))}
-      </Table>
+                  {t("courses.openClass")}
+                </Button>
+              ) : null}
+              {live && !cancelling ? (
+                <Button
+                  ref={cancelRef}
+                  size="sm"
+                  variant="ghost"
+                  className={`text-muted-foreground ${firstAction ? "max-sm:-ml-3" : ""}`}
+                  aria-expanded={false}
+                  onClick={() => setCancelling(true)}
+                >
+                  {t("courses.cancelClass")}
+                </Button>
+              ) : null}
+            </>
+          ) : null
+        }
+      />
+      {lifecycle.error ? (
+        <div className="-mt-3 mb-6">
+          <ErrorAlert error={lifecycle.error} />
+        </div>
+      ) : null}
+      <RecordLayout main={main} side={side} />
     </section>
   );
 }
@@ -956,7 +1230,8 @@ function RosterLine({
   classId: string;
   canEnrol: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const queryClient = useQueryClient();
   const [moving, setMoving] = useState(false);
   const [target, setTarget] = useState("");
@@ -995,49 +1270,100 @@ function RosterLine({
     },
   });
   const attending = ["enrolled", "trial"].includes(row.status);
+  const error = withdraw.error ?? transfer.error;
+  const dates =
+    formatDate(row.start_date, i18n.language) +
+    (row.end_date ? ` – ${formatDate(row.end_date, i18n.language)}` : "");
+  const status = t(`courses.enrolmentStatus.${row.status}`);
   return (
     <tr>
-      <Cell>
-        {row.student_name}
-        <span className="block text-xs text-muted-foreground">{row.client_name}</span>
-      </Cell>
-      <Cell>{t(`courses.enrolmentStatus.${row.status}`)}</Cell>
-      <Cell>
-        {formatDate(row.start_date)}
-        {row.end_date ? ` – ${formatDate(row.end_date)}` : ""}
-      </Cell>
-      <Cell>
-        {canEnrol && attending ? (
-          <span className="flex flex-wrap items-end gap-2">
-            <Button size="sm" variant="secondary" onClick={() => withdraw.mutate()}>
-              {t("courses.withdraw", { student: row.student_name })}
-            </Button>
-            <Button size="sm" variant="secondary" onClick={() => setMoving(!moving)}>
-              {t("courses.transfer")}
-            </Button>
-            {moving ? (
-              <>
-                <SelectField
-                  label={t("courses.moveTo")}
-                  value={target}
-                  onChange={(e) => setTarget(e.target.value)}
-                  options={[
-                    { value: "", label: "–" },
-                    ...(others.data?.results ?? [])
-                      .filter((x) => x.id !== classId)
-                      .map((x) => ({ value: x.id, label: `${x.course_name} – ${x.name}` })),
-                  ]}
-                />
-                <Button size="sm" disabled={!target} onClick={() => transfer.mutate()}>
-                  {t("courses.move")}
-                </Button>
-              </>
-            ) : null}
-          </span>
-        ) : null}
-        {withdraw.error ? <Alert tone="danger">{withdraw.error.message}</Alert> : null}
-        {transfer.error ? <Alert tone="danger">{transfer.error.message}</Alert> : null}
-      </Cell>
+      <td>
+        <span className="font-medium">{row.student_name}</span>
+        <span className={`${caption} tabular-nums`}>
+          {(isPhone ? [status, dates] : [row.client_name, dates]).join(" · ")}
+        </span>
+      </td>
+      {isPhone ? null : (
+        <>
+          <td
+            className={`whitespace-nowrap ${
+              attending || row.status === "pending_payment" ? "" : "text-muted-foreground"
+            }`}
+          >
+            {status}
+          </td>
+        </>
+      )}
+      {canEnrol ? (
+        <td className="py-1.5 text-right">
+          {attending ? (
+            <span
+              className={`inline-flex items-center justify-end gap-2 ${moving || isPhone ? "flex-wrap" : ""}`}
+            >
+              {moving ? (
+                <>
+                  <SelectField
+                    label={t("courses.moveTo")}
+                    hideLabel
+                    size="sm"
+                    className="h-8 max-w-56"
+                    value={target}
+                    onChange={(e) => setTarget(e.target.value)}
+                    options={[
+                      { value: "", label: t("courses.moveTo") },
+                      ...(others.data?.results ?? [])
+                        .filter((x) => x.id !== classId)
+                        .map((x) => ({ value: x.id, label: `${x.course_name} – ${x.name}` })),
+                    ]}
+                  />
+                  <Button
+                    size="sm"
+                    disabled={!target}
+                    loading={transfer.isPending}
+                    onClick={() => transfer.mutate()}
+                  >
+                    {t("courses.move")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    onClick={() => setMoving(false)}
+                  >
+                    {t("common.cancel")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    aria-expanded={false}
+                    onClick={() => setMoving(true)}
+                  >
+                    {t("courses.transfer")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    aria-label={t("courses.withdraw", { student: row.student_name })}
+                    loading={withdraw.isPending}
+                    onClick={() => withdraw.mutate()}
+                  >
+                    {t("designS6.courses.withdraw")}
+                  </Button>
+                </>
+              )}
+            </span>
+          ) : null}
+          {error ? (
+            <div className="mt-2 text-left">
+              <ErrorAlert error={error} />
+            </div>
+          ) : null}
+        </td>
+      ) : null}
     </tr>
   );
 }
@@ -1098,13 +1424,28 @@ function EnrolForm({ groupClass, onDone }: { groupClass: GroupClass; onDone: () 
     },
   });
   const q = quote.data;
+  const full = groupClass.places_left <= 0;
+  const money = (value: { amount: string; currency: string }) => formatMoney(value, i18n.language);
   return (
-    <FormCard
+    <FormPanel
       title={t("courses.enrolStudent")}
       submit={t("courses.enrol")}
       pending={enrol.isPending}
-      error={enrol.error ?? waitlist.error}
+      error={<ErrorAlert error={enrol.error ?? waitlist.error} />}
       onSubmit={() => enrol.mutate()}
+      lead={
+        full && groupClass.waitlist_enabled ? (
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={!student}
+            loading={waitlist.isPending}
+            onClick={() => waitlist.mutate()}
+          >
+            {t("courses.addToWaitlist")}
+          </Button>
+        ) : null
+      }
     >
       <SelectField
         label={t("courses.student")}
@@ -1116,15 +1457,21 @@ function EnrolForm({ groupClass, onDone }: { groupClass: GroupClass; onDone: () 
           ...(students.data?.results ?? []).map((s) => ({ value: s.id, label: s.full_name })),
         ]}
       />
-      <div className="flex flex-col gap-2 text-sm">
+      <div className="flex flex-col gap-2 text-sm sm:mt-7">
         <label className="flex items-center gap-2">
-          <input type="checkbox" checked={trial} onChange={(e) => setTrial(e.target.checked)} />
+          <input
+            type="checkbox"
+            className="size-4"
+            checked={trial}
+            onChange={(e) => setTrial(e.target.checked)}
+          />
           {t("courses.trial")}
         </label>
-        {groupClass.places_left <= 0 ? (
+        {full ? (
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
+              className="size-4"
               checked={override}
               onChange={(e) => setOverride(e.target.checked)}
             />
@@ -1133,33 +1480,30 @@ function EnrolForm({ groupClass, onDone }: { groupClass: GroupClass; onDone: () 
         ) : null}
       </div>
       {q ? (
-        <div className="sm:col-span-2 rounded-md bg-muted p-3 text-sm" aria-live="polite">
+        <div
+          className="space-y-1 rounded-md border border-border px-4 py-3 text-sm tabular-nums sm:col-span-full"
+          aria-live="polite"
+        >
           <p>
-            {t("courses.feeDue", { amount: formatMoney(q.fee_due, i18n.language) })}
+            {t("courses.feeDue", { amount: money(q.fee_due) })}
             {q.units.total && q.units.remaining < q.units.total
               ? ` ${t("courses.prorated", { remaining: q.units.remaining, total: q.units.total })}`
               : ""}
           </p>
           {q.discounts.map((d) => (
-            <p key={d.name}>
-              {d.name}: {formatMoney(d.amount, i18n.language)}
+            <p key={d.name} className="text-muted-foreground">
+              {d.name}: {money(d.amount)}
             </p>
           ))}
-          <p>{t("courses.dueNow", { amount: formatMoney(q.due_now, i18n.language) })}</p>
-          {q.problems?.length ? <Alert tone="warning">{q.problems.join(" ")}</Alert> : null}
+          <p className="font-semibold">{t("courses.dueNow", { amount: money(q.due_now) })}</p>
+          {q.problems?.length ? (
+            <Alert tone="warning" className="mt-2">
+              {q.problems.join(" ")}
+            </Alert>
+          ) : null}
         </div>
       ) : null}
-      {groupClass.places_left <= 0 && groupClass.waitlist_enabled ? (
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={!student}
-          onClick={() => waitlist.mutate()}
-        >
-          {t("courses.addToWaitlist")}
-        </Button>
-      ) : null}
-    </FormCard>
+    </FormPanel>
   );
 }
 
@@ -1167,7 +1511,8 @@ function EnrolForm({ groupClass, onDone }: { groupClass: GroupClass; onDone: () 
 
 /** The class register: everyone at once, with absence reasons (FR-20-6). */
 export function RegisterPage({ sessionId }: { sessionId: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const queryClient = useQueryClient();
   const register = useQuery({
     queryKey: ["courses", "register", sessionId],
@@ -1210,83 +1555,180 @@ export function RegisterPage({ sessionId }: { sessionId: string }) {
         register.data.rows.map((r) => [r.student, { outcome: "present" as Outcome, reason: "" }]),
       ),
     );
+  const s = session.data;
+  const back: ReactNode = (
+    <>
+      <Link to="/courses">{t("courses.title")}</Link>
+      {s ? (
+        <>
+          <BackSeparator />
+          <Link to="/classes/$classId" params={{ classId: s.group_class }}>
+            {s.class_name}
+          </Link>
+        </>
+      ) : null}
+    </>
+  );
+  const status = register.data.lesson_status;
   return (
-    <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">
-        {t("courses.registerFor", {
-          name: session.data ? `${session.data.course_name} – ${session.data.class_name}` : "",
+    <section>
+      <RecordHeader
+        back={back}
+        title={t("courses.registerFor", {
+          name: s ? `${s.course_name} – ${s.class_name}` : "",
         })}
-      </h1>
-      {session.data ? <p className="text-sm">{formatDateTime(session.data.start)}</p> : null}
-      <p role="status" className="text-sm">
-        {t(`courses.lessonStatus.${register.data.lesson_status}`)}
-      </p>
-      {register.data.rows.length ? (
-        <Button size="sm" variant="secondary" onClick={markAll}>
-          {t("courses.markAllPresent")}
-        </Button>
-      ) : (
-        <p className="text-sm">{t("courses.nobodyInSession")}</p>
-      )}
+        description={
+          <span className="tabular-nums">
+            {s ? `${formatDateTime(s.start, i18n.language)} · ` : ""}
+            <span role="status">{t(`courses.lessonStatus.${status}`)}</span>
+          </span>
+        }
+      />
       <form
-        className="space-y-3"
         aria-label={t("courses.register")}
+        className="max-w-4xl"
         onSubmit={(e) => {
           e.preventDefault();
           save.mutate();
         }}
       >
-        <ul className="space-y-2">
-          {register.data.rows.map((r) => {
-            const current = rows[r.student] ?? {
-              outcome: r.outcome,
-              reason: r.absence_reason ?? "",
-            };
-            const absent = !["present", "late"].includes(current.outcome);
-            return (
-              <li
-                key={r.student}
-                className="flex flex-wrap items-end gap-3 rounded-md border border-border p-3"
-              >
-                <span className="min-w-40 font-medium">
-                  {r.student_name}
-                  {r.makeup ? (
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {t("courses.makeup")}
-                    </span>
-                  ) : null}
-                </span>
-                <SelectField
-                  label={t("courses.outcomeFor", { student: r.student_name })}
-                  value={current.outcome}
-                  onChange={(e) =>
-                    setRows({
-                      ...rows,
-                      [r.student]: { ...current, outcome: e.target.value as Outcome },
-                    })
-                  }
-                  options={OUTCOMES.map((o) => ({ value: o, label: t(`courses.outcomes.${o}`) }))}
-                />
-                {absent ? (
+        <RuledPanel
+          flush
+          title={t("courses.students")}
+          aside={
+            register.data.rows.length ? (
+              <Button type="button" size="sm" variant="secondary" onClick={markAll}>
+                {t("courses.markAllPresent")}
+              </Button>
+            ) : null
+          }
+        >
+          {register.data.rows.length ? (
+            <RuledTable
+              caption={t("courses.register")}
+              columns={[
+                { header: t("courses.student"), width: isPhone ? undefined : "min-w-48" },
+                {
+                  header: t("designS6.courses.mark"),
+                  center: true,
+                  width: isPhone ? "w-14" : "w-20",
+                },
+                ...(isPhone
+                  ? []
+                  : [
+                      { header: t("designS6.courses.attendance"), width: "w-56" },
+                      { header: t("designS6.courses.absenceReason") },
+                    ]),
+              ]}
+            >
+              {register.data.rows.map((r) => {
+                const changed = rows[r.student];
+                const current = changed ?? {
+                  outcome: r.outcome,
+                  reason: r.absence_reason ?? "",
+                };
+                const absent = !["present", "late"].includes(current.outcome);
+                const kind: RegisterMarkKind =
+                  !changed && status === "planned"
+                    ? registerMarkFor("planned", s?.end ?? new Date().toISOString())
+                    : current.outcome === "present" || current.outcome === "late"
+                      ? "completed"
+                      : current.outcome.startsWith("cancelled")
+                        ? "cancelled"
+                        : "missed";
+                const reasonField = absent ? (
                   <TextField
                     label={t("courses.absenceReasonFor", { student: r.student_name })}
+                    hideLabel
+                    size="sm"
+                    placeholder={isPhone ? t("designS6.courses.absenceReason") : undefined}
                     value={current.reason}
                     onChange={(e) =>
-                      setRows({ ...rows, [r.student]: { ...current, reason: e.target.value } })
+                      setRows({
+                        ...rows,
+                        [r.student]: { ...current, reason: e.target.value },
+                      })
                     }
                   />
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-        {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
-        {save.isSuccess ? <Alert tone="success">{t("courses.registerSaved")}</Alert> : null}
-        {register.data.rows.length ? (
-          <Button type="submit" disabled={save.isPending}>
-            {t("courses.saveRegister")}
-          </Button>
-        ) : null}
+                ) : null;
+                const select = (
+                  <SelectField
+                    label={t("courses.outcomeFor", { student: r.student_name })}
+                    hideLabel
+                    size="sm"
+                    value={current.outcome}
+                    onChange={(e) =>
+                      setRows({
+                        ...rows,
+                        [r.student]: { ...current, outcome: e.target.value as Outcome },
+                      })
+                    }
+                    options={OUTCOMES.map((o) => ({
+                      value: o,
+                      label: t(`courses.outcomes.${o}`),
+                    }))}
+                  />
+                );
+                const name = (
+                  <>
+                    <span className="font-medium">{r.student_name}</span>
+                    {r.makeup ? <span className={caption}>{t("courses.makeup")}</span> : null}
+                  </>
+                );
+                const mark = (
+                  <td className="py-3">
+                    <RegisterMark
+                      kind={kind}
+                      label={
+                        kind === "due" || kind === "upcoming"
+                          ? t(MARK_LABEL[kind])
+                          : t(`courses.outcomes.${current.outcome}`)
+                      }
+                      className="mx-auto"
+                    />
+                  </td>
+                );
+                // On phones the controls stack under the name, so each select has the row's width.
+                return isPhone ? (
+                  <tr key={r.student}>
+                    <td className="space-y-2 py-3">
+                      <div>{name}</div>
+                      {select}
+                      {reasonField}
+                    </td>
+                    {mark}
+                  </tr>
+                ) : (
+                  <tr key={r.student}>
+                    <td className="py-3">{name}</td>
+                    {mark}
+                    <td className="py-1.5">{select}</td>
+                    <td className="py-1.5">{reasonField}</td>
+                  </tr>
+                );
+              })}
+            </RuledTable>
+          ) : (
+            <PanelEmpty>{t("courses.nobodyInSession")}</PanelEmpty>
+          )}
+          {save.error ? (
+            <div className="border-t border-rule px-5 py-4">
+              <ErrorAlert error={save.error} />
+            </div>
+          ) : null}
+          {register.data.rows.length ? (
+            <PanelFooter>
+              <Button type="submit" loading={save.isPending}>
+                {t("courses.saveRegister")}
+              </Button>
+              {save.isSuccess ? (
+                <p role="status" className="text-success">
+                  {t("courses.registerSaved")}
+                </p>
+              ) : null}
+            </PanelFooter>
+          ) : null}
+        </RuledPanel>
       </form>
     </section>
   );
@@ -1296,7 +1738,7 @@ export function RegisterPage({ sessionId }: { sessionId: string }) {
 
 /** Keep (or give up) next term's place from the email link (FR-20-4 roll over). */
 export function ReEnrolPage({ token }: { token: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const page = useQuery({
     queryKey: ["re-enrol", token],
@@ -1315,35 +1757,58 @@ export function ReEnrolPage({ token }: { token: string }) {
     onSuccess: (data) => queryClient.setQueryData(["re-enrol", token], data),
   });
   if (page.isError) return <PublicLayout title={t("courses.reEnrol.missing")}>{null}</PublicLayout>;
-  if (!page.data) return <Spinner label={t("grid.loading")} />;
+  if (!page.data) {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-4">
+        <Spinner label={t("grid.loading")} />
+      </main>
+    );
+  }
   const p = page.data;
   return (
     <PublicLayout title={t("courses.reEnrol.title", { student: p.student })}>
-      <p>
-        {t("courses.reEnrol.place", {
-          course: p.course_name,
-          name: p.class_name,
-          term: p.term,
-          date: formatDate(p.starts),
-          time: p.start_time,
-        })}
-      </p>
-      <p className="mt-2 text-sm">
-        {p.mode === "opt_out" ? t("courses.reEnrol.optOut") : t("courses.reEnrol.confirm")}{" "}
-        {t("courses.reEnrol.deadline", { date: formatDateTime(p.deadline) })}
-      </p>
-      <p role="status" className="mt-4 font-medium">
-        {t(`courses.offerStatus.${p.status}`)}
-      </p>
-      {p.open ? (
-        <div className="mt-4 flex gap-2">
-          <Button onClick={() => answer.mutate(true)}>{t("courses.reEnrol.keep")}</Button>
-          <Button variant="secondary" onClick={() => answer.mutate(false)}>
-            {t("courses.reEnrol.leave")}
-          </Button>
+      <div className="space-y-6">
+        <div className="space-y-1">
+          <p className="tabular-nums">
+            {t("courses.reEnrol.place", {
+              course: p.course_name,
+              name: p.class_name,
+              term: p.term,
+              date: formatDate(p.starts, i18n.language),
+              time: p.start_time,
+            })}
+          </p>
+          <p className="text-sm text-muted-foreground tabular-nums">
+            {p.mode === "opt_out" ? t("courses.reEnrol.optOut") : t("courses.reEnrol.confirm")}{" "}
+            {t(p.mode === "opt_out" ? "courses.reEnrol.deadline" : "designS6.courses.answerBy", {
+              date: formatDateTime(p.deadline, i18n.language),
+            })}
+          </p>
         </div>
-      ) : null}
-      {answer.error ? <Alert tone="danger">{answer.error.message}</Alert> : null}
+        <div className="border-y border-border py-3">
+          <p role="status" className="text-base font-semibold">
+            {t(`courses.offerStatus.${p.status}`)}
+          </p>
+        </div>
+        {p.open ? (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              loading={answer.isPending && answer.variables === true}
+              onClick={() => answer.mutate(true)}
+            >
+              {t("courses.reEnrol.keep")}
+            </Button>
+            <Button
+              variant="secondary"
+              loading={answer.isPending && answer.variables === false}
+              onClick={() => answer.mutate(false)}
+            >
+              {t("courses.reEnrol.leave")}
+            </Button>
+          </div>
+        ) : null}
+        <ErrorAlert error={answer.error} />
+      </div>
     </PublicLayout>
   );
 }

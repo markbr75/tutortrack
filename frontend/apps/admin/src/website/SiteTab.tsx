@@ -252,13 +252,12 @@ function Pages() {
   return (
     <RuledPanel title={t("website.pages.title")} flush>
       <RuledTable
-        bare
         caption={t("website.pages.title")}
         columns={[
-          { label: t("website.pages.page") },
-          ...(phone ? [] : [{ label: t("website.pages.address") }]),
-          { label: t("website.pages.status") },
-          { label: t("website.pages.actions"), srOnly: true },
+          { header: t("website.pages.page") },
+          ...(phone ? [] : [{ header: t("website.pages.address") }]),
+          { header: t("website.pages.status") },
+          { header: t("website.pages.actions"), hidden: true },
         ]}
       >
         {pages.data.results.map((p) => (

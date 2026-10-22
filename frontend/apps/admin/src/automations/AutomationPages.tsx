@@ -248,14 +248,16 @@ function RunRows({ runs, bare = false }: { runs: Run[]; bare?: boolean }) {
   const started = (r: Run) => formatDateTime(r.started_at, i18n.language);
   return (
     <RuledTable
-      bare={bare}
+      framed={!bare}
       caption={t("automations.runs")}
       empty={runs.length === 0 ? t("automations.noRuns") : undefined}
       columns={[
-        { label: t("automations.automation") },
-        ...(phone ? [] : [{ label: t("automations.record") }, { label: t("automations.started") }]),
-        { label: t("automations.status") },
-        { label: t("automations.actions"), srOnly: true },
+        { header: t("automations.automation") },
+        ...(phone
+          ? []
+          : [{ header: t("automations.record") }, { header: t("automations.started") }]),
+        { header: t("automations.status") },
+        { header: t("automations.actions"), hidden: true },
       ]}
     >
       {runs.map((r) => (

@@ -7537,5 +7537,66 @@
       "anyGender": "Tutor gender: no preference",
       "listHint": "Separate several exam boards or needs with commas."
     }
+  },
+  "designS6": {
+    "catalogue": {
+      "noServices": "No services yet. Add your first one below.",
+      "payIs": "Pay {{pay}}",
+      "noTaxRates": "No tax rates yet. Add one below.",
+      "noLocations": "No locations yet. Add one below.",
+      "noProducts": "No fees or products yet. Add one below.",
+      "noPackages": "No packages yet. Add one below.",
+      "subjectCount_one": "{{count}} subject",
+      "subjectCount_other": "{{count}} subjects",
+      "noSubjects": "No subjects yet. Add one below.",
+      "noRooms": "No rooms yet. Add one below.",
+      "noTiers": "No pay tiers yet. Add a tier below, then set its pay for each service here.",
+      "noPremiums": "No premiums yet. Add one below.",
+      "noCalendars": "No holiday calendars yet. Add one below.",
+      "holidayCount_one": "{{count}} holiday",
+      "holidayCount_other": "{{count}} holidays",
+      "noDiscounts": "No discounts yet. Add one below.",
+      "noCodes": "No promo codes yet. Add a discount of the promo code type to create one.",
+      "usesOf": "{{uses}} of {{max}}",
+      "noPriceLists": "No price lists yet. Add one below.",
+      "priceCheck": "Check a price",
+      "priceCheckHelp": "See what a lesson would charge and pay, and why, without booking it.",
+      "chosen_one": "{{count}} chosen",
+      "chosen_other": "{{count}} chosen",
+      "tutorShareIs": "Tutor share {{percent}}%",
+      "scrollTiers": "Scroll the grid sideways to see every tier."
+    },
+    "courses": {
+      "filter": "Filter classes",
+      "classCount_one": "{{count}} class",
+      "classCount_other": "{{count}} classes",
+      "reEnrolments": "Re-enrolments",
+      "noRollovers": "No re-enrolments yet. Start one below.",
+      "fromTo": "{{from}} to {{to}}",
+      "online": "Online",
+      "cancelTitle": "Cancel this class",
+      "keepClass": "Keep the class",
+      "reason": "Reason (optional)",
+      "noSessions": "No sessions yet.",
+      "mark": "Mark",
+      "details": "Details",
+      "where": "Where",
+      "nobodyWaiting": "Nobody is waiting.",
+      "withdraw": "Withdraw",
+      "attendance": "Attendance",
+      "absenceReason": "Reason for absence",
+      "answerBy": "Answer by {{date}}."
+    },
+    "learning": {
+      "findResources": "Find resources",
+      "install": "Install",
+      "nothingOnLoan": "Nothing is on loan.",
+      "progressDone": "{{percent}}% done",
+      "milestonesDone": "{{done}} of {{total}} milestones",
+      "counts": "{{submitted}} handed in, {{completed}} marked of {{total}}",
+      "overdue_one": "({{count}} overdue)",
+      "overdue_other": "({{count}} overdue)",
+      "rate": "Homework handed in on time: {{rate}} of {{due}} due ({{overdue}} overdue)."
+    }
   }
 }

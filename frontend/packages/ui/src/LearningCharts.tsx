@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { cn } from "./cn";
 import { MASTERY_LEVELS, type MasteryLevel } from "./masteryLevels";
@@ -21,25 +21,50 @@ export interface TrendChartLabels {
   empty: string;
 }
 
-const W = 600;
+/** The drawing width follows the container (up to 672px), so 12px labels stay 12px on phones. */
+const MAX_W = 672;
 const H = 220;
 const PAD = { top: 12, right: 16, bottom: 28, left: 40 };
 const TICKS = [0, 25, 50, 75, 100];
 
-/** Score % over time: one 2px line in the brand colour, focusable 8px markers with a
+/** Score % over time: one 2px line in link ink (never the tenant colour), focusable 8px markers with a
  * tooltip, a recessive grid on one 0-100 axis and a table view (WCAG 2.2 AA). */
 export function TrendChart({
   points,
   labels,
   formatDate,
+  hideTitle = false,
 }: {
   points: ReadonlyArray<TrendPoint>;
   labels: TrendChartLabels;
   formatDate: (iso: string) => string;
+  /** Keep the caption for screen readers only, when a panel heading already names it. */
+  hideTitle?: boolean;
 }) {
   const titleId = useId();
   const [active, setActive] = useState<number | null>(null);
-  if (!points.length) return <p className="text-sm text-muted-foreground">{labels.empty}</p>;
+  const box = useRef<HTMLDivElement>(null);
+  const hasPoints = points.length > 0;
+  const [W, setW] = useState(320);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const measure = () => {
+      const width = Math.round(el.getBoundingClientRect().width);
+      if (width > 0) setW(Math.min(Math.max(width, 240), MAX_W));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasPoints]);
+  if (!points.length) {
+    return (
+      <div ref={box}>
+        <p className="text-sm text-muted-foreground">{labels.empty}</p>
+      </div>
+    );
+  }
   const innerW = W - PAD.left - PAD.right;
   const innerH = H - PAD.top - PAD.bottom;
   const times = points.map((p) => new Date(p.date).getTime());
@@ -54,13 +79,15 @@ export function TrendChart({
   const shown = active !== null ? points[active] : null;
   return (
     <figure className="space-y-2">
-      <figcaption id={titleId} className="text-sm font-semibold">
+      <figcaption id={titleId} className={hideTitle ? "sr-only" : "text-sm font-semibold"}>
         {labels.title}
       </figcaption>
-      <div className="relative">
+      <div ref={box} className="relative max-w-2xl overflow-hidden">
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          className="h-auto w-full max-w-2xl"
+          width={W}
+          height={H}
+          className="block"
           role="img"
           aria-labelledby={titleId}
         >
@@ -84,14 +111,14 @@ export function TrendChart({
               </text>
             </g>
           ))}
-          <path d={path} fill="none" className="stroke-brand" strokeWidth={2} />
+          <path d={path} fill="none" className="stroke-link" strokeWidth={2} />
           {points.map((p, i) => (
             <circle
               key={`${p.date}-${i}`}
               cx={x(i)}
               cy={y(Number(p.percent))}
               r={active === i ? 6 : 4}
-              className="fill-brand stroke-background"
+              className="fill-link stroke-surface"
               strokeWidth={2}
               tabIndex={0}
               role="button"
@@ -119,7 +146,7 @@ export function TrendChart({
         {shown ? (
           <div
             role="status"
-            className="pointer-events-none absolute left-2 top-2 rounded-md border border-border bg-background px-2 py-1 text-xs shadow"
+            className="pointer-events-none absolute left-2 top-2 rounded-md border border-border bg-surface px-2 py-1 text-xs"
           >
             <p className="font-medium">{shown.name}</p>
             <p>
@@ -128,8 +155,22 @@ export function TrendChart({
           </div>
         ) : null}
       </div>
-      <details>
-        <summary className="cursor-pointer text-sm underline">{labels.showTable}</summary>
+      <details className="group">
+        <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-link [&::-webkit-details-marker]:hidden">
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            className="size-3.5 transition-transform duration-150 group-open:rotate-90"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.75}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+          {labels.showTable}
+        </summary>
         <table className="mt-2 w-full text-sm">
           <thead>
             <tr className="text-left">
@@ -163,9 +204,9 @@ export interface HeatmapUnit {
 
 const LEVEL_STYLE: Record<MasteryLevel, string> = {
   not_started: "bg-muted text-foreground",
-  learning: "bg-brand/15 text-foreground",
-  secure: "bg-brand/40 text-foreground",
-  mastered: "bg-brand text-brand-foreground",
+  learning: "bg-link/15 text-foreground",
+  secure: "bg-link/40 text-foreground",
+  mastered: "bg-link text-background",
 };
 
 /** Topic coverage heatmap: one hue from light (not started) to full (mastered); every

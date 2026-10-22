@@ -2,40 +2,54 @@ import type { ReactNode } from "react";
 
 import { cn } from "./cn";
 
-export interface RuledTableColumn {
-  /** Stable React key; falls back to the label. */
+export interface RuledColumn {
+  /** Stable key; falls back to the position. */
   key?: string;
-  label: ReactNode;
-  /** Figure columns are right-aligned (headings too). */
-  align?: "left" | "right";
+  header: ReactNode;
+  /** A figure column: right-aligned heading and cells (pair with `figureCell`). */
+  end?: boolean;
+  /** A centred column (a register mark). */
+  center?: boolean;
+  /** A fixed width class for figure or mark columns ("w-32" for an amount). */
+  width?: string;
   /** Keep the heading for screen readers only (an actions column). */
-  srOnly?: boolean;
-  className?: string;
+  hidden?: boolean;
 }
+
+/** The class for a right-aligned, tabular figure cell. */
+export const figureCell = "text-right tabular-nums whitespace-nowrap";
 
 /**
  * A hand-built register table: a positioned, labelled, focusable scroll region (so wide
- * tables scroll inside it and never widen a phone page), a visually hidden caption, headings
- * as 12px/600 faded ink ruled off by a register rule, 10×16 cells with the first and last
- * column inset 20px to line up with a panel's header, and faint rules between rows (global).
- * Standing alone it is a clean-leaf panel with 12px corners; `bare` drops the edge for use
- * inside a flush `RuledPanel`. Rows are passed as `<tr>` children.
+ * content scrolls inside it and never widens the page), a visually hidden caption, the header
+ * ruled off by a register rule, faint rules between rows and cells inset 10×16 (20 at the
+ * panel edges). Inside a flush `RuledPanel` it is bare; on its own (`framed`) it is a
+ * clean-leaf panel like the data grid. Rows are plain `<tr>`/`<td>` children.
  */
 export function RuledTable({
   caption,
   columns,
   children,
+  footer,
+  framed = false,
+  loading = false,
+  loadingLabel,
   empty,
-  bare = false,
   className,
+  tableClassName,
 }: {
   caption: string;
-  columns: ReadonlyArray<RuledTableColumn>;
+  columns: ReadonlyArray<RuledColumn>;
   children?: ReactNode;
-  /** One faded-ink sentence shown instead of the table when there are no rows. */
+  /** A `<tfoot>` with totals, ruled off by a register rule. */
+  footer?: ReactNode;
+  framed?: boolean;
+  loading?: boolean;
+  loadingLabel?: string;
+  /** One faded-ink sentence instead of rows (pass it only when there are none). */
   empty?: ReactNode;
-  bare?: boolean;
   className?: string;
+  tableClassName?: string;
 }) {
   return (
     <div
@@ -44,41 +58,69 @@ export function RuledTable({
       tabIndex={0}
       className={cn(
         "relative overflow-x-auto",
-        !bare && "rounded-xl border border-border bg-surface",
+        framed && "rounded-xl border border-border bg-surface",
         className,
       )}
     >
-      {empty ? (
-        <p className="px-5 py-6 text-sm text-muted-foreground">{empty}</p>
-      ) : (
-        <table
-          className={cn(
-            "w-full text-sm",
-            "[&_td]:px-4 [&_td]:py-2.5 [&_td]:align-top [&_tbody_th]:px-4 [&_tbody_th]:py-2.5 [&_tbody_th]:text-left [&_tbody_th]:align-top [&_tbody_th]:font-medium",
-            "[&_td:first-child]:pl-5 [&_td:last-child]:pr-5 [&_th:first-child]:pl-5 [&_th:last-child]:pr-5",
-          )}
-        >
-          <caption className="sr-only">{caption}</caption>
-          <thead className="border-b border-border">
+      <table
+        className={cn(
+          "w-full text-left text-sm",
+          // Low-specificity defaults, so a cell's own classes (py-1.5, align-middle) win.
+          "[:where(&)_td]:px-4 [:where(&)_td]:py-2.5 [:where(&)_td]:align-top",
+          "[:where(&)_td:first-child]:pl-5 [:where(&)_td:last-child]:pr-5",
+          "[:where(&)_th]:px-4 [:where(&)_th:first-child]:pl-5 [:where(&)_th:last-child]:pr-5",
+          // Row headers in the body read like a primary cell.
+          "[:where(&)_tbody_th]:py-2.5 [:where(&)_tbody_th]:text-left [:where(&)_tbody_th]:align-top [:where(&)_tbody_th]:font-medium",
+          tableClassName,
+        )}
+      >
+        <caption className="sr-only">{caption}</caption>
+        <thead className="border-b border-border">
+          <tr>
+            {columns.map((column, index) => (
+              <th
+                key={column.key ?? index}
+                scope="col"
+                className={cn(
+                  "py-2.5 whitespace-nowrap",
+                  column.end && "text-right",
+                  column.center && "text-center",
+                  column.width,
+                )}
+              >
+                {column.hidden ? <span className="sr-only">{column.header}</span> : column.header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {loading ? (
+            [0, 1, 2].map((i) => (
+              <tr key={`loading-${i}`}>
+                <td colSpan={columns.length}>
+                  {i === 0 && loadingLabel ? (
+                    <span role="status" className="sr-only">
+                      {loadingLabel}
+                    </span>
+                  ) : null}
+                  <div aria-hidden="true" className="h-4 animate-pulse rounded bg-muted" />
+                </td>
+              </tr>
+            ))
+          ) : empty ? (
             <tr>
-              {columns.map((c, i) => (
-                <th
-                  key={c.key ?? (typeof c.label === "string" ? c.label : i)}
-                  scope="col"
-                  className={cn(
-                    "px-4 py-2.5 whitespace-nowrap",
-                    c.align === "right" && "text-right",
-                    c.className,
-                  )}
-                >
-                  {c.srOnly ? <span className="sr-only">{c.label}</span> : c.label}
-                </th>
-              ))}
+              <td colSpan={columns.length} className="py-8 text-center text-muted-foreground">
+                {empty}
+              </td>
             </tr>
-          </thead>
-          <tbody>{children}</tbody>
-        </table>
-      )}
+          ) : (
+            children
+          )}
+        </tbody>
+        {footer && !loading && !empty ? (
+          <tfoot className="border-t border-border">{footer}</tfoot>
+        ) : null}
+      </table>
     </div>
   );
 }

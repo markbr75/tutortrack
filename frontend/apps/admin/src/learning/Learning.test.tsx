@@ -170,10 +170,8 @@ describe("learning tools", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Score trend" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Mock, .*: 67.50%/ })).toBeInTheDocument();
-    expect(screen.getByRole("progressbar", { name: "Progress" })).toHaveAttribute(
-      "aria-valuenow",
-      "50",
-    );
+    // Goal progress is said in words, not drawn as a bar.
+    expect(screen.getByText("In progress · 50% done · 1 of 2 milestones")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("checkbox", { name: "Algebra" }));
     await waitFor(() =>
       expect(calls.find((c) => c.path.endsWith("/milestone"))?.body).toEqual({
