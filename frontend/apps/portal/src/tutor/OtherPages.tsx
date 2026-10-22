@@ -292,7 +292,7 @@ export function AvailabilityPage() {
               </div>
             ) : null}
             <PanelFooter>
-              <Button type="submit" disabled={timeOff.isPending}>
+              <Button type="submit" variant="secondary" disabled={timeOff.isPending}>
                 {t("tutor.addTimeOff")}
               </Button>
               <span role="status" className="text-sm text-success">
