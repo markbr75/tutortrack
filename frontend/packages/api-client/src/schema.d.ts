@@ -21289,6 +21289,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /**
+     * @description The tutor's day, plus what is waiting: ``unmarked_lessons`` counts lessons that
+     *     have ended and are still planned, on any of the last 60 days.
+     */
     get: operations["tutor_today_retrieve"];
     put?: never;
     post?: never;
@@ -23766,13 +23770,21 @@ export interface components {
       /** Format: uuid */
       impersonator_id: string | null;
     };
+    /**
+     * @description An audit entry. ``object_repr`` is the record's name when it changed (what ``q``
+     *     searches); ``record_label``, ``record_type_label`` and ``action_label`` are readable
+     *     labels computed when read, in the request's language.
+     */
     AuditEntry: {
       /** Format: uuid */
       readonly id: string;
       readonly action: string;
+      readonly action_label: string;
       readonly object_type: string;
+      readonly record_type_label: string;
       readonly object_id: string;
       readonly object_repr: string;
+      readonly record_label: string;
       readonly changes: unknown;
       /** Format: uuid */
       readonly actor: string | null;
@@ -27936,6 +27948,10 @@ export interface components {
       readonly labels: unknown;
       readonly steps_done: unknown;
       readonly report: unknown;
+      /** @description A readable name for each key of ``report`` (the area that was erased). */
+      readonly area_labels: {
+        [key: string]: string;
+      };
       /** Format: date-time */
       readonly financial_retained_until: string | null;
       /** Format: date-time */
@@ -40411,6 +40427,10 @@ export interface components {
       readonly status: components["schemas"]["RetentionRunStatusEnum"];
       readonly trigger: string;
       readonly report: unknown;
+      /** @description A readable name for each key of ``report`` (the retention category). */
+      readonly area_labels: {
+        [key: string]: string;
+      };
       /** Format: date-time */
       readonly started_at: string;
       /** Format: date-time */
@@ -44081,6 +44101,8 @@ export interface components {
       date: string;
       lessons: components["schemas"]["TutorDayLesson"][];
       reports_due: number;
+      /** @description The tutor's lessons that have ended and are still planned (not yet marked completed, missed or cancelled), today and on earlier days within the last 60 days. */
+      unmarked_lessons: number;
       offers: number;
       unread: number;
       earnings_this_month: components["schemas"]["MoneyOut"];
