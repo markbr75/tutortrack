@@ -1,19 +1,34 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, PageHeader, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FactList,
+  NamePlate,
+  PageHeader,
+  Panel,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
 import { AiJobAdvert } from "../ai/AiWidgets";
 import { AttachedFiles } from "../components/AttachedFiles";
+import { HeaderReveal, RecordHeader, RecordLayout } from "../components/RecordHeader";
+import { TabLinks } from "../components/TabLinks";
 import { Turnstile } from "../components/Turnstile";
 import { PublicLayout } from "../layout/PublicLayout";
 import { PublicField, type Schema } from "../leads/MorePages";
 
 /** The recruitment area's frame: page header and the Applications / Openings / Compliance
- * links (G5a adds Openings). */
+ * links (G5a adds Openings), ruled like tabs. */
 export function RecruitmentPage({
   title,
   description,
@@ -26,33 +41,29 @@ export function RecruitmentPage({
   children: ReactNode;
 }) {
   const { t } = useTranslation();
-  const link =
-    "pb-1 text-muted-foreground [&.active]:border-b-2 [&.active]:border-foreground [&.active]:text-foreground";
   return (
-    <div className="space-y-4">
-      <PageHeader title={title} description={description} actions={actions} className="mb-2" />
-      <nav
-        aria-label={t("recruitment.title")}
-        className="flex gap-4 border-b border-border text-sm"
-      >
-        <Link to="/recruitment" activeOptions={{ exact: true }} className={link}>
-          {t("recruitment.applications")}
-        </Link>
-        <Link to="/recruitment/openings" className={link}>
-          {t("hiring.openings.title")}
-        </Link>
-        <Link to="/compliance" className={link}>
-          {t("recruitment.compliance")}
-        </Link>
-      </nav>
-      {children}
+    <div>
+      <PageHeader title={title} description={description} actions={actions} className="mb-4" />
+      <TabLinks
+        label={t("recruitment.title")}
+        className="mb-6"
+        links={[
+          { to: "/recruitment", label: t("recruitment.applications"), exact: true },
+          { to: "/recruitment/openings", label: t("hiring.openings.title") },
+          { to: "/compliance", label: t("recruitment.compliance") },
+        ]}
+      />
+      <div className="space-y-6">{children}</div>
     </div>
   );
 }
 
 const Page = RecruitmentPage;
 
-/** Applications by stage (FR-18-2). */
+const subjectList = (subjects: unknown) =>
+  ((subjects as { subject: string }[] | undefined) ?? []).map((s) => s.subject).join(", ");
+
+/** Applications by stage (FR-18-2): the open stages as ruled columns. */
 export function ApplicationsPage() {
   const { t } = useTranslation();
   const canManageOpenings = usePermission("recruitment.pipeline.manage");
@@ -71,8 +82,14 @@ export function ApplicationsPage() {
   });
   return (
     <Page title={t("recruitment.title")}>
-      {applications.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      <div className="flex gap-3 overflow-x-auto pb-2">
+      {applications.isPending || stages.isPending ? <Spinner label={t("grid.loading")} /> : null}
+      {/* Scrolls sideways when the stages outgrow the page: focusable so keyboards can scroll it. */}
+      <div
+        role="region"
+        aria-label={t("recruitment.applications")}
+        tabIndex={0}
+        className="relative flex items-start gap-4 overflow-x-auto pb-2"
+      >
         {stages.data
           ?.filter((s) => s.kind === "open")
           .map((stage) => {
@@ -81,32 +98,44 @@ export function ApplicationsPage() {
               <section
                 key={stage.id}
                 aria-label={stage.name}
-                className="w-64 shrink-0 rounded-md bg-muted/50 p-2"
+                className="w-72 shrink-0 rounded-xl border border-border bg-surface"
               >
-                <h2 className="mb-2 flex justify-between text-sm font-semibold">
-                  <span>{stage.name}</span>
-                  <span className="text-muted-foreground">{cards.length}</span>
+                <h2 className="flex items-baseline justify-between gap-2 border-b border-border px-4 py-3 text-base font-semibold">
+                  <span className="min-w-0 truncate">{stage.name}</span>
+                  <span className="text-sm font-normal text-muted-foreground tabular-nums">
+                    {cards.length}
+                  </span>
                 </h2>
-                <ul className="space-y-2">
-                  {cards.map((a) => (
-                    <li
-                      key={a.id}
-                      className="rounded-md border border-border bg-background p-2 text-sm"
-                    >
-                      <Link
-                        to="/recruitment/$id"
-                        params={{ id: a.id }}
-                        className="font-medium underline"
-                      >
-                        {a.full_name}
-                      </Link>
-                      <p className="text-xs text-muted-foreground">
-                        {(a.subjects as { subject: string }[]).map((s) => s.subject).join(", ")}
-                        {a.opening_title ? ` · ${a.opening_title}` : ""}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
+                {cards.length ? (
+                  <ul className="divide-y divide-rule">
+                    {cards.map((a) => (
+                      <li key={a.id} className="px-4 py-2.5 text-sm hover:bg-muted/60">
+                        <NamePlate
+                          name={
+                            <Link
+                              to="/recruitment/$id"
+                              params={{ id: a.id }}
+                              className="underline-offset-2 hover:underline"
+                            >
+                              {a.full_name}
+                            </Link>
+                          }
+                          context={[
+                            subjectList(a.subjects),
+                            a.opening_title,
+                            formatDate(a.created_at),
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="px-4 py-4 text-sm text-muted-foreground">
+                    {t("designS8.recruitment.emptyColumn")}
+                  </p>
+                )}
               </section>
             );
           })}
@@ -116,11 +145,13 @@ export function ApplicationsPage() {
   );
 }
 
-/** One application: scorecards, references, interview, decision. */
+/** One application: what they sent, next steps (interview, references), the decision, and
+ * its references, interviews and scorecards beside it. */
 export function ApplicationPage({ id }: { id: string }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const canDecide = usePermission("recruitment.application.decide");
+  const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
   const [referee, setReferee] = useState({ name: "", email: "" });
   const [slot, setSlot] = useState("");
@@ -128,6 +159,7 @@ export function ApplicationPage({ id }: { id: string }) {
   const [windowStart, setWindowStart] = useState("");
   const [windowEnd, setWindowEnd] = useState("");
   const [minutes, setMinutes] = useState("30");
+  const [stage, setStage] = useState("");
   const application = useQuery({
     queryKey: ["application", id],
     queryFn: async () =>
@@ -162,7 +194,10 @@ export function ApplicationPage({ id }: { id: string }) {
           body: { reason, talent_pool: false, notify: true },
         }),
       ),
-    onSuccess: set,
+    onSuccess: (data) => {
+      set(data);
+      setRejecting(false);
+    },
   });
   const reference = useMutation({
     mutationFn: async () =>
@@ -172,7 +207,10 @@ export function ApplicationPage({ id }: { id: string }) {
           body: { ...referee, relationship: "" },
         }),
       ),
-    onSuccess: set,
+    onSuccess: (data) => {
+      set(data);
+      setReferee({ name: "", email: "" });
+    },
   });
   const interview = useMutation({
     mutationFn: async () =>
@@ -201,75 +239,328 @@ export function ApplicationPage({ id }: { id: string }) {
   });
   if (!application.data) return <Spinner label={t("grid.loading")} />;
   const a = application.data;
-  const error = move.error ?? approve.error ?? reject.error ?? reference.error ?? interview.error;
+  const open = a.status === "open";
+  const openStages = stages.data?.filter((s) => s.kind === "open") ?? [];
+  const error = move.error ?? approve.error ?? reference.error ?? interview.error;
+  const files = [
+    ...(a.cv_file
+      ? [{ ...a.cv_file, filename: `${t("hiring.files.cv")}: ${a.cv_file.filename}` }]
+      : []),
+    ...(a.video_file
+      ? [{ ...a.video_file, filename: `${t("hiring.files.video")}: ${a.video_file.filename}` }]
+      : []),
+    ...(a.attachments ?? []),
+  ];
   return (
-    <Page title={a.full_name}>
-      <p className="text-sm">
-        {a.stage_name} · {t(`recruitment.status.${a.status}`)} · {a.email}
-        {a.phone ? ` · ${a.phone}` : ""} · {formatDate(a.created_at)}
-      </p>
-      <section className="space-y-1 rounded-md border border-border p-4 text-sm">
-        <p>
-          {t("recruitment.subjects")}:{" "}
-          {(a.subjects as { subject: string }[]).map((s) => s.subject).join(", ") || "–"}
-        </p>
-        {a.experience ? <p className="whitespace-pre-line">{a.experience}</p> : null}
-        {Object.entries(a.answers as Record<string, unknown>).map(([q, v]) => (
-          <p key={q}>
-            <strong>{q}</strong>: {String(v)}
-          </p>
-        ))}
-        {a.video_url ? (
-          <p>
-            {t("hiring.files.videoLink")}:{" "}
-            <a className="text-link underline" href={a.video_url} rel="noreferrer" target="_blank">
-              {a.video_url}
-            </a>
-          </p>
-        ) : null}
-        <AttachedFiles
-          label={t("hiring.files.uploads")}
-          files={[
-            ...(a.cv_file
-              ? [{ ...a.cv_file, filename: `${t("hiring.files.cv")}: ${a.cv_file.filename}` }]
-              : []),
-            ...(a.video_file
-              ? [
-                  {
-                    ...a.video_file,
-                    filename: `${t("hiring.files.video")}: ${a.video_file.filename}`,
-                  },
-                ]
-              : []),
-            ...(a.attachments ?? []),
-          ]}
-        />
-      </section>
-      {a.status === "open" ? (
-        <section className="space-y-3 rounded-md border border-border p-4">
-          <label className="flex items-center gap-2 text-sm">
-            <span>{t("recruitment.stage")}</span>
-            <select
-              className="h-9 rounded-md border border-border bg-background px-2"
-              value={a.stage}
-              onChange={(e) => move.mutate(e.target.value)}
-            >
-              {stages.data
-                ?.filter((s) => s.kind === "open")
-                .map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <fieldset className="space-y-2">
-            <legend className="text-sm font-medium">{t("recruitment.inviteToInterview")}</legend>
-            <div className="flex flex-wrap items-end gap-2">
+    <article>
+      <RecordHeader
+        back={<Link to="/recruitment">{t("recruitment.applications")}</Link>}
+        title={a.full_name}
+        description={[
+          open ? a.stage_name : t(`recruitment.status.${a.status}`),
+          a.opening_title,
+          t("designS8.recruitment.applied", { date: formatDate(a.created_at) }),
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+        actions={
+          open ? (
+            <>
+              {openStages.length > 1 ? (
+                <HeaderReveal label={t("designS8.recruitment.moveStage")}>
+                  {(close) => (
+                    <>
+                      <SelectField
+                        label={t("recruitment.stage")}
+                        hideLabel
+                        size="sm"
+                        value={stage || a.stage}
+                        onChange={(e) => setStage(e.target.value)}
+                        options={openStages.map((s) => ({ value: s.id, label: s.name }))}
+                      />
+                      <Button
+                        size="sm"
+                        loading={move.isPending}
+                        onClick={() => move.mutate(stage || a.stage, { onSuccess: () => close() })}
+                      >
+                        {t("designS8.recruitment.move")}
+                      </Button>
+                    </>
+                  )}
+                </HeaderReveal>
+              ) : null}
+              {canDecide ? (
+                <>
+                  <Button size="sm" onClick={() => approve.mutate()} loading={approve.isPending}>
+                    {t("recruitment.approve")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    aria-expanded={rejecting}
+                    onClick={() => setRejecting(true)}
+                  >
+                    {t("recruitment.reject")}
+                  </Button>
+                </>
+              ) : null}
+            </>
+          ) : null
+        }
+      />
+      {error ? (
+        <Alert tone="danger" className="mb-6">
+          {error.message}
+        </Alert>
+      ) : null}
+      <RecordLayout
+        main={
+          <>
+            {rejecting && open && canDecide ? (
+              <Panel flush title={t("designS8.recruitment.rejectTitle")}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    reject.mutate();
+                  }}
+                >
+                  <div className="max-w-md px-5 py-4">
+                    <TextField
+                      label={t("recruitment.rejectReason")}
+                      required
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                    />
+                  </div>
+                  {reject.error ? (
+                    <Alert tone="danger" className="mx-5 mb-4">
+                      {reject.error.message}
+                    </Alert>
+                  ) : null}
+                  <PanelFooter>
+                    <Button
+                      type="submit"
+                      size="sm"
+                      variant="danger"
+                      disabled={!reason.trim()}
+                      loading={reject.isPending}
+                    >
+                      {t("recruitment.reject")}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setRejecting(false)}>
+                      {t("common.cancel")}
+                    </Button>
+                  </PanelFooter>
+                </form>
+              </Panel>
+            ) : null}
+            <Panel title={t("designS8.recruitment.application")} flush>
+              <FactList
+                none={t("designS5.noDetails")}
+                items={[
+                  [t("recruitment.subjects"), subjectList(a.subjects)],
+                  [t("designS8.recruitment.qualifications"), a.qualifications],
+                  [
+                    t("designS8.recruitment.experience"),
+                    a.experience ? <span className="whitespace-pre-line">{a.experience}</span> : "",
+                  ],
+                  ...Object.entries(a.answers as Record<string, unknown>).map(
+                    ([q, v]) => [q, String(v ?? "")] as const,
+                  ),
+                  [
+                    t("hiring.files.videoLink"),
+                    a.video_url ? (
+                      <a
+                        className="text-link underline-offset-2 hover:underline"
+                        href={a.video_url}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {a.video_url}
+                      </a>
+                    ) : (
+                      ""
+                    ),
+                  ],
+                  [t("hiring.files.uploads"), files.length ? <AttachedFiles files={files} /> : ""],
+                ]}
+              />
+            </Panel>
+            {open ? (
+              <NextSteps
+                inviteMode={inviteMode}
+                setInviteMode={setInviteMode}
+                minutes={minutes}
+                setMinutes={setMinutes}
+                windowStart={windowStart}
+                setWindowStart={setWindowStart}
+                windowEnd={windowEnd}
+                setWindowEnd={setWindowEnd}
+                slot={slot}
+                setSlot={setSlot}
+                invitePending={interview.isPending}
+                onInvite={() => interview.mutate()}
+                referee={referee}
+                setReferee={setReferee}
+                referencePending={reference.isPending}
+                onReference={() => reference.mutate()}
+              />
+            ) : null}
+          </>
+        }
+        side={
+          <>
+            <Panel title={t("people.details")} flush>
+              <FactList
+                items={[
+                  [t("people.email"), a.email],
+                  [t("people.phone"), a.phone],
+                  [t("designS8.recruitment.postcode"), a.postcode],
+                  [t("designS8.recruitment.rightToWork"), a.right_to_work],
+                ]}
+                none={t("designS5.noDetails")}
+              />
+            </Panel>
+            <Panel title={t("recruitment.interviews")} flush>
+              {a.interviews.length ? (
+                <PanelRows>
+                  {a.interviews.map((i) => (
+                    <PanelRow key={i.id}>
+                      <NamePlate
+                        name={
+                          i.start ? (
+                            <span className="tabular-nums">{formatDateTime(i.start)}</span>
+                          ) : (
+                            t("recruitment.awaitingChoice")
+                          )
+                        }
+                        context={
+                          i.mode === "availability" && !i.start && i.window_start
+                            ? t("hiring.interviews.window", {
+                                from: formatDate(i.window_start),
+                                to: formatDate(i.window_end ?? i.window_start),
+                              })
+                            : undefined
+                        }
+                        aside={
+                          i.host_url || i.meeting_url ? (
+                            <a
+                              className="text-link underline-offset-2 hover:underline"
+                              href={i.host_url || i.meeting_url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {t("hiring.interviews.join")}
+                            </a>
+                          ) : null
+                        }
+                      />
+                    </PanelRow>
+                  ))}
+                </PanelRows>
+              ) : (
+                <p className="px-5 py-4 text-sm text-muted-foreground">
+                  {t("designS8.recruitment.noInterviews")}
+                </p>
+              )}
+            </Panel>
+            <Panel title={t("recruitment.references")} flush>
+              {a.references.length ? (
+                <PanelRows>
+                  {a.references.map((r) => (
+                    <PanelRow key={r.id}>
+                      <NamePlate
+                        name={r.referee_name}
+                        context={[
+                          t(`recruitment.referenceStatus.${r.status}`),
+                          r.rating ? t("designS8.recruitment.rating", { rating: r.rating }) : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                        aside={
+                          r.concerns ? (
+                            <span className="text-sm font-semibold text-margin">
+                              {t("recruitment.concerns")}
+                            </span>
+                          ) : null
+                        }
+                      />
+                    </PanelRow>
+                  ))}
+                </PanelRows>
+              ) : (
+                <p className="px-5 py-4 text-sm text-muted-foreground">
+                  {t("designS8.recruitment.noReferences")}
+                </p>
+              )}
+            </Panel>
+            <Panel title={t("recruitment.scorecards")} flush>
+              {a.scorecards.length ? (
+                <PanelRows>
+                  {a.scorecards.map((sc) => (
+                    <PanelRow key={sc.id}>
+                      <NamePlate
+                        name={sc.reviewer_name}
+                        context={sc.stage_name}
+                        aside={
+                          <span className="text-sm">
+                            {t(`recruitment.recommendations.${sc.recommendation}`)}
+                          </span>
+                        }
+                      />
+                    </PanelRow>
+                  ))}
+                </PanelRows>
+              ) : (
+                <p className="px-5 py-4 text-sm text-muted-foreground">
+                  {t("designS8.recruitment.noScorecards")}
+                </p>
+              )}
+            </Panel>
+          </>
+        }
+      />
+    </article>
+  );
+}
+
+/** Invite to an interview and ask for a reference: each a ruled row of fields and the button
+ * they enable. */
+function NextSteps(props: {
+  inviteMode: "availability" | "times";
+  setInviteMode: (v: "availability" | "times") => void;
+  minutes: string;
+  setMinutes: (v: string) => void;
+  windowStart: string;
+  setWindowStart: (v: string) => void;
+  windowEnd: string;
+  setWindowEnd: (v: string) => void;
+  slot: string;
+  setSlot: (v: string) => void;
+  invitePending: boolean;
+  onInvite: () => void;
+  referee: { name: string; email: string };
+  setReferee: (v: { name: string; email: string }) => void;
+  referencePending: boolean;
+  onReference: () => void;
+}) {
+  const { t } = useTranslation();
+  const inviteId = useId();
+  const p = props;
+  return (
+    <Panel title={t("designS8.recruitment.nextSteps")} flush>
+      <div className="divide-y divide-rule">
+        <div className="px-5 py-4">
+          <fieldset className="space-y-3" aria-describedby={`${inviteId}-hint`}>
+            <legend className="mb-3 text-sm font-semibold">
+              {t("recruitment.inviteToInterview")}
+            </legend>
+            <div className="grid gap-3 sm:grid-cols-2">
               <SelectField
                 label={t("hiring.interviews.how")}
-                value={inviteMode}
-                onChange={(e) => setInviteMode(e.target.value as "availability" | "times")}
+                value={p.inviteMode}
+                onChange={(e) => p.setInviteMode(e.target.value as "availability" | "times")}
                 options={[
                   { value: "availability", label: t("hiring.interviews.bookingLink") },
                   { value: "times", label: t("hiring.interviews.oneTime") },
@@ -277,142 +568,94 @@ export function ApplicationPage({ id }: { id: string }) {
               />
               <SelectField
                 label={t("hiring.interviews.length")}
-                value={minutes}
-                onChange={(e) => setMinutes(e.target.value)}
+                value={p.minutes}
+                onChange={(e) => p.setMinutes(e.target.value)}
                 options={["20", "30", "45", "60"].map((m) => ({
                   value: m,
                   label: t("hiring.interviews.minutes", { count: Number(m) }),
                 }))}
               />
-              {inviteMode === "availability" ? (
+              {p.inviteMode === "availability" ? (
                 <>
                   <TextField
                     label={t("hiring.interviews.from")}
                     type="date"
-                    value={windowStart}
-                    onChange={(e) => setWindowStart(e.target.value)}
+                    value={p.windowStart}
+                    onChange={(e) => p.setWindowStart(e.target.value)}
                   />
                   <TextField
                     label={t("hiring.interviews.to")}
                     type="date"
-                    value={windowEnd}
-                    onChange={(e) => setWindowEnd(e.target.value)}
+                    value={p.windowEnd}
+                    onChange={(e) => p.setWindowEnd(e.target.value)}
                   />
                 </>
               ) : (
                 <TextField
                   label={t("recruitment.interviewTime")}
                   type="datetime-local"
-                  value={slot}
-                  onChange={(e) => setSlot(e.target.value)}
+                  value={p.slot}
+                  onChange={(e) => p.setSlot(e.target.value)}
                 />
               )}
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <Button
+                size="sm"
                 variant="secondary"
-                disabled={inviteMode === "availability" ? !windowStart : !slot}
-                loading={interview.isPending}
-                onClick={() => interview.mutate()}
+                disabled={p.inviteMode === "availability" ? !p.windowStart : !p.slot}
+                loading={p.invitePending}
+                onClick={p.onInvite}
               >
                 {t("hiring.interviews.send")}
               </Button>
+              <p id={`${inviteId}-hint`} className="text-xs text-muted-foreground">
+                {t("hiring.interviews.hint")}
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">{t("hiring.interviews.hint")}</p>
           </fieldset>
-          <div className="flex flex-wrap items-end gap-2">
-            <TextField
-              label={t("recruitment.refereeName", { n: "" })}
-              value={referee.name}
-              onChange={(e) => setReferee({ ...referee, name: e.target.value })}
-            />
-            <TextField
-              label={t("recruitment.refereeEmail", { n: "" })}
-              type="email"
-              value={referee.email}
-              onChange={(e) => setReferee({ ...referee, email: e.target.value })}
-            />
-            <Button
-              variant="secondary"
-              disabled={!referee.email}
-              onClick={() => reference.mutate()}
-            >
+        </div>
+        <div className="px-5 py-4">
+          <fieldset className="space-y-3">
+            <legend className="mb-3 text-sm font-semibold">
               {t("recruitment.requestReference")}
-            </Button>
-          </div>
-          {canDecide ? (
-            <div className="flex flex-wrap items-end gap-2">
-              <Button onClick={() => approve.mutate()} loading={approve.isPending}>
-                {t("recruitment.approve")}
-              </Button>
+            </legend>
+            <div className="grid gap-3 sm:grid-cols-2">
               <TextField
-                label={t("recruitment.rejectReason")}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
+                label={t("recruitment.refereeName", { n: "" })}
+                value={p.referee.name}
+                onChange={(e) => p.setReferee({ ...p.referee, name: e.target.value })}
               />
-              <Button variant="ghost" disabled={!reason} onClick={() => reject.mutate()}>
-                {t("recruitment.reject")}
-              </Button>
+              <TextField
+                label={t("recruitment.refereeEmail", { n: "" })}
+                type="email"
+                value={p.referee.email}
+                onChange={(e) => p.setReferee({ ...p.referee, email: e.target.value })}
+              />
             </div>
-          ) : null}
-          {error ? <Alert tone="danger">{error.message}</Alert> : null}
-        </section>
-      ) : null}
-      <section className="space-y-1 text-sm">
-        <h2 className="font-semibold">{t("recruitment.references")}</h2>
-        {a.references.map((r) => (
-          <p key={r.id}>
-            {r.referee_name} · {t(`recruitment.referenceStatus.${r.status}`)}
-            {r.rating ? ` · ${r.rating}/5` : ""}
-            {r.concerns ? ` · ${t("recruitment.concerns")}` : ""}
-          </p>
-        ))}
-        <h2 className="font-semibold">{t("recruitment.interviews")}</h2>
-        {a.interviews.map((i) => (
-          <p key={i.id}>
-            {i.start ? formatDateTime(i.start) : t("recruitment.awaitingChoice")}
-            {i.mode === "availability" && !i.start && i.window_start ? (
-              <span className="text-muted-foreground">
-                {" "}
-                ·{" "}
-                {t("hiring.interviews.window", {
-                  from: formatDate(i.window_start),
-                  to: formatDate(i.window_end ?? i.window_start),
-                })}
-              </span>
-            ) : null}
-            {i.host_url || i.meeting_url ? (
-              <>
-                {" "}
-                ·{" "}
-                <a
-                  className="text-link underline"
-                  href={i.host_url || i.meeting_url}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {t("hiring.interviews.join")}
-                </a>
-              </>
-            ) : null}
-          </p>
-        ))}
-        <h2 className="font-semibold">{t("recruitment.scorecards")}</h2>
-        {a.scorecards.map((sc) => (
-          <p key={sc.id}>
-            {sc.reviewer_name} · {sc.stage_name} ·{" "}
-            {t(`recruitment.recommendations.${sc.recommendation}`)}
-          </p>
-        ))}
-      </section>
-    </Page>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={!p.referee.email}
+              loading={p.referencePending}
+              onClick={p.onReference}
+            >
+              {t("designS8.recruitment.sendRequest")}
+            </Button>
+          </fieldset>
+        </div>
+      </div>
+    </Panel>
   );
 }
 
+/** How a compliance cell reads: overdue and to-check in margin red, gaps in faded ink. */
 const CELL_TONE: Record<string, string> = {
-  verified: "bg-green-100 text-green-900",
-  submitted: "bg-warning/10 text-warning",
-  missing: "bg-red-100 text-red-900",
-  rejected: "bg-red-100 text-red-900",
-  expired: "bg-red-100 text-red-900",
+  verified: "",
+  submitted: "font-semibold text-margin",
+  expired: "font-semibold text-margin",
+  missing: "text-muted-foreground",
+  rejected: "font-medium",
 };
 
 /** Tutors × requirements (FR-18-8), with filters, CSV export and bulk "request missing
@@ -474,6 +717,7 @@ export function ComplianceDashboardPage() {
       actions={
         <>
           <Button
+            size="sm"
             variant="secondary"
             loading={exportCsv.isPending}
             onClick={() => exportCsv.mutate()}
@@ -491,12 +735,13 @@ export function ComplianceDashboardPage() {
       }
     >
       <div
-        className="flex flex-wrap items-end gap-2"
+        className="-mt-2 flex flex-wrap items-center gap-2"
         role="group"
         aria-label={t("hiring.compliance.filters")}
       >
         <SelectField
           label={t("hiring.compliance.tutorStatus")}
+          hideLabel
           size="sm"
           value={tutorStatus}
           onChange={(e) => setTutorStatus(e.target.value)}
@@ -510,6 +755,7 @@ export function ComplianceDashboardPage() {
         />
         <SelectField
           label={t("hiring.compliance.requirement")}
+          hideLabel
           size="sm"
           value={requirement}
           onChange={(e) => setRequirement(e.target.value)}
@@ -520,8 +766,13 @@ export function ComplianceDashboardPage() {
               .map((r) => ({ value: r.key, label: r.name })),
           ]}
         />
-        <label className="flex h-9 items-center gap-2 text-sm">
-          <input type="checkbox" checked={gaps} onChange={(e) => setGaps(e.target.checked)} />
+        <label className="flex h-9 items-center gap-2 px-1 text-sm">
+          <input
+            type="checkbox"
+            className="size-4"
+            checked={gaps}
+            onChange={(e) => setGaps(e.target.checked)}
+          />
           {t("hiring.compliance.gapsOnly")}
         </label>
       </div>
@@ -536,18 +787,26 @@ export function ComplianceDashboardPage() {
       {!board.data ? (
         <Spinner label={t("grid.loading")} />
       ) : (
-        <div className="overflow-x-auto">
+        <div
+          role="region"
+          aria-label={t("recruitment.compliance")}
+          tabIndex={0}
+          className="relative overflow-x-auto rounded-xl border border-border bg-surface"
+        >
           <table className="w-full text-sm">
+            <caption className="sr-only">{t("recruitment.compliance")}</caption>
             <thead>
-              <tr className="text-left">
+              <tr className="border-b border-border">
                 {canRequest ? (
-                  <th scope="col">
+                  <th scope="col" className="w-10 py-2.5 pl-4">
                     <span className="sr-only">{t("hiring.compliance.select")}</span>
                   </th>
                 ) : null}
-                <th scope="col">{t("recruitment.tutor")}</th>
+                <th scope="col" className="px-4 py-2.5 whitespace-nowrap">
+                  {t("recruitment.tutor")}
+                </th>
                 {board.data.requirements.map((r) => (
-                  <th key={r.key} scope="col">
+                  <th key={r.key} scope="col" className="px-4 py-2.5 whitespace-nowrap">
                     {r.name}
                   </th>
                 ))}
@@ -555,36 +814,45 @@ export function ComplianceDashboardPage() {
             </thead>
             <tbody>
               {board.data.rows.map((row) => (
-                <tr key={row.tutor} className="border-t border-border">
+                <tr key={row.tutor}>
                   {canRequest ? (
-                    <td>
+                    <td className="py-2.5 pl-4 align-top">
                       <input
                         type="checkbox"
+                        className="size-4"
                         aria-label={t("hiring.compliance.selectTutor", { name: row.name })}
                         checked={selected.includes(row.tutor)}
                         onChange={() => toggle(row.tutor)}
                       />
                     </td>
                   ) : null}
-                  <th scope="row" className="text-left font-normal">
+                  <th
+                    scope="row"
+                    className="px-4 py-2.5 text-left align-top font-medium whitespace-nowrap"
+                  >
                     <Link
                       to="/tutors/$tutorId"
                       params={{ tutorId: row.tutor }}
-                      className="underline"
+                      className="underline-offset-2 hover:underline"
                     >
                       {row.name}
                     </Link>
-                    {row.status === "restricted" ? ` · ${t("recruitment.restricted")}` : ""}
+                    {row.status === "restricted" ? (
+                      <span className="block text-xs font-normal text-muted-foreground">
+                        {t("recruitment.restricted")}
+                      </span>
+                    ) : null}
                   </th>
                   {board.data.requirements.map((r) => {
                     const cell = row.cells[r.key];
+                    const status = cell?.status ?? "missing";
                     return (
-                      <td key={r.key}>
-                        <span className={`rounded px-1 ${CELL_TONE[cell?.status ?? ""] ?? ""}`}>
-                          {t(`recruitment.cell.${cell?.status ?? "missing"}`)}
+                      <td key={r.key} className="px-4 py-2.5 align-top whitespace-nowrap">
+                        <span className={CELL_TONE[status] ?? ""}>
+                          {t(`recruitment.cell.${status}`)}
                         </span>
                         {cell?.expiry_date ? (
-                          <span className="block text-xs text-muted-foreground">
+                          <span className="block text-xs text-muted-foreground tabular-nums">
                             {formatDate(cell.expiry_date)}
                           </span>
                         ) : null}
@@ -596,7 +864,9 @@ export function ComplianceDashboardPage() {
             </tbody>
           </table>
           {!board.data.rows.length ? (
-            <p className="mt-3 text-muted-foreground">{t("hiring.compliance.noRows")}</p>
+            <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+              {t("hiring.compliance.noRows")}
+            </p>
           ) : null}
         </div>
       )}
@@ -636,43 +906,68 @@ export function TutorComplianceCard({ tutorId }: { tutorId: string }) {
   if (!canView || !data.data) return null;
   const records = new Map(data.data.records.map((r) => [r.requirement, r]));
   return (
-    <section className="rounded-lg border border-border p-4 text-sm" aria-labelledby="compliance">
-      <h2 id="compliance" className="mb-2 font-semibold">
-        {t("recruitment.compliance")}
-        {data.data.restricted ? ` · ${t("recruitment.restricted")}` : ""}
-      </h2>
-      <ul className="space-y-1">
+    <Panel
+      title={t("recruitment.compliance")}
+      aside={
+        data.data.restricted ? (
+          <span className="font-semibold text-margin">{t("recruitment.restricted")}</span>
+        ) : null
+      }
+      flush
+    >
+      <PanelRows>
         {data.data.requirements.map((req) => {
           const record = records.get(req.id);
+          const status =
+            record && !record.valid && record.status === "verified"
+              ? "expired"
+              : (record?.status ?? "missing");
           return (
-            <li key={req.id} className="flex flex-wrap items-center justify-between gap-2">
-              <span>
-                {req.name}:{" "}
-                {t(
-                  `recruitment.cell.${record && !record.valid && record.status === "verified" ? "expired" : (record?.status ?? "missing")}`,
-                )}
-                {record?.expiry_date ? ` · ${formatDate(record.expiry_date)}` : ""}
-              </span>
-              {canVerify && record?.status === "submitted" ? (
-                <span className="flex gap-1">
-                  <Button size="sm" onClick={() => decide.mutate({ id: record.id, ok: true })}>
-                    {t("recruitment.verify")}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => decide.mutate({ id: record.id, ok: false })}
-                  >
-                    {t("recruitment.reject")}
-                  </Button>
-                </span>
-              ) : null}
-            </li>
+            <PanelRow key={req.id}>
+              <NamePlate
+                name={req.name}
+                context={
+                  <>
+                    <span className={CELL_TONE[status] ?? ""}>
+                      {t(`recruitment.cell.${status}`)}
+                    </span>
+                    {record?.expiry_date ? (
+                      <span className="tabular-nums"> · {formatDate(record.expiry_date)}</span>
+                    ) : null}
+                  </>
+                }
+                aside={
+                  canVerify && record?.status === "submitted" ? (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => decide.mutate({ id: record.id, ok: true })}
+                      >
+                        {t("recruitment.verify")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-muted-foreground"
+                        onClick={() => decide.mutate({ id: record.id, ok: false })}
+                      >
+                        {t("recruitment.reject")}
+                      </Button>
+                    </>
+                  ) : null
+                }
+              />
+            </PanelRow>
           );
         })}
-      </ul>
-      {decide.error ? <Alert tone="danger">{decide.error.message}</Alert> : null}
-    </section>
+      </PanelRows>
+      {decide.error ? (
+        <div className="px-5 pb-4">
+          <Alert tone="danger">{decide.error.message}</Alert>
+        </div>
+      ) : null}
+    </Panel>
   );
 }
 
@@ -687,17 +982,28 @@ export function VacanciesPage() {
   });
   return (
     <PublicLayout title={t("recruitment.jobsTitle")}>
-      {openings.data && !openings.data.length ? <p>{t("recruitment.noOpenings")}</p> : null}
-      <ul className="space-y-3">
-        {openings.data?.map((o) => (
-          <li key={o.slug}>
-            <a className="font-medium underline" href={`/vacancies/${o.slug}`}>
-              {o.title}
-            </a>
-            {o.location ? <span className="text-muted-foreground"> · {o.location}</span> : null}
-          </li>
-        ))}
-      </ul>
+      {openings.isPending ? <Spinner label={t("grid.loading")} /> : null}
+      {openings.data && !openings.data.length ? (
+        <p className="text-sm text-muted-foreground">{t("recruitment.noOpenings")}</p>
+      ) : null}
+      {openings.data?.length ? (
+        <Panel label={t("recruitment.jobsTitle")} flush>
+          <PanelRows>
+            {openings.data.map((o) => (
+              <PanelRow key={o.slug} className="hover:bg-muted/60">
+                <NamePlate
+                  name={
+                    <a className="underline-offset-2 hover:underline" href={`/vacancies/${o.slug}`}>
+                      {o.title}
+                    </a>
+                  }
+                  context={o.location || undefined}
+                />
+              </PanelRow>
+            ))}
+          </PanelRows>
+        </Panel>
+      ) : null}
     </PublicLayout>
   );
 }
@@ -728,7 +1034,13 @@ export function VacancyPage({ slug }: { slug: string }) {
       ),
   });
   if (opening.isError)
-    return <PublicLayout title={t("recruitment.noOpening")}>{null}</PublicLayout>;
+    return (
+      <PublicLayout title={t("recruitment.noOpening")}>
+        <a className="text-sm text-link underline-offset-2 hover:underline" href="/vacancies">
+          {t("designS8.recruitment.allVacancies")}
+        </a>
+      </PublicLayout>
+    );
   if (!opening.data) return <Spinner label={t("grid.loading")} />;
   const schema = opening.data.schema as unknown as Schema;
   const errors = (apply.error as { problem?: { errors?: Record<string, string[]> } } | null)
@@ -736,35 +1048,40 @@ export function VacancyPage({ slug }: { slug: string }) {
   return (
     <PublicLayout title={opening.data.title}>
       {opening.data.description ? (
-        <p className="mb-4 whitespace-pre-line">{opening.data.description}</p>
+        <p className="mb-6 whitespace-pre-line">{opening.data.description}</p>
       ) : null}
       {apply.isSuccess ? (
         <p role="status">{t("recruitment.applied")}</p>
       ) : (
         <form
-          className="space-y-4"
+          className="space-y-6"
           onSubmit={(e) => {
             e.preventDefault();
             apply.mutate();
           }}
         >
-          {schema.steps.flatMap((step) =>
-            step.fields.map((f) => (
-              <PublicField
-                key={f.key}
-                field={f}
-                value={answers[f.key]}
-                error={errors?.[f.key]?.[0]}
-                onChange={(v) => setAnswers({ ...answers, [f.key]: v })}
-                uploadTarget={{ target: "opening", slug }}
-              />
-            )),
-          )}
+          {schema.steps.map((step, s) => (
+            <fieldset key={s} className="space-y-3">
+              {step.title ? (
+                <legend className="mb-1 text-base font-semibold">{step.title}</legend>
+              ) : null}
+              {step.fields.map((f) => (
+                <PublicField
+                  key={f.key}
+                  field={f}
+                  value={answers[f.key]}
+                  error={errors?.[f.key]?.[0]}
+                  onChange={(v) => setAnswers({ ...answers, [f.key]: v })}
+                  uploadTarget={{ target: "opening", slug }}
+                />
+              ))}
+            </fieldset>
+          ))}
           {opening.data.turnstile_site_key ? (
             <Turnstile siteKey={opening.data.turnstile_site_key} onToken={setToken} />
           ) : null}
           {apply.error && !errors ? <Alert tone="danger">{apply.error.message}</Alert> : null}
-          <Button type="submit" loading={apply.isPending}>
+          <Button type="submit" className="w-full sm:w-auto" loading={apply.isPending}>
             {t("recruitment.apply")}
           </Button>
         </form>
@@ -775,7 +1092,7 @@ export function VacancyPage({ slug }: { slug: string }) {
 
 /** The applicant picks an interview time at ``/interviews/<token>``. */
 export function InterviewChoicePage({ token }: { token: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const interview = useQuery({
     queryKey: ["interview", token],
@@ -794,9 +1111,15 @@ export function InterviewChoicePage({ token }: { token: string }) {
     onSuccess: (data) => queryClient.setQueryData(["interview", token], data),
   });
   if (interview.isError)
-    return <PublicLayout title={t("recruitment.linkExpired")}>{null}</PublicLayout>;
+    return (
+      <PublicLayout title={t("recruitment.linkExpired")}>
+        <p className="text-sm text-muted-foreground">{t("designS8.recruitment.askAgain")}</p>
+      </PublicLayout>
+    );
   if (!interview.data) return <Spinner label={t("grid.loading")} />;
   const i = interview.data;
+  const timeOf = (iso: string) =>
+    formatDateTime(iso, i18n.language, undefined, { timeStyle: "short" });
   return (
     <PublicLayout title={t("recruitment.chooseTime", { organisation: i.organisation })}>
       {i.status === "booked" && i.start ? (
@@ -805,7 +1128,7 @@ export function InterviewChoicePage({ token }: { token: string }) {
           {i.meeting_url ? (
             <p>
               <a
-                className="text-link underline"
+                className="text-link underline-offset-2 hover:underline"
                 href={i.meeting_url}
                 target="_blank"
                 rel="noreferrer"
@@ -828,26 +1151,31 @@ export function InterviewChoicePage({ token }: { token: string }) {
               return days;
             }, {}),
           ).map(([day, options]) => (
-            <section key={day} aria-label={day}>
-              <h2 className="mb-2 font-semibold">{day}</h2>
+            <Panel key={day} title={day}>
               <ul className="flex flex-wrap gap-2">
                 {options.map((option) => (
                   <li key={option}>
                     <Button
                       variant="secondary"
+                      className="tabular-nums"
+                      aria-label={formatDateTime(option)}
                       loading={book.isPending && book.variables === option}
                       onClick={() => book.mutate(option)}
                     >
-                      {formatDateTime(option)}
+                      {timeOf(option)}
                     </Button>
                   </li>
                 ))}
               </ul>
-            </section>
+            </Panel>
           ))}
         </div>
       )}
-      {book.error ? <Alert tone="danger">{book.error.message}</Alert> : null}
+      {book.error ? (
+        <Alert tone="danger" className="mt-4">
+          {book.error.message}
+        </Alert>
+      ) : null}
     </PublicLayout>
   );
 }
@@ -874,7 +1202,11 @@ export function ReferencePage({ token }: { token: string }) {
       ),
   });
   if (reference.isError)
-    return <PublicLayout title={t("recruitment.linkExpired")}>{null}</PublicLayout>;
+    return (
+      <PublicLayout title={t("recruitment.linkExpired")}>
+        <p className="text-sm text-muted-foreground">{t("designS8.recruitment.askAgain")}</p>
+      </PublicLayout>
+    );
   if (!reference.data) return <Spinner label={t("grid.loading")} />;
   const r = reference.data;
   if (give.isSuccess || r.status !== "requested") {
@@ -897,37 +1229,31 @@ export function ReferencePage({ token }: { token: string }) {
           <label key={q} className="flex flex-col gap-1 text-sm">
             <span className="font-medium">{q}</span>
             <textarea
-              className="rounded-md border border-border p-2"
+              className="rounded-md border border-field bg-surface px-3 py-2 text-sm"
               rows={3}
               value={answers[`q${i + 1}`] ?? ""}
               onChange={(e) => setAnswers({ ...answers, [`q${i + 1}`]: e.target.value })}
             />
           </label>
         ))}
-        <label className="flex items-center gap-2 text-sm">
-          <span>{t("recruitment.overallRating")}</span>
-          <select
-            className="h-9 rounded-md border border-border bg-background px-2"
-            value={rating}
-            onChange={(e) => setRating(e.target.value)}
-          >
-            {["5", "4", "3", "2", "1"].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex items-center gap-2 text-sm">
+        <SelectField
+          label={t("recruitment.overallRating")}
+          className="w-24 tabular-nums"
+          value={rating}
+          onChange={(e) => setRating(e.target.value)}
+          options={["5", "4", "3", "2", "1"].map((n) => ({ value: n, label: n }))}
+        />
+        <label className="flex items-start gap-2 text-sm">
           <input
             type="checkbox"
+            className="mt-0.5 size-4"
             checked={concerns}
             onChange={(e) => setConcerns(e.target.checked)}
           />
           {t("recruitment.raiseConcern")}
         </label>
         {give.error ? <Alert tone="danger">{give.error.message}</Alert> : null}
-        <Button type="submit" loading={give.isPending}>
+        <Button type="submit" className="w-full sm:w-auto" loading={give.isPending}>
           {t("recruitment.sendReference")}
         </Button>
       </form>

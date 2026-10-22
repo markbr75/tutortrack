@@ -1,10 +1,24 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  NamePlate,
+  Panel,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledTable,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { Circle, CircleCheck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
 import { AiContentHelper } from "../ai/AiParts";
 import { RecruitmentPage } from "./RecruitmentPages";
 
@@ -59,6 +73,7 @@ export function OpeningsPage() {
   const { t } = useTranslation();
   const canManage = usePermission("recruitment.pipeline.manage");
   const [draft, setDraft] = useState<Draft | null>(null);
+  const phone = useIsPhone();
   const openings = useQuery({
     queryKey: ["job-openings"],
     queryFn: async () => unwrap(await api.GET("/api/v1/job-openings")),
@@ -68,77 +83,96 @@ export function OpeningsPage() {
       title={t("hiring.openings.title")}
       description={t("hiring.openings.description")}
       actions={
-        canManage ? (
+        canManage && !draft ? (
           <Button onClick={() => setDraft({ ...EMPTY })}>{t("hiring.openings.new")}</Button>
         ) : null
       }
     >
-      {openings.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      {openings.data && !openings.data.length ? (
-        <p className="text-muted-foreground">{t("hiring.openings.none")}</p>
+      {draft ? (
+        <OpeningEditor key={draft.id ?? "new"} initial={draft} onClose={() => setDraft(null)} />
       ) : null}
-      {openings.data?.length ? (
-        <div className="overflow-x-auto rounded-xl border border-border bg-surface">
-          <table className="w-full text-sm">
-            <thead>
-              <tr>
-                <th scope="col" className="px-4 py-2">
-                  {t("hiring.openings.role")}
+      {openings.isPending ? (
+        <Spinner label={t("grid.loading")} />
+      ) : (
+        <RuledTable
+          caption={t("hiring.openings.title")}
+          empty={openings.data?.length ? undefined : t("hiring.openings.none")}
+          columns={[
+            { label: t("hiring.openings.role") },
+            ...(phone
+              ? []
+              : [{ label: t("hiring.openings.location") }, { label: t("hiring.openings.status") }]),
+            { label: t("hiring.openings.applications"), align: "right" as const },
+            { label: t("hiring.openings.actions"), srOnly: true },
+          ]}
+        >
+          {openings.data?.map((o) => {
+            const status = o.published ? (
+              t("hiring.openings.published")
+            ) : (
+              <span className="text-muted-foreground">{t("hiring.openings.draft")}</span>
+            );
+            const closes = o.closes_on
+              ? t("hiring.openings.closes", { date: formatDate(o.closes_on) })
+              : "";
+            return (
+              <tr key={o.id}>
+                <th scope="row">
+                  {o.title}
+                  <span className="block text-xs font-normal text-muted-foreground">
+                    {phone
+                      ? [
+                          o.location,
+                          o.published ? t("hiring.openings.published") : t("hiring.openings.draft"),
+                          closes,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")
+                      : subjectsText(o.subjects)}
+                  </span>
                 </th>
-                <th scope="col" className="px-4 py-2">
-                  {t("hiring.openings.location")}
-                </th>
-                <th scope="col" className="px-4 py-2">
-                  {t("hiring.openings.status")}
-                </th>
-                <th scope="col" className="px-4 py-2 text-right">
-                  {t("hiring.openings.applications")}
-                </th>
-                <th scope="col" className="px-4 py-2">
-                  <span className="sr-only">{t("hiring.openings.actions")}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {openings.data.map((o) => (
-                <tr key={o.id}>
-                  <th scope="row" className="px-4 py-2 text-left font-medium">
-                    {o.title}
-                    <span className="block text-xs font-normal text-muted-foreground">
-                      {subjectsText(o.subjects)}
-                    </span>
-                  </th>
-                  <td className="px-4 py-2">{o.location || "–"}</td>
-                  <td className="px-4 py-2">
-                    {o.published ? t("hiring.openings.published") : t("hiring.openings.draft")}
-                    {o.closes_on ? (
-                      <span className="block text-xs text-muted-foreground">
-                        {t("hiring.openings.closes", { date: formatDate(o.closes_on) })}
-                      </span>
+                {phone ? null : (
+                  <>
+                    <td>{o.location || <span className="text-muted-foreground">–</span>}</td>
+                    <td>
+                      {status}
+                      {closes ? (
+                        <span className="block text-xs text-muted-foreground tabular-nums">
+                          {closes}
+                        </span>
+                      ) : null}
+                    </td>
+                  </>
+                )}
+                <td className="text-right tabular-nums">{o.applications_open}</td>
+                <td className="text-right">
+                  <span className="inline-flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                    {o.published ? (
+                      <a
+                        className="text-link underline-offset-2 hover:underline"
+                        href={`/vacancies/${o.slug}`}
+                        aria-label={t("hiring.openings.view", { title: o.title })}
+                      >
+                        {t("designS8.view")}
+                      </a>
                     ) : null}
-                  </td>
-                  <td className="px-4 py-2 text-right tabular-nums">{o.applications_open}</td>
-                  <td className="px-4 py-2 text-right">
-                    <span className="inline-flex gap-2">
-                      {o.published ? (
-                        <a className="text-link underline" href={`/vacancies/${o.slug}`}>
-                          {t("hiring.openings.view", { title: o.title })}
-                        </a>
-                      ) : null}
-                      {canManage ? (
-                        <Button size="sm" variant="ghost" onClick={() => setDraft(toDraft(o))}>
-                          {t("hiring.openings.edit", { title: o.title })}
-                        </Button>
-                      ) : null}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
-      {draft ? <OpeningEditor initial={draft} onClose={() => setDraft(null)} /> : null}
+                    {canManage ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        aria-label={t("hiring.openings.edit", { title: o.title })}
+                        onClick={() => setDraft(toDraft(o))}
+                      >
+                        {t("designS8.edit")}
+                      </Button>
+                    ) : null}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
+        </RuledTable>
+      )}
     </RecruitmentPage>
   );
 }
@@ -147,6 +181,8 @@ function OpeningEditor({ initial, onClose }: { initial: Draft; onClose: () => vo
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [d, setD] = useState<Draft>(initial);
+  const first = useRef<HTMLInputElement>(null);
+  useEffect(() => first.current?.focus(), []);
   const set = (patch: Partial<Draft>) => setD({ ...d, ...patch });
   const forms = useQuery({
     queryKey: ["forms"],
@@ -197,133 +233,121 @@ function OpeningEditor({ initial, onClose }: { initial: Draft; onClose: () => vo
     ?.errors;
   const applicationForms = (forms.data ?? []).filter((f) => f.type === "application");
   return (
-    <section
-      aria-labelledby="opening-editor"
-      className="mt-6 space-y-4 rounded-xl border border-border bg-surface p-5"
-    >
-      <h2 id="opening-editor" className="text-base font-semibold">
-        {d.id ? t("hiring.openings.editTitle") : t("hiring.openings.newTitle")}
-      </h2>
+    <Panel flush title={d.id ? t("hiring.openings.editTitle") : t("hiring.openings.newTitle")}>
       <form
-        className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
           save.mutate();
         }}
       >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <TextField
-            label={t("hiring.openings.titleField")}
-            required
-            value={d.title}
-            error={errors?.title?.[0]}
-            onChange={(e) => set({ title: e.target.value })}
-          />
-          <TextField
-            label={t("hiring.openings.slug")}
-            hint={t("hiring.openings.slugHint")}
-            value={d.slug}
-            error={errors?.slug?.[0]}
-            onChange={(e) => set({ slug: e.target.value })}
-          />
-          <TextField
-            label={t("hiring.openings.subjects")}
-            hint={t("hiring.openings.subjectsHint")}
-            value={d.subjects}
-            onChange={(e) => set({ subjects: e.target.value })}
-          />
-          <TextField
-            label={t("hiring.openings.location")}
-            value={d.location}
-            onChange={(e) => set({ location: e.target.value })}
-          />
-          <SelectField
-            label={t("hiring.openings.branch")}
-            value={d.branch}
-            onChange={(e) => set({ branch: e.target.value })}
-            options={[
-              { value: "", label: t("hiring.openings.allBranches") },
-              ...(branches.data ?? []).map((b) => ({ value: b.id, label: b.name })),
-            ]}
-          />
-          <TextField
-            label={t("hiring.openings.closesOn")}
-            type="date"
-            value={d.closes_on}
-            onChange={(e) => set({ closes_on: e.target.value })}
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label htmlFor="opening-description" className="text-sm font-medium">
-            {t("hiring.openings.descriptionField")}
+        <div className="space-y-4 px-5 py-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField
+              ref={first}
+              label={t("hiring.openings.titleField")}
+              required
+              value={d.title}
+              error={errors?.title?.[0]}
+              onChange={(e) => set({ title: e.target.value })}
+            />
+            <TextField
+              label={t("hiring.openings.slug")}
+              hint={t("hiring.openings.slugHint")}
+              value={d.slug}
+              error={errors?.slug?.[0]}
+              onChange={(e) => set({ slug: e.target.value })}
+            />
+            <TextField
+              label={t("hiring.openings.subjects")}
+              hint={t("hiring.openings.subjectsHint")}
+              value={d.subjects}
+              onChange={(e) => set({ subjects: e.target.value })}
+            />
+            <TextField
+              label={t("hiring.openings.location")}
+              value={d.location}
+              onChange={(e) => set({ location: e.target.value })}
+            />
+            <SelectField
+              label={t("hiring.openings.branch")}
+              value={d.branch}
+              onChange={(e) => set({ branch: e.target.value })}
+              options={[
+                { value: "", label: t("hiring.openings.allBranches") },
+                ...(branches.data ?? []).map((b) => ({ value: b.id, label: b.name })),
+              ]}
+            />
+            <TextField
+              label={t("hiring.openings.closesOn")}
+              type="date"
+              value={d.closes_on}
+              onChange={(e) => set({ closes_on: e.target.value })}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="opening-description" className="text-sm font-medium">
+              {t("hiring.openings.descriptionField")}
+            </label>
+            <textarea
+              id="opening-description"
+              rows={6}
+              className="rounded-md border border-field bg-surface px-3 py-2 text-sm"
+              value={d.description}
+              onChange={(e) => set({ description: e.target.value })}
+            />
+            <AiContentHelper
+              kind="job_ad"
+              title={d.title}
+              onUse={(draft) => set({ title: d.title || draft.title, description: draft.body })}
+            />
+          </div>
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="min-w-56 flex-1 sm:max-w-sm">
+              <SelectField
+                label={t("hiring.openings.form")}
+                value={d.form}
+                error={errors?.form?.[0]}
+                onChange={(e) => set({ form: e.target.value })}
+                options={[
+                  { value: "", label: t("hiring.openings.standardForm") },
+                  ...applicationForms.map((f) => ({ value: f.id, label: f.name })),
+                ]}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              loading={standard.isPending}
+              onClick={() => standard.mutate()}
+            >
+              {t("hiring.openings.useStandard")}
+            </Button>
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4"
+              checked={d.published}
+              onChange={(e) => set({ published: e.target.checked })}
+            />
+            {t("hiring.openings.publish")}
           </label>
-          <textarea
-            id="opening-description"
-            rows={6}
-            className="rounded-md border border-field bg-surface p-3 text-sm"
-            value={d.description}
-            onChange={(e) => set({ description: e.target.value })}
-          />
-          <AiContentHelper
-            kind="job_ad"
-            title={d.title}
-            onUse={(draft) => set({ title: d.title || draft.title, description: draft.body })}
-          />
+          {save.error && !errors ? <Alert tone="danger">{save.error.message}</Alert> : null}
         </div>
-        <div className="flex flex-wrap items-end gap-2">
-          <SelectField
-            label={t("hiring.openings.form")}
-            value={d.form}
-            error={errors?.form?.[0]}
-            onChange={(e) => set({ form: e.target.value })}
-            options={[
-              { value: "", label: t("hiring.openings.standardForm") },
-              ...applicationForms.map((f) => ({ value: f.id, label: f.name })),
-            ]}
-          />
-          <Button
-            type="button"
-            variant="secondary"
-            loading={standard.isPending}
-            onClick={() => standard.mutate()}
-          >
-            {t("hiring.openings.useStandard")}
-          </Button>
-        </div>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={d.published}
-            onChange={(e) => set({ published: e.target.checked })}
-          />
-          {t("hiring.openings.publish")}
-        </label>
-        {save.error && !errors ? <Alert tone="danger">{save.error.message}</Alert> : null}
-        <div className="flex gap-2">
-          <Button type="submit" loading={save.isPending}>
+        <PanelFooter>
+          <Button type="submit" size="sm" loading={save.isPending}>
             {t("common.save")}
           </Button>
-          <Button type="button" variant="ghost" onClick={onClose}>
+          <Button type="button" size="sm" variant="ghost" onClick={onClose}>
             {t("common.cancel")}
           </Button>
-        </div>
+        </PanelFooter>
       </form>
-    </section>
+    </Panel>
   );
 }
 
 // --- tutor record: performance, probation and offboarding (FR-18-9) -------------------------
-
-function Panel({ id, title, children }: { id: string; title: string; children: ReactNode }) {
-  return (
-    <section className="rounded-lg border border-border p-4 text-sm" aria-labelledby={id}>
-      <h2 id={id} className="mb-3 font-semibold">
-        {title}
-      </h2>
-      {children}
-    </section>
-  );
-}
 
 /** Probation reviews and performance notes on the tutor record. */
 export function TutorPerformanceCard({ tutorId }: { tutorId: string }) {
@@ -402,149 +426,195 @@ export function TutorPerformanceCard({ tutorId }: { tutorId: string }) {
   });
   if (!canView) return null;
   const open = reviews.data?.find((r) => r.status === "scheduled");
+  const past = reviews.data?.filter((r) => r.status !== "scheduled") ?? [];
   const error = schedule.error ?? complete.error ?? addNote.error;
   return (
-    <Panel id="tutor-performance" title={t("hiring.performance.title")}>
-      <h3 className="font-medium">{t("hiring.performance.probation")}</h3>
-      {open ? (
-        <div className="mt-1 space-y-2">
-          <p>{t("hiring.performance.dueOn", { date: formatDate(open.due_on) })}</p>
-          {canManage ? (
-            <form
-              className="flex flex-wrap items-end gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                complete.mutate(open.id);
-              }}
-            >
-              <SelectField
-                label={t("hiring.performance.outcome")}
+    <>
+      <Panel
+        title={t("hiring.performance.probation")}
+        aside={
+          open ? (
+            <span className="tabular-nums">
+              {t("hiring.performance.dueOn", { date: formatDate(open.due_on) })}
+            </span>
+          ) : null
+        }
+        flush
+      >
+        {open && canManage ? (
+          <form
+            className="flex flex-wrap items-end gap-2 px-5 py-4"
+            aria-label={t("hiring.performance.record")}
+            onSubmit={(e) => {
+              e.preventDefault();
+              complete.mutate(open.id);
+            }}
+          >
+            <SelectField
+              label={t("hiring.performance.outcome")}
+              size="sm"
+              value={outcome}
+              onChange={(e) => setOutcome(e.target.value)}
+              options={["passed", "extended", "failed", "cancelled"].map((o) => ({
+                value: o,
+                label: t(`hiring.performance.outcomes.${o}`),
+              }))}
+            />
+            {outcome === "extended" ? (
+              <TextField
+                label={t("hiring.performance.extendTo")}
+                type="date"
                 size="sm"
-                value={outcome}
-                onChange={(e) => setOutcome(e.target.value)}
-                options={["passed", "extended", "failed", "cancelled"].map((o) => ({
-                  value: o,
-                  label: t(`hiring.performance.outcomes.${o}`),
-                }))}
+                required
+                value={extendTo}
+                onChange={(e) => setExtendTo(e.target.value)}
               />
-              {outcome === "extended" ? (
-                <TextField
-                  label={t("hiring.performance.extendTo")}
-                  type="date"
-                  size="sm"
-                  required
-                  value={extendTo}
-                  onChange={(e) => setExtendTo(e.target.value)}
-                />
-              ) : null}
+            ) : null}
+            <div className="min-w-48 flex-1">
               <TextField
                 label={t("hiring.performance.notes")}
                 size="sm"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
-              <Button type="submit" size="sm" loading={complete.isPending}>
-                {t("hiring.performance.record")}
-              </Button>
-            </form>
-          ) : null}
-        </div>
-      ) : canManage ? (
-        <form
-          className="mt-1 flex flex-wrap items-end gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            schedule.mutate();
-          }}
-        >
-          <TextField
-            label={t("hiring.performance.reviewDate")}
-            type="date"
-            size="sm"
-            required
-            value={due}
-            onChange={(e) => setDue(e.target.value)}
-          />
-          <Button type="submit" size="sm" variant="secondary" loading={schedule.isPending}>
-            {t("hiring.performance.schedule")}
-          </Button>
-        </form>
-      ) : (
-        <p className="text-muted-foreground">{t("hiring.performance.noReview")}</p>
-      )}
-      {reviews.data?.filter((r) => r.status !== "scheduled").length ? (
-        <ul className="mt-2 space-y-1">
-          {reviews.data
-            .filter((r) => r.status !== "scheduled")
-            .map((r) => (
-              <li key={r.id}>
-                {formatDate(r.due_on)} · {t(`hiring.performance.outcomes.${r.status}`)}
-                {r.outcome_notes ? ` · ${r.outcome_notes}` : ""}
-                {r.reviewer_name ? (
-                  <span className="text-muted-foreground"> · {r.reviewer_name}</span>
-                ) : null}
-              </li>
+            </div>
+            <Button type="submit" size="sm" className="h-9" loading={complete.isPending}>
+              {t("hiring.performance.record")}
+            </Button>
+          </form>
+        ) : null}
+        {!open && canManage ? (
+          <form
+            className="flex flex-wrap items-end gap-2 px-5 py-4"
+            aria-label={t("hiring.performance.schedule")}
+            onSubmit={(e) => {
+              e.preventDefault();
+              schedule.mutate();
+            }}
+          >
+            <TextField
+              label={t("hiring.performance.reviewDate")}
+              type="date"
+              size="sm"
+              required
+              value={due}
+              onChange={(e) => setDue(e.target.value)}
+            />
+            <Button
+              type="submit"
+              size="sm"
+              variant="secondary"
+              className="h-9"
+              loading={schedule.isPending}
+            >
+              {t("hiring.performance.schedule")}
+            </Button>
+          </form>
+        ) : null}
+        {!open && !canManage && !past.length ? (
+          <p className="px-5 py-4 text-sm text-muted-foreground">
+            {t("hiring.performance.noReview")}
+          </p>
+        ) : null}
+        {past.length ? (
+          <PanelRows className={canManage ? "border-t border-rule" : undefined}>
+            {past.map((r) => (
+              <PanelRow key={r.id}>
+                <NamePlate
+                  name={t(`hiring.performance.outcomes.${r.status}`)}
+                  context={[formatDate(r.due_on), r.reviewer_name].filter(Boolean).join(" · ")}
+                />
+                {r.outcome_notes ? <p className="mt-1">{r.outcome_notes}</p> : null}
+              </PanelRow>
             ))}
-        </ul>
-      ) : null}
-      <h3 className="mt-4 font-medium">{t("hiring.performance.notesTitle")}</h3>
-      {canManage ? (
-        <form
-          className="mt-1 flex flex-wrap items-end gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            addNote.mutate();
-          }}
-        >
-          <SelectField
-            label={t("hiring.performance.kind")}
-            size="sm"
-            value={kind}
-            onChange={(e) => setKind(e.target.value)}
-            options={["note", "praise", "concern"].map((k) => ({
-              value: k,
-              label: t(`hiring.performance.kinds.${k}`),
-            }))}
-          />
-          <TextField
-            label={t("hiring.performance.note")}
-            size="sm"
-            required
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-          />
-          <Button type="submit" size="sm" variant="secondary" loading={addNote.isPending}>
-            {t("hiring.performance.addNote")}
-          </Button>
-        </form>
-      ) : null}
-      <ul className="mt-2 space-y-1">
-        {noteList.data?.map((n) => (
-          <li key={n.id}>
-            <span className="font-medium">{t(`hiring.performance.kinds.${n.kind ?? "note"}`)}</span>
-            : {n.body}
-            <span className="block text-xs text-muted-foreground">
-              {n.author_name} · {formatDateTime(n.created_at)}
-            </span>
-          </li>
-        ))}
-      </ul>
+          </PanelRows>
+        ) : null}
+      </Panel>
+      <Panel title={t("hiring.performance.notesTitle")} flush>
+        {canManage ? (
+          <form
+            className="flex flex-wrap items-end gap-2 px-5 py-4"
+            aria-label={t("hiring.performance.addNote")}
+            onSubmit={(e) => {
+              e.preventDefault();
+              addNote.mutate();
+            }}
+          >
+            <SelectField
+              label={t("hiring.performance.kind")}
+              size="sm"
+              value={kind}
+              onChange={(e) => setKind(e.target.value)}
+              options={["note", "praise", "concern"].map((k) => ({
+                value: k,
+                label: t(`hiring.performance.kinds.${k}`),
+              }))}
+            />
+            <div className="min-w-48 flex-1">
+              <TextField
+                label={t("hiring.performance.note")}
+                size="sm"
+                required
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+              />
+            </div>
+            <Button
+              type="submit"
+              size="sm"
+              variant="secondary"
+              className="h-9"
+              loading={addNote.isPending}
+            >
+              {t("hiring.performance.addNote")}
+            </Button>
+          </form>
+        ) : null}
+        {noteList.data?.length ? (
+          <PanelRows className={canManage ? "border-t border-rule" : undefined}>
+            {noteList.data.map((n) => (
+              <PanelRow key={n.id}>
+                <p>
+                  <span className="font-medium">
+                    {t(`hiring.performance.kinds.${n.kind ?? "note"}`)}
+                  </span>
+                  {": "}
+                  {n.body}
+                </p>
+                <p className="text-xs text-muted-foreground tabular-nums">
+                  {n.author_name} · {formatDateTime(n.created_at)}
+                </p>
+              </PanelRow>
+            ))}
+          </PanelRows>
+        ) : !canManage ? (
+          <p className="px-5 py-4 text-sm text-muted-foreground">
+            {t("designS8.recruitment.noNotes")}
+          </p>
+        ) : null}
+      </Panel>
       {tests.data?.length ? (
-        <>
-          <h3 className="mt-4 font-medium">{t("hiring.tests.results")}</h3>
-          <ul className="mt-1 space-y-1">
+        <Panel title={t("hiring.tests.results")} flush>
+          <PanelRows>
             {tests.data.map((a) => (
-              <li key={a.id}>
-                {a.title} · {t("hiring.tests.score", { percent: Math.round(Number(a.percent)) })} ·{" "}
-                {a.passed ? t("hiring.tests.passed") : t("hiring.tests.failed")} ·{" "}
-                <span className="text-muted-foreground">{formatDate(a.submitted_at)}</span>
-              </li>
+              <PanelRow key={a.id}>
+                <NamePlate
+                  name={a.title}
+                  context={<span className="tabular-nums">{formatDate(a.submitted_at)}</span>}
+                  aside={
+                    <span className="tabular-nums">
+                      {t("hiring.tests.score", { percent: Math.round(Number(a.percent)) })} ·{" "}
+                      {a.passed ? t("hiring.tests.passed") : t("hiring.tests.failed")}
+                    </span>
+                  }
+                />
+              </PanelRow>
             ))}
-          </ul>
-        </>
+          </PanelRows>
+        </Panel>
       ) : null}
       {error ? <Alert tone="danger">{error.message}</Alert> : null}
-    </Panel>
+    </>
   );
 }
 
@@ -598,76 +668,22 @@ export function TutorOffboardingCard({ tutorId }: { tutorId: string }) {
   const s = state.data;
   const running = s.id && !s.completed_at;
   const error = start.error ?? tick.error ?? revoke.error ?? finish.error;
+  const context = running
+    ? [
+        s.reason,
+        s.leaving_on ? t("hiring.offboarding.leaving", { date: formatDate(s.leaving_on) }) : "",
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : "";
   return (
-    <Panel id="tutor-offboarding" title={t("hiring.offboarding.title")}>
-      {s.completed_at ? (
-        <p>{t("hiring.offboarding.finished", { date: formatDate(s.completed_at) })}</p>
-      ) : null}
-      {!running && !s.completed_at && s.tutor_status !== "archived" ? (
-        <form
-          className="flex flex-wrap items-end gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            start.mutate();
-          }}
-        >
-          <TextField
-            label={t("hiring.offboarding.reason")}
-            size="sm"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-          />
-          <TextField
-            label={t("hiring.offboarding.leavingOn")}
-            type="date"
-            size="sm"
-            value={leavingOn}
-            onChange={(e) => setLeavingOn(e.target.value)}
-          />
-          <Button type="submit" size="sm" variant="secondary" loading={start.isPending}>
-            {t("hiring.offboarding.start")}
-          </Button>
-        </form>
-      ) : null}
-      {running ? (
-        <>
-          <p className="mb-2 text-muted-foreground">
-            {s.reason ? `${s.reason} · ` : ""}
-            {s.leaving_on
-              ? t("hiring.offboarding.leaving", { date: formatDate(s.leaving_on) })
-              : ""}
-          </p>
-          <ul className="space-y-2">
-            {s.items.map((item) => (
-              <li key={item.key} className="flex flex-wrap items-center justify-between gap-2">
-                <span>
-                  <span aria-hidden="true">{item.done ? "✓ " : "○ "}</span>
-                  {item.label}
-                  <span className="sr-only">
-                    {" "}
-                    {item.done ? t("hiring.offboarding.done") : t("hiring.offboarding.todo")}
-                  </span>
-                  {item.auto && !item.done ? (
-                    <span className="block text-xs text-muted-foreground">
-                      {t("hiring.offboarding.auto")}
-                    </span>
-                  ) : null}
-                </span>
-                {!item.done && item.key === "access" ? (
-                  <Button size="sm" variant="secondary" onClick={() => revoke.mutate()}>
-                    {t("hiring.offboarding.revoke")}
-                  </Button>
-                ) : null}
-                {!item.done && !item.auto ? (
-                  <Button size="sm" variant="ghost" onClick={() => tick.mutate(item.key)}>
-                    {t("hiring.offboarding.markDone", { item: item.label })}
-                  </Button>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+    <Panel
+      title={t("hiring.offboarding.title")}
+      description={context || undefined}
+      flush
+      footer={
+        running ? (
           <Button
-            className="mt-3"
             size="sm"
             disabled={!s.items.every((i) => i.done)}
             loading={finish.isPending}
@@ -675,9 +691,104 @@ export function TutorOffboardingCard({ tutorId }: { tutorId: string }) {
           >
             {t("hiring.offboarding.finish")}
           </Button>
-        </>
+        ) : undefined
+      }
+    >
+      {s.completed_at ? (
+        <p className="px-5 py-4 text-sm">
+          {t("hiring.offboarding.finished", { date: formatDate(s.completed_at) })}
+        </p>
       ) : null}
-      {error ? <Alert tone="danger">{error.message}</Alert> : null}
+      {!running && !s.completed_at && s.tutor_status !== "archived" ? (
+        <form
+          className="flex flex-wrap items-end gap-2 px-5 py-4"
+          aria-label={t("hiring.offboarding.start")}
+          onSubmit={(e) => {
+            e.preventDefault();
+            start.mutate();
+          }}
+        >
+          <div className="min-w-48 flex-1">
+            <TextField
+              label={t("hiring.offboarding.reason")}
+              size="sm"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
+          </div>
+          <TextField
+            label={t("hiring.offboarding.leavingOn")}
+            type="date"
+            size="sm"
+            value={leavingOn}
+            onChange={(e) => setLeavingOn(e.target.value)}
+          />
+          <Button
+            type="submit"
+            size="sm"
+            variant="secondary"
+            className="h-9"
+            loading={start.isPending}
+          >
+            {t("hiring.offboarding.start")}
+          </Button>
+        </form>
+      ) : null}
+      {running ? (
+        <PanelRows>
+          {s.items.map((item) => (
+            <PanelRow key={item.key} className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              {item.done ? (
+                <CircleCheck
+                  aria-hidden="true"
+                  strokeWidth={1.75}
+                  className="size-4 shrink-0 text-foreground"
+                />
+              ) : (
+                <Circle
+                  aria-hidden="true"
+                  strokeWidth={1.75}
+                  className="size-4 shrink-0 text-field"
+                />
+              )}
+              <span className="min-w-0 flex-1">
+                <span className={item.done ? "text-muted-foreground" : undefined}>
+                  {item.label}
+                </span>
+                <span className="sr-only">
+                  {" "}
+                  {item.done ? t("hiring.offboarding.done") : t("hiring.offboarding.todo")}
+                </span>
+                {item.auto && !item.done ? (
+                  <span className="block text-xs text-muted-foreground">
+                    {t("hiring.offboarding.auto")}
+                  </span>
+                ) : null}
+              </span>
+              {!item.done && item.key === "access" ? (
+                <Button size="sm" variant="secondary" onClick={() => revoke.mutate()}>
+                  {t("hiring.offboarding.revoke")}
+                </Button>
+              ) : null}
+              {!item.done && !item.auto ? (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  aria-label={t("hiring.offboarding.markDone", { item: item.label })}
+                  onClick={() => tick.mutate(item.key)}
+                >
+                  {t("designS8.recruitment.markDone")}
+                </Button>
+              ) : null}
+            </PanelRow>
+          ))}
+        </PanelRows>
+      ) : null}
+      {error ? (
+        <div className="px-5 pb-4">
+          <Alert tone="danger">{error.message}</Alert>
+        </div>
+      ) : null}
     </Panel>
   );
 }

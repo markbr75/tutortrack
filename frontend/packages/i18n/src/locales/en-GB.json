@@ -1,4 +1,38 @@
 {
+  "designS8": {
+    "view": "View",
+    "edit": "Edit",
+    "recruitment": {
+      "emptyColumn": "No applications here.",
+      "applied": "Applied {{date}}",
+      "moveStage": "Move to another stage",
+      "move": "Move",
+      "rejectTitle": "Reject this application",
+      "application": "Application",
+      "qualifications": "Qualifications",
+      "experience": "Experience",
+      "postcode": "Postcode",
+      "rightToWork": "Right to work",
+      "noInterviews": "No interviews yet.",
+      "rating": "Rated {{rating}} of 5",
+      "noReferences": "No references asked for yet.",
+      "noScorecards": "No scorecards yet.",
+      "nextSteps": "Next steps",
+      "sendRequest": "Send the request",
+      "allVacancies": "See all vacancies",
+      "askAgain": "Please ask us for a new link.",
+      "noNotes": "No notes yet.",
+      "markDone": "Mark done"
+    },
+    "growth": {
+      "noLinks": "No tracking links yet.",
+      "noRules": "No commission rules yet.",
+      "rate": "Rate",
+      "percent": "{{value}}%",
+      "chosen_one": "{{count}} chosen",
+      "chosen_other": "{{count}} chosen"
+    }
+  },
   "app": {
     "name": "TutorTrack"
   },
