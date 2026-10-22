@@ -1,5 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
+import { NamePlate, Panel, PanelRow, PanelRows } from "@tutortrack/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
@@ -18,27 +19,40 @@ export function StudentJobs({ studentId }: { studentId: string }) {
     enabled: canView,
   });
   if (!canView) return null;
+  const rows = jobs.data?.results ?? [];
   return (
-    <section className="rounded-lg border border-border p-4">
-      <h2 className="mb-3 font-semibold">{t("jobs.title")}</h2>
-      <ul className="mb-3 space-y-1">
-        {(jobs.data?.results ?? []).map((job) => (
-          <li key={job.id}>
-            <Link
-              className="font-medium underline-offset-2 hover:underline"
-              to="/jobs/$jobId"
-              params={{ jobId: job.id }}
-            >
-              {job.name}
-            </Link>{" "}
-            <span className="text-sm text-muted-foreground">{t(`jobs.status.${job.status}`)}</span>
-          </li>
-        ))}
-      </ul>
-      {jobs.data && jobs.data.results.length === 0 ? (
-        <p className="mb-3 text-sm text-muted-foreground">{t("jobs.none")}</p>
+    <Panel title={t("jobs.title")} flush>
+      {jobs.isPending ? (
+        <div aria-hidden="true" className="px-5 py-4">
+          <div className="h-8 animate-pulse rounded bg-muted" />
+        </div>
+      ) : rows.length ? (
+        <PanelRows>
+          {rows.map((job) => (
+            <PanelRow key={job.id}>
+              <NamePlate
+                name={
+                  <Link
+                    className="underline-offset-2 hover:underline"
+                    to="/jobs/$jobId"
+                    params={{ jobId: job.id }}
+                  >
+                    {job.name}
+                  </Link>
+                }
+                context={t(`jobs.status.${job.status}`)}
+              />
+            </PanelRow>
+          ))}
+        </PanelRows>
+      ) : (
+        <p className="px-5 py-4 text-sm text-muted-foreground">{t("jobs.none")}</p>
+      )}
+      {canCreate ? (
+        <div className="border-t border-rule px-5 py-4">
+          <QuickSetup studentId={studentId} />
+        </div>
       ) : null}
-      {canCreate ? <QuickSetup studentId={studentId} /> : null}
-    </section>
+    </Panel>
   );
 }

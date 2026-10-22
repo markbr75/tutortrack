@@ -1,8 +1,8 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, TextField } from "@tutortrack/ui";
+import { Alert, Button, FactList, Panel, SelectField, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 
 import { api, usePermission } from "../api";
 import { GENDERS, splitTags } from "../matching/needs";
@@ -11,26 +11,19 @@ type Tutor = components["schemas"]["Tutor"];
 type Student = components["schemas"]["Student"];
 type Gender = "" | components["schemas"]["TutorGenderEnum"];
 
-function Panel({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section aria-label={title} className="space-y-3 rounded-lg border border-border p-4">
-      <h2 className="font-semibold">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
+/** The profile as ruled facts; an empty value reads "None recorded". */
 function Facts({ items }: { items: [string, string][] }) {
   const { t } = useTranslation();
+  return <FactList items={items} empty={t("g5c.profile.none")} />;
+}
+
+/** Edit opens the form in place of the facts. */
+function EditButton({ onClick }: { onClick: () => void }) {
+  const { t } = useTranslation();
   return (
-    <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[max-content_1fr]">
-      {items.map(([label, value]) => (
-        <div key={label} className="contents">
-          <dt className="text-muted-foreground">{label}</dt>
-          <dd>{value || t("g5c.profile.none")}</dd>
-        </div>
-      ))}
-    </dl>
+    <Button size="sm" variant="secondary" onClick={onClick}>
+      {t("g5c.profile.edit")}
+    </Button>
   );
 }
 
@@ -76,10 +69,14 @@ export function TutorMatchingCard({ tutor }: { tutor: Tutor }) {
   });
   const genderLabel = (value?: string) => (value ? t(`g5c.genders.${value}`) : "");
   return (
-    <Panel title={t("g5c.profile.title")}>
+    <Panel
+      title={t("g5c.profile.title")}
+      flush
+      aside={canEdit && !editing ? <EditButton onClick={() => setEditing(true)} /> : null}
+    >
       {editing ? (
         <form
-          className="space-y-3"
+          className="space-y-3 px-5 py-4"
           onSubmit={(e) => {
             e.preventDefault();
             save.mutate();
@@ -120,22 +117,15 @@ export function TutorMatchingCard({ tutor }: { tutor: Tutor }) {
           {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
         </form>
       ) : (
-        <>
-          <Facts
-            items={[
-              [t("g5c.profile.senExperience"), (tutor.sen_tags ?? []).join(", ")],
-              [t("g5c.needs.examBoards"), (tutor.exam_boards ?? []).join(", ")],
-              ...(seesGender
-                ? ([[t("g5c.profile.gender"), genderLabel(tutor.gender)]] as [string, string][])
-                : []),
-            ]}
-          />
-          {canEdit ? (
-            <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>
-              {t("g5c.profile.edit")}
-            </Button>
-          ) : null}
-        </>
+        <Facts
+          items={[
+            [t("g5c.profile.senExperience"), (tutor.sen_tags ?? []).join(", ")],
+            [t("g5c.needs.examBoards"), (tutor.exam_boards ?? []).join(", ")],
+            ...(seesGender
+              ? ([[t("g5c.profile.gender"), genderLabel(tutor.gender)]] as [string, string][])
+              : []),
+          ]}
+        />
       )}
     </Panel>
   );
@@ -176,10 +166,14 @@ export function StudentMatchingCard({ student }: { student: Student }) {
     ? t(`g5c.genders.${student.tutor_gender_preference}`)
     : t("g5c.needs.noPreference");
   return (
-    <Panel title={t("g5c.profile.studentTitle")}>
+    <Panel
+      title={t("g5c.profile.studentTitle")}
+      flush
+      aside={canEdit && !editing ? <EditButton onClick={() => setEditing(true)} /> : null}
+    >
       {editing ? (
         <form
-          className="space-y-3"
+          className="space-y-3 px-5 py-4"
           onSubmit={(e) => {
             e.preventDefault();
             save.mutate();
@@ -221,27 +215,20 @@ export function StudentMatchingCard({ student }: { student: Student }) {
           {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
         </form>
       ) : (
-        <>
-          <Facts
-            items={[
-              [t("g5c.needs.examBoards"), boardsOf(student.exam_boards)],
-              ...(sensitive
-                ? ([[t("g5c.needs.senTags"), (student.sen_tags ?? []).join(", ")]] as [
-                    string,
-                    string,
-                  ][])
-                : []),
-              ...(sensitive && preferences
-                ? ([[t("g5c.needs.gender"), preference]] as [string, string][])
-                : []),
-            ]}
-          />
-          {canEdit ? (
-            <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>
-              {t("g5c.profile.edit")}
-            </Button>
-          ) : null}
-        </>
+        <Facts
+          items={[
+            [t("g5c.needs.examBoards"), boardsOf(student.exam_boards)],
+            ...(sensitive
+              ? ([[t("g5c.needs.senTags"), (student.sen_tags ?? []).join(", ")]] as [
+                  string,
+                  string,
+                ][])
+              : []),
+            ...(sensitive && preferences
+              ? ([[t("g5c.needs.gender"), preference]] as [string, string][])
+              : []),
+          ]}
+        />
       )}
     </Panel>
   );

@@ -1,6 +1,15 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  PageHeader,
+  Panel,
+  Segmented,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -80,7 +89,7 @@ function Marker({
           cx={x}
           cy={y}
           r={radius}
-          className="fill-sky-600/10 stroke-sky-700/40"
+          className="fill-link/10 stroke-link/40"
           strokeDasharray="4 3"
         />
       ) : null}
@@ -91,11 +100,11 @@ function Marker({
           y={y - size}
           width={size * 2}
           height={size * 2}
-          className="fill-sky-700 stroke-white"
+          className="fill-link stroke-surface"
           strokeWidth={1.5}
         />
       ) : (
-        <circle cx={x} cy={y} r={size} className="fill-warning stroke-black" strokeWidth={1} />
+        <circle cx={x} cy={y} r={size} className="fill-warning stroke-surface" strokeWidth={1.5} />
       )}
     </g>
   );
@@ -142,16 +151,33 @@ export function PeopleMapPage() {
   const chosen = points.find((p) => p.id === selected) ?? null;
   const proj = points.length ? project(points) : null;
   return (
-    <div className="space-y-4 p-6">
-      <h1 className="text-2xl font-semibold">{t("peopleMap.title")}</h1>
-      <p className="text-sm text-muted-foreground">{t("peopleMap.intro")}</p>
+    <div className="space-y-4">
+      <PageHeader
+        title={t("peopleMap.title")}
+        description={<span className="block max-w-prose">{t("peopleMap.intro")}</span>}
+        actions={
+          <Segmented
+            label={t("peopleMap.viewAs")}
+            value={view}
+            onChange={setView}
+            options={[
+              { key: "map", label: t("peopleMap.mapView") },
+              { key: "list", label: t("peopleMap.listView") },
+            ]}
+          />
+        }
+        className="mb-2"
+      />
       <form
-        className="flex flex-wrap items-end gap-3"
+        role="search"
+        className="flex flex-wrap items-center gap-2"
         aria-label={t("peopleMap.filters")}
         onSubmit={(e) => e.preventDefault()}
       >
         <SelectField
           label={t("peopleMap.show")}
+          hideLabel
+          size="sm"
           value={kind}
           onChange={(e) => setKind(e.target.value as Kind)}
           options={[
@@ -160,38 +186,36 @@ export function PeopleMapPage() {
             { value: "tutor", label: t("peopleMap.kinds.tutorPlural") },
           ]}
         />
-        <TextField
-          label={t("peopleMap.status")}
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          placeholder="active"
-        />
-        <TextField
-          label={t("peopleMap.subject")}
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-        />
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={radius} onChange={(e) => setRadius(e.target.checked)} />
+        <div className="min-w-40 flex-1 sm:max-w-56">
+          <TextField
+            label={t("peopleMap.status")}
+            hideLabel
+            size="sm"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            placeholder={t("peopleMap.status")}
+          />
+        </div>
+        <div className="min-w-40 flex-1 sm:max-w-56">
+          <TextField
+            label={t("peopleMap.subject")}
+            hideLabel
+            size="sm"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            placeholder={t("peopleMap.subject")}
+          />
+        </div>
+        <label className="flex h-9 items-center gap-2 px-1 text-sm">
+          <input
+            type="checkbox"
+            className="size-4"
+            checked={radius}
+            onChange={(e) => setRadius(e.target.checked)}
+          />
           {t("peopleMap.showRadius")}
         </label>
       </form>
-      <div role="group" aria-label={t("peopleMap.viewAs")} className="flex gap-2">
-        <Button
-          variant={view === "map" ? "primary" : "secondary"}
-          aria-pressed={view === "map"}
-          onClick={() => setView("map")}
-        >
-          {t("peopleMap.mapView")}
-        </Button>
-        <Button
-          variant={view === "list" ? "primary" : "secondary"}
-          aria-pressed={view === "list"}
-          onClick={() => setView("list")}
-        >
-          {t("peopleMap.listView")}
-        </Button>
-      </div>
       {map.isLoading ? <Spinner label={t("grid.loading")} /> : null}
       {map.error ? <Alert tone="danger">{map.error.message}</Alert> : null}
       {missing > 0 ? (
@@ -199,6 +223,7 @@ export function PeopleMapPage() {
           <p>{t("peopleMap.missing", { count: missing })}</p>
           {canGeocode ? (
             <Button
+              size="sm"
               variant="secondary"
               className="mt-2"
               disabled={geocode.isPending}
@@ -214,59 +239,72 @@ export function PeopleMapPage() {
           ) : null}
         </Alert>
       ) : null}
-      {map.data && points.length === 0 ? <p>{t("peopleMap.empty")}</p> : null}
+      {map.data && points.length === 0 ? (
+        <p className="rounded-xl border border-border bg-surface px-4 py-10 text-center text-sm text-muted-foreground">
+          {t("peopleMap.empty")}
+        </p>
+      ) : null}
       {view === "map" && proj ? (
-        <figure className="space-y-2">
-          <svg
-            role="group"
-            aria-label={t("peopleMap.mapLabel", { count: points.length })}
-            viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-            className="w-full max-w-3xl rounded-md border border-border bg-muted/30"
-          >
-            {points.map((p) => (
-              <Marker
-                key={`${p.kind}-${p.id}`}
-                point={p}
-                selected={p.id === selected}
-                x={proj.x(p.lng)}
-                y={proj.y(p.lat)}
-                radius={radius && p.travel_radius_km ? proj.km(p.travel_radius_km) : null}
-                onSelect={setSelected}
-              />
-            ))}
-          </svg>
-          <figcaption className="flex flex-wrap gap-4 text-sm">
-            <span className="flex items-center gap-1">
-              <svg width="14" height="14" aria-hidden="true">
-                <circle cx="7" cy="7" r="5" className="fill-warning stroke-black" />
-              </svg>
-              {t("peopleMap.kinds.studentPlural")}
-            </span>
-            <span className="flex items-center gap-1">
-              <svg width="14" height="14" aria-hidden="true">
-                <rect x="2" y="2" width="10" height="10" className="fill-sky-700" />
-              </svg>
-              {t("peopleMap.kinds.tutorPlural")}
-            </span>
-            <span>{t("peopleMap.schematic")}</span>
-          </figcaption>
-          {chosen ? (
-            <section aria-live="polite" className="rounded-md border border-border p-3 text-sm">
-              <h2 className="font-semibold">{chosen.name}</h2>
-              <p>
-                {t(`peopleMap.kinds.${chosen.kind}`)} · {chosen.area || t("peopleMap.noArea")}
-                {chosen.subjects.length ? ` · ${chosen.subjects.join(", ")}` : ""}
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+          <figure className="min-w-0 rounded-xl border border-border bg-surface">
+            <svg
+              role="group"
+              aria-label={t("peopleMap.mapLabel", { count: points.length })}
+              viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+              className="block w-full rounded-t-xl"
+            >
+              {points.map((p) => (
+                <Marker
+                  key={`${p.kind}-${p.id}`}
+                  point={p}
+                  selected={p.id === selected}
+                  x={proj.x(p.lng)}
+                  y={proj.y(p.lat)}
+                  radius={radius && p.travel_radius_km ? proj.km(p.travel_radius_km) : null}
+                  onSelect={setSelected}
+                />
+              ))}
+            </svg>
+            <figcaption className="flex flex-wrap gap-x-4 gap-y-1 border-t border-rule px-5 py-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5 text-foreground">
+                <svg width="14" height="14" aria-hidden="true">
+                  <circle cx="7" cy="7" r="5" className="fill-warning" />
+                </svg>
+                {t("peopleMap.kinds.studentPlural")}
+              </span>
+              <span className="flex items-center gap-1.5 text-foreground">
+                <svg width="14" height="14" aria-hidden="true">
+                  <rect x="2" y="2" width="10" height="10" className="fill-link" />
+                </svg>
+                {t("peopleMap.kinds.tutorPlural")}
+              </span>
+              <span>{t("peopleMap.schematic")}</span>
+            </figcaption>
+          </figure>
+          <div aria-live="polite">
+            {chosen ? (
+              <Panel title={chosen.name}>
+                <p className="text-sm text-muted-foreground">
+                  {t(`peopleMap.kinds.${chosen.kind}`)} · {chosen.area || t("peopleMap.noArea")}
+                  {chosen.subjects.length ? ` · ${chosen.subjects.join(", ")}` : ""}
+                </p>
+                <Link
+                  to={chosen.kind === "tutor" ? "/tutors/$tutorId" : "/students/$studentId"}
+                  params={
+                    chosen.kind === "tutor" ? { tutorId: chosen.id } : { studentId: chosen.id }
+                  }
+                  className="mt-2 inline-block text-sm font-medium text-link underline-offset-2 hover:underline"
+                >
+                  {t("peopleMap.open")}
+                </Link>
+              </Panel>
+            ) : (
+              <p className="rounded-xl border border-border bg-surface px-5 py-4 text-sm text-muted-foreground">
+                {t("designS5.map.choose")}
               </p>
-              <Link
-                to={chosen.kind === "tutor" ? "/tutors/$tutorId" : "/students/$studentId"}
-                params={chosen.kind === "tutor" ? { tutorId: chosen.id } : { studentId: chosen.id }}
-                className="underline underline-offset-2"
-              >
-                {t("peopleMap.open")}
-              </Link>
-            </section>
-          ) : null}
-        </figure>
+            )}
+          </div>
+        </div>
       ) : null}
       {view === "list" || !proj ? <PointList points={points} /> : null}
     </div>
@@ -277,44 +315,57 @@ function PointList({ points }: { points: Point[] }) {
   const { t } = useTranslation();
   if (points.length === 0) return null;
   return (
-    <table className="w-full max-w-3xl text-sm">
-      <caption className="sr-only">{t("peopleMap.listCaption")}</caption>
-      <thead>
-        <tr className="text-left">
-          <th scope="col">{t("peopleMap.name")}</th>
-          <th scope="col">{t("peopleMap.kind")}</th>
-          <th scope="col">{t("peopleMap.area")}</th>
-          <th scope="col">{t("peopleMap.subjects")}</th>
-          <th scope="col">{t("peopleMap.radius")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {[...points]
-          .sort((a, b) => a.area.localeCompare(b.area) || a.name.localeCompare(b.name))
-          .map((p) => (
-            <tr key={`${p.kind}-${p.id}`} className="border-t border-border">
-              <td>
-                {p.kind === "tutor" ? (
-                  <Link to="/tutors/$tutorId" params={{ tutorId: p.id }} className="underline">
-                    {p.name}
-                  </Link>
-                ) : (
-                  <Link
-                    to="/students/$studentId"
-                    params={{ studentId: p.id }}
-                    className="underline"
-                  >
-                    {p.name}
-                  </Link>
-                )}
-              </td>
-              <td>{t(`peopleMap.kinds.${p.kind}`)}</td>
-              <td>{p.area || t("peopleMap.noArea")}</td>
-              <td>{p.subjects.join(", ")}</td>
-              <td>{p.travel_radius_km ? t("peopleMap.km", { count: p.travel_radius_km }) : ""}</td>
-            </tr>
-          ))}
-      </tbody>
-    </table>
+    <div
+      role="region"
+      aria-label={t("peopleMap.listCaption")}
+      tabIndex={0}
+      className="relative overflow-x-auto rounded-xl border border-border bg-surface"
+    >
+      <table className="w-full text-sm [&_td]:px-4 [&_td]:py-2.5 [&_th]:px-4 [&_th]:py-2.5">
+        <caption className="sr-only">{t("peopleMap.listCaption")}</caption>
+        <thead className="border-b border-border">
+          <tr className="text-left whitespace-nowrap">
+            <th scope="col">{t("peopleMap.name")}</th>
+            <th scope="col">{t("peopleMap.kind")}</th>
+            <th scope="col">{t("peopleMap.area")}</th>
+            <th scope="col">{t("peopleMap.subjects")}</th>
+            <th scope="col">{t("peopleMap.radius")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[...points]
+            .sort((a, b) => a.area.localeCompare(b.area) || a.name.localeCompare(b.name))
+            .map((p) => (
+              <tr key={`${p.kind}-${p.id}`}>
+                <td>
+                  {p.kind === "tutor" ? (
+                    <Link
+                      to="/tutors/$tutorId"
+                      params={{ tutorId: p.id }}
+                      className="font-medium underline-offset-2 hover:underline"
+                    >
+                      {p.name}
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/students/$studentId"
+                      params={{ studentId: p.id }}
+                      className="font-medium underline-offset-2 hover:underline"
+                    >
+                      {p.name}
+                    </Link>
+                  )}
+                </td>
+                <td>{t(`peopleMap.kinds.${p.kind}`)}</td>
+                <td>{p.area || t("peopleMap.noArea")}</td>
+                <td>{p.subjects.join(", ")}</td>
+                <td className="tabular-nums">
+                  {p.travel_radius_km ? t("peopleMap.km", { count: p.travel_radius_km }) : ""}
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

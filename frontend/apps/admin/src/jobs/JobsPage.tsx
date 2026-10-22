@@ -4,6 +4,9 @@ import {
   Button,
   DataGrid,
   ErrorFallback,
+  NamePlate,
+  PageHeader,
+  Segmented,
   SelectField,
   Spinner,
   TextField,
@@ -48,9 +51,14 @@ function JobList() {
         header: t("jobs.job"),
         accessorKey: "name",
         cell: ({ row }) => (
-          <Link className={linkClass} to="/jobs/$jobId" params={{ jobId: row.original.id }}>
-            {row.original.reference} · {row.original.name}
-          </Link>
+          <NamePlate
+            name={
+              <Link className={linkClass} to="/jobs/$jobId" params={{ jobId: row.original.id }}>
+                {row.original.name}
+              </Link>
+            }
+            context={row.original.reference}
+          />
         ),
       },
       { header: t("jobs.client"), accessorKey: "client_name" },
@@ -74,20 +82,27 @@ function JobList() {
       <form
         role="search"
         aria-label={t("jobs.title")}
-        className="mb-6 grid gap-3 sm:grid-cols-[1fr_12rem_auto_12rem_auto] sm:items-end"
+        className="mb-4 flex flex-wrap items-center gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           setFilters(draft);
         }}
       >
-        <TextField
-          label={t("jobs.search")}
-          type="search"
-          value={draft.q}
-          onChange={(e) => setDraft((d) => ({ ...d, q: e.target.value }))}
-        />
+        <div className="min-w-56 flex-1">
+          <TextField
+            label={t("jobs.search")}
+            hideLabel
+            size="sm"
+            placeholder={t("jobs.search")}
+            type="search"
+            value={draft.q}
+            onChange={(e) => setDraft((d) => ({ ...d, q: e.target.value }))}
+          />
+        </div>
         <SelectField
           label={t("jobs.statusLabel")}
+          hideLabel
+          size="sm"
           value={draft.status}
           onChange={(e) => setDraft((d) => ({ ...d, status: e.target.value }))}
           options={[
@@ -95,7 +110,7 @@ function JobList() {
             ...JOB_STATUSES.map((s) => ({ value: s, label: t(`jobs.status.${s}`) })),
           ]}
         />
-        <label className="flex h-10 items-center gap-2 text-sm">
+        <label className="flex h-9 items-center gap-2 px-1 text-sm">
           <input
             type="checkbox"
             className="size-4"
@@ -106,6 +121,8 @@ function JobList() {
         </label>
         <SelectField
           label={t("g3.attention.reason")}
+          hideLabel
+          size="sm"
           value={draft.reason}
           onChange={(e) => setDraft((d) => ({ ...d, reason: e.target.value }))}
           options={[
@@ -113,7 +130,9 @@ function JobList() {
             ...ATTENTION_REASONS.map((r) => ({ value: r, label: t(`g3.attention.reasons.${r}`) })),
           ]}
         />
-        <Button type="submit">{t("people.apply")}</Button>
+        <Button type="submit" variant="secondary" size="sm" className="h-9">
+          {t("people.apply")}
+        </Button>
       </form>
       {query.isError ? (
         <ErrorFallback
@@ -177,7 +196,7 @@ function JobBoard() {
     );
   }
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-4">
       {move.isError ? (
         <p role="alert" className="text-sm text-danger md:col-span-2 xl:col-span-4">
           {t("jobs.moveFailed")}
@@ -189,27 +208,37 @@ function JobBoard() {
           <section
             key={status}
             aria-labelledby={`col-${status}`}
-            className="rounded-lg bg-muted/40 p-3"
+            className="min-w-0 rounded-xl border border-border bg-surface"
           >
-            <h2 id={`col-${status}`} className="mb-3 font-semibold">
-              {t(`jobs.status.${status}`)}{" "}
-              <span className="text-muted-foreground">({jobs.length})</span>
+            <h2
+              id={`col-${status}`}
+              className="flex items-baseline justify-between gap-2 border-b border-border px-4 py-3 text-base font-semibold"
+            >
+              <span>{t(`jobs.status.${status}`)}</span>{" "}
+              <span className="text-sm font-normal text-muted-foreground tabular-nums">
+                ({jobs.length})
+              </span>
             </h2>
-            <ul className="space-y-2">
+            {jobs.length === 0 ? (
+              <p className="px-4 py-4 text-sm text-muted-foreground">
+                {t("designS5.jobs.emptyColumn")}
+              </p>
+            ) : null}
+            <ul className="divide-y divide-rule">
               {jobs.map((job) => (
-                <li
-                  key={job.id}
-                  className="rounded-md border border-border bg-background p-3 text-sm"
-                >
-                  <Link className={linkClass} to="/jobs/$jobId" params={{ jobId: job.id }}>
-                    {job.name}
-                  </Link>
-                  <p className="text-muted-foreground">
-                    {job.reference} · {tutorNames(job) || t("jobs.noTutor")}
-                  </p>
+                <li key={job.id} className="space-y-1.5 px-4 py-2.5 text-sm">
+                  <NamePlate
+                    name={
+                      <Link className={linkClass} to="/jobs/$jobId" params={{ jobId: job.id }}>
+                        {job.name}
+                      </Link>
+                    }
+                    context={`${job.reference} · ${tutorNames(job) || t("jobs.noTutor")}`}
+                  />
                   {canChange && NEXT_STATUSES[status].length ? (
                     <SelectField
-                      className="mt-2 h-8"
+                      className="h-8"
+                      hideLabel
                       label={t("jobs.moveNamed", { name: job.name })}
                       value=""
                       onChange={(e) =>
@@ -240,22 +269,20 @@ export function JobsPage() {
   const [view, setView] = useState<"list" | "board">("list");
   return (
     <section>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold">{t("jobs.title")}</h1>
-        <div role="group" aria-label={t("jobs.view")} className="flex gap-1">
-          {(["list", "board"] as const).map((v) => (
-            <Button
-              key={v}
-              size="sm"
-              variant={view === v ? "primary" : "secondary"}
-              aria-pressed={view === v}
-              onClick={() => setView(v)}
-            >
-              {t(`jobs.views.${v}`)}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        title={t("jobs.title")}
+        actions={
+          <Segmented
+            label={t("jobs.view")}
+            value={view}
+            onChange={setView}
+            options={(["list", "board"] as const).map((v) => ({
+              key: v,
+              label: t(`jobs.views.${v}`),
+            }))}
+          />
+        }
+      />
       {view === "list" ? <JobList /> : <JobBoard />}
     </section>
   );

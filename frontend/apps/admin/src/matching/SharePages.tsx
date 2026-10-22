@@ -1,6 +1,6 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import { Alert, Button, Panel, PanelRow, PanelRows, Spinner, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -25,42 +25,41 @@ export function TutorCard({
   onSelect?: () => void;
 }) {
   const { t } = useTranslation();
+  const facts = [
+    card.rating !== null
+      ? t("shortlistShare.rating", { rating: card.rating, count: card.rating_count })
+      : "",
+    card.years_experience !== null
+      ? t("shortlistShare.experience", { count: card.years_experience })
+      : "",
+    card.online ? t("shortlistShare.online") : "",
+    card.in_person ? t("shortlistShare.inPerson") : "",
+  ].filter(Boolean);
+  const subjects = card.subjects
+    .map((s) => (s.level ? `${s.subject} (${s.level})` : s.subject))
+    .join(", ");
+  const background = [
+    card.qualifications.map((q) => q.title).join("; "),
+    card.languages.length ? t("shortlistShare.languages", { list: card.languages.join(", ") }) : "",
+  ].filter(Boolean);
   const body = (
     <div className="flex gap-3">
       {card.photo_url ? (
-        <img src={card.photo_url} alt="" className="size-16 shrink-0 rounded-full object-cover" />
+        <img src={card.photo_url} alt="" className="size-14 shrink-0 rounded-full object-cover" />
       ) : null}
-      <div className="space-y-1 text-sm">
+      <div className="min-w-0 flex-1 text-sm">
         <p className="text-base font-semibold">{card.name}</p>
-        {card.headline ? <p>{card.headline}</p> : null}
-        {card.rating !== null ? (
-          <p>{t("shortlistShare.rating", { rating: card.rating, count: card.rating_count })}</p>
-        ) : null}
-        {card.subjects.length ? (
-          <p>
-            {card.subjects
-              .map((s) => (s.level ? `${s.subject} (${s.level})` : s.subject))
-              .join(", ")}
-          </p>
-        ) : null}
-        {card.years_experience !== null ? (
-          <p>{t("shortlistShare.experience", { count: card.years_experience })}</p>
-        ) : null}
-        {card.qualifications.length ? (
-          <p>{card.qualifications.map((q) => q.title).join("; ")}</p>
-        ) : null}
-        {card.languages.length ? (
-          <p>{t("shortlistShare.languages", { list: card.languages.join(", ") })}</p>
-        ) : null}
-        <p className="text-muted-foreground">
-          {[
-            card.online ? t("shortlistShare.online") : "",
-            card.in_person ? t("shortlistShare.inPerson") : "",
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-        </p>
-        {card.bio ? <p className="whitespace-pre-line">{card.bio}</p> : null}
+        {card.headline ? <p className="text-muted-foreground">{card.headline}</p> : null}
+        <div className="mt-3 space-y-1 border-t border-rule pt-3">
+          {subjects ? <p className="font-medium">{subjects}</p> : null}
+          {facts.length ? (
+            <p className="text-muted-foreground tabular-nums">{facts.join(" · ")}</p>
+          ) : null}
+          {background.length ? (
+            <p className="text-muted-foreground">{background.join(" · ")}</p>
+          ) : null}
+          {card.bio ? <p className="pt-1 whitespace-pre-line">{card.bio}</p> : null}
+        </div>
       </div>
     </div>
   );
@@ -69,7 +68,7 @@ export function TutorCard({
       <article
         aria-label={card.name}
         className={
-          "rounded-md border p-3 " + (selected ? "border-brand bg-muted" : "border-border")
+          "rounded-xl border bg-surface p-4 " + (selected ? "border-link" : "border-border")
         }
       >
         {body}
@@ -77,11 +76,11 @@ export function TutorCard({
     );
   }
   return (
-    <label className="block cursor-pointer rounded-md border border-border p-3 has-[:checked]:border-brand has-[:checked]:bg-muted has-[:focus-visible]:ring-2">
+    <label className="block cursor-pointer rounded-xl border border-border bg-surface p-4 hover:bg-muted/60 has-[:checked]:border-link has-[:checked]:bg-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-link">
       <input
         type="radio"
         name={name}
-        className="sr-only"
+        className="float-right mt-1 ml-3 size-4 accent-brand"
         checked={selected}
         onChange={onSelect}
         aria-label={t("shortlistShare.choose", { name: card.name })}
@@ -135,17 +134,11 @@ export function ShareShortlistSection({ jobId }: { jobId: string }) {
   });
   const entries = shortlist.data ?? [];
   return (
-    <section
-      aria-labelledby="share-heading"
-      className="space-y-3 rounded-lg border border-border p-4"
-    >
-      <h2 id="share-heading" className="font-semibold">
-        {t("shortlistShare.title")}
-      </h2>
-      <p className="text-sm text-muted-foreground">{t("shortlistShare.intro")}</p>
+    <Panel title={t("shortlistShare.title")} flush>
+      <p className="px-5 pt-4 text-sm text-muted-foreground">{t("shortlistShare.intro")}</p>
       {canShare ? (
         <form
-          className="space-y-2"
+          className="max-w-xl space-y-4 px-5 py-4"
           aria-label={t("shortlistShare.form")}
           onSubmit={(e) => {
             e.preventDefault();
@@ -156,9 +149,10 @@ export function ShareShortlistSection({ jobId }: { jobId: string }) {
             <fieldset>
               <legend className="text-sm font-medium">{t("shortlistShare.which")}</legend>
               {entries.map((entry) => (
-                <label key={entry.id} className="flex items-center gap-2 text-sm">
+                <label key={entry.id} className="mt-1 flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
+                    className="size-4"
                     checked={chosen.includes(entry.tutor)}
                     onChange={(e) =>
                       setChosen(
@@ -174,7 +168,7 @@ export function ShareShortlistSection({ jobId }: { jobId: string }) {
               <p className="text-xs text-muted-foreground">{t("shortlistShare.allHint")}</p>
             </fieldset>
           ) : (
-            <p className="text-sm">{t("shortlistShare.emptyShortlist")}</p>
+            <p className="text-sm text-muted-foreground">{t("shortlistShare.emptyShortlist")}</p>
           )}
           <div className="flex flex-col gap-1">
             <label htmlFor="share-message" className="text-sm font-medium">
@@ -182,7 +176,7 @@ export function ShareShortlistSection({ jobId }: { jobId: string }) {
             </label>
             <textarea
               id="share-message"
-              className="min-h-20 rounded-md border border-border p-2 text-sm"
+              className="min-h-20 rounded-md border border-field bg-surface px-3 py-2 text-sm"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
@@ -201,19 +195,23 @@ export function ShareShortlistSection({ jobId }: { jobId: string }) {
           {share.error ? <Alert tone="danger">{share.error.message}</Alert> : null}
         </form>
       ) : null}
-      {shares.isLoading ? <Spinner label={t("grid.loading")} /> : null}
+      {shares.isLoading ? (
+        <div className="px-5 pb-4">
+          <Spinner label={t("grid.loading")} />
+        </div>
+      ) : null}
       {shares.data?.results.length ? (
-        <ul className="space-y-2 text-sm">
+        <PanelRows className="border-t border-border">
           {shares.data.results.map((s) => (
-            <li key={s.id} className="rounded-md border border-border p-2">
-              <p>
+            <PanelRow key={s.id} className="space-y-0.5">
+              <p className="font-medium">
                 {t(`shortlistShare.states.${s.state}`)} ·{" "}
                 {t("shortlistShare.sentTo", {
                   name: s.contact_name || t("shortlistShare.family"),
                   count: s.tutors.length,
                 })}
               </p>
-              <p className="text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {s.viewed_at
                   ? t("shortlistShare.viewed", { date: formatDateTime(s.viewed_at) })
                   : t("shortlistShare.notViewed")}
@@ -229,7 +227,12 @@ export function ShareShortlistSection({ jobId }: { jobId: string }) {
               ) : null}
               {s.link ? (
                 <p className="break-all">
-                  <a className="underline" href={s.link} target="_blank" rel="noreferrer">
+                  <a
+                    className="font-medium text-link underline-offset-2 hover:underline"
+                    href={s.link}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     {t("shortlistShare.link")}
                   </a>
                 </p>
@@ -239,11 +242,11 @@ export function ShareShortlistSection({ jobId }: { jobId: string }) {
                   {t("shortlistShare.revoke")}
                 </Button>
               ) : null}
-            </li>
+            </PanelRow>
           ))}
-        </ul>
+        </PanelRows>
       ) : null}
-    </section>
+    </Panel>
   );
 }
 
@@ -289,7 +292,7 @@ export function PublicShortlistPage({ token }: { token: string }) {
           }}
         >
           <fieldset className="space-y-3">
-            <legend className="text-lg font-semibold">
+            <legend className="mb-1 text-base font-semibold">
               {t("shortlistShare.pick", { students: p.job.students.join(", ") })}
             </legend>
             {p.tutors.map((card) => (
@@ -309,13 +312,15 @@ export function PublicShortlistPage({ token }: { token: string }) {
             </label>
             <textarea
               id="shortlist-note"
-              className="min-h-20 rounded-md border border-border p-2"
+              className="min-h-20 rounded-md border border-field bg-surface px-3 py-2"
               maxLength={1000}
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
           </div>
-          <p className="text-sm">{t("shortlistShare.until", { date: formatDate(p.expires_at) })}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("shortlistShare.until", { date: formatDate(p.expires_at) })}
+          </p>
           <Button type="submit" disabled={!tutor || choose.isPending}>
             {t("shortlistShare.confirm")}
           </Button>

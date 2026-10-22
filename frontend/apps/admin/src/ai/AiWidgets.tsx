@@ -6,6 +6,7 @@ import { useId, useState } from "react";
 
 import { api } from "../api";
 import { useAiFeature } from "./ai";
+import { useEnquiryTriage, type EnquiryTriage } from "./enquiryTriage";
 import {
   AiContentHelper,
   AiError,
@@ -194,42 +195,42 @@ export function AiEnquiryExtract({ onExtract }: { onExtract: (data: Extracted) =
 }
 
 /** Triage: next steps, a draft reply, and field changes as a proposal to confirm. */
-export function AiEnquiryTriage({
-  enquiryId,
+
+/** "Triage with AI": a small secondary action (for a panel header or the page actions). */
+export function AiEnquiryTriageButton({ triage }: { triage: EnquiryTriage }) {
+  const { t } = useTranslation();
+  if (!triage.enabled) return null;
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="secondary"
+      loading={triage.triage.isPending}
+      onClick={() => triage.triage.mutate()}
+    >
+      {t("ai.enquiry.triage")}
+    </Button>
+  );
+}
+
+/** The triage's suggested next steps and reply, on the clean leaf (nothing until asked). */
+export function AiEnquiryTriageResult({
+  triage,
   onApplied,
+  className,
 }: {
-  enquiryId: string;
+  triage: EnquiryTriage;
   onApplied: () => void;
+  className?: string;
 }) {
   const { t } = useTranslation();
-  const enabled = useAiFeature("enquiry");
-  const triage = useMutation({
-    mutationFn: async () =>
-      unwrap(
-        await api.POST("/api/v1/ai/enquiries/{enquiry_id}/triage", {
-          params: { path: { enquiry_id: enquiryId } },
-        }),
-      ),
-  });
-  if (!enabled) return null;
-  const data = triage.data;
+  const data = triage.triage.data;
+  if (!triage.enabled || (!data && !triage.triage.error)) return null;
   return (
-    <section
-      aria-label={t("ai.enquiry.triage")}
-      className="space-y-2 rounded-md border border-violet-200 p-4 text-sm"
-    >
-      <Button
-        type="button"
-        size="sm"
-        variant="secondary"
-        loading={triage.isPending}
-        onClick={() => triage.mutate()}
-      >
-        {t("ai.enquiry.triage")}
-      </Button>
-      <AiError error={triage.error} />
+    <section aria-label={t("ai.enquiry.triage")} className={className}>
+      <AiError error={triage.triage.error} />
       {data ? (
-        <div className="space-y-2" aria-live="polite">
+        <div className="space-y-2 text-sm" aria-live="polite">
           <h3 className="font-semibold">{t("ai.enquiry.nextSteps")}</h3>
           <ul className="list-disc pl-5">
             {data.next_steps.map((step) => (
@@ -239,11 +240,14 @@ export function AiEnquiryTriage({
           {data.priority ? <p>{t("ai.enquiry.priority", { priority: data.priority })}</p> : null}
           <h3 className="font-semibold">{t("ai.enquiry.reply")}</h3>
           {data.reply_subject ? <p className="font-medium">{data.reply_subject}</p> : null}
-          <p className="whitespace-pre-wrap rounded-md bg-muted p-2">{data.reply_body}</p>
+          <p className="rounded-md border border-border px-3 py-2 whitespace-pre-wrap">
+            {data.reply_body}
+          </p>
           <Button
             type="button"
             size="sm"
             variant="ghost"
+            className="-ml-3"
             onClick={() => void navigator.clipboard?.writeText(data.reply_body)}
           >
             {t("ai.copy")}
@@ -254,6 +258,24 @@ export function AiEnquiryTriage({
         </div>
       ) : null}
     </section>
+  );
+}
+
+/** The button and its result together (used where there is no panel to host them). */
+export function AiEnquiryTriage({
+  enquiryId,
+  onApplied,
+}: {
+  enquiryId: string;
+  onApplied: () => void;
+}) {
+  const triage = useEnquiryTriage(enquiryId);
+  if (!triage.enabled) return null;
+  return (
+    <div className="space-y-3">
+      <AiEnquiryTriageButton triage={triage} />
+      <AiEnquiryTriageResult triage={triage} onApplied={onApplied} />
+    </div>
   );
 }
 

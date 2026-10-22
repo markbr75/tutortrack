@@ -1,12 +1,25 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  NamePlate,
+  Panel,
+  PanelRow,
+  PanelRows,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
 import { AiAssistedBadge } from "../ai/AiParts";
 import { ErrorList } from "../calendar/ErrorList";
+import { RecordHeader, RecordLayout } from "../components/RecordHeader";
 import { AttachmentInput } from "../g3/AttachmentInput";
 import { useTopicSuggestions } from "../learning/hooks";
 
@@ -30,23 +43,23 @@ function TextArea({
 }) {
   const id = useId();
   return (
-    <div className="space-y-1">
+    <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-sm font-medium">
         {label}
       </label>
+      <textarea
+        id={id}
+        aria-describedby={hint ? `${id}-hint` : undefined}
+        className="min-h-24 w-full rounded-md border border-field bg-surface px-3 py-2 text-sm"
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value)}
+      />
       {hint ? (
         <p id={`${id}-hint`} className="text-xs text-muted-foreground">
           {hint}
         </p>
       ) : null}
-      <textarea
-        id={id}
-        aria-describedby={hint ? `${id}-hint` : undefined}
-        className="min-h-24 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-        value={value}
-        disabled={disabled}
-        onChange={(e) => onChange(e.target.value)}
-      />
     </div>
   );
 }
@@ -68,25 +81,30 @@ function ListInput({
   const topics = useTopicSuggestions(field.type === "topics" && !disabled);
   const listId = useId();
   return (
-    <fieldset className="space-y-1">
+    <fieldset className="space-y-2">
       <legend className="text-sm font-medium">{field.label}</legend>
-      <ul className="flex flex-wrap gap-2">
-        {value.map((item) => (
-          <li key={item} className="flex items-center gap-1 rounded bg-muted px-2 py-1 text-sm">
-            {item}
-            {!disabled ? (
-              <button
-                type="button"
-                className="text-muted-foreground"
-                aria-label={t("delivery.reports.removeItem", { item })}
-                onClick={() => onChange(value.filter((v) => v !== item))}
-              >
-                ×
-              </button>
-            ) : null}
-          </li>
-        ))}
-      </ul>
+      {value.length ? (
+        <ul className="flex flex-wrap gap-2">
+          {value.map((item) => (
+            <li
+              key={item}
+              className="flex items-center gap-1 rounded-md border border-border bg-muted py-0.5 pr-1 pl-2 text-sm"
+            >
+              {item}
+              {!disabled ? (
+                <button
+                  type="button"
+                  className="grid size-6 place-items-center rounded text-muted-foreground hover:bg-surface hover:text-foreground"
+                  aria-label={t("delivery.reports.removeItem", { item })}
+                  onClick={() => onChange(value.filter((v) => v !== item))}
+                >
+                  <X aria-hidden="true" className="size-3.5" strokeWidth={1.75} />
+                </button>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {!disabled ? (
         <div className="flex items-end gap-2">
           <TextField
@@ -106,7 +124,6 @@ function ListInput({
           ) : null}
           <Button
             type="button"
-            size="sm"
             variant="secondary"
             onClick={() => {
               if (draft.trim() && !value.includes(draft.trim())) onChange([...value, draft.trim()]);
@@ -151,9 +168,9 @@ function FieldInput({
     return (
       <fieldset>
         <legend className="text-sm font-medium">{label}</legend>
-        <div className="mt-1 flex gap-3">
+        <div className="mt-1 flex gap-4 tabular-nums">
           {[1, 2, 3, 4, 5].map((n) => (
-            <label key={n} className="flex items-center gap-1 text-sm">
+            <label key={n} className="flex items-center gap-1.5 text-sm">
               <input
                 type="radio"
                 name={field.key}
@@ -186,7 +203,7 @@ function FieldInput({
     return (
       <fieldset>
         <legend className="text-sm font-medium">{label}</legend>
-        <div className="mt-1 space-y-1">
+        <div className="mt-1.5 space-y-1.5">
           {(field.options ?? []).map((o) => (
             <label key={o} className="flex items-center gap-2 text-sm">
               <input
@@ -263,23 +280,30 @@ function Comments({ reportId }: { reportId: string }) {
       void queryClient.invalidateQueries({ queryKey: key });
     },
   });
+  const rows = comments.data ?? [];
   return (
-    <section aria-labelledby="comments-title" className="space-y-2">
-      <h2 id="comments-title" className="text-lg font-semibold">
-        {t("delivery.reports.comments")}
-      </h2>
-      <ul className="space-y-2">
-        {(comments.data ?? []).map((c) => (
-          <li key={c.id} className="rounded-md border border-border p-2 text-sm">
-            <p className="text-xs text-muted-foreground">
-              {c.author_name} · {formatDateTime(c.created_at, i18n.language)}
-            </p>
-            <p className="whitespace-pre-wrap">{c.body}</p>
-          </li>
-        ))}
-      </ul>
+    <Panel title={t("delivery.reports.comments")} flush>
+      {rows.length ? (
+        <PanelRows>
+          {rows.map((c) => (
+            <PanelRow key={c.id}>
+              <NamePlate
+                name={c.author_name}
+                context={
+                  <time dateTime={c.created_at} className="tabular-nums">
+                    {formatDateTime(c.created_at, i18n.language)}
+                  </time>
+                }
+              />
+              <p className="mt-1 whitespace-pre-wrap">{c.body}</p>
+            </PanelRow>
+          ))}
+        </PanelRows>
+      ) : (
+        <p className="px-5 py-4 text-sm text-muted-foreground">{t("designS5.report.noComments")}</p>
+      )}
       <form
-        className="space-y-2"
+        className="space-y-3 border-t border-border px-5 py-4"
         onSubmit={(e) => {
           e.preventDefault();
           if (body.trim()) post.mutate();
@@ -300,11 +324,11 @@ function Comments({ reportId }: { reportId: string }) {
             { value: "client", label: t("delivery.reports.commentClient") },
           ]}
         />
-        <Button type="submit" size="sm" disabled={post.isPending}>
+        <Button type="submit" size="sm" variant="secondary" loading={post.isPending}>
           {t("delivery.reports.post")}
         </Button>
       </form>
-    </section>
+    </Panel>
   );
 }
 
@@ -391,102 +415,125 @@ export function ReportPage({ reportId }: { reportId: string }) {
   const editable = canWrite && (!written || canEditAny);
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">
-          {t("delivery.reports.heading", { title: data.lesson_title })}
-          <AiAssistedBadge subjectType="lesson_report" subjectId={reportId} />
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {formatDateTime(data.lesson_start, i18n.language)} · {data.tutor_name} ·{" "}
-          {t(`delivery.reports.sla.${data.sla_state}`)} ·{" "}
-          {t("delivery.reports.dueAt", { when: formatDateTime(data.due_at, i18n.language) })}
-        </p>
-      </header>
-      {data.status === "returned" && data.returned_note ? (
-        <Alert tone="warning">{t("delivery.reports.returned", { note: data.returned_note })}</Alert>
-      ) : null}
-      {data.pay_held ? <Alert tone="warning">{t("delivery.reports.payHeld")}</Alert> : null}
-      {!editable ? <Alert>{t("delivery.reports.readOnly")}</Alert> : null}
-
-      <form
-        className="space-y-4"
-        aria-label={data.lesson_title}
-        onSubmit={(e) => {
-          e.preventDefault();
-          act.mutate("submit");
-        }}
-      >
-        {data.template_fields.map((field) => (
-          <FieldInput
-            key={field.key}
-            field={field}
-            value={answers[field.key]}
-            disabled={!editable}
-            onChange={(value) => {
-              setAnswers((current) => ({ ...(current ?? {}), [field.key]: value }));
-              setDirty(true);
-            }}
-          />
-        ))}
-        <p className="text-xs text-muted-foreground" aria-live="polite">
-          {autosave.isPending
-            ? t("delivery.reports.saving")
-            : autosave.isSuccess && !dirty
-              ? t("delivery.reports.saved")
-              : ""}
-        </p>
-        <ErrorList error={act.error ?? autosave.error} />
-        <div className="flex flex-wrap gap-2">
-          {editable && !written ? (
-            <Button type="submit" disabled={act.isPending}>
-              {t("delivery.reports.submit")}
-            </Button>
-          ) : null}
-          {canApprove && data.status === "submitted" ? (
-            <>
-              <Button type="button" onClick={() => act.mutate("approve")}>
-                {t("delivery.reports.approve")}
-              </Button>
-              <Button type="button" variant="secondary" onClick={() => setReturning(true)}>
-                {t("delivery.reports.return")}
-              </Button>
-            </>
-          ) : null}
-          {canShare && written && !data.shared_at ? (
-            <Button type="button" variant="secondary" onClick={() => act.mutate("share")}>
-              {t("delivery.reports.share")}
-            </Button>
-          ) : null}
-        </div>
-        {data.shared_at ? (
-          <p className="text-sm text-muted-foreground">
-            {t("delivery.reports.sharedAt", {
-              when: formatDateTime(data.shared_at, i18n.language),
-            })}
-          </p>
-        ) : null}
-      </form>
-      {returning ? (
-        <form
-          className="space-y-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            act.mutate("return");
-          }}
-        >
-          <TextArea
-            label={t("delivery.reports.returnNote")}
-            value={note}
-            onChange={setNote}
-            disabled={false}
-          />
-          <Button type="submit" variant="secondary">
-            {t("delivery.reports.return")}
-          </Button>
-        </form>
-      ) : null}
-      <Comments reportId={reportId} />
-    </div>
+    <article>
+      <RecordHeader
+        back={<Link to="/reports">{t("delivery.reports.title")}</Link>}
+        title={t("delivery.reports.heading", { title: data.lesson_title })}
+        description={
+          <>
+            <span className="tabular-nums">
+              {[
+                formatDateTime(data.lesson_start, i18n.language),
+                data.tutor_name,
+                t(`delivery.reports.sla.${data.sla_state}`),
+                t("delivery.reports.dueAt", { when: formatDateTime(data.due_at, i18n.language) }),
+              ].join(" · ")}
+            </span>
+            <AiAssistedBadge subjectType="lesson_report" subjectId={reportId} />
+          </>
+        }
+      />
+      <RecordLayout
+        main={
+          <>
+            {data.status === "returned" && data.returned_note ? (
+              <Alert tone="warning">
+                {t("delivery.reports.returned", { note: data.returned_note })}
+              </Alert>
+            ) : null}
+            {data.pay_held ? <Alert tone="warning">{t("delivery.reports.payHeld")}</Alert> : null}
+            {!editable ? <Alert>{t("delivery.reports.readOnly")}</Alert> : null}
+            <section className="rounded-xl border border-border bg-surface">
+              <form
+                aria-label={data.lesson_title}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  act.mutate("submit");
+                }}
+              >
+                <div className="max-w-2xl space-y-5 px-5 py-5">
+                  {data.template_fields.map((field) => (
+                    <FieldInput
+                      key={field.key}
+                      field={field}
+                      value={answers[field.key]}
+                      disabled={!editable}
+                      onChange={(value) => {
+                        setAnswers((current) => ({ ...(current ?? {}), [field.key]: value }));
+                        setDirty(true);
+                      }}
+                    />
+                  ))}
+                  <ErrorList error={act.error ?? autosave.error} />
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-3">
+                  <p className="text-xs text-muted-foreground" aria-live="polite">
+                    {data.shared_at ? (
+                      <span className="text-sm">
+                        {t("delivery.reports.sharedAt", {
+                          when: formatDateTime(data.shared_at, i18n.language),
+                        })}
+                      </span>
+                    ) : autosave.isPending ? (
+                      t("delivery.reports.saving")
+                    ) : autosave.isSuccess && !dirty ? (
+                      t("delivery.reports.saved")
+                    ) : (
+                      ""
+                    )}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {canShare && written && !data.shared_at ? (
+                      <Button type="button" variant="secondary" onClick={() => act.mutate("share")}>
+                        {t("delivery.reports.share")}
+                      </Button>
+                    ) : null}
+                    {canApprove && data.status === "submitted" ? (
+                      <>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={() => setReturning(true)}
+                        >
+                          {t("delivery.reports.return")}
+                        </Button>
+                        <Button type="button" onClick={() => act.mutate("approve")}>
+                          {t("delivery.reports.approve")}
+                        </Button>
+                      </>
+                    ) : null}
+                    {editable && !written ? (
+                      <Button type="submit" loading={act.isPending}>
+                        {t("delivery.reports.submit")}
+                      </Button>
+                    ) : null}
+                  </div>
+                </div>
+              </form>
+              {returning ? (
+                <form
+                  className="max-w-2xl space-y-3 border-t border-border px-5 py-4"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    act.mutate("return");
+                  }}
+                >
+                  <TextArea
+                    label={t("delivery.reports.returnNote")}
+                    value={note}
+                    onChange={setNote}
+                    disabled={false}
+                  />
+                  <Button type="submit" size="sm" variant="secondary">
+                    {t("delivery.reports.return")}
+                  </Button>
+                </form>
+              ) : null}
+            </section>
+          </>
+        }
+        side={<Comments reportId={reportId} />}
+      />
+    </article>
   );
 }

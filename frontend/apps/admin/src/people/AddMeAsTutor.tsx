@@ -22,11 +22,11 @@ export function AddMeAsTutor() {
   if (!me?.membership || me.membership.teaches || !canCreate) return null;
   return (
     <>
-      <Button variant="secondary" loading={add.isPending} onClick={() => add.mutate()}>
+      <Button size="sm" variant="secondary" loading={add.isPending} onClick={() => add.mutate()}>
         {t("people.addMeAsTutor")}
       </Button>
       {add.isError ? (
-        <p role="alert" className="text-sm text-danger">
+        <p role="alert" className="text-xs text-danger">
           {add.error.message}
         </p>
       ) : null}

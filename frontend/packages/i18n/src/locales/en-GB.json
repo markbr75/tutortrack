@@ -7426,5 +7426,57 @@
       "days": "days",
       "percent": "%"
     }
+  },
+  "designS5": {
+    "back": "Breadcrumb",
+    "noDetails": "Nothing recorded yet.",
+    "client": {
+      "noContacts": "No contacts yet.",
+      "billingDetails": "Billing details"
+    },
+    "tutor": {
+      "sections": "Tutor record",
+      "pay": "Pay",
+      "compliance": "Compliance",
+      "performance": "Performance and leaving",
+      "noSubjects": "No subjects yet."
+    },
+    "delivery": {
+      "chosen_one": "{{count}} lesson selected",
+      "chosen_other": "{{count}} lessons selected",
+      "waiting_one": "{{count}} lesson waiting",
+      "waiting_other": "{{count}} lessons waiting",
+      "lessonsTable": "Unconfirmed lessons table"
+    },
+    "report": {
+      "noComments": "No comments yet."
+    },
+    "feedback": {
+      "anyStatus": "Any status",
+      "anyRating": "Any rating",
+      "answeredOf": "{{answered}} of {{asked}} answered"
+    },
+    "policy": {
+      "situation": "When",
+      "noTemplates": "No report templates yet."
+    },
+    "jobs": {
+      "emptyColumn": "No jobs here."
+    },
+    "leads": {
+      "empty": "No enquiries here.",
+      "noForms": "No forms yet.",
+      "noHistory": "Nothing has happened yet.",
+      "waiting": "Waiting",
+      "noSources": "No enquiries yet."
+    },
+    "map": {
+      "choose": "Choose a point on the map to see who it is."
+    },
+    "matching": {
+      "noData": "Nothing to show yet.",
+      "anyGender": "Tutor gender: no preference",
+      "listHint": "Separate several exam boards or needs with commas."
+    }
   }
 }

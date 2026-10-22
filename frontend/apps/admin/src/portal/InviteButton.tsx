@@ -6,7 +6,15 @@ import { useMutation } from "@tanstack/react-query";
 import { api } from "../api";
 
 /** Invite a parent (contact) to the family portal (E15-T01). */
-export function InviteButton({ contactId, name }: { contactId: string; name: string }) {
+export function InviteButton({
+  contactId,
+  name,
+  variant = "ghost",
+}: {
+  contactId: string;
+  name: string;
+  variant?: "ghost" | "secondary";
+}) {
   const { t } = useTranslation();
   const invite = useMutation({
     mutationFn: async () =>
@@ -22,7 +30,12 @@ export function InviteButton({ contactId, name }: { contactId: string; name: str
   }
   return (
     <>
-      <Button size="sm" variant="ghost" onClick={() => invite.mutate()} disabled={invite.isPending}>
+      <Button
+        size="sm"
+        variant={variant}
+        onClick={() => invite.mutate()}
+        disabled={invite.isPending}
+      >
         {t("announcements.invite")}
         <span className="sr-only"> {name}</span>
       </Button>

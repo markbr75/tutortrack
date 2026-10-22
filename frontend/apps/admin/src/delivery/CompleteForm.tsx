@@ -92,11 +92,11 @@ export function CompleteForm({ lessonId, onDone }: { lessonId: string; onDone: (
       }}
     >
       <fieldset>
-        <legend className="text-sm font-semibold">{t("delivery.complete.title")}</legend>
+        <legend className="text-base font-semibold">{t("delivery.complete.title")}</legend>
         <VideoAttendanceHint lessonId={lessonId} onApply={applyVideo} />
-        <ul className="mt-2 space-y-2">
+        <ul className="mt-2 divide-y divide-rule border-y border-rule">
           {attendees.map((a) => (
-            <li key={a.id} className="grid grid-cols-[1fr_auto] items-end gap-2">
+            <li key={a.id} className="grid grid-cols-[1fr_auto] items-end gap-2 py-2.5">
               <SelectField
                 label={t("delivery.complete.outcomeFor", { name: a.name })}
                 value={rowOf(a.id).outcome}
@@ -105,7 +105,7 @@ export function CompleteForm({ lessonId, onDone }: { lessonId: string; onDone: (
               />
               {rowOf(a.id).outcome === "late" ? (
                 <TextField
-                  className="w-24"
+                  className="w-24 tabular-nums"
                   type="number"
                   min={0}
                   max={600}
@@ -132,11 +132,14 @@ export function CompleteForm({ lessonId, onDone }: { lessonId: string; onDone: (
         ) : null}
       </fieldset>
       <details>
-        <summary className="cursor-pointer text-sm">{t("delivery.complete.actualTimes")}</summary>
+        <summary className="cursor-pointer text-sm font-medium">
+          {t("delivery.complete.actualTimes")}
+        </summary>
         <div className="mt-2 grid grid-cols-2 gap-2">
           <TextField
             type="time"
             step={300}
+            className="tabular-nums"
             label={t("delivery.complete.actualStart")}
             value={actual.start}
             placeholder={lesson.data ? toTimeInput(new Date(lesson.data.start)) : undefined}
@@ -145,6 +148,7 @@ export function CompleteForm({ lessonId, onDone }: { lessonId: string; onDone: (
           <TextField
             type="time"
             step={300}
+            className="tabular-nums"
             label={t("delivery.complete.actualEnd")}
             value={actual.end}
             onChange={(e) => setActual((v) => ({ ...v, end: e.target.value }))}

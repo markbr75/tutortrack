@@ -1,6 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Button, SelectField, Spinner } from "@tutortrack/ui";
+import { Button, Panel, PanelRow, PanelRows, SelectField, Spinner } from "@tutortrack/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -52,21 +52,22 @@ export function PolicyOverrides() {
   const chosenName = records.data?.find((r) => r.id === record)?.name ?? "";
   return (
     <div className="space-y-6">
-      <section aria-labelledby="overrides-list" className="space-y-2">
-        <h2 id="overrides-list" className="text-lg font-medium">
-          {t("g3.delivery.overrides")}
-        </h2>
-        <p className="text-sm text-muted-foreground">{t("g3.delivery.overridesHelp")}</p>
+      <Panel title={t("g3.delivery.overrides")} flush>
+        <p className="border-b border-rule px-5 py-2.5 text-xs text-muted-foreground">
+          {t("g3.delivery.overridesHelp")}
+        </p>
         {policies.isPending ? (
-          <Spinner label={t("grid.loading")} />
+          <div className="px-5 py-4">
+            <Spinner label={t("grid.loading")} />
+          </div>
         ) : overrides.length ? (
-          <ul className="divide-y divide-border rounded-md border border-border">
+          <PanelRows>
             {overrides.map((p) => (
-              <li key={p.id} className="flex items-center justify-between gap-2 p-2 text-sm">
-                <span>
-                  {p.name}{" "}
-                  <span className="text-muted-foreground">
-                    · {t(`g3.delivery.scopes.${p.scope_type}`)}
+              <PanelRow key={p.id} className="flex items-center justify-between gap-3">
+                <span className="min-w-0">
+                  <span className="block font-medium">{p.name}</span>
+                  <span className="block text-xs text-muted-foreground">
+                    {t(`g3.delivery.scopes.${p.scope_type}`)}
                   </span>
                 </span>
                 <Button
@@ -80,15 +81,15 @@ export function PolicyOverrides() {
                   {t("g3.delivery.edit")}
                   <span className="sr-only"> {p.name}</span>
                 </Button>
-              </li>
+              </PanelRow>
             ))}
-          </ul>
+          </PanelRows>
         ) : (
-          <p className="text-sm">{t("g3.delivery.noOverrides")}</p>
+          <p className="px-5 py-4 text-sm text-muted-foreground">{t("g3.delivery.noOverrides")}</p>
         )}
-      </section>
-      <section aria-labelledby="override-edit" className="space-y-3">
-        <h2 id="override-edit" className="text-lg font-medium">
+      </Panel>
+      <section aria-labelledby="override-edit" className="space-y-4">
+        <h2 id="override-edit" className="text-base font-semibold">
           {t("g3.delivery.setOverride")}
         </h2>
         <div className="grid max-w-xl gap-3 sm:grid-cols-2">
@@ -152,13 +153,13 @@ export function TemplateAssignments({
     rows: { id: string; name: string }[] | undefined,
   ) => (
     <fieldset className="space-y-1">
-      <legend className="text-sm font-semibold">{label}</legend>
-      <div className="max-h-40 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+      <legend className="text-sm font-medium">{label}</legend>
+      <div className="relative max-h-40 space-y-1.5 overflow-y-auto rounded-md border border-field bg-surface p-2.5">
         {(rows ?? []).map((r) => (
-          <label key={r.id} className="flex items-center gap-2 text-sm">
+          <label key={r.id} className="flex items-start gap-2 text-sm">
             <input
               type="checkbox"
-              className="size-4"
+              className="mt-0.5 size-4 shrink-0"
               checked={value[name].includes(r.id)}
               onChange={(e) =>
                 onChange({
@@ -173,14 +174,14 @@ export function TemplateAssignments({
           </label>
         ))}
         {rows && !rows.length ? (
-          <p className="text-sm text-muted-foreground">{t("g3.delivery.noneYet")}</p>
+          <p className="text-xs text-muted-foreground">{t("g3.delivery.noneYet")}</p>
         ) : null}
       </div>
     </fieldset>
   );
   return (
     <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">{t("g3.delivery.assignHelp")}</p>
+      <p className="text-xs text-muted-foreground">{t("g3.delivery.assignHelp")}</p>
       <div className="grid gap-3 sm:grid-cols-3">
         {pick("jobs", t("g3.delivery.scopes.job"), jobs.data)}
         {pick("services", t("g3.delivery.scopes.service"), services.data)}

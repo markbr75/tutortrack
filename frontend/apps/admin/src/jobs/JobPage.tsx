@@ -1,12 +1,31 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, ErrorFallback, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  buttonClass,
+  ErrorFallback,
+  FactList,
+  NamePlate,
+  Panel,
+  PanelRow,
+  PanelRows,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
 import { formatRate } from "../catalogue/format";
+import {
+  BackSeparator,
+  HeaderReveal,
+  RecordHeader,
+  RecordLayout,
+} from "../components/RecordHeader";
 import { RecordActivity } from "../crm/Activity";
 import { NEXT_STATUSES, type JobStatus } from "./statuses";
 
@@ -14,15 +33,6 @@ type Job = components["schemas"]["Job"];
 type JobTutor = components["schemas"]["JobTutor"];
 
 const linkClass = "font-medium underline-offset-2 hover:underline";
-
-function Card({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="rounded-lg border border-border p-4">
-      <h2 className="mb-3 font-semibold">{title}</h2>
-      {children}
-    </section>
-  );
-}
 
 function ErrorText({ error }: { error: unknown }) {
   const { t } = useTranslation();
@@ -70,45 +80,60 @@ function StatusControl({ job }: { job: Job }) {
   });
   if (!next.length) return null;
   return (
-    <form
-      className="flex flex-wrap items-end gap-2"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (status) change.mutate();
-      }}
-    >
-      <SelectField
-        label={t("jobs.changeStatus")}
-        value={status}
-        onChange={(e) => setStatus(e.target.value as JobStatus)}
-        options={[
-          { value: "", label: t("jobs.chooseStatus") },
-          ...next.map((s) => ({ value: s, label: t(`jobs.status.${s}`) })),
-        ]}
-      />
-      {status ? (
-        <TextField
-          label={t("jobs.reason")}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-        />
+    <>
+      <HeaderReveal label={t("jobs.changeStatus")}>
+        {(close) => (
+          <form
+            className="flex flex-wrap items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (status) change.mutate(undefined, { onSuccess: close });
+            }}
+          >
+            <SelectField
+              label={t("jobs.changeStatus")}
+              hideLabel
+              size="sm"
+              value={status}
+              onChange={(e) => setStatus(e.target.value as JobStatus)}
+              options={[
+                { value: "", label: t("jobs.chooseStatus") },
+                ...next.map((s) => ({ value: s, label: t(`jobs.status.${s}`) })),
+              ]}
+            />
+            {status ? (
+              <TextField
+                label={t("jobs.reason")}
+                hideLabel
+                size="sm"
+                placeholder={t("jobs.reason")}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
+            ) : null}
+            {status === "paused" ? (
+              <label className="flex h-9 items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4"
+                  checked={cancelFuture}
+                  onChange={(e) => setCancelFuture(e.target.checked)}
+                />
+                {t("jobs.cancelFuture")}
+              </label>
+            ) : null}
+            <Button type="submit" size="sm" disabled={!status} loading={change.isPending}>
+              {t("jobs.apply")}
+            </Button>
+          </form>
+        )}
+      </HeaderReveal>
+      {change.error ? (
+        <div className="basis-full">
+          <ErrorText error={change.error} />
+        </div>
       ) : null}
-      {status === "paused" ? (
-        <label className="flex h-10 items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="size-4"
-            checked={cancelFuture}
-            onChange={(e) => setCancelFuture(e.target.checked)}
-          />
-          {t("jobs.cancelFuture")}
-        </label>
-      ) : null}
-      <Button type="submit" variant="secondary" disabled={!status || change.isPending}>
-        {t("jobs.apply")}
-      </Button>
-      <ErrorText error={change.error} />
-    </form>
+    </>
   );
 }
 
@@ -141,7 +166,7 @@ function AddTutor({ job }: { job: Job }) {
   });
   return (
     <form
-      className="mt-4 flex flex-wrap items-end gap-2"
+      className="flex flex-wrap items-end gap-2 border-t border-rule px-5 py-4"
       onSubmit={(e) => {
         e.preventDefault();
         if (tutor) add.mutate();
@@ -208,7 +233,7 @@ function ReplaceTutor({ job, link, onDone }: { job: Job; link: JobTutor; onDone:
     },
   });
   return (
-    <div className="mt-3 rounded-md border border-border p-3">
+    <div className="mt-3 rounded-md border border-border bg-background p-3">
       <form
         className="flex flex-wrap items-end gap-2"
         onSubmit={(e) => {
@@ -249,7 +274,7 @@ function ReplaceTutor({ job, link, onDone }: { job: Job; link: JobTutor; onDone:
           {preview.conflicts ? (
             <Alert tone="warning">{t("jobs.conflicts", { count: preview.conflicts })}</Alert>
           ) : null}
-          <ul className="list-disc pl-5">
+          <ul className="list-disc pl-5 tabular-nums">
             {preview.lessons.slice(0, 10).map((lesson) => (
               <li key={lesson.id}>
                 {formatDateTime(lesson.starts_at, i18n.language)}
@@ -286,66 +311,70 @@ function Tutors({ job }: { job: Job }) {
   const past = job.tutors.filter((x) => x.status === "ended" || x.status === "declined");
   const open = job.status !== "completed" && job.status !== "cancelled";
   return (
-    <Card title={t("jobs.tutors")}>
+    <Panel title={t("jobs.tutors")} flush>
       {current.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("jobs.noTutor")}</p>
+        <p className="px-5 py-4 text-sm text-muted-foreground">{t("jobs.noTutor")}</p>
       ) : null}
-      <ul className="space-y-3">
+      <PanelRows>
         {current.map((link) => (
-          <li key={link.id}>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
+          <PanelRow key={link.id}>
+            <NamePlate
+              name={
                 <Link className={linkClass} to="/tutors/$tutorId" params={{ tutorId: link.tutor }}>
                   {link.tutor_name}
                 </Link>
-                <p className="text-sm text-muted-foreground">
-                  {[
-                    t(`jobs.role.${link.role ?? "lead"}`),
-                    t(`jobs.tutorStatus.${link.status}`),
-                    link.pay_rate_override ? formatRate(link.pay_rate_override, i18n.language) : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-              </div>
-              {canManage && open ? (
-                <div className="flex gap-2">
-                  {link.status === "active" ? (
+              }
+              context={[
+                t(`jobs.role.${link.role ?? "lead"}`),
+                t(`jobs.tutorStatus.${link.status}`),
+                link.pay_rate_override ? formatRate(link.pay_rate_override, i18n.language) : "",
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              aside={
+                canManage && open ? (
+                  <>
+                    {link.status === "active" ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        aria-expanded={replacing === link.id}
+                        aria-label={t("jobs.replaceNamed", { name: link.tutor_name })}
+                        onClick={() => setReplacing(replacing === link.id ? null : link.id)}
+                      >
+                        {t("jobs.replace")}
+                      </Button>
+                    ) : null}
                     <Button
                       size="sm"
-                      variant="secondary"
-                      aria-expanded={replacing === link.id}
-                      aria-label={t("jobs.replaceNamed", { name: link.tutor_name })}
-                      onClick={() => setReplacing(replacing === link.id ? null : link.id)}
+                      variant="ghost"
+                      aria-label={t("jobs.removeNamed", { name: link.tutor_name })}
+                      onClick={() => remove.mutate(link.id)}
                     >
-                      {t("jobs.replace")}
+                      {t("jobs.remove")}
                     </Button>
-                  ) : null}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    aria-label={t("jobs.removeNamed", { name: link.tutor_name })}
-                    onClick={() => remove.mutate(link.id)}
-                  >
-                    {t("jobs.remove")}
-                  </Button>
-                </div>
-              ) : null}
-            </div>
+                  </>
+                ) : null
+              }
+            />
             {replacing === link.id ? (
               <ReplaceTutor job={job} link={link} onDone={() => setReplacing(null)} />
             ) : null}
-          </li>
+          </PanelRow>
         ))}
-      </ul>
+      </PanelRows>
       {past.length ? (
-        <p className="mt-3 text-sm text-muted-foreground">
+        <p className="border-t border-rule px-5 py-2.5 text-sm text-muted-foreground">
           {t("jobs.previously")}: {past.map((x) => x.tutor_name).join(", ")}
         </p>
       ) : null}
       {canManage && open ? <AddTutor job={job} /> : null}
-      <ErrorText error={remove.error} />
-    </Card>
+      {remove.error ? (
+        <div className="px-5 pb-4">
+          <ErrorText error={remove.error} />
+        </div>
+      ) : null}
+    </Panel>
   );
 }
 
@@ -359,36 +388,82 @@ function Summary({ jobId }: { jobId: string }) {
   if (!summary.data) return null;
   const per = summary.data.per_lesson;
   return (
-    <Card title={t("jobs.economics")}>
+    <Panel title={t("jobs.economics")} flush>
       {per ? (
-        <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-1 text-sm">
-          <dt className="text-muted-foreground">{t("jobs.chargePerLesson")}</dt>
-          <dd>{formatRate(per.charge, i18n.language)}</dd>
-          {per.pay ? (
-            <>
-              <dt className="text-muted-foreground">{t("jobs.payPerLesson")}</dt>
-              <dd>{formatRate(per.pay, i18n.language)}</dd>
-              <dt className="text-muted-foreground">{t("jobs.margin")}</dt>
-              <dd>
-                {formatRate(per.margin, i18n.language)}
-                {per.margin_percent ? ` (${per.margin_percent}%)` : ""}
-              </dd>
-            </>
-          ) : null}
-        </dl>
+        <FactList
+          className="tabular-nums"
+          items={[
+            [t("jobs.chargePerLesson"), formatRate(per.charge, i18n.language)],
+            ...(per.pay
+              ? ([
+                  [t("jobs.payPerLesson"), formatRate(per.pay, i18n.language)],
+                  [
+                    t("jobs.margin"),
+                    `${formatRate(per.margin, i18n.language)}${
+                      per.margin_percent ? ` (${per.margin_percent}%)` : ""
+                    }`,
+                  ],
+                ] as [string, string][])
+              : []),
+          ]}
+        />
       ) : null}
-      <p className="mt-2 text-xs text-muted-foreground">{summary.data.trace.join(" · ")}</p>
-      <p className="mt-2 text-sm">
-        {t("jobs.delivered", {
-          completed: summary.data.lessons_completed,
-          planned: summary.data.lessons_planned,
-        })}
-      </p>
-    </Card>
+      <div className="space-y-1 border-t border-rule px-5 py-2.5">
+        <p className="text-sm">
+          {t("jobs.delivered", {
+            completed: summary.data.lessons_completed,
+            planned: summary.data.lessons_planned,
+          })}
+        </p>
+        <p className="text-xs text-muted-foreground">{summary.data.trace.join(" · ")}</p>
+      </div>
+    </Panel>
   );
 }
 
 /** One job: details, students, tutors, status, economics and activity (E07-T07). */
+/** One student on the job as a name plate: name, then year group · status (from the
+ * student's record), any rate override and when they left the job. */
+function JobStudentRow({ link }: { link: Job["students"][number] }) {
+  const { t, i18n } = useTranslation();
+  const canView = usePermission("people.student.view");
+  const student = useQuery({
+    queryKey: ["students", link.student],
+    enabled: canView,
+    retry: false,
+    queryFn: async () =>
+      unwrap(await api.GET("/api/v1/students/{id}", { params: { path: { id: link.student } } })),
+  });
+  const s = student.data;
+  return (
+    <PanelRow className={link.active_to ? "text-muted-foreground" : undefined}>
+      <NamePlate
+        name={
+          <Link
+            className={linkClass}
+            to="/students/$studentId"
+            params={{ studentId: link.student }}
+          >
+            {link.student_name}
+          </Link>
+        }
+        context={
+          [
+            s?.year_group ?? "",
+            s ? t(`people.studentStatus.${s.status ?? "active"}`) : "",
+            link.charge_rate_override ? formatRate(link.charge_rate_override, i18n.language) : "",
+            link.active_to
+              ? t("jobs.leftOn", { when: formatDate(link.active_to, i18n.language) })
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" · ") || undefined
+        }
+      />
+    </PanelRow>
+  );
+}
+
 export function JobPage({ jobId }: { jobId: string }) {
   const { t, i18n } = useTranslation();
   const canSeeCharge = usePermission("billing.rates.view_charge");
@@ -412,94 +487,87 @@ export function JobPage({ jobId }: { jobId: string }) {
   const j = job.data;
   return (
     <article>
-      <p className="mb-2 text-sm">
-        <Link to="/jobs" className={linkClass}>
-          {t("jobs.title")}
-        </Link>
-        {" · "}
-        <Link to="/clients/$clientId" params={{ clientId: j.client }} className={linkClass}>
-          {j.client_name}
-        </Link>
-      </p>
-      <h1 className="text-2xl font-semibold">{j.name}</h1>
-      <p className="mb-4 text-sm text-muted-foreground">
-        {j.reference} · {t(`jobs.status.${j.status}`)} · {j.service_name}
-      </p>
-      {canMatch && j.status !== "completed" && j.status !== "cancelled" ? (
-        <p className="mb-4">
-          <Link to="/jobs/$jobId/match" params={{ jobId: j.id }} className={linkClass}>
-            {t("matching.findTutor")}
-          </Link>
-        </p>
-      ) : null}
-      {canChangeStatus ? (
-        <div className="mb-6">
-          <StatusControl job={j} />
-        </div>
-      ) : null}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card title={t("jobs.details")}>
-          <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-1 text-sm">
-            {canSeeCharge && j.charge_rate ? (
-              <>
-                <dt className="text-muted-foreground">{t("jobs.chargeRate")}</dt>
-                <dd>{formatRate(j.charge_rate, i18n.language)}</dd>
-              </>
+      <RecordHeader
+        back={
+          <>
+            <Link to="/jobs">{t("jobs.title")}</Link>
+            <BackSeparator />
+            <Link to="/clients/$clientId" params={{ clientId: j.client }}>
+              {j.client_name}
+            </Link>
+          </>
+        }
+        title={j.name ?? ""}
+        description={`${j.reference} · ${t(`jobs.status.${j.status}`)} · ${j.service_name}`}
+        actions={
+          <>
+            {canChangeStatus ? <StatusControl job={j} /> : null}
+            {canMatch && j.status !== "completed" && j.status !== "cancelled" ? (
+              <Link
+                to="/jobs/$jobId/match"
+                params={{ jobId: j.id }}
+                className={buttonClass({ variant: "secondary", size: "sm" })}
+              >
+                {t("matching.findTutor")}
+              </Link>
             ) : null}
-            <dt className="text-muted-foreground">{t("jobs.billing")}</dt>
-            <dd>{t(`jobs.billingMethod.${j.billing_method ?? "pay_as_you_go"}`)}</dd>
-            {j.start_date ? (
-              <>
-                <dt className="text-muted-foreground">{t("jobs.starts")}</dt>
-                <dd>{formatDate(j.start_date, i18n.language)}</dd>
-              </>
-            ) : null}
-            {j.default_schedule?.length ? (
-              <>
-                <dt className="text-muted-foreground">{t("jobs.schedule")}</dt>
-                <dd>
-                  {j.default_schedule
-                    .map((slot) => `${t(`jobs.weekday.${slot.weekday}`)} ${slot.time}`)
-                    .join(", ")}
-                </dd>
-              </>
-            ) : null}
-            {j.hours_cap ? (
-              <>
-                <dt className="text-muted-foreground">{t("jobs.hoursCap")}</dt>
-                <dd>
-                  {t(`jobs.cap.${j.hours_cap_period ?? "total"}`, { hours: Number(j.hours_cap) })}
-                </dd>
-              </>
-            ) : null}
-          </dl>
-          {j.notes_for_tutor ? <p className="mt-3 text-sm">{j.notes_for_tutor}</p> : null}
-        </Card>
-        <Card title={t("jobs.students")}>
-          <ul className="space-y-2">
-            {j.students.map((link) => (
-              <li key={link.id} className={link.active_to ? "text-muted-foreground" : undefined}>
-                <Link
-                  className={linkClass}
-                  to="/students/$studentId"
-                  params={{ studentId: link.student }}
-                >
-                  {link.student_name}
-                </Link>
-                {link.charge_rate_override
-                  ? ` · ${formatRate(link.charge_rate_override, i18n.language)}`
-                  : ""}
-                {link.active_to
-                  ? ` · ${t("jobs.leftOn", { when: formatDate(link.active_to, i18n.language) })}`
-                  : ""}
-              </li>
-            ))}
-          </ul>
-        </Card>
-        <Tutors job={j} />
-        {canSeeCharge ? <Summary jobId={j.id} /> : null}
-      </div>
-      <RecordActivity target={{ target_type: "jobs.job", target_id: j.id }} />
+          </>
+        }
+      />
+      <RecordLayout
+        main={
+          <>
+            <Tutors job={j} />
+            <Panel title={t("jobs.students")} flush>
+              <PanelRows>
+                {j.students.map((link) => (
+                  <JobStudentRow key={link.id} link={link} />
+                ))}
+              </PanelRows>
+            </Panel>
+            <RecordActivity target={{ target_type: "jobs.job", target_id: j.id }} />
+          </>
+        }
+        side={
+          <>
+            <Panel title={t("jobs.details")} flush>
+              <FactList
+                items={[
+                  [
+                    t("jobs.chargeRate"),
+                    canSeeCharge && j.charge_rate ? formatRate(j.charge_rate, i18n.language) : "",
+                  ],
+                  [
+                    t("jobs.billing"),
+                    t(`jobs.billingMethod.${j.billing_method ?? "pay_as_you_go"}`),
+                  ],
+                  [t("jobs.starts"), j.start_date ? formatDate(j.start_date, i18n.language) : ""],
+                  [
+                    t("jobs.schedule"),
+                    (j.default_schedule ?? [])
+                      .map((slot) => `${t(`jobs.weekday.${slot.weekday}`)} ${slot.time}`)
+                      .join(", "),
+                  ],
+                  [
+                    t("jobs.hoursCap"),
+                    j.hours_cap
+                      ? t(`jobs.cap.${j.hours_cap_period ?? "total"}`, {
+                          hours: Number(j.hours_cap),
+                        })
+                      : "",
+                  ],
+                ]}
+              />
+              {j.notes_for_tutor ? (
+                <p className="border-t border-rule px-5 py-2.5 text-sm whitespace-pre-line">
+                  {j.notes_for_tutor}
+                </p>
+              ) : null}
+            </Panel>
+            {canSeeCharge ? <Summary jobId={j.id} /> : null}
+          </>
+        }
+      />
     </article>
   );
 }

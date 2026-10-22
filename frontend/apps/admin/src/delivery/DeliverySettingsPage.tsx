@@ -1,6 +1,16 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import {
+  Button,
+  PageHeader,
+  Panel,
+  PanelRow,
+  PanelRows,
+  SelectField,
+  Spinner,
+  Tabs,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -96,116 +106,141 @@ export function PolicyForm({
   if (policies.isPending) return <Spinner label={t("grid.loading")} />;
   const update = (change: Partial<Rules>) => setRules({ ...value, ...change });
 
+  const makeup = value.makeup_credit ?? DEFAULT_RULES.makeup_credit!;
   return (
     <form
-      className="max-w-xl space-y-4"
+      aria-label={scopeName || t("delivery.settings.policies")}
+      className="rounded-xl border border-border bg-surface"
       onSubmit={(e) => {
         e.preventDefault();
         save.mutate();
       }}
     >
-      <TextField
-        type="number"
-        min={0}
-        label={t("delivery.settings.freeWindow")}
-        value={String(value.free_window_hours ?? 24)}
-        onChange={(e) => update({ free_window_hours: Number(e.target.value) })}
-      />
-      {PAIRS.map(([key, label]) => (
-        <fieldset key={key} className="grid grid-cols-2 gap-2">
-          <legend className="col-span-2 text-sm font-semibold">
-            {t(`delivery.settings.${label}`)}
-          </legend>
+      <div className="grid gap-4 px-5 py-4 sm:grid-cols-2">
+        <div className="sm:col-span-2 sm:max-w-sm">
           <TextField
             type="number"
             min={0}
-            max={100}
-            label={t("delivery.settings.charge")}
-            value={value[key]?.charge_percent ?? "0"}
-            onChange={(e) =>
-              update({
-                [key]: { ...value[key], charge_percent: e.target.value },
-              } as Partial<Rules>)
-            }
+            label={t("delivery.settings.freeWindow")}
+            className="tabular-nums"
+            value={String(value.free_window_hours ?? 24)}
+            onChange={(e) => update({ free_window_hours: Number(e.target.value) })}
           />
+        </div>
+        <TextField
+          type="number"
+          min={0}
+          label={t("delivery.settings.maxFree")}
+          className="tabular-nums"
+          value={value.max_free_per_month == null ? "" : String(value.max_free_per_month)}
+          onChange={(e) =>
+            update({ max_free_per_month: e.target.value === "" ? null : Number(e.target.value) })
+          }
+        />
+        <TextField
+          type="number"
+          min={0}
+          label={t("g3.delivery.maxFreeTerm")}
+          hint={t("g3.delivery.maxFreeTermHint")}
+          className="tabular-nums"
+          value={value.max_free_per_term == null ? "" : String(value.max_free_per_term)}
+          onChange={(e) =>
+            update({ max_free_per_term: e.target.value === "" ? null : Number(e.target.value) })
+          }
+        />
+      </div>
+      <div className="border-t border-border">
+        <div
+          aria-hidden="true"
+          className="grid grid-cols-[minmax(0,1fr)_5.5rem_5.5rem] gap-x-3 border-b border-rule px-5 py-2.5 text-xs font-semibold text-muted-foreground sm:grid-cols-[minmax(0,1fr)_8rem_8rem]"
+        >
+          <span>{t("designS5.policy.situation")}</span>
+          <span>{t("delivery.settings.charge")}</span>
+          <span>{t("delivery.settings.pay")}</span>
+        </div>
+        {PAIRS.map(([key, label]) => (
+          <fieldset
+            key={key}
+            className="grid grid-cols-[minmax(0,1fr)_5.5rem_5.5rem] items-center gap-x-3 border-b border-rule px-5 py-2 last:border-0 sm:grid-cols-[minmax(0,1fr)_8rem_8rem]"
+          >
+            <legend className="float-left text-sm">{t(`delivery.settings.${label}`)}</legend>
+            <TextField
+              type="number"
+              min={0}
+              max={100}
+              size="sm"
+              hideLabel
+              className="tabular-nums"
+              label={t("delivery.settings.charge")}
+              value={value[key]?.charge_percent ?? "0"}
+              onChange={(e) =>
+                update({
+                  [key]: { ...value[key], charge_percent: e.target.value },
+                } as Partial<Rules>)
+              }
+            />
+            <TextField
+              type="number"
+              min={0}
+              max={100}
+              size="sm"
+              hideLabel
+              className="tabular-nums"
+              label={t("delivery.settings.pay")}
+              value={value[key]?.pay_percent ?? "0"}
+              onChange={(e) =>
+                update({ [key]: { ...value[key], pay_percent: e.target.value } } as Partial<Rules>)
+              }
+            />
+          </fieldset>
+        ))}
+      </div>
+      <div className="space-y-3 border-t border-border px-5 py-4">
+        {(["on_free_cancellation", "on_tutor_cancellation"] as const).map((key) => (
+          <label key={key} className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4"
+              checked={Boolean(makeup[key])}
+              onChange={(e) => update({ makeup_credit: { ...makeup, [key]: e.target.checked } })}
+            />
+            {t(
+              key === "on_free_cancellation"
+                ? "delivery.settings.makeupFree"
+                : "delivery.settings.makeupTutor",
+            )}
+          </label>
+        ))}
+        <div className="sm:max-w-sm">
           <TextField
             type="number"
-            min={0}
-            max={100}
-            label={t("delivery.settings.pay")}
-            value={value[key]?.pay_percent ?? "0"}
+            min={1}
+            max={730}
+            label={t("delivery.settings.makeupDays")}
+            className="tabular-nums"
+            value={String(makeup.valid_days ?? 60)}
             onChange={(e) =>
-              update({ [key]: { ...value[key], pay_percent: e.target.value } } as Partial<Rules>)
+              update({ makeup_credit: { ...makeup, valid_days: Number(e.target.value) } })
             }
           />
-        </fieldset>
-      ))}
-      <TextField
-        type="number"
-        min={0}
-        label={t("delivery.settings.maxFree")}
-        value={value.max_free_per_month == null ? "" : String(value.max_free_per_month)}
-        onChange={(e) =>
-          update({ max_free_per_month: e.target.value === "" ? null : Number(e.target.value) })
-        }
-      />
-      <TextField
-        type="number"
-        min={0}
-        label={t("g3.delivery.maxFreeTerm")}
-        hint={t("g3.delivery.maxFreeTermHint")}
-        value={value.max_free_per_term == null ? "" : String(value.max_free_per_term)}
-        onChange={(e) =>
-          update({ max_free_per_term: e.target.value === "" ? null : Number(e.target.value) })
-        }
-      />
-      {(["on_free_cancellation", "on_tutor_cancellation"] as const).map((key) => (
-        <label key={key} className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="size-4"
-            checked={Boolean(value.makeup_credit?.[key])}
-            onChange={(e) =>
-              update({
-                makeup_credit: {
-                  ...(value.makeup_credit ?? DEFAULT_RULES.makeup_credit!),
-                  [key]: e.target.checked,
-                },
-              })
-            }
-          />
+        </div>
+        <p className="text-xs text-muted-foreground">
           {t(
-            key === "on_free_cancellation"
-              ? "delivery.settings.makeupFree"
-              : "delivery.settings.makeupTutor",
+            scopeType === "organisation" ? "g3.delivery.orgPolicyHelp" : "g3.delivery.overrideHelp",
           )}
-        </label>
-      ))}
-      <TextField
-        type="number"
-        min={1}
-        max={730}
-        label={t("delivery.settings.makeupDays")}
-        value={String(value.makeup_credit?.valid_days ?? 60)}
-        onChange={(e) =>
-          update({
-            makeup_credit: {
-              ...(value.makeup_credit ?? DEFAULT_RULES.makeup_credit!),
-              valid_days: Number(e.target.value),
-            },
-          })
-        }
-      />
-      <p className="text-sm text-muted-foreground">
-        {t(scopeType === "organisation" ? "g3.delivery.orgPolicyHelp" : "g3.delivery.overrideHelp")}
-      </p>
-      <ErrorList error={save.error} />
-      {save.isSuccess && !rules ? (
-        <Alert tone="success">{t("delivery.settings.saved")}</Alert>
-      ) : null}
-      <Button type="submit" disabled={save.isPending}>
-        {t("delivery.settings.savePolicy")}
-      </Button>
+        </p>
+        <ErrorList error={save.error} />
+      </div>
+      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border px-5 py-3">
+        {save.isSuccess && !rules ? (
+          <p role="status" className="text-sm text-muted-foreground">
+            {t("delivery.settings.saved")}
+          </p>
+        ) : null}
+        <Button type="submit" loading={save.isPending}>
+          {t("delivery.settings.savePolicy")}
+        </Button>
+      </div>
     </form>
   );
 }
@@ -275,32 +310,39 @@ function TemplateEditor({ template, onSaved }: { template: Template | null; onSa
 
   return (
     <form
-      className="max-w-2xl space-y-4"
+      className="rounded-xl border border-border bg-surface"
       aria-label={t("delivery.settings.templates")}
       onSubmit={(e) => {
         e.preventDefault();
         save.mutate();
       }}
     >
-      <TextField
-        label={t("delivery.settings.templateName")}
-        value={name}
-        required
-        onChange={(e) => setName(e.target.value)}
-      />
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          className="size-4"
-          checked={isDefault}
-          onChange={(e) => setIsDefault(e.target.checked)}
+      <div className="space-y-3 px-5 py-4 sm:max-w-md">
+        <TextField
+          label={t("delivery.settings.templateName")}
+          value={name}
+          required
+          onChange={(e) => setName(e.target.value)}
         />
-        {t("delivery.settings.default")}
-      </label>
-      <fieldset className="space-y-3">
-        <legend className="text-sm font-semibold">{t("delivery.settings.fields")}</legend>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="size-4"
+            checked={isDefault}
+            onChange={(e) => setIsDefault(e.target.checked)}
+          />
+          {t("delivery.settings.default")}
+        </label>
+      </div>
+      <fieldset className="border-t border-border">
+        <legend className="float-left w-full px-5 pt-4 pb-1 text-base font-semibold">
+          {t("delivery.settings.fields")}
+        </legend>
         {fields.map((field, i) => (
-          <div key={i} className="grid gap-2 rounded-md border border-border p-3 sm:grid-cols-2">
+          <div
+            key={i}
+            className="clear-both grid gap-3 border-b border-rule px-5 py-4 sm:grid-cols-2"
+          >
             <TextField
               label={t("delivery.settings.fieldLabel")}
               value={field.label}
@@ -353,7 +395,7 @@ function TemplateEditor({ template, onSaved }: { template: Template | null; onSa
                 </label>
                 <textarea
                   id={`options-${i}`}
-                  className="mt-1 min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+                  className="mt-1 min-h-20 w-full rounded-md border border-field bg-surface px-3 py-2 text-sm"
                   value={(field.options ?? []).join("\n")}
                   onChange={(e) =>
                     setField(i, { options: e.target.value.split("\n").filter(Boolean) })
@@ -366,6 +408,7 @@ function TemplateEditor({ template, onSaved }: { template: Template | null; onSa
                 type="button"
                 size="sm"
                 variant="ghost"
+                className="-ml-3"
                 onClick={() => setFields((current) => current.filter((_f, n) => n !== i))}
               >
                 {t("delivery.settings.removeField", { label: field.label || field.key })}
@@ -373,31 +416,40 @@ function TemplateEditor({ template, onSaved }: { template: Template | null; onSa
             </div>
           </div>
         ))}
-        <Button
-          type="button"
-          size="sm"
-          variant="secondary"
-          onClick={() =>
-            setFields((current) => [
-              ...current,
-              { key: "", label: "", type: "text", required: false, visibility: "client" },
-            ])
-          }
-        >
-          {t("delivery.settings.addField")}
-        </Button>
+        <div className="clear-both px-5 py-3">
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() =>
+              setFields((current) => [
+                ...current,
+                { key: "", label: "", type: "text", required: false, visibility: "client" },
+              ])
+            }
+          >
+            {t("delivery.settings.addField")}
+          </Button>
+        </div>
       </fieldset>
-      <TemplateAssignments value={assigned} onChange={setAssigned} />
-      <ErrorList error={save.error} />
-      <div className="flex gap-2">
-        <Button type="submit" disabled={save.isPending}>
-          {t("delivery.settings.saveTemplate")}
-        </Button>
+      <div className="space-y-3 border-t border-border px-5 py-4">
+        <TemplateAssignments value={assigned} onChange={setAssigned} />
+        <ErrorList error={save.error} />
+      </div>
+      <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border px-5 py-3">
         {template ? (
-          <Button type="button" variant="ghost" onClick={() => archive.mutate()}>
+          <Button
+            type="button"
+            variant="ghost"
+            className="mr-auto text-muted-foreground"
+            onClick={() => archive.mutate()}
+          >
             {t("delivery.settings.archive")}
           </Button>
         ) : null}
+        <Button type="submit" loading={save.isPending}>
+          {t("delivery.settings.saveTemplate")}
+        </Button>
       </div>
     </form>
   );
@@ -418,29 +470,45 @@ function Templates() {
   if (templates.isPending) return <Spinner label={t("grid.loading")} />;
   const current = templates.data?.find((x) => x.id === editing) ?? null;
   if (editing) return <TemplateEditor key={editing} template={current} onSaved={saved} />;
+  const rows = templates.data ?? [];
   return (
-    <div className="space-y-3">
-      <ul className="divide-y divide-border rounded-md border border-border">
-        {(templates.data ?? []).map((template) => (
-          <li key={template.id} className="flex items-center justify-between p-3 text-sm">
-            <span>
-              {template.name}
-              {template.is_default ? ` · ${t("delivery.settings.default")}` : ""}
-              <span className="ml-2 text-muted-foreground">
-                {t("delivery.settings.version", { n: template.version })}
+    <Panel
+      title={t("delivery.settings.templates")}
+      aside={
+        <Button size="sm" onClick={() => setEditing("new")}>
+          {t("delivery.settings.newTemplate")}
+        </Button>
+      }
+      flush
+    >
+      {rows.length ? (
+        <PanelRows>
+          {rows.map((template) => (
+            <PanelRow key={template.id} className="flex items-center justify-between gap-3">
+              <span className="min-w-0">
+                <span className="block font-medium">{template.name}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {[
+                    template.is_default ? t("delivery.settings.default") : "",
+                    t("delivery.settings.version", { n: template.version }),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
               </span>
-            </span>
-            <Button size="sm" variant="secondary" onClick={() => setEditing(template.id)}>
-              {t("delivery.reports.open")}
-              <span className="sr-only"> {template.name}</span>
-            </Button>
-          </li>
-        ))}
-      </ul>
-      <Button size="sm" onClick={() => setEditing("new")}>
-        {t("delivery.settings.newTemplate")}
-      </Button>
-    </div>
+              <Button size="sm" variant="secondary" onClick={() => setEditing(template.id)}>
+                {t("delivery.reports.open")}
+                <span className="sr-only"> {template.name}</span>
+              </Button>
+            </PanelRow>
+          ))}
+        </PanelRows>
+      ) : (
+        <p className="px-5 py-4 text-sm text-muted-foreground">
+          {t("designS5.policy.noTemplates")}
+        </p>
+      )}
+    </Panel>
   );
 }
 
@@ -460,8 +528,8 @@ export function DeliverySettingsPage() {
     tabs[0]?.key ?? "policies",
   );
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("delivery.settings.title")}</h1>
+    <div>
+      <PageHeader title={t("delivery.settings.title")} />
       <Tabs label={t("delivery.settings.title")} tabs={tabs} value={tab} onChange={setTab}>
         {tab === "policies" ? (
           <PolicyForm />

@@ -70,21 +70,21 @@ export function QuickSetup({ studentId }: { studentId: string }) {
   const errors = fieldErrors(save.error);
   if (!open) {
     return (
-      <Button variant="secondary" onClick={() => setOpen(true)}>
+      <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
         {t("jobs.quick.open")}
       </Button>
     );
   }
   return (
     <form
-      className="space-y-3 rounded-lg border border-border p-4"
+      className="space-y-4"
       aria-label={t("jobs.quick.open")}
       onSubmit={(e) => {
         e.preventDefault();
         if (form.service) save.mutate();
       }}
     >
-      <h2 className="font-semibold">{t("jobs.quick.open")}</h2>
+      <h3 className="font-semibold">{t("jobs.quick.open")}</h3>
       <div className="grid gap-3 sm:grid-cols-2">
         <SelectField
           label={t("jobs.service")}
@@ -145,7 +145,7 @@ export function QuickSetup({ studentId }: { studentId: string }) {
         <Button type="submit" disabled={!form.service || save.isPending}>
           {t("jobs.quick.save")}
         </Button>
-        <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+        <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
           {t("catalogue.cancel")}
         </Button>
       </div>

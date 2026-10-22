@@ -1,7 +1,17 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatMoney, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  Panel,
+  PanelRow,
+  PanelRows,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
@@ -31,7 +41,7 @@ function TextArea({
       </label>
       <textarea
         id={id}
-        className="min-h-20 rounded-md border border-border p-2 text-sm"
+        className="min-h-20 rounded-md border border-field bg-surface px-3 py-2 text-sm"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
@@ -112,7 +122,7 @@ function ProposalEditor({
     setLines(lines.map((l, i) => (i === index ? { ...l, ...patch } : l)));
   return (
     <form
-      className="space-y-3 rounded-md border border-border p-4"
+      className="space-y-4 border-t border-border px-5 py-4"
       aria-label={t("proposals.editor")}
       onSubmit={(e) => {
         e.preventDefault();
@@ -181,18 +191,24 @@ function ProposalEditor({
             </Button>
           </div>
         ))}
-        <Button type="button" variant="secondary" onClick={() => setLines([...lines, EMPTY_LINE])}>
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          onClick={() => setLines([...lines, EMPTY_LINE])}
+        >
           {t("proposals.addLine")}
         </Button>
-        {errors.lines ? <p className="text-sm text-danger">{errors.lines}</p> : null}
+        {errors.lines ? <p className="text-xs text-danger">{errors.lines}</p> : null}
       </fieldset>
       <fieldset>
         <legend className="text-sm font-medium">{t("proposals.tutors")}</legend>
-        <div className="max-h-40 space-y-1 overflow-y-auto">
+        <div className="relative mt-1 max-h-40 space-y-1 overflow-y-auto rounded-md border border-border px-3 py-2">
           {(tutorList.data?.results ?? []).map((tutor) => (
             <label key={tutor.id} className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
+                className="size-4"
                 checked={tutors.includes(tutor.id)}
                 onChange={(e) =>
                   setTutors(
@@ -230,7 +246,7 @@ function ProposalEditor({
         <Button type="submit" disabled={save.isPending}>
           {t("proposals.saveDraft")}
         </Button>
-        <Button type="button" variant="secondary" onClick={onDone}>
+        <Button type="button" variant="ghost" onClick={onDone}>
           {t("common.cancel")}
         </Button>
       </div>
@@ -262,29 +278,32 @@ export function ProposalsSection({ enquiryId }: { enquiryId: string }) {
   });
   const rows = proposals.data?.results ?? [];
   return (
-    <section
-      className="space-y-3 rounded-md border border-border p-4 text-sm"
-      aria-labelledby="proposals-heading"
-    >
-      <div className="flex items-center justify-between">
-        <h2 id="proposals-heading" className="font-semibold">
-          {t("proposals.title")}
-        </h2>
-        {canManage && editing === null ? (
+    <Panel
+      title={t("proposals.title")}
+      flush
+      aside={
+        canManage && editing === null ? (
           <Button size="sm" variant="secondary" onClick={() => setEditing("new")}>
             {t("proposals.new")}
           </Button>
-        ) : null}
-      </div>
-      {proposals.isLoading ? <Spinner label={t("grid.loading")} /> : null}
-      {rows.length === 0 && proposals.data ? <p>{t("proposals.none")}</p> : null}
-      <ul className="space-y-2">
+        ) : null
+      }
+    >
+      {proposals.isLoading ? (
+        <div className="px-5 py-4">
+          <Spinner label={t("grid.loading")} />
+        </div>
+      ) : null}
+      {rows.length === 0 && proposals.data ? (
+        <p className="px-5 py-4 text-sm text-muted-foreground">{t("proposals.none")}</p>
+      ) : null}
+      <PanelRows>
         {rows.map((p) => (
-          <li key={p.id} className="rounded-md border border-border p-3">
+          <PanelRow key={p.id} className="space-y-0.5">
             <p className="font-medium">
               {p.number} · {p.title}
             </p>
-            <p>
+            <p className="text-xs text-muted-foreground tabular-nums">
               {t(`proposals.states.${p.state}`)} · {formatMoney(p.total)}
               {p.deposit
                 ? ` · ${t("proposals.depositOf", { amount: formatMoney(p.deposit) })}`
@@ -294,7 +313,7 @@ export function ProposalsSection({ enquiryId }: { enquiryId: string }) {
                 : ""}
             </p>
             {p.accepted_name ? (
-              <p>
+              <p className="text-xs">
                 {t("proposals.acceptedBy", { name: p.accepted_name })}
                 {p.chosen_tutor_name
                   ? ` · ${t("proposals.chose", { tutor: p.chosen_tutor_name })}`
@@ -302,11 +321,13 @@ export function ProposalsSection({ enquiryId }: { enquiryId: string }) {
               </p>
             ) : null}
             {p.decline_reason ? (
-              <p>{t("proposals.declinedBecause", { reason: p.decline_reason })}</p>
+              <p className="text-xs">
+                {t("proposals.declinedBecause", { reason: p.decline_reason })}
+              </p>
             ) : null}
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-1.5">
               <a
-                className="underline underline-offset-2"
+                className="font-medium text-link underline-offset-2 hover:underline"
                 href={`/api/v1/proposals/${p.id}/pdf`}
                 target="_blank"
                 rel="noreferrer"
@@ -315,7 +336,7 @@ export function ProposalsSection({ enquiryId }: { enquiryId: string }) {
               </a>
               {p.link ? (
                 <a
-                  className="underline underline-offset-2"
+                  className="font-medium text-link underline-offset-2 hover:underline"
                   href={p.link}
                   target="_blank"
                   rel="noreferrer"
@@ -343,10 +364,14 @@ export function ProposalsSection({ enquiryId }: { enquiryId: string }) {
                 </Button>
               ) : null}
             </div>
-          </li>
+          </PanelRow>
         ))}
-      </ul>
-      {act.error ? <Alert tone="danger">{act.error.message}</Alert> : null}
+      </PanelRows>
+      {act.error ? (
+        <div className="px-5 pb-4">
+          <Alert tone="danger">{act.error.message}</Alert>
+        </div>
+      ) : null}
       {editing !== null ? (
         <ProposalEditor
           enquiryId={enquiryId}
@@ -354,7 +379,7 @@ export function ProposalsSection({ enquiryId }: { enquiryId: string }) {
           onDone={refresh}
         />
       ) : null}
-    </section>
+    </Panel>
   );
 }
 
@@ -406,7 +431,7 @@ export function PublicProposalPage({ token }: { token: string }) {
         {p.introduction ? <p className="whitespace-pre-line">{p.introduction}</p> : null}
         {p.tutors.length ? (
           <section aria-labelledby="proposal-tutors" className="space-y-2">
-            <h2 id="proposal-tutors" className="text-lg font-semibold">
+            <h2 id="proposal-tutors" className="text-base font-semibold">
               {p.tutors.length > 1 ? t("proposals.chooseTutor") : t("proposals.yourTutor")}
             </h2>
             <div className="grid gap-3">
@@ -424,63 +449,81 @@ export function PublicProposalPage({ token }: { token: string }) {
           </section>
         ) : null}
         {p.schedule ? (
-          <section>
-            <h2 className="text-lg font-semibold">{t("proposals.schedule")}</h2>
+          <section className="space-y-1">
+            <h2 className="text-base font-semibold">{t("proposals.schedule")}</h2>
             <p className="whitespace-pre-line">{p.schedule}</p>
           </section>
         ) : null}
-        <table className="w-full text-sm">
-          <caption className="text-left text-lg font-semibold">{t("proposals.pricing")}</caption>
-          <thead>
-            <tr className="text-left">
-              <th scope="col">{t("proposals.description")}</th>
-              <th scope="col" className="text-right">
-                {t("proposals.quantity")}
-              </th>
-              <th scope="col" className="text-right">
-                {t("proposals.unitPrice")}
-              </th>
-              <th scope="col" className="text-right">
-                {t("proposals.amount")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {p.lines.map((line, i) => (
-              <tr key={i} className="border-t border-border">
-                <td>{line.description}</td>
-                <td className="text-right">{line.quantity}</td>
-                <td className="text-right">{money(line.unit_price)}</td>
-                <td className="text-right">{money(line.amount)}</td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="border-t border-border font-semibold">
-              <th scope="row" colSpan={3} className="text-left">
-                {t("proposals.total")}
-              </th>
-              <td className="text-right">{money(p.total)}</td>
-            </tr>
-            {p.deposit ? (
-              <tr>
-                <th scope="row" colSpan={3} className="text-left">
-                  {t("proposals.depositDue")}
+        <div
+          role="region"
+          aria-label={t("proposals.pricing")}
+          tabIndex={0}
+          className="relative overflow-x-auto rounded-xl border border-border bg-surface"
+        >
+          <table className="w-full text-sm [&_td]:px-4 [&_td]:py-2.5 [&_th]:px-4 [&_th]:py-2.5">
+            <caption className="border-b border-border px-4 py-3 text-left text-base font-semibold">
+              {t("proposals.pricing")}
+            </caption>
+            <thead className="border-b border-border">
+              <tr className="text-left">
+                <th scope="col">{t("proposals.description")}</th>
+                <th scope="col" className="text-right">
+                  {t("proposals.quantity")}
                 </th>
-                <td className="text-right">{money(p.deposit)}</td>
+                <th scope="col" className="text-right">
+                  {t("proposals.unitPrice")}
+                </th>
+                <th scope="col" className="text-right">
+                  {t("proposals.amount")}
+                </th>
               </tr>
-            ) : null}
-          </tfoot>
-        </table>
+            </thead>
+            <tbody>
+              {p.lines.map((line, i) => (
+                <tr key={i}>
+                  <td>{line.description}</td>
+                  <td className="text-right">{line.quantity}</td>
+                  <td className="text-right">{money(line.unit_price)}</td>
+                  <td className="text-right">{money(line.amount)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t border-border font-semibold">
+                <th scope="row" colSpan={3} className="text-left">
+                  {t("proposals.total")}
+                </th>
+                <td className="text-right">{money(p.total)}</td>
+              </tr>
+              {p.deposit ? (
+                <tr className="border-t border-rule">
+                  <th scope="row" colSpan={3} className="text-left font-normal">
+                    {t("proposals.depositDue")}
+                  </th>
+                  <td className="text-right">{money(p.deposit)}</td>
+                </tr>
+              ) : null}
+            </tfoot>
+          </table>
+        </div>
         {p.terms ? (
-          <details>
-            <summary className="cursor-pointer">{t("proposals.terms")}</summary>
-            <p className="mt-2 whitespace-pre-line text-sm">{p.terms}</p>
+          <details className="group">
+            <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium [&::-webkit-details-marker]:hidden">
+              <ChevronRight
+                aria-hidden="true"
+                strokeWidth={1.75}
+                className="size-4 text-muted-foreground transition-transform duration-150 group-open:rotate-90"
+              />
+              {t("proposals.terms")}
+            </summary>
+            <p className="mt-2 pl-5.5 text-sm whitespace-pre-line text-muted-foreground">
+              {p.terms}
+            </p>
           </details>
         ) : null}
         <p className="text-sm">
           <a
-            className="underline"
+            className="font-medium text-link underline-offset-2 hover:underline"
             href={`/api/v1/public/proposals/${token}/pdf`}
             target="_blank"
             rel="noreferrer"
@@ -491,10 +534,12 @@ export function PublicProposalPage({ token }: { token: string }) {
         {p.status === "sent" ? (
           <>
             {p.expires_at ? (
-              <p className="text-sm">{t("proposals.until", { date: formatDate(p.expires_at) })}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("proposals.until", { date: formatDate(p.expires_at) })}
+              </p>
             ) : null}
             <form
-              className="space-y-3"
+              className="space-y-3 rounded-xl border border-border bg-surface px-5 py-4"
               aria-label={t("proposals.acceptForm")}
               onSubmit={(e) => {
                 e.preventDefault();
@@ -509,16 +554,28 @@ export function PublicProposalPage({ token }: { token: string }) {
                 error={errors.name ?? errors.tutor}
                 onChange={(e) => setName(e.target.value)}
               />
-              <Button type="submit" disabled={accept.isPending || name.trim().length < 2}>
-                {p.deposit ? t("proposals.acceptAndPay") : t("proposals.accept")}
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button type="submit" disabled={accept.isPending || name.trim().length < 2}>
+                  {p.deposit ? t("proposals.acceptAndPay") : t("proposals.accept")}
+                </Button>
+                {declining ? null : (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    onClick={() => setDeclining(true)}
+                  >
+                    {t("proposals.notForUs")}
+                  </Button>
+                )}
+              </div>
             </form>
             {accept.error && !Object.keys(errors).length ? (
               <Alert tone="danger">{accept.error.message}</Alert>
             ) : null}
             {declining ? (
               <form
-                className="space-y-2"
+                className="space-y-3 rounded-xl border border-border bg-surface px-5 py-4"
                 aria-label={t("proposals.declineForm")}
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -534,17 +591,16 @@ export function PublicProposalPage({ token }: { token: string }) {
                   {t("proposals.decline")}
                 </Button>
               </form>
-            ) : (
-              <Button variant="ghost" onClick={() => setDeclining(true)}>
-                {t("proposals.notForUs")}
-              </Button>
-            )}
+            ) : null}
           </>
         ) : (
           <div role="status" className="space-y-2">
             <p>{t(`proposals.publicStates.${p.status}`)}</p>
             {p.pay_url ? (
-              <a className="underline" href={p.pay_url}>
+              <a
+                className="font-medium text-link underline-offset-2 hover:underline"
+                href={p.pay_url}
+              >
                 {t("proposals.payDeposit")}
               </a>
             ) : null}

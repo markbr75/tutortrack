@@ -68,7 +68,8 @@ describe("people", () => {
     expect(screen.getByRole("link", { name: "Add a family" })).toBeInTheDocument();
     fireEvent.click(link);
     expect(await screen.findByRole("heading", { name: "The Patel Family" })).toBeInTheDocument();
-    expect(screen.getByText("Priya Patel · Primary · Bill payer")).toBeInTheDocument();
+    expect(screen.getByText("Priya Patel")).toBeInTheDocument();
+    expect(screen.getByText(/Primary · Bill payer/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Arjun Patel" })).toBeInTheDocument();
     expect(await screen.findByText("No notes yet.")).toBeInTheDocument();
   });

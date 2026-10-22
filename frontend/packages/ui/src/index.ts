@@ -32,7 +32,9 @@ export {
   type TrendPoint,
 } from "./LearningCharts";
 export { PageHeader } from "./PageHeader";
+export { FactList, NamePlate, Panel, PanelRow, PanelRows } from "./Panel";
 export { RegisterMark } from "./RegisterMark";
 export { PanelFooter, RuledPanel, type RuledPanelProps } from "./RuledPanel";
 export { registerMarkFor, type RegisterMarkKind } from "./registerMarks";
+export { Segmented } from "./Segmented";
 export { Tabs, type TabItem, type TabsProps } from "./Tabs";

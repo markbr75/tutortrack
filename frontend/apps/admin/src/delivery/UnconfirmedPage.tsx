@@ -1,6 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner } from "@tutortrack/ui";
+import { Alert, Button, ErrorFallback, PageHeader, RegisterMark, Spinner } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -53,93 +53,147 @@ export function UnconfirmedPage() {
       return next;
     });
 
+  const allChosen = rows.length > 0 && selected.size === rows.length;
   return (
-    <div className="space-y-4">
-      <header>
-        <h1 className="text-2xl font-semibold">{t("delivery.unconfirmed.title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("delivery.unconfirmed.help")}</p>
-      </header>
-      {message ? <Alert tone="success">{message}</Alert> : null}
+    <div>
+      <PageHeader
+        title={t("delivery.unconfirmed.title")}
+        description={t("delivery.unconfirmed.help")}
+      />
+      {message ? (
+        <Alert tone="success" className="mb-4">
+          {message}
+        </Alert>
+      ) : null}
       <ErrorList error={act.error} />
       {lessons.isPending ? (
         <Spinner label={t("grid.loading")} />
+      ) : lessons.isError ? (
+        <ErrorFallback
+          title={t("errors.generic")}
+          retryLabel={t("errors.retry")}
+          onRetry={() => void lessons.refetch()}
+        />
       ) : rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("delivery.unconfirmed.empty")}</p>
       ) : (
-        <>
-          <div className="flex flex-wrap gap-2">
-            {canComplete ? (
-              <Button size="sm" disabled={!ids.length} onClick={() => act.mutate("complete")}>
-                {t("delivery.unconfirmed.complete")}
-              </Button>
-            ) : null}
-            {canCancel ? (
+        <section
+          aria-label={t("delivery.unconfirmed.title")}
+          className="rounded-xl border border-border bg-surface"
+        >
+          {/* Margin red: these lessons are over and still to mark (the One Red Rule). */}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-margin px-4 py-3">
+            <label className="flex items-center gap-3 text-sm">
+              <input
+                type="checkbox"
+                className="size-4"
+                aria-label={t("delivery.unconfirmed.selectAll")}
+                checked={allChosen}
+                onChange={(e) =>
+                  setSelected(e.target.checked ? new Set(rows.map((r) => r.id)) : new Set())
+                }
+              />
+              <span aria-live="polite" className="text-muted-foreground">
+                {ids.length
+                  ? t("designS5.delivery.chosen", { count: ids.length })
+                  : t("designS5.delivery.waiting", { count: rows.length })}
+              </span>
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 size="sm"
                 variant="secondary"
                 disabled={!ids.length}
-                onClick={() => act.mutate("cancel")}
+                onClick={() => act.mutate("nudge")}
               >
-                {t("delivery.unconfirmed.cancel")}
+                {t("delivery.unconfirmed.nudge")}
               </Button>
-            ) : null}
-            <Button
-              size="sm"
-              variant="secondary"
-              disabled={!ids.length}
-              onClick={() => act.mutate("nudge")}
-            >
-              {t("delivery.unconfirmed.nudge")}
-            </Button>
+              {canCancel ? (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={!ids.length}
+                  onClick={() => act.mutate("cancel")}
+                >
+                  {t("delivery.unconfirmed.cancel")}
+                </Button>
+              ) : null}
+              {canComplete ? (
+                <Button
+                  size="sm"
+                  disabled={!ids.length}
+                  loading={act.isPending}
+                  onClick={() => act.mutate("complete")}
+                >
+                  {t("delivery.unconfirmed.complete")}
+                </Button>
+              ) : null}
+            </div>
           </div>
-          <div className="overflow-x-auto">
+          <div
+            role="region"
+            aria-label={t("designS5.delivery.lessonsTable")}
+            tabIndex={0}
+            className="relative overflow-x-auto"
+          >
             <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th scope="col" className="py-2 pr-2">
-                    <input
-                      type="checkbox"
-                      className="size-4"
-                      aria-label={t("delivery.unconfirmed.selectAll")}
-                      checked={selected.size === rows.length}
-                      onChange={(e) =>
-                        setSelected(e.target.checked ? new Set(rows.map((r) => r.id)) : new Set())
-                      }
-                    />
+              <thead className="border-b border-border">
+                <tr>
+                  <th scope="col" className="w-10 px-4 py-2.5">
+                    <span className="sr-only">{t("delivery.unconfirmed.selectAll")}</span>
                   </th>
-                  <th scope="col" className="py-2 pr-4">
+                  <th scope="col" className="px-4 py-2.5">
                     {t("delivery.reports.lesson")}
                   </th>
-                  <th scope="col" className="py-2 pr-4">
+                  <th scope="col" className="px-4 py-2.5 max-sm:hidden">
                     {t("calendar.tutors")}
+                  </th>
+                  <th scope="col" className="w-20 px-4 py-2.5 text-center">
+                    {t("home.register.mark")}
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((lesson) => (
-                  <tr key={lesson.id} className="border-b border-border">
-                    <td className="py-2 pr-2">
-                      <input
-                        type="checkbox"
-                        className="size-4"
-                        aria-label={t("delivery.unconfirmed.select", { title: lesson.title })}
-                        checked={selected.has(lesson.id)}
-                        onChange={(e) => toggle(lesson.id, e.target.checked)}
-                      />
-                    </td>
-                    <td className="py-2 pr-4">
-                      {lesson.title}
-                      <span className="block text-muted-foreground">
-                        {formatDateTime(lesson.start, i18n.language)}
-                      </span>
-                    </td>
-                    <td className="py-2 pr-4">{lesson.tutors.map((x) => x.name).join(", ")}</td>
-                  </tr>
-                ))}
+                {rows.map((lesson) => {
+                  const tutors = lesson.tutors.map((x) => x.name).join(", ");
+                  return (
+                    <tr
+                      key={lesson.id}
+                      className="border-t border-rule first:border-0 has-[:checked]:bg-muted/60"
+                    >
+                      <td className="px-4 py-2.5">
+                        <input
+                          type="checkbox"
+                          className="size-4"
+                          aria-label={t("delivery.unconfirmed.select", { title: lesson.title })}
+                          checked={selected.has(lesson.id)}
+                          onChange={(e) => toggle(lesson.id, e.target.checked)}
+                        />
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <span className="font-medium">{lesson.title}</span>
+                        <span className="block text-xs text-muted-foreground tabular-nums">
+                          <time dateTime={lesson.start}>
+                            {formatDateTime(lesson.start, i18n.language)}
+                          </time>
+                          <span className="sm:hidden">{tutors ? ` · ${tutors}` : ""}</span>
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 max-sm:hidden">{tutors}</td>
+                      <td className="px-4 py-2.5">
+                        <RegisterMark
+                          kind="due"
+                          label={t("home.register.marks.due")}
+                          className="mx-auto"
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
-        </>
+        </section>
       )}
     </div>
   );

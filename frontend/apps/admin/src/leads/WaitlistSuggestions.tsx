@@ -1,6 +1,6 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, TextField } from "@tutortrack/ui";
+import { Alert, Button, Panel, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -45,14 +45,13 @@ export function WaitlistSuggestions() {
   const rows = suggestions.data?.results ?? [];
   if (!rows.length) return null;
   return (
-    <section aria-labelledby="waitlist-suggestions" className="space-y-2">
-      <h2 id="waitlist-suggestions" className="text-base font-semibold">
-        {t("g5c.suggestions.title", { count: rows.length })}
-      </h2>
-      <p className="text-sm text-muted-foreground">{t("g5c.suggestions.intro")}</p>
-      <ul className="divide-y divide-rule rounded-xl border border-border bg-surface">
+    <Panel title={t("g5c.suggestions.title", { count: rows.length })} flush>
+      <p className="border-b border-rule px-5 py-2.5 text-sm text-muted-foreground">
+        {t("g5c.suggestions.intro")}
+      </p>
+      <ul className="divide-y divide-rule">
         {rows.map((s) => (
-          <li key={s.id} className="flex flex-wrap items-end gap-3 px-5 py-2.5 text-sm">
+          <li key={s.id} className="flex flex-wrap items-end gap-3 px-5 py-3 text-sm">
             <div className="min-w-56 flex-1">
               <p className="font-medium">
                 {t("g5c.suggestions.room", { tutor: s.tutor_name, student: s.student_name })}
@@ -70,12 +69,13 @@ export function WaitlistSuggestions() {
               </p>
             </div>
             <TextField
+              size="sm"
               label={t("g5c.suggestions.details", { student: s.student_name })}
               hint={t("g5c.suggestions.detailsHint")}
               value={details[s.id] ?? ""}
               onChange={(e) => setDetails({ ...details, [s.id]: e.target.value })}
             />
-            <div className="flex gap-2">
+            <div className="flex gap-2 self-start pt-6">
               <Button
                 size="sm"
                 disabled={offer.isPending}
@@ -103,8 +103,12 @@ export function WaitlistSuggestions() {
           </li>
         ))}
       </ul>
-      {offer.error ? <Alert tone="danger">{offer.error.message}</Alert> : null}
-      {dismiss.error ? <Alert tone="danger">{dismiss.error.message}</Alert> : null}
-    </section>
+      {offer.error || dismiss.error ? (
+        <div className="space-y-2 px-5 pb-4">
+          {offer.error ? <Alert tone="danger">{offer.error.message}</Alert> : null}
+          {dismiss.error ? <Alert tone="danger">{dismiss.error.message}</Alert> : null}
+        </div>
+      ) : null}
+    </Panel>
   );
 }
