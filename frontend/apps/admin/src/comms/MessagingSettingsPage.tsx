@@ -186,7 +186,7 @@ function SenderDomains() {
               <tr key={`${r.purpose}-${r.host}`}>
                 <td className="font-medium">{r.record_type}</td>
                 <td className="break-all">{r.host}</td>
-                <td className="text-xs break-all">{r.value}</td>
+                <td className="break-all">{r.value}</td>
                 <td className="whitespace-nowrap">
                   {["spf", "dmarc"].includes(r.purpose) ? (
                     <span className="text-muted-foreground">

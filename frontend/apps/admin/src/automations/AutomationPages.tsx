@@ -280,7 +280,7 @@ function RunRows({ runs, bare = false }: { runs: Run[]; bare?: boolean }) {
             </span>
             {r.error ? <span className="block text-xs text-danger">{r.error}</span> : null}
           </td>
-          <td className="text-right">
+          <td className="text-right whitespace-nowrap">
             {r.status === "failed" ? (
               <Button size="sm" variant="secondary" onClick={() => retry.mutate(r.id)}>
                 {t("automations.retry")}

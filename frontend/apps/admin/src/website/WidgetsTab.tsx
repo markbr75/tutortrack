@@ -35,7 +35,7 @@ function CopyBlock({ label, value }: { label: string; value: string }) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
         <pre
           aria-labelledby={id}
-          className="min-w-0 flex-1 rounded-md border border-field bg-background px-3 py-2 text-xs break-all whitespace-pre-wrap"
+          className="min-w-0 flex-1 rounded-md border border-field bg-background px-3 py-2 font-sans text-xs break-all whitespace-pre-wrap"
         >
           {value}
         </pre>
