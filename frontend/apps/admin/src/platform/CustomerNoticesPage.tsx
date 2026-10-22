@@ -1,6 +1,18 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FormPanel,
+  PageHeader,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -11,7 +23,7 @@ type Notice = components["schemas"]["CustomerNotice"];
 /** G6 (FR-29-9): breach, security, service and legal notices to organisations' owners and
  *  admins, sent through comms and written to each organisation's audit log. */
 export function CustomerNoticesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const templates = useQuery({
     queryKey: ["platform", "notice-templates"],
@@ -45,9 +57,8 @@ export function CustomerNoticesPage() {
   });
 
   return (
-    <div className="max-w-4xl space-y-6">
-      <h1 className="text-2xl font-semibold">{t("customerNotices.title")}</h1>
-      <p className="text-sm text-muted-foreground">{t("customerNotices.intro")}</p>
+    <div className="max-w-3xl space-y-6">
+      <PageHeader title={t("customerNotices.title")} description={t("customerNotices.intro")} />
       {templates.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {draft ? (
         <NoticePreview
@@ -58,19 +69,20 @@ export function CustomerNoticesPage() {
             void queryClient.invalidateQueries({ queryKey: ["platform", "customer-notices"] });
           }}
         />
-      ) : (
-        <form
-          className="space-y-3 rounded-lg border border-border p-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            create.mutate();
-          }}
+      ) : templates.data ? (
+        <FormPanel
+          title={t("designS11.platform.newNotice")}
+          submit={t("customerNotices.preview")}
+          pending={create.isPending}
+          onSubmit={() => create.mutate()}
+          columns={1}
+          error={create.error ? <Alert tone="danger">{create.error.message}</Alert> : null}
         >
           <SelectField
             label={t("customerNotices.template")}
             value={template}
             onChange={(e) => setTemplate(e.target.value)}
-            options={(templates.data ?? []).map((row) => ({ value: row.key, label: row.title }))}
+            options={templates.data.map((row) => ({ value: row.key, label: row.title }))}
           />
           {chosen?.variables.map((name) => (
             <TextField
@@ -83,43 +95,41 @@ export function CustomerNoticesPage() {
           <TextField
             label={t("customerNotices.organisations")}
             hint={t("customerNotices.organisationsHint")}
+            className="font-mono"
             value={orgIds}
             onChange={(e) => setOrgIds(e.target.value)}
           />
-          {create.error ? <Alert tone="danger">{create.error.message}</Alert> : null}
-          <Button type="submit" loading={create.isPending}>
-            {t("customerNotices.preview")}
-          </Button>
-        </form>
-      )}
-      <section aria-labelledby="notice-history">
-        <h2 id="notice-history" className="text-lg font-semibold">
-          {t("customerNotices.history")}
-        </h2>
-        {history.data?.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("customerNotices.none")}</p>
+        </FormPanel>
+      ) : null}
+      <RuledPanel title={t("customerNotices.history")} flush>
+        {history.data?.length ? (
+          <PanelRows>
+            {history.data.map((notice) => (
+              <PanelRow key={notice.id}>
+                <p className="font-medium">{notice.subject}</p>
+                <p className="text-xs text-muted-foreground tabular-nums">
+                  <span className={notice.status === "sent" ? undefined : "text-foreground"}>
+                    {t(`customerNotices.status.${notice.status}`)}
+                  </span>
+                  {notice.sent_at ? ` · ${formatDateTime(notice.sent_at, i18n.language)}` : ""}
+                  {" · "}
+                  {t("customerNotices.counts", {
+                    organisations: notice.organisations_count,
+                    people: notice.recipients_count,
+                  })}
+                </p>
+              </PanelRow>
+            ))}
+          </PanelRows>
+        ) : history.data ? (
+          <p className="px-5 py-4 text-sm text-muted-foreground">{t("customerNotices.none")}</p>
         ) : null}
-        <ul className="divide-y divide-border">
-          {history.data?.map((notice) => (
-            <li key={notice.id} className="py-2 text-sm">
-              <p className="font-medium">{notice.subject}</p>
-              <p className="text-muted-foreground">
-                {t(`customerNotices.status.${notice.status}`)}
-                {notice.sent_at ? ` · ${formatDateTime(notice.sent_at)}` : ""}
-                {" · "}
-                {t("customerNotices.counts", {
-                  organisations: notice.organisations_count,
-                  people: notice.recipients_count,
-                })}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
+      </RuledPanel>
     </div>
   );
 }
 
+/** The notice as it will go out, its reach in a sentence, then the reason and Send. */
 function NoticePreview({ notice, onDone }: { notice: Notice; onDone: () => void }) {
   const { t } = useTranslation();
   const [reason, setReason] = useState("");
@@ -143,45 +153,52 @@ function NoticePreview({ notice, onDone }: { notice: Notice; onDone: () => void 
     onSuccess: onDone,
   });
   return (
-    <section aria-labelledby="notice-preview" className="space-y-3 rounded-lg border p-4">
-      <h2 id="notice-preview" className="text-lg font-semibold">
-        {t("customerNotices.previewTitle")}
-      </h2>
-      {preview.data ? (
-        <>
-          <p className="text-sm">
-            {t("customerNotices.goesTo", { count: preview.data.organisations })}
-          </p>
-          <p className="font-medium">{preview.data.subject}</p>
-          <pre className="whitespace-pre-wrap rounded-md bg-muted p-3 text-sm">
-            {preview.data.body}
-          </pre>
-        </>
-      ) : (
-        <Spinner label={t("grid.loading")} />
-      )}
-      <form
-        className="flex flex-wrap items-end gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          send.mutate();
-        }}
+    <form
+      aria-labelledby="notice-preview"
+      onSubmit={(e) => {
+        e.preventDefault();
+        send.mutate();
+      }}
+    >
+      <RuledPanel
+        title={t("customerNotices.previewTitle")}
+        titleId="notice-preview"
+        description={
+          preview.data ? t("customerNotices.goesTo", { count: preview.data.organisations }) : null
+        }
+        flush
       >
-        <TextField
-          label={t("customerNotices.reason")}
-          hint={t("customerNotices.reasonHint")}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          required
-        />
-        <Button type="submit" loading={send.isPending} disabled={!reason.trim()}>
-          {t("customerNotices.send")}
-        </Button>
-        <Button type="button" variant="secondary" onClick={onDone}>
-          {t("customerNotices.discard")}
-        </Button>
-      </form>
-      {send.error ? <Alert tone="danger">{send.error.message}</Alert> : null}
-    </section>
+        <div className="space-y-4 px-5 py-4">
+          {preview.data ? (
+            <div className="max-w-2xl space-y-2">
+              <p className="font-medium">{preview.data.subject}</p>
+              <div className="rounded-md border border-border px-3 py-2 text-sm whitespace-pre-wrap">
+                {preview.data.body}
+              </div>
+            </div>
+          ) : (
+            <Spinner label={t("grid.loading")} />
+          )}
+          <div className="max-w-sm">
+            <TextField
+              label={t("customerNotices.reason")}
+              hint={t("customerNotices.reasonHint")}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              required
+            />
+          </div>
+          {send.error ? <Alert tone="danger">{send.error.message}</Alert> : null}
+        </div>
+        <PanelFooter>
+          <Button type="button" variant="secondary" onClick={onDone}>
+            {t("customerNotices.discard")}
+          </Button>
+          <Button type="submit" loading={send.isPending} disabled={!reason.trim()}>
+            {t("customerNotices.send")}
+          </Button>
+        </PanelFooter>
+      </RuledPanel>
+    </form>
   );
 }

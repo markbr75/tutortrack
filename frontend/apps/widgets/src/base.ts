@@ -16,42 +16,77 @@ export class TtWidget extends LitElement {
     failed: { state: true },
   };
 
+  /**
+   * Quiet register proportions that take the host page's font, colour and ground: ink and
+   * rules are drawn from the inherited text colour, so a widget reads on a light or a dark
+   * site; the tenant's colour fills primary buttons only. Tenants can still set any `--tt-*`
+   * property (the widget builder sets `--tt-radius`).
+   */
   static baseStyles = css`
     :host {
       display: block;
-      font-family: var(--tt-font, system-ui, sans-serif);
-      color: var(--tt-text, #111827);
+      font-family: var(--tt-font, inherit);
+      color: var(--tt-text, inherit);
       line-height: 1.5;
+      font-variant-numeric: tabular-nums;
+      --tt-muted: var(--tt-muted-color, color-mix(in srgb, currentColor 72%, transparent));
+      --tt-rule: var(--tt-border, color-mix(in srgb, currentColor 18%, transparent));
+      --tt-edge: var(--tt-field, color-mix(in srgb, currentColor 55%, transparent));
     }
     *,
     *::before,
     *::after {
       box-sizing: border-box;
     }
+    h2,
+    h3 {
+      font-size: 1em;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    p {
+      margin: 0 0 8px;
+    }
     a {
-      color: var(--tt-link-color, #1d4ed8);
+      color: var(--tt-link-color, LinkText);
+      text-underline-offset: 0.2em;
     }
     button,
     .button {
       font: inherit;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       min-height: 44px;
-      padding: 10px 18px;
-      border: 0;
+      padding: 8px 16px;
+      border: 1px solid transparent;
       border-radius: var(--tt-radius, 8px);
-      background: var(--tt-brand-color, #1d4ed8);
+      background: var(--tt-brand-color, #2a54a2);
       color: var(--tt-on-brand, #fff);
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       text-decoration: none;
     }
+    button:hover,
+    .button:hover {
+      opacity: 0.9;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     button.secondary {
       background: transparent;
-      color: var(--tt-link-color, #1d4ed8);
-      border: 1px solid currentColor;
+      color: inherit;
+      border-color: var(--tt-rule);
+    }
+    button.secondary:hover {
+      opacity: 1;
+      background: color-mix(in srgb, currentColor 6%, transparent);
     }
     :focus-visible {
-      outline: 3px solid var(--tt-link-color, #1d4ed8);
+      outline: 2px solid var(--tt-link-color, #2a54a2);
       outline-offset: 2px;
     }
     input,
@@ -60,25 +95,39 @@ export class TtWidget extends LitElement {
       font: inherit;
       width: 100%;
       min-height: 44px;
-      padding: 8px 10px;
-      border: 1px solid var(--tt-border, #6b7280);
+      padding: 8px 12px;
+      border: 1px solid var(--tt-edge);
       border-radius: var(--tt-radius, 8px);
-      background: var(--tt-surface, #fff);
+      background: var(--tt-surface, transparent);
       color: inherit;
+    }
+    select option {
+      color: initial;
     }
     label {
       display: block;
-      font-weight: 600;
+      font-weight: 500;
       margin-bottom: 4px;
     }
+    fieldset {
+      border: 0;
+      padding: 0;
+      margin: 0;
+      min-width: 0;
+    }
+    legend {
+      padding: 0;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
     .muted {
-      color: var(--tt-muted-color, #4b5563);
+      color: var(--tt-muted);
     }
     .card {
-      background: var(--tt-surface, #fff);
-      border: 1px solid var(--tt-border, #e5e7eb);
-      border-radius: var(--tt-radius, 8px);
-      padding: 16px;
+      background: var(--tt-surface, transparent);
+      border: 1px solid var(--tt-rule);
+      border-radius: calc(var(--tt-radius, 8px) + 4px);
+      padding: 16px 20px;
     }
     .sr-only {
       position: absolute;
@@ -89,11 +138,15 @@ export class TtWidget extends LitElement {
       white-space: nowrap;
     }
     .powered {
-      margin-top: 12px;
-      font-size: 0.8rem;
+      margin: 16px 0 0;
+      font-size: 0.75em;
     }
-    [role="alert"] {
-      color: #b91c1c;
+    .powered a {
+      color: inherit;
+    }
+    [role="alert"],
+    .error {
+      color: var(--tt-danger, #b42318);
     }
   `;
 

@@ -44,13 +44,20 @@ export class TtCookieConsent extends LitElement {
       position: fixed;
       inset: auto 0 0 0;
       z-index: 2147483000;
-      font: var(--tt-font, 14px system-ui, sans-serif);
+      font-family: var(--tt-font, inherit);
+      font-size: 0.875rem;
+      line-height: 1.5;
     }
+    /* Over the page, so it needs its own ground: the host's own Canvas colours. */
     section {
-      background: var(--tt-surface, #fff);
-      color: var(--tt-text, #111827);
-      border-top: 1px solid var(--tt-border, #e5e7eb);
+      background: var(--tt-surface, Canvas);
+      color: var(--tt-text, CanvasText);
+      border-top: 1px solid
+        var(--tt-border, color-mix(in srgb, var(--tt-text, CanvasText) 18%, transparent));
       padding: 16px;
+    }
+    strong {
+      font-weight: 600;
     }
     .actions {
       display: flex;
@@ -58,17 +65,20 @@ export class TtCookieConsent extends LitElement {
       flex-wrap: wrap;
       margin-top: 8px;
     }
+    /* Accept and reject carry equal weight, so neither choice is nudged. */
     button {
       font: inherit;
-      padding: 8px 14px;
-      border-radius: 6px;
+      font-weight: 500;
+      min-height: 40px;
+      padding: 8px 16px;
+      border-radius: var(--tt-radius, 8px);
       border: 0;
       cursor: pointer;
-      background: var(--tt-brand-color, #2563eb);
-      color: #fff;
+      background: var(--tt-brand-color, #2a54a2);
+      color: var(--tt-on-brand, #fff);
     }
     button:focus-visible {
-      outline: 2px solid var(--tt-brand-color, #2563eb);
+      outline: 2px solid var(--tt-link-color, #2a54a2);
       outline-offset: 2px;
     }
   `;

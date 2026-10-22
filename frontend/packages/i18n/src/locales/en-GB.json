@@ -7845,6 +7845,43 @@
     "poweredBy": "Powered by",
     "invite": {
       "invalidTitle": "This invitation can't be used"
+    },
+    "platform": {
+      "console": "Staff console",
+      "groups": {
+        "customers": "Customers",
+        "product": "Product",
+        "revenue": "Revenue",
+        "operations": "Operations"
+      },
+      "searchOrganisations": "Search by name or address",
+      "filterOrganisations": "Filter organisations",
+      "anyStatus": "Any status",
+      "noOrganisations": "No organisations match these filters.",
+      "organisationsByScore": "Organisations, lowest score first",
+      "anyRisk": "Any risk",
+      "noScores": "No organisations have been scored yet.",
+      "stripeCustomer": "Stripe customer",
+      "noActivity": "No activity yet.",
+      "daysUnit": "days",
+      "twoStep": "two-step sign-in",
+      "noFlags": "No flags yet.",
+      "newFlag": "New flag",
+      "onForEveryone": "On for everyone",
+      "rolloutShort": "{{percent}}% rollout",
+      "waiting_one": "{{count}} waiting",
+      "waiting_other": "{{count}} waiting",
+      "noDeadLetters": "No dead-lettered events.",
+      "ended": "ended",
+      "noNotices": "No status notices.",
+      "noComments": "No comments yet.",
+      "step": "Step",
+      "organisations": "Organisations",
+      "ofSignedUp": "Of those signed up",
+      "prices": "Prices",
+      "sharePercent": "{{percent}}% share",
+      "newNotice": "New notice",
+      "scrollSideways": "Scroll sideways to see every column."
     }
   }
 }

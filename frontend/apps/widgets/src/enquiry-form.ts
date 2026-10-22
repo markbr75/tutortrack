@@ -66,8 +66,7 @@ export class TtEnquiryForm extends TtWidget {
         margin: 0 0 16px;
       }
       legend {
-        font-weight: 700;
-        font-size: 1.1rem;
+        font-weight: 600;
         margin-bottom: 8px;
       }
       .field {
@@ -88,8 +87,7 @@ export class TtEnquiryForm extends TtWidget {
         left: -9999px;
       }
       .error {
-        color: #b91c1c;
-        font-size: 0.9rem;
+        font-size: 0.875em;
         margin: 4px 0 0;
       }
     `,

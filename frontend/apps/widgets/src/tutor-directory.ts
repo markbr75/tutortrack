@@ -71,30 +71,36 @@ export class TtTutorDirectory extends TtWidget {
       }
       h3 {
         margin: 8px 0 4px;
-        font-size: 1.1rem;
       }
+      /* Subjects read as one line of words, not a cloud of pills. */
       .tags {
         list-style: none;
         padding: 0;
         margin: 8px 0;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+        font-weight: 500;
       }
       .tags li {
-        border: 1px solid var(--tt-border, #e5e7eb);
-        border-radius: 999px;
-        padding: 2px 10px;
-        font-size: 0.85rem;
+        display: inline;
+      }
+      .tags li + li::before {
+        content: " · ";
+        font-weight: 400;
       }
       .link {
+        display: inline;
         background: none;
-        color: var(--tt-link-color, #1d4ed8);
+        border: 0;
+        color: inherit;
         padding: 0;
         min-height: 24px;
         text-decoration: underline;
+        text-decoration-color: var(--tt-rule);
         font-weight: 600;
         text-align: left;
+      }
+      .link:hover {
+        opacity: 1;
+        text-decoration-color: currentColor;
       }
     `,
   ];

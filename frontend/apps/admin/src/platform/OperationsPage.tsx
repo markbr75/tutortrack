@@ -1,6 +1,19 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  FigureStrip,
+  PageHeader,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -8,7 +21,7 @@ import { api } from "../api";
 
 /** Outbox, dead letters, queues, webhook backlogs and status notices (E30 T04/T06). */
 export function OperationsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState<string[]>([]);
   const ops = useQuery({
@@ -38,77 +51,96 @@ export function OperationsPage() {
         ...Object.entries(ops.data.queues).map(([q, n]) => [`queue:${q}`, n] as const),
       ] as const)
     : [];
+  const rows = dead.data?.results ?? [];
   return (
     <div className="max-w-5xl space-y-6">
-      <h1 className="text-2xl font-semibold">{t("platform.nav.operations")}</h1>
+      <PageHeader title={t("platform.nav.operations")} />
       {ops.isPending ? <Spinner label={t("grid.loading")} /> : null}
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {figures.map(([label, value]) => (
-          <div key={label} className="rounded-md border border-border p-3">
-            <dt className="text-sm text-muted-foreground">
-              {label.startsWith("queue:")
-                ? t("platform.ops.queue", { name: label.slice(6) })
-                : t(`platform.ops.${label}`)}
-            </dt>
-            <dd className="text-xl font-semibold">{value}</dd>
-          </div>
-        ))}
-      </dl>
-      <section className="space-y-2">
-        <h2 className="text-lg font-semibold">{t("platform.deadLetters")}</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left">
-                <th scope="col">
-                  <span className="sr-only">{t("platform.select")}</span>
-                </th>
-                <th scope="col">{t("platform.event")}</th>
-                <th scope="col">{t("platform.organisation")}</th>
-                <th scope="col">{t("platform.failedAt")}</th>
-                <th scope="col">{t("platform.error")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dead.data?.results.map((row) => (
-                <tr key={row.id} className="border-t border-border align-top">
-                  <td>
-                    <input
-                      type="checkbox"
-                      aria-label={t("platform.selectEvent", { type: row.event_type })}
-                      checked={selected.includes(row.id)}
-                      onChange={(e) =>
-                        setSelected((s) =>
-                          e.target.checked ? [...s, row.id] : s.filter((x) => x !== row.id),
-                        )
-                      }
-                    />
-                  </td>
-                  <td>{row.event_type}</td>
-                  <td>{row.organisation_name ?? "–"}</td>
-                  <td>{formatDateTime(row.dead_lettered_at)}</td>
-                  <td className="max-w-md break-words">{row.last_error}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <Button
-          size="sm"
-          disabled={!selected.length}
-          loading={replay.isPending}
-          onClick={() => replay.mutate()}
+      {figures.length ? (
+        <FigureStrip
+          label={t("platform.nav.operations")}
+          columns={3}
+          figures={figures.map(([label, value]) => ({
+            key: label,
+            label: label.startsWith("queue:")
+              ? t("platform.ops.queue", { name: label.slice(6) })
+              : t(`platform.ops.${label}`),
+            value: value.toLocaleString(i18n.language),
+            // Dead letters wait on us; everything else is a level, not a fault.
+            tone: label === "deadLetters" && Number(value) > 0 ? ("margin" as const) : undefined,
+          }))}
+        />
+      ) : null}
+      <RuledPanel
+        title={t("platform.deadLetters")}
+        rule={rows.length ? "margin" : "border"}
+        aside={
+          rows.length ? (
+            <span className="font-semibold text-margin tabular-nums">
+              {t("designS11.platform.waiting", { count: rows.length })}
+            </span>
+          ) : null
+        }
+        flush
+        footer={
+          rows.length ? (
+            <Button
+              size="sm"
+              disabled={!selected.length}
+              loading={replay.isPending}
+              onClick={() => replay.mutate()}
+            >
+              {t("platform.replay", { count: selected.length })}
+            </Button>
+          ) : null
+        }
+      >
+        <RuledTable
+          caption={t("platform.deadLetters")}
+          loading={dead.isPending}
+          loadingLabel={t("grid.loading")}
+          empty={dead.data && !rows.length ? t("designS11.platform.noDeadLetters") : undefined}
+          columns={[
+            { header: t("platform.select"), hidden: true, width: "w-10" },
+            { header: t("platform.event") },
+            { header: t("platform.organisation") },
+            { header: t("platform.failedAt") },
+            { header: t("platform.error") },
+          ]}
         >
-          {t("platform.replay", { count: selected.length })}
-        </Button>
-      </section>
+          {rows.map((row) => (
+            <tr key={row.id}>
+              <td className="align-top">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 size-4"
+                  aria-label={t("platform.selectEvent", { type: row.event_type })}
+                  checked={selected.includes(row.id)}
+                  onChange={(e) =>
+                    setSelected((s) =>
+                      e.target.checked ? [...s, row.id] : s.filter((x) => x !== row.id),
+                    )
+                  }
+                />
+              </td>
+              <td className="font-mono text-xs leading-5">{row.event_type}</td>
+              <td>{row.organisation_name ?? "–"}</td>
+              <td className="whitespace-nowrap tabular-nums">
+                {formatDateTime(row.dead_lettered_at, i18n.language)}
+              </td>
+              <td className="max-w-md min-w-56 break-words text-danger">{row.last_error}</td>
+            </tr>
+          ))}
+        </RuledTable>
+      </RuledPanel>
       <Notices />
     </div>
   );
 }
 
+/** Status notices shown to every organisation: what is live, then a new one. */
 function Notices() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [message, setMessage] = useState("");
   const [severity, setSeverity] = useState<"info" | "warning" | "outage">("warning");
@@ -140,56 +172,76 @@ function Notices() {
     onSuccess: refresh,
   });
   return (
-    <section className="space-y-2">
-      <h2 className="text-lg font-semibold">{t("platform.notices")}</h2>
-      <ul className="text-sm">
-        {notices.data?.map((n) => {
-          const live = !n.ends_at || new Date(n.ends_at) > new Date();
-          return (
-            <li key={n.id} className="flex items-center justify-between gap-2 py-1">
-              <span>
-                [{n.severity}] {n.message} · {formatDateTime(n.starts_at)}
-              </span>
-              {live ? (
-                <Button size="sm" variant="ghost" onClick={() => end.mutate(n.id)}>
-                  {t("platform.endNotice")}
-                </Button>
-              ) : null}
-            </li>
-          );
-        })}
-      </ul>
+    <RuledPanel title={t("platform.notices")} flush>
+      {notices.data?.length ? (
+        <PanelRows>
+          {notices.data.map((n) => {
+            const live = !n.ends_at || new Date(n.ends_at) > new Date();
+            return (
+              <PanelRow key={n.id} className="flex flex-wrap items-start justify-between gap-2">
+                <span className="min-w-0">
+                  <span className="break-words">{n.message}</span>
+                  <span className="block text-xs text-muted-foreground tabular-nums">
+                    {t(`platform.severities.${n.severity}`)} ·{" "}
+                    {formatDateTime(n.starts_at, i18n.language)}
+                    {live ? "" : ` · ${t("designS11.platform.ended")}`}
+                  </span>
+                </span>
+                {live ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    onClick={() => end.mutate(n.id)}
+                  >
+                    {t("platform.endNotice")}
+                  </Button>
+                ) : null}
+              </PanelRow>
+            );
+          })}
+        </PanelRows>
+      ) : notices.data ? (
+        <p className="px-5 py-4 text-sm text-muted-foreground">
+          {t("designS11.platform.noNotices")}
+        </p>
+      ) : null}
       <form
-        className="flex flex-wrap items-end gap-2"
+        className="border-t border-border"
         onSubmit={(e) => {
           e.preventDefault();
           post.mutate();
         }}
       >
-        <TextField
-          label={t("platform.noticeMessage")}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">{t("platform.severity")}</span>
-          <select
-            className="h-10 rounded-md border border-border bg-background px-2"
+        <div className="flex flex-wrap items-end gap-x-4 gap-y-3 px-5 py-4">
+          <div className="min-w-56 flex-1">
+            <TextField
+              label={t("platform.noticeMessage")}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+          </div>
+          <SelectField
+            label={t("platform.severity")}
             value={severity}
             onChange={(e) => setSeverity(e.target.value as typeof severity)}
-          >
-            {(["info", "warning", "outage"] as const).map((s) => (
-              <option key={s} value={s}>
-                {t(`platform.severities.${s}`)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <Button type="submit" size="sm" loading={post.isPending}>
-          {t("platform.postNotice")}
-        </Button>
+            options={(["info", "warning", "outage"] as const).map((s) => ({
+              value: s,
+              label: t(`platform.severities.${s}`),
+            }))}
+          />
+        </div>
+        {post.error ? (
+          <div className="px-5 pb-4">
+            <Alert tone="danger">{post.error.message}</Alert>
+          </div>
+        ) : null}
+        <PanelFooter>
+          <Button type="submit" size="sm" loading={post.isPending}>
+            {t("platform.postNotice")}
+          </Button>
+        </PanelFooter>
       </form>
-      {post.error ? <Alert tone="danger">{post.error.message}</Alert> : null}
-    </section>
+    </RuledPanel>
   );
 }
