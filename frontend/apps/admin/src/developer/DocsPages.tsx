@@ -231,38 +231,41 @@ export function MarketplacePage() {
                 {items.map((entry) => (
                   <PanelRow
                     key={entry.key}
-                    className="grid gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_7rem_15rem] sm:items-center"
+                    className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                   >
                     <div className="min-w-0">
                       <p className="font-medium">{entry.name}</p>
+                      {/* The status leads the one caption line, so it sits in the same place
+                          on every row whatever the width of the button beside it. */}
                       <p className="text-xs text-muted-foreground">
+                        <span
+                          className={cn(
+                            entry.status === "needs_attention" && "font-semibold text-margin",
+                            entry.status === "connected" && "font-medium text-foreground",
+                          )}
+                        >
+                          {entry.status === "needs_attention"
+                            ? t("gapG6.needsAttention")
+                            : t(`marketplace.status.${entry.status}`)}
+                        </span>
+                        {" · "}
                         {entry.description}
                         {entry.detail ? ` ${entry.detail}` : ""}
                       </p>
                     </div>
-                    <span
-                      className={cn(
-                        entry.status === "needs_attention" && "font-semibold text-margin",
-                        (entry.status === "available" || entry.status === "coming_soon") &&
-                          "text-muted-foreground",
-                      )}
-                    >
-                      {entry.status === "needs_attention"
-                        ? t("gapG6.needsAttention")
-                        : t(`marketplace.status.${entry.status}`)}
-                    </span>
-                    <span className="sm:text-right">
-                      {entry.settings_path && entry.status !== "coming_soon" ? (
-                        <a
-                          href={entry.settings_path}
-                          className={buttonClass({ variant: "secondary", size: "sm" })}
-                        >
-                          {entry.status === "connected"
-                            ? t("marketplace.manage", { name: entry.name })
-                            : t("marketplace.connect", { name: entry.name })}
-                        </a>
-                      ) : null}
-                    </span>
+                    {entry.settings_path && entry.status !== "coming_soon" ? (
+                      <a
+                        href={entry.settings_path}
+                        className={cn(
+                          buttonClass({ variant: "secondary", size: "sm" }),
+                          "shrink-0 self-start sm:self-auto sm:whitespace-nowrap",
+                        )}
+                      >
+                        {entry.status === "connected"
+                          ? t("marketplace.manage", { name: entry.name })
+                          : t("marketplace.connect", { name: entry.name })}
+                      </a>
+                    ) : null}
                   </PanelRow>
                 ))}
               </PanelRows>

@@ -363,29 +363,37 @@ function DryRun({ batch }: { batch: ImportBatch }) {
   const will = Object.entries(stats.will ?? {}).flatMap(([target, verbs]) =>
     Object.entries(verbs).map(([verb, count]) => ({ target, verb, count })),
   );
+  const sentence = t("dataTransfer.dryRun.rows", {
+    valid: stats.valid ?? 0,
+    invalid: stats.invalid ?? 0,
+    warnings: stats.warnings ?? 0,
+  });
+  // With nothing to list, the sentence is the panel's body rather than a header line over an
+  // empty panel.
+  if (!will.length) {
+    return (
+      <RuledPanel title={t("dataTransfer.dryRun.title")} titleId="dry-run-heading">
+        <p className="text-sm">{sentence}</p>
+      </RuledPanel>
+    );
+  }
   return (
     <RuledPanel
       title={t("dataTransfer.dryRun.title")}
       titleId="dry-run-heading"
-      description={t("dataTransfer.dryRun.rows", {
-        valid: stats.valid ?? 0,
-        invalid: stats.invalid ?? 0,
-        warnings: stats.warnings ?? 0,
-      })}
+      description={sentence}
       flush
     >
-      {will.length ? (
-        <PanelRows>
-          {will.map(({ target, verb, count }) => (
-            <PanelRow key={`${target}-${verb}`}>
-              {t(`dataTransfer.dryRun.${verb}`, {
-                count,
-                what: t(`dataTransfer.targets.${target}`, { defaultValue: target }),
-              })}
-            </PanelRow>
-          ))}
-        </PanelRows>
-      ) : null}
+      <PanelRows>
+        {will.map(({ target, verb, count }) => (
+          <PanelRow key={`${target}-${verb}`}>
+            {t(`dataTransfer.dryRun.${verb}`, {
+              count,
+              what: t(`dataTransfer.targets.${target}`, { defaultValue: target }),
+            })}
+          </PanelRow>
+        ))}
+      </PanelRows>
     </RuledPanel>
   );
 }

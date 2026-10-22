@@ -189,33 +189,41 @@ function Overview() {
   return (
     <div className="space-y-4">
       {o.sandbox_of ? <Alert tone="info">{t("developer.sandboxBanner")}</Alert> : null}
-      <FigureStrip
-        label={t("developer.tabs.overview")}
-        figures={[
-          { key: "keys", label: t("developer.stats.apiKeys"), value: n.format(o.api_keys) },
-          {
-            key: "apps",
-            label: t("developer.stats.connectedApps"),
-            value: n.format(o.connected_apps),
-          },
-          {
-            key: "endpoints",
-            label: t("developer.stats.endpoints"),
-            value: n.format(o.webhook_endpoints),
-          },
-          {
-            key: "deliveries",
-            label: t("developer.stats.deliveries"),
-            value: n.format(o.deliveries_24h),
-          },
-          {
-            key: "failing",
-            label: t("developer.stats.failing"),
-            value: n.format(o.failed_24h),
-            tone: o.failed_24h > 0 ? "danger" : "default",
-          },
-        ]}
-      />
+      {/* What is set up, then the last day's traffic: two ruled lines, so five labels never
+          squeeze into one row. */}
+      <div role="group" aria-label={t("developer.tabs.overview")}>
+        <FigureStrip
+          figures={[
+            { key: "keys", label: t("developer.stats.apiKeys"), value: n.format(o.api_keys) },
+            {
+              key: "apps",
+              label: t("developer.stats.connectedApps"),
+              value: n.format(o.connected_apps),
+            },
+            {
+              key: "endpoints",
+              label: t("developer.stats.endpoints"),
+              value: n.format(o.webhook_endpoints),
+            },
+          ]}
+        />
+        <FigureStrip
+          className="-mt-px"
+          figures={[
+            {
+              key: "deliveries",
+              label: t("developer.stats.deliveries"),
+              value: n.format(o.deliveries_24h),
+            },
+            {
+              key: "failing",
+              label: t("developer.stats.failing"),
+              value: n.format(o.failed_24h),
+              tone: o.failed_24h > 0 ? "danger" : "default",
+            },
+          ]}
+        />
+      </div>
       <p className="text-sm text-muted-foreground">
         {t("developer.rateLimits", {
           perMinute: o.rate_limit_per_minute,
@@ -806,7 +814,7 @@ function DeliveryRow({
             <td className="whitespace-nowrap tabular-nums">
               {formatDateTime(delivery.created_at, locale)}
             </td>
-            <td className="py-1.5 text-right">{action}</td>
+            <td className="py-1.5 text-right whitespace-nowrap">{action}</td>
           </>
         )}
       </tr>

@@ -227,6 +227,42 @@ describe("home", () => {
     expect(within(dashboard).queryAllByRole("region")).toHaveLength(0);
   });
 
+  it("says once when no figure has anything to compare with", async () => {
+    const r = routes({ ...PERMISSIONS, "reporting.dashboard.view": "all" });
+    const kpi = (key: string, title: string, value: string) => ({
+      body: {
+        widget: { key, title, category: "operations", kind: "kpi", report: key },
+        unit: "count",
+        values: [{ label: "", currency: "", value, previous: "0" }],
+        series: [],
+        rows: [],
+      },
+    });
+    mockApi({
+      ...r,
+      "GET /api/v1/reporting/dashboard": {
+        body: {
+          preset: "simple",
+          customised: false,
+          widgets: [
+            { widget: "lessons", size: "s" },
+            { widget: "new_enquiries", size: "s" },
+          ],
+        },
+      },
+      "GET /api/v1/reporting/widgets/lessons": kpi("lessons", "Lessons delivered", "12"),
+      "GET /api/v1/reporting/widgets/new_enquiries": kpi("new_enquiries", "New enquiries", "3"),
+    });
+    render(<App />);
+    const dashboard = await screen.findByRole("region", { name: "Dashboard" });
+    expect(
+      await within(dashboard).findByText(
+        "Nothing to compare with: the comparison period has no figures yet.",
+      ),
+    ).toBeInTheDocument();
+    expect(within(dashboard).queryByText("Nothing to compare with")).not.toBeInTheDocument();
+  });
+
   it("shows only what the role may see", async () => {
     mockApi(routes({ "scheduling.lesson.view": "all" }));
     render(<App />);

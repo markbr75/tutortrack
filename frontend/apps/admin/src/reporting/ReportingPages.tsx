@@ -373,6 +373,7 @@ export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
 
   const loading = !layout.data || widgets.some((w) => w.isPending);
   const figures: StripFigure[] = [];
+  const notes: { context: string | null; comparison: string | null }[] = [];
   const panels: ReactNode[] = [];
   items.forEach((item, index) => {
     const result = widgets[index];
@@ -421,15 +422,28 @@ export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
       // A lone value's label is either its unit ("Lessons", said by the title already) or a
       // figure of its own ("56.4%" margin), which reads as context before the comparison.
       const context = single && v.label && /\d/.test(v.label) ? v.label : null;
-      const note = [context, comparison].filter(Boolean).join(" · ");
+      notes.push({ context, comparison });
       figures.push({
         key: `${item.widget}-${i}`,
         label: i === 0 ? named : v.label,
         value: format(v.value, data.unit, v.currency),
-        note: note || undefined,
       });
     });
   });
+  // Say It Once: when no figure has anything to compare with, one sentence says so under
+  // the strip instead of the same note under every figure.
+  const nothingToCompare = t("reporting.noComparison");
+  const compareOnce =
+    notes.length > 1 &&
+    notes.every((n) => n.comparison === null || n.comparison === nothingToCompare) &&
+    notes.some((n) => n.comparison === nothingToCompare);
+  let n = 0;
+  for (const figure of figures) {
+    if (figure.note !== undefined || figure.tone) continue;
+    const { context, comparison } = notes[n++] ?? { context: null, comparison: null };
+    const note = [context, compareOnce ? null : comparison].filter(Boolean).join(" · ");
+    figure.note = note || undefined;
+  }
 
   return (
     <section aria-labelledby="dashboard-title" className="space-y-4 border-t border-border pt-6">
@@ -609,6 +623,11 @@ export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
               {stripRows(figures).map((row, i) => (
                 <FigureStrip key={i} figures={row} className={i ? "-mt-px" : undefined} />
               ))}
+              {compareOnce ? (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {t("designS9a.nothingToCompare")}
+                </p>
+              ) : null}
             </div>
           ) : null}
           {panels.length ? (
@@ -949,7 +968,7 @@ export function ResultTable({
     key: c.key,
     header: c.label,
     end: figure(c),
-    width: c.type === "money" ? "w-32" : i === 0 ? "min-w-36" : undefined,
+    width: c.type === "money" ? "w-32" : i === 0 ? "min-w-48" : undefined,
   }));
   return (
     <>

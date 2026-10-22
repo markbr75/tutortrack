@@ -200,7 +200,12 @@ function ExportsTable({ destination }: { destination: Destination }) {
                   <span className="block text-xs text-muted-foreground">
                     {[
                       run.full ? t("designS9a.fullExport") : null,
-                      phone ? t("warehouse.rows", { count: run.row_count }) : null,
+                      phone
+                        ? t("designS9a.rowsCount", {
+                            count: run.row_count,
+                            n: new Intl.NumberFormat(i18n.language).format(run.row_count),
+                          })
+                        : null,
                     ]
                       .filter(Boolean)
                       .join(" · ")}
