@@ -133,15 +133,22 @@ export function AuditPage() {
             <span className="block font-medium whitespace-nowrap">
               {action(row.original.action)}
             </span>
-            {/* Who and when fold into one caption under the action (and, on phones, the record). */}
-            <span className="block text-xs text-muted-foreground tabular-nums [overflow-wrap:anywhere]">
-              {[
-                row.original.actor_email || t("designS9b.audit.system"),
-                formatDateTime(row.original.created_at, i18n.language),
-                phone ? row.original.object_repr : "",
-              ]
-                .filter(Boolean)
-                .join(" · ")}
+            {/* Who and when fold into one caption under the action (and, on phones, the
+                record). Each part stays whole, so the line only wraps at a separator. */}
+            <span className="block text-xs text-muted-foreground tabular-nums">
+              <span className="whitespace-nowrap">
+                {row.original.actor_email || t("designS9b.audit.system")}
+              </span>
+              {" · "}
+              <span className="whitespace-nowrap">
+                {formatDateTime(row.original.created_at, i18n.language)}
+              </span>
+              {phone && row.original.object_repr ? (
+                <>
+                  {" · "}
+                  <span className="[overflow-wrap:anywhere]">{row.original.object_repr}</span>
+                </>
+              ) : null}
             </span>
           </div>
         ),
