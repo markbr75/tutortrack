@@ -180,7 +180,7 @@ function ImageField({
           id={id}
           type="file"
           accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon"
-          className="text-sm file:mr-3 file:h-8 file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
+          className="max-w-full min-w-0 text-sm file:mr-3 file:h-8 file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
           disabled={busy}
           onChange={async (e) => {
             const file = e.target.files?.[0];
@@ -255,7 +255,7 @@ function BrandingTab() {
   const set = <K extends keyof KitForm>(key: K, value: KitForm[K]) =>
     setForm({ ...form, [key]: value });
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <form
         aria-label={t("website.branding.form")}
         className="space-y-4"
@@ -275,7 +275,7 @@ function BrandingTab() {
           hint={branch ? t("website.branding.branchHint") : undefined}
         />
         <Card title={t("website.branding.logos")}>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 2xl:grid-cols-2">
             {(
               [
                 ["logo", t("website.branding.logo")],
@@ -343,7 +343,7 @@ function BrandingTab() {
           />
         </Card>
         <Card title={t("website.branding.social")}>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 2xl:grid-cols-2">
             {options.data.social_networks.map((network) => (
               <TextField
                 key={network}

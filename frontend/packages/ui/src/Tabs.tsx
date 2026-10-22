@@ -1,4 +1,4 @@
-import { useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 
 import { cn } from "./cn";
 
@@ -27,6 +27,16 @@ export function Tabs<K extends string>({
 }: TabsProps<K>) {
   const baseId = useId();
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
+  // On narrow screens the row scrolls sideways: keep the selected tab in view (a page can
+  // open on a later tab, e.g. ?tab=site) without moving the page itself.
+  useEffect(() => {
+    const tab = refs.current[value];
+    const row = tab?.parentElement;
+    if (!tab || !row || row.scrollWidth <= row.clientWidth) return;
+    const r = row.getBoundingClientRect();
+    const b = tab.getBoundingClientRect();
+    if (b.left < r.left || b.right > r.right - 24) row.scrollLeft += b.left - r.left - 16;
+  }, [value]);
   const move = (from: K, step: number | "first" | "last") => {
     const index = tabs.findIndex((t) => t.key === from);
     const nextIndex =

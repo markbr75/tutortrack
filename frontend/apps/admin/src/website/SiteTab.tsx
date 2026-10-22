@@ -18,6 +18,7 @@ import { ArrowDown, ArrowUp, ChevronLeft } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 
 import { api, usePermission } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
 import { AiContentHelper } from "../ai/AiParts";
 import { errorText, fieldErrors } from "./helpers";
 import { Card } from "./shared";
@@ -230,6 +231,7 @@ function Pages() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const canManage = usePermission("sites.site.manage");
+  const phone = useIsPhone();
   const pages = useQuery({
     queryKey: ["site-pages"],
     queryFn: async () => unwrap(await api.GET("/api/v1/sites/pages")),
@@ -254,15 +256,20 @@ function Pages() {
         caption={t("website.pages.title")}
         columns={[
           { label: t("website.pages.page") },
-          { label: t("website.pages.address") },
+          ...(phone ? [] : [{ label: t("website.pages.address") }]),
           { label: t("website.pages.status") },
           { label: t("website.pages.actions"), srOnly: true },
         ]}
       >
         {pages.data.results.map((p) => (
           <tr key={p.id}>
-            <td className="font-medium">{p.title}</td>
-            <td className="break-all">/{p.path}</td>
+            <td>
+              <span className="font-medium">{p.title}</span>
+              {phone ? (
+                <span className="block text-xs break-all text-muted-foreground">/{p.path}</span>
+              ) : null}
+            </td>
+            {phone ? null : <td className="break-all">/{p.path}</td>}
             <td
               className={
                 p.status === "changed"
@@ -818,7 +825,7 @@ function BlockImage({
         id={id}
         type="file"
         accept="image/png,image/jpeg,image/webp,image/svg+xml"
-        className="text-sm file:mr-3 file:h-8 file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
+        className="max-w-full min-w-0 text-sm file:mr-3 file:h-8 file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
         onChange={async (e) => {
           const file = e.target.files?.[0];
           if (!file) return;

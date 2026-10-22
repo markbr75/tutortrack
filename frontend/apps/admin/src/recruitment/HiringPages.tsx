@@ -295,11 +295,13 @@ function OpeningEditor({ initial, onClose }: { initial: Draft; onClose: () => vo
               value={d.description}
               onChange={(e) => set({ description: e.target.value })}
             />
-            <AiContentHelper
-              kind="job_ad"
-              title={d.title}
-              onUse={(draft) => set({ title: d.title || draft.title, description: draft.body })}
-            />
+            <div className="mt-1">
+              <AiContentHelper
+                kind="job_ad"
+                title={d.title}
+                onUse={(draft) => set({ title: d.title || draft.title, description: draft.body })}
+              />
+            </div>
           </div>
           <div className="flex flex-wrap items-end gap-2">
             <div className="min-w-56 flex-1 sm:max-w-sm">

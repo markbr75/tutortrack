@@ -747,7 +747,6 @@ function ReferralsSection() {
               caption={t("referrals.listTitle")}
               empty={!rows.length && t("referrals.empty")}
               columns={[
-                ...(phone ? [] : [{ label: t("referrals.referrer") }]),
                 { label: t("referrals.referee") },
                 ...(phone ? [] : [{ label: t("referrals.statusLabel") }]),
                 { label: t("referrals.rewardLabel"), align: "right" },
@@ -756,13 +755,10 @@ function ReferralsSection() {
             >
               {rows.map((r: Referral) => (
                 <tr key={r.id}>
-                  {phone ? null : <td>{r.referrer_name}</td>}
                   <td>
                     {r.referee_name}
                     <span className="block text-xs text-muted-foreground tabular-nums">
-                      {phone
-                        ? `${t("referrals.referrer")} ${r.referrer_name} · ${formatDate(r.created_at, i18n.language)}`
-                        : formatDate(r.created_at, i18n.language)}
+                      {`${t("referrals.referrer")} ${r.referrer_name} · ${formatDate(r.created_at, i18n.language)}`}
                     </span>
                     {phone ? (
                       <span
@@ -798,7 +794,7 @@ function ReferralsSection() {
                   </td>
                   <td className="text-right">
                     {canManage ? (
-                      <div className="flex flex-wrap justify-end gap-1">
+                      <div className="flex justify-end gap-1 whitespace-nowrap">
                         {r.status === "blocked" ? (
                           <Button
                             size="sm"
