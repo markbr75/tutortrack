@@ -10,6 +10,7 @@ import {
   RuledPanel,
   SelectField,
   Spinner,
+  TextAreaField,
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,7 +19,7 @@ import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 import { api } from "../api";
-import { PanelEmpty, PanelLoading, PortalHeader, TextAreaField, Word } from "../layout/PortalPage";
+import { PanelEmpty, PanelLoading, PortalHeader, Word } from "../layout/PortalPage";
 
 type Assignment = components["schemas"]["Assignment"];
 
@@ -145,13 +146,14 @@ function SetHomework() {
             value={form.due}
             onChange={(e) => setForm({ ...form, due: e.target.value })}
           />
-          <TextAreaField
-            className="sm:col-span-2"
-            label={t("learning.homework.instructions")}
-            rows={4}
-            value={form.instructions}
-            onChange={(e) => setForm({ ...form, instructions: e.target.value })}
-          />
+          <div className="sm:col-span-2">
+            <TextAreaField
+              label={t("learning.homework.instructions")}
+              rows={4}
+              value={form.instructions}
+              onChange={(e) => setForm({ ...form, instructions: e.target.value })}
+            />
+          </div>
         </div>
         {create.error ? (
           <div className="px-5 pb-4">

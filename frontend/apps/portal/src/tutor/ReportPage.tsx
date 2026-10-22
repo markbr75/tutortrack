@@ -3,10 +3,12 @@ import { useTranslation } from "@tutortrack/i18n";
 import {
   Alert,
   Button,
+  CheckboxField,
   PanelFooter,
   RuledPanel,
   SelectField,
   Spinner,
+  TextAreaField,
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -14,7 +16,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { api } from "../api";
-import { CheckField, PortalHeader, TextAreaField } from "../layout/PortalPage";
+import { PortalHeader } from "../layout/PortalPage";
 import { isNetworkError, isOffline, queueChange } from "../offline/client";
 import { AiReportDrafter } from "./AiDrafts";
 import { DictationButton } from "./Dictation";
@@ -77,7 +79,7 @@ export function ReportFieldInput({
       <fieldset className="space-y-2">
         <legend className="mb-1 text-sm font-medium">{label}</legend>
         {(field.options ?? []).map((o) => (
-          <CheckField
+          <CheckboxField
             key={o}
             label={o}
             checked={chosen.includes(o)}
@@ -126,21 +128,22 @@ export function ReportFieldInput({
     );
   }
   return (
-    <TextAreaField
-      label={label}
-      rows={4}
-      disabled={disabled}
-      value={(value as string) ?? ""}
-      onChange={(e) => onChange(e.target.value)}
-      labelAside={
-        <DictationButton
-          value={(value as string) ?? ""}
-          onChange={onChange}
-          disabled={disabled}
-          fieldLabel={field.label}
-        />
-      }
-    />
+    // The dictation button (when the browser has speech recognition) sits under the field.
+    <div className="space-y-1.5">
+      <TextAreaField
+        label={label}
+        rows={4}
+        disabled={disabled}
+        value={(value as string) ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <DictationButton
+        value={(value as string) ?? ""}
+        onChange={onChange}
+        disabled={disabled}
+        fieldLabel={field.label}
+      />
+    </div>
   );
 }
 

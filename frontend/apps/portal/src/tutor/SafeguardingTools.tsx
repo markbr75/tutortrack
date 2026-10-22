@@ -1,11 +1,18 @@
 import { ApiError, unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, PanelFooter, RuledPanel, SelectField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  PanelFooter,
+  RuledPanel,
+  SelectField,
+  TextAreaField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
-import { CheckField, TextAreaField } from "../layout/PortalPage";
 
 const CATEGORIES = [
   "physical", "emotional", "sexual", "neglect", "online", "self_harm", "bullying",
@@ -150,7 +157,7 @@ export function TutorRaiseConcern({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
-              <CheckField
+              <CheckboxField
                 label={t("safeguarding.immediateRiskQuestion")}
                 checked={risk}
                 onChange={(e) => setRisk(e.target.checked)}

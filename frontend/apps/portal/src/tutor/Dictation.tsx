@@ -100,7 +100,7 @@ export function DictationButton({
   };
 
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="-ml-3 inline-flex items-center gap-2">
       <Button
         type="button"
         size="sm"

@@ -8,6 +8,7 @@ import {
   RuledPanel,
   SelectField,
   Spinner,
+  TextAreaField,
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -15,7 +16,7 @@ import { ChevronLeft, Paperclip } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { api, uploadFile, usePortalMe } from "../api";
-import { FileField, PanelEmpty, PortalHeader, TextAreaField } from "../layout/PortalPage";
+import { FileField, PanelEmpty, PortalHeader } from "../layout/PortalPage";
 
 type ThreadRow = components["schemas"]["PortalThread"];
 type ThreadDetail = components["schemas"]["PortalThreadDetail"];
@@ -248,14 +249,15 @@ function NewConversation({
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
           />
-          <TextAreaField
-            className="sm:col-span-2"
-            label={t("portalMessages.yourMessage")}
-            rows={4}
-            required
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-          />
+          <div className="sm:col-span-2">
+            <TextAreaField
+              label={t("portalMessages.yourMessage")}
+              rows={4}
+              required
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+            />
+          </div>
           <div className="sm:col-span-2">
             <Attach onChange={setFiles} />
           </div>

@@ -1,11 +1,11 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Button, Spinner } from "@tutortrack/ui";
+import { Button, Spinner, TextAreaField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
-import { PortalHeader, TextAreaField } from "../layout/PortalPage";
+import { PortalHeader } from "../layout/PortalPage";
 
 function Reply({ reportId }: { reportId: string }) {
   const { t } = useTranslation();

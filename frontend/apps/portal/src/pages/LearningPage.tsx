@@ -10,6 +10,7 @@ import {
   RuledPanel,
   Spinner,
   Tabs,
+  TextAreaField,
   TextField,
   TrendChart,
 } from "@tutortrack/ui";
@@ -19,14 +20,7 @@ import { Check, Circle } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { api, uploadFile } from "../api";
-import {
-  FileField,
-  PanelEmpty,
-  PanelLoading,
-  PortalHeader,
-  TextAreaField,
-  Word,
-} from "../layout/PortalPage";
+import { FileField, PanelEmpty, PanelLoading, PortalHeader, Word } from "../layout/PortalPage";
 
 type Homework = components["schemas"]["PortalHomework"];
 type Answer = string | string[];

@@ -3,6 +3,7 @@ import { useTranslation } from "@tutortrack/i18n";
 import {
   Alert,
   Button,
+  CheckboxField,
   PanelFooter,
   RuledPanel,
   SelectField,
@@ -13,7 +14,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
 import { api } from "../api";
-import { CheckField, PanelEmpty, PortalHeader, Word } from "../layout/PortalPage";
+import { PanelEmpty, PortalHeader, Word } from "../layout/PortalPage";
 
 type Connection = components["schemas"]["IntegrationConnection"];
 
@@ -79,7 +80,7 @@ function SyncSettings({ connection }: { connection: Connection }) {
           <legend className="text-sm font-medium">{t("integrations.readCalendars")}</legend>
           <p className="text-xs text-muted-foreground">{t("integrations.readHelp")}</p>
           {page.data.calendars.map((c) => (
-            <CheckField
+            <CheckboxField
               key={c.id}
               label={c.name}
               checked={read.includes(c.id)}
@@ -102,7 +103,7 @@ function SyncSettings({ connection }: { connection: Connection }) {
             ]}
           />
           <div>
-            <CheckField
+            <CheckboxField
               label={t("integrations.twoWay")}
               checked={twoWay}
               disabled={!page.data.two_way_allowed}

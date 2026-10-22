@@ -1,11 +1,20 @@
 import { ApiError, unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, PanelFooter, RuledPanel, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  PanelFooter,
+  RuledPanel,
+  Spinner,
+  TextAreaField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { api, uploadFile } from "../api";
-import { CheckField, FileField, TextAreaField, Word } from "../layout/PortalPage";
+import { FileField, Word } from "../layout/PortalPage";
 import { AiBioHelper } from "./AiDrafts";
 
 const SECTIONS = ["qualifications", "languages", "experience", "location"] as const;
@@ -81,7 +90,7 @@ export function PublicProfileSection() {
               {t("tutor.publicProfile.rejected", { reason: p.rejection_reason })}
             </Alert>
           ) : null}
-          <CheckField
+          <CheckboxField
             className="sm:col-span-2"
             label={t("tutor.publicProfile.listed")}
             checked={p.listed}
@@ -121,7 +130,7 @@ export function PublicProfileSection() {
           <fieldset className="space-y-2">
             <legend className="mb-1 text-sm font-medium">{t("tutor.publicProfile.show")}</legend>
             {SECTIONS.map((key) => (
-              <CheckField
+              <CheckboxField
                 key={key}
                 label={t(`tutor.publicProfile.${key}`)}
                 checked={draft.show.includes(key)}

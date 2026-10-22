@@ -1,12 +1,7 @@
 import { useTranslation } from "@tutortrack/i18n";
 import { cn } from "@tutortrack/ui";
 import { ChevronLeft } from "lucide-react";
-import {
-  useId,
-  type InputHTMLAttributes,
-  type ReactNode,
-  type TextareaHTMLAttributes,
-} from "react";
+import { useId, type InputHTMLAttributes, type ReactNode } from "react";
 
 /**
  * A portal screen's header: an optional way back (faded ink, a 16px chevron), the title at
@@ -107,58 +102,6 @@ export function Word({
   );
 }
 
-const fieldEdge =
-  "w-full rounded-md border border-field bg-surface px-3 py-2 text-sm aria-[invalid=true]:border-danger disabled:opacity-60";
-
-/** A labelled textarea with its hint and error, in the shared field style. */
-export function TextAreaField({
-  label,
-  hint,
-  error,
-  className,
-  labelAside,
-  id,
-  ...props
-}: Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "children"> & {
-  label: string;
-  hint?: string;
-  error?: string;
-  /** Something beside the label (a dictation button). */
-  labelAside?: ReactNode;
-}) {
-  const autoId = useId();
-  const fieldId = id ?? autoId;
-  const describedBy = error ? `${fieldId}-error` : hint ? `${fieldId}-hint` : undefined;
-  return (
-    <div className={cn("flex flex-col gap-1", className)}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <label htmlFor={fieldId} className="text-sm font-medium">
-          {label}
-        </label>
-        {labelAside}
-      </div>
-      <textarea
-        id={fieldId}
-        rows={3}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy}
-        className={fieldEdge}
-        {...props}
-      />
-      {hint && !error ? (
-        <p id={`${fieldId}-hint`} className="text-xs text-muted-foreground">
-          {hint}
-        </p>
-      ) : null}
-      {error ? (
-        <p id={`${fieldId}-error`} role="alert" className="text-xs text-danger">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
 /** A labelled file input whose button takes the secondary button's look. */
 export function FileField({
   label,
@@ -178,7 +121,7 @@ export function FileField({
         id={fieldId}
         type="file"
         aria-describedby={hint ? `${fieldId}-hint` : undefined}
-        className="max-w-full text-sm text-muted-foreground file:mr-3 file:h-9 file:cursor-pointer file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
+        className="max-w-full text-sm text-muted-foreground file:mr-3 file:h-10 file:cursor-pointer file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
         {...props}
       />
       {hint ? (
@@ -187,20 +130,6 @@ export function FileField({
         </p>
       ) : null}
     </div>
-  );
-}
-
-/** A checkbox with its label to the right, at body size. */
-export function CheckField({
-  label,
-  className,
-  ...props
-}: Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & { label: ReactNode }) {
-  return (
-    <label className={cn("flex items-start gap-2 text-sm", className)}>
-      <input type="checkbox" className="mt-0.5 size-4 shrink-0" {...props} />
-      <span>{label}</span>
-    </label>
   );
 }
 

@@ -8,12 +8,13 @@ import {
   PanelRows,
   RuledPanel,
   SelectField,
+  TextAreaField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
-import { PortalHeader, TextAreaField } from "../layout/PortalPage";
+import { PortalHeader } from "../layout/PortalPage";
 
 /** "Your data" (E29-T05): ask for a copy of your (or your child's) data, or for it to be
  * erased, and follow the request. The copy arrives as an expiring link by email. */
@@ -88,12 +89,13 @@ export function PrivacyPage() {
                   ]}
                 />
               ) : null}
-              <TextAreaField
-                className="sm:col-span-2"
-                label={t("privacyCentre.portal.details")}
-                value={details}
-                onChange={(e) => setDetails(e.target.value)}
-              />
+              <div className="sm:col-span-2">
+                <TextAreaField
+                  label={t("privacyCentre.portal.details")}
+                  value={details}
+                  onChange={(e) => setDetails(e.target.value)}
+                />
+              </div>
               {kind === "erasure" ? (
                 <Alert tone="warning" className="sm:col-span-2">
                   {t("privacyCentre.portal.erasureWarning")}

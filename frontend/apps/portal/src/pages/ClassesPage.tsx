@@ -4,6 +4,7 @@ import {
   Alert,
   Button,
   buttonClass,
+  CheckboxField,
   Disclosure,
   PanelRow,
   PanelRows,
@@ -15,7 +16,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, usePortalMe } from "../api";
-import { CheckField, PanelEmpty, PortalHeader, Word } from "../layout/PortalPage";
+import { PanelEmpty, PortalHeader, Word } from "../layout/PortalPage";
 
 type PublicClass = components["schemas"]["PublicClass"];
 
@@ -296,8 +297,8 @@ function ClassRow({
               />
             ) : null}
             {terms ? (
-              <CheckField
-                className="min-h-9 items-center"
+              <CheckboxField
+                className="min-h-9 justify-center"
                 label={t("portalCourses.acceptTerms")}
                 checked={accepted}
                 onChange={(e) => setAccepted(e.target.checked)}

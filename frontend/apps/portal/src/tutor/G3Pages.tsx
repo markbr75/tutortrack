@@ -11,12 +11,13 @@ import {
   RuledTable,
   SelectField,
   Spinner,
+  TextAreaField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
-import { PanelLoading, PortalHeader, TextAreaField } from "../layout/PortalPage";
+import { PanelLoading, PortalHeader } from "../layout/PortalPage";
 import { useIsPhone } from "../layout/useIsPhone";
 
 const quiet = "text-muted-foreground hover:text-foreground";

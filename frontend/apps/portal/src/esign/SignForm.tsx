@@ -1,8 +1,6 @@
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, TextField } from "@tutortrack/ui";
+import { Alert, Button, CheckboxField, TextField } from "@tutortrack/ui";
 import { useState } from "react";
-
-import { CheckField } from "../layout/PortalPage";
 
 /** Click-to-sign (gap batch G2): type your full name and tick that you agree. It opens in
  * place under the document, in a register-ruled box. */
@@ -39,7 +37,7 @@ export function SignForm({
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      <CheckField
+      <CheckboxField
         label={t("esign.agree", { title })}
         checked={agree}
         onChange={(e) => setAgree(e.target.checked)}

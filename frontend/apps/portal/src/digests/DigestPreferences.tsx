@@ -1,10 +1,17 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, PanelFooter, RuledPanel, SelectField, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  PanelFooter,
+  RuledPanel,
+  SelectField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { CheckField } from "../layout/PortalPage";
 import { api } from "../api";
 
 type Digest = components["schemas"]["DigestPreference"];
@@ -63,8 +70,8 @@ export function DigestPreferences() {
                   <p className="text-xs text-muted-foreground">{t("digests.notSent")}</p>
                 ) : null}
                 <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-3">
-                  <CheckField
-                    className="min-h-10 items-center"
+                  <CheckboxField
+                    className="min-h-10 justify-center"
                     label={t("digests.wantIt")}
                     checked={row.enabled}
                     onChange={(e) => change(row, { enabled: e.target.checked })}

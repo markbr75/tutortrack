@@ -1,12 +1,12 @@
 import { ApiError, unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, PanelFooter, RuledPanel, TextField } from "@tutortrack/ui";
+import { Alert, Button, PanelFooter, RuledPanel, TextAreaField, TextField } from "@tutortrack/ui";
 import { useMutation } from "@tanstack/react-query";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { useState } from "react";
 
 import { api } from "../api";
-import { FileField, TextAreaField } from "../layout/PortalPage";
+import { FileField } from "../layout/PortalPage";
 import { useAiFeature } from "./aiApi";
 
 const ERRORS: Record<string, string> = {
@@ -102,12 +102,13 @@ export function AiReportDrafter({
   return (
     <RuledPanel title={t("ai.report.title")} flush>
       <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
-        <TextAreaField
-          className="sm:col-span-2"
-          label={t("ai.report.notes")}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-        />
+        <div className="sm:col-span-2">
+          <TextAreaField
+            label={t("ai.report.notes")}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </div>
         <FileField
           label={t("ai.report.voice")}
           accept="audio/*"

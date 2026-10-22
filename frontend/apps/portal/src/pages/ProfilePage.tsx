@@ -1,12 +1,20 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Button, PanelFooter, RuledPanel, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Button,
+  CheckboxField,
+  PanelFooter,
+  RuledPanel,
+  Spinner,
+  TextAreaField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
 import { DigestPreferences } from "../digests/DigestPreferences";
-import { CheckField, PortalHeader, SavedNote, TextAreaField } from "../layout/PortalPage";
+import { PortalHeader, SavedNote } from "../layout/PortalPage";
 
 type Contact = components["schemas"]["PortalContact"];
 type Student = components["schemas"]["PortalStudent"];
@@ -75,7 +83,7 @@ function ContactForm({ contact }: { contact: Contact }) {
           <fieldset className="space-y-2">
             <legend className="mb-2 text-sm font-medium">{t("portal.whatToReceive")}</legend>
             {FLAGS.map((flag) => (
-              <CheckField
+              <CheckboxField
                 key={flag}
                 label={t(`portal.flags.${flag}`)}
                 checked={Boolean(form[flag])}
@@ -138,13 +146,14 @@ function StudentForm({ student }: { student: Student }) {
             value={form.year_group ?? ""}
             onChange={(e) => setForm({ ...form, year_group: e.target.value })}
           />
-          <TextAreaField
-            className="sm:col-span-3"
-            label={t("portal.learningNeeds")}
-            hint={t("portal.learningNeedsHelp")}
-            value={form.learning_needs ?? ""}
-            onChange={(e) => setForm({ ...form, learning_needs: e.target.value })}
-          />
+          <div className="sm:col-span-3">
+            <TextAreaField
+              label={t("portal.learningNeeds")}
+              hint={t("portal.learningNeedsHelp")}
+              value={form.learning_needs ?? ""}
+              onChange={(e) => setForm({ ...form, learning_needs: e.target.value })}
+            />
+          </div>
         </div>
         <PanelFooter>
           <Button type="submit" disabled={save.isPending}>

@@ -10,6 +10,7 @@ import {
   RuledPanel,
   SelectField,
   Spinner,
+  TextAreaField,
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,7 +18,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api } from "../api";
-import { PanelEmpty, PortalHeader, SavedNote, TextAreaField } from "../layout/PortalPage";
+import { PanelEmpty, PortalHeader, SavedNote } from "../layout/PortalPage";
 import { PayDetailsSection } from "./PayPages";
 import { PublicProfileSection } from "./PublicProfile";
 import { useTutorMe } from "./useTutorMe";
@@ -347,13 +348,14 @@ export function TutorProfilePage() {
                 value={value.phone}
                 onChange={(e) => setForm({ ...value, phone: e.target.value })}
               />
-              <TextAreaField
-                className="sm:col-span-2"
-                label={t("tutor.bio")}
-                rows={5}
-                value={value.bio_public}
-                onChange={(e) => setForm({ ...value, bio_public: e.target.value })}
-              />
+              <div className="sm:col-span-2">
+                <TextAreaField
+                  label={t("tutor.bio")}
+                  rows={5}
+                  value={value.bio_public}
+                  onChange={(e) => setForm({ ...value, bio_public: e.target.value })}
+                />
+              </div>
             </div>
             {save.error ? (
               <div className="px-5 pb-4">

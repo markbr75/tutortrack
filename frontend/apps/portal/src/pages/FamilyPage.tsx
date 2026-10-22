@@ -3,6 +3,7 @@ import { formatDateTime, useTranslation } from "@tutortrack/i18n";
 import {
   Alert,
   Button,
+  CheckboxField,
   NamePlate,
   PanelFooter,
   PanelRow,
@@ -15,7 +16,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api, usePortalMe } from "../api";
-import { CheckField, PanelEmpty, PanelLoading, PortalHeader } from "../layout/PortalPage";
+import { PanelEmpty, PanelLoading, PortalHeader } from "../layout/PortalPage";
 
 type Relationship = components["schemas"]["GuardianInviteRequest"]["relationship"];
 type StudentLogin = components["schemas"]["StudentLogin"];
@@ -119,7 +120,7 @@ function Guardians() {
                 setForm((f) => ({ ...f, relationship: e.target.value as Relationship }))
               }
             />
-            <CheckField
+            <CheckboxField
               className="sm:col-span-2"
               label={t("family.confirm")}
               checked={confirm}
@@ -270,7 +271,7 @@ function LoginRow({ row }: { row: StudentLogin }) {
             error={errors.pin}
             onChange={(e) => setPin(e.target.value)}
           />
-          <CheckField
+          <CheckboxField
             className="sm:col-span-2"
             label={t("family.consent", { name: row.student_name })}
             checked={consent}

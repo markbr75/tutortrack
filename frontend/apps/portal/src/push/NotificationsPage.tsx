@@ -3,6 +3,7 @@ import { formatDateTime, useTranslation } from "@tutortrack/i18n";
 import {
   Alert,
   Button,
+  CheckboxField,
   NamePlate,
   PanelFooter,
   PanelRow,
@@ -14,7 +15,7 @@ import { useEffect, useState } from "react";
 
 import { api } from "../api";
 import { DigestPreferences } from "../digests/DigestPreferences";
-import { CheckField, PanelLoading, PortalHeader } from "../layout/PortalPage";
+import { PanelLoading, PortalHeader } from "../layout/PortalPage";
 import {
   currentSubscription,
   disablePush,
@@ -250,9 +251,9 @@ function Preferences() {
                 </legend>
                 <div className="flex flex-wrap gap-x-5 gap-y-1">
                   {row.available.map((channel) => (
-                    <CheckField
+                    <CheckboxField
                       key={channel}
-                      className="min-h-6 items-center"
+                      className="min-h-6 justify-center"
                       label={t(`comms.channel.${channel}`)}
                       checked={row.channels.includes(channel)}
                       onChange={(e) => toggle(row.category, channel, e.target.checked)}
