@@ -69,6 +69,8 @@ export function RuledTable({
           "[:where(&)_td]:px-4 [:where(&)_td]:py-2.5 [:where(&)_td]:align-top",
           "[:where(&)_td:first-child]:pl-5 [:where(&)_td:last-child]:pr-5",
           "[:where(&)_th]:px-4 [:where(&)_th:first-child]:pl-5 [:where(&)_th:last-child]:pr-5",
+          // Row headers in the body read like a primary cell.
+          "[:where(&)_tbody_th]:py-2.5 [:where(&)_tbody_th]:text-left [:where(&)_tbody_th]:align-top [:where(&)_tbody_th]:font-medium",
           tableClassName,
         )}
       >

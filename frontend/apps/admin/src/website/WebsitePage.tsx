@@ -1,6 +1,15 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  PageHeader,
+  RuledTable,
+  SelectField,
+  Spinner,
+  Tabs,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useState } from "react";
 
@@ -42,8 +51,8 @@ export function WebsitePage() {
     ...(canModerate ? [{ key: "profiles" as const, label: t("website.tabs.profiles") }] : []),
   ];
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("website.title")}</h1>
+    <div>
+      <PageHeader title={t("website.title")} />
       <Tabs label={t("website.title")} tabs={tabs} value={tab} onChange={setTab}>
         {tab === "branding" ? <BrandingTab /> : null}
         {tab === "domains" ? <DomainsTab /> : null}
@@ -120,13 +129,13 @@ function ColourField({
           type="color"
           aria-hidden="true"
           tabIndex={-1}
-          className="h-10 w-12 rounded-md border border-border"
+          className="h-10 w-12 cursor-pointer rounded-md border border-border bg-surface p-1"
           value={isHex(value) ? value : "#000000"}
           onChange={(e) => onChange(e.target.value)}
         />
         <input
           id={id}
-          className="h-10 w-32 rounded-md border border-border bg-background px-3 font-mono text-sm"
+          className="h-10 w-32 rounded-md border border-field bg-surface px-3 text-sm tabular-nums uppercase aria-[invalid=true]:border-danger"
           value={value}
           aria-invalid={error || !isHex(value) ? true : undefined}
           onChange={(e) => onChange(e.target.value)}
@@ -164,14 +173,14 @@ function ImageField({
           <img
             src={`/api/v1/public/assets/${current}`}
             alt=""
-            className="h-10 max-w-32 rounded border border-border object-contain"
+            className="h-10 max-w-32 rounded-md border border-border bg-surface object-contain p-1"
           />
         ) : null}
         <input
           id={id}
           type="file"
           accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon"
-          className="text-sm"
+          className="max-w-full min-w-0 text-sm file:mr-3 file:h-8 file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
           disabled={busy}
           onChange={async (e) => {
             const file = e.target.files?.[0];
@@ -188,7 +197,12 @@ function ImageField({
           }}
         />
         {current ? (
-          <Button size="sm" variant="ghost" onClick={() => onUploaded(null)}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-muted-foreground"
+            onClick={() => onUploaded(null)}
+          >
             {t("website.remove")}
           </Button>
         ) : null}
@@ -241,7 +255,7 @@ function BrandingTab() {
   const set = <K extends keyof KitForm>(key: K, value: KitForm[K]) =>
     setForm({ ...form, [key]: value });
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <form
         aria-label={t("website.branding.form")}
         className="space-y-4"
@@ -261,7 +275,7 @@ function BrandingTab() {
           hint={branch ? t("website.branding.branchHint") : undefined}
         />
         <Card title={t("website.branding.logos")}>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 2xl:grid-cols-2">
             {(
               [
                 ["logo", t("website.branding.logo")],
@@ -329,7 +343,7 @@ function BrandingTab() {
           />
         </Card>
         <Card title={t("website.branding.social")}>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 2xl:grid-cols-2">
             {options.data.social_networks.map((network) => (
               <TextField
                 key={network}
@@ -348,7 +362,7 @@ function BrandingTab() {
         <label className="flex items-start gap-2 text-sm">
           <input
             type="checkbox"
-            className="mt-1"
+            className="mt-0.5 size-4"
             checked={form.hide_powered_by}
             disabled={!options.data.white_label}
             onChange={(e) => set("hide_powered_by", e.target.checked)}
@@ -356,7 +370,7 @@ function BrandingTab() {
           <span>
             {t("website.branding.hidePoweredBy")}
             {!options.data.white_label ? (
-              <span className="block text-muted-foreground">
+              <span className="block text-xs text-muted-foreground">
                 {t("website.branding.whiteLabelPlan")}
               </span>
             ) : null}
@@ -372,7 +386,11 @@ function BrandingTab() {
               {t("website.save")}
             </Button>
             {branch && kit ? (
-              <Button variant="ghost" onClick={() => remove.mutate(kit.id)}>
+              <Button
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={() => remove.mutate(kit.id)}
+              >
                 {t("website.branding.removeOverride")}
               </Button>
             ) : null}
@@ -402,7 +420,7 @@ function Textarea({
       <textarea
         id={id}
         rows={3}
-        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+        className="w-full rounded-md border border-field bg-surface px-3 py-2 text-sm"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
@@ -449,11 +467,11 @@ function ThemePreview({ form, logo }: { form: KitForm; logo: string | null | und
   const link = readableOnWhite(brand);
   const fontFamily = form.font ? `'${form.font}', system-ui, sans-serif` : undefined;
   return (
-    <aside aria-label={t("website.preview.title")} className="space-y-4 lg:sticky lg:top-4">
-      <h2 className="font-semibold">{t("website.preview.title")}</h2>
+    <aside aria-label={t("website.preview.title")} className="space-y-3 lg:sticky lg:top-20">
+      <h2 className="text-base font-semibold">{t("website.preview.title")}</h2>
       <div
         data-testid="theme-preview"
-        className="overflow-hidden rounded-lg border border-border bg-white text-[#111827]"
+        className="overflow-hidden rounded-xl border border-border bg-white text-[#111827]"
         style={{ fontFamily }}
       >
         <div className="flex items-center justify-between border-b border-[#e5e7eb] p-3">
@@ -491,10 +509,31 @@ function ThemePreview({ form, logo }: { form: KitForm; logo: string | null | und
 
 // --- domains ------------------------------------------------------------------------------------
 
-function statusTone(domain: Domain): "success" | "warning" | "danger" | "info" {
-  if (domain.verification_status === "failed" || domain.ssl_status === "failed") return "danger";
-  if (domain.ssl_status === "active") return "success";
-  return "warning";
+const VERIFY_TONE: Record<string, string> = {
+  pending: "font-semibold text-margin",
+  failed: "font-medium text-danger",
+};
+const SSL_TONE: Record<string, string> = {
+  pending: "text-muted-foreground",
+  failed: "font-medium text-danger",
+};
+
+/** A domain's DNS and certificate state in words (waiting in margin red, failures in danger). */
+function DomainStatus({ domain }: { domain: Domain }) {
+  const { t } = useTranslation();
+  return (
+    <>
+      {t("website.domains.verification")}:{" "}
+      <span className={VERIFY_TONE[domain.verification_status] ?? "text-foreground"}>
+        {t(`website.domains.verification_${domain.verification_status}`)}
+      </span>
+      {" · "}
+      {t("website.domains.certificate")}:{" "}
+      <span className={SSL_TONE[domain.ssl_status] ?? "text-foreground"}>
+        {t(`website.domains.ssl_${domain.ssl_status}`)}
+      </span>
+    </>
+  );
 }
 
 function DomainsTab() {
@@ -534,119 +573,124 @@ function DomainsTab() {
   if (!domains.data || !options.data) return <Spinner label={t("grid.loading")} />;
   const addErrors = fieldErrors(add.error);
   return (
-    <div className="space-y-4">
+    <div className="max-w-4xl space-y-6">
       <p className="text-sm text-muted-foreground">{t("website.domains.intro")}</p>
       {!options.data.custom_domain ? (
         <Alert tone="info">{t("website.domains.needsPlan")}</Alert>
       ) : null}
-      {canManage && options.data.custom_domain ? (
-        <form
-          aria-label={t("website.domains.add")}
-          className="flex flex-wrap items-end gap-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            add.mutate();
-          }}
-        >
-          <TextField
-            label={t("website.domains.hostname")}
-            placeholder="portal.example.com"
-            value={hostname}
-            required
-            onChange={(e) => setHostname(e.target.value)}
-            error={addErrors.hostname?.[0]}
-          />
-          <SelectField
-            label={t("website.domains.purpose")}
-            value={purpose}
-            onChange={(e) => setPurpose(e.target.value as "app" | "site")}
-            options={[
-              { value: "app", label: t("website.domains.purposeApp") },
-              { value: "site", label: t("website.domains.purposeSite") },
-            ]}
-          />
-          <Button type="submit" loading={add.isPending}>
-            {t("website.domains.add")}
-          </Button>
-        </form>
-      ) : null}
-      {add.isError && !addErrors.hostname ? (
-        <Alert tone="danger">{errorText(add.error)}</Alert>
-      ) : null}
       {domains.data.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("website.domains.none")}</p>
+        <p className="rounded-xl border border-border bg-surface px-5 py-6 text-sm text-muted-foreground">
+          {t("website.domains.none")}
+        </p>
       ) : null}
       {domains.data.map((domain) => (
-        <Card key={domain.id} title={domain.hostname}>
-          <Alert tone={statusTone(domain)}>
-            <p>
-              {t("website.domains.verification")}:{" "}
-              <strong>{t(`website.domains.verification_${domain.verification_status}`)}</strong> ·{" "}
-              {t("website.domains.certificate")}:{" "}
-              <strong>{t(`website.domains.ssl_${domain.ssl_status}`)}</strong>
+        <Card
+          key={domain.id}
+          title={domain.hostname}
+          description={<DomainStatus domain={domain} />}
+          footer={
+            canManage ? (
+              <>
+                {domain.ssl_status !== "active" ? (
+                  <Button size="sm" variant="secondary" onClick={() => verify.mutate(domain.id)}>
+                    {t("website.domains.checkNow")}
+                  </Button>
+                ) : null}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-muted-foreground"
+                  aria-label={t("website.domains.removeNamed", { host: domain.hostname })}
+                  onClick={() => {
+                    if (
+                      window.confirm(t("website.domains.confirmRemove", { host: domain.hostname }))
+                    )
+                      remove.mutate(domain.id);
+                  }}
+                >
+                  {t("website.remove")}
+                </Button>
+              </>
+            ) : undefined
+          }
+        >
+          {domain.status_detail ? <p className="text-sm">{domain.status_detail}</p> : null}
+          {domain.last_checked_at ? (
+            <p className="text-xs text-muted-foreground tabular-nums">
+              {t("website.domains.lastChecked", {
+                when: formatDateTime(domain.last_checked_at, i18n.language),
+              })}
             </p>
-            {domain.status_detail ? <p>{domain.status_detail}</p> : null}
-            {domain.last_checked_at ? (
-              <p className="text-xs text-muted-foreground">
-                {t("website.domains.lastChecked", {
-                  when: formatDateTime(domain.last_checked_at, i18n.language),
-                })}
-              </p>
-            ) : null}
-          </Alert>
+          ) : null}
           {domain.ssl_status === "active" ? (
             <p className="text-sm">
               {t("website.domains.live")}{" "}
-              <a className="underline" href={domain.url}>
+              <a className="text-link underline-offset-2 hover:underline" href={domain.url}>
                 {domain.url}
               </a>
             </p>
           ) : (
             <>
               <p className="text-sm">{t("website.domains.instructions")}</p>
-              <table className="w-full text-left text-sm">
-                <caption className="sr-only">{t("website.domains.records")}</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">{t("website.domains.type")}</th>
-                    <th scope="col">{t("website.domains.name")}</th>
-                    <th scope="col">{t("website.domains.value")}</th>
+              <RuledTable
+                className="rounded-md border border-border"
+                caption={t("website.domains.records")}
+                columns={[
+                  { header: t("website.domains.type") },
+                  { header: t("website.domains.name") },
+                  { header: t("website.domains.value"), width: "min-w-56" },
+                ]}
+              >
+                {domain.dns_records.map((r) => (
+                  <tr key={r.record_type}>
+                    <td className="font-medium">{r.record_type}</td>
+                    <td className="break-all">{r.name}</td>
+                    <td className="break-all">{r.value}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {domain.dns_records.map((r) => (
-                    <tr key={r.record_type} className="border-t border-border">
-                      <td className="py-1 pr-2">{r.record_type}</td>
-                      <td className="break-all py-1 pr-2 font-mono text-xs">{r.name}</td>
-                      <td className="break-all py-1 font-mono text-xs">{r.value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                ))}
+              </RuledTable>
             </>
           )}
-          {canManage ? (
-            <div className="flex flex-wrap gap-2">
-              {domain.ssl_status !== "active" ? (
-                <Button size="sm" variant="secondary" onClick={() => verify.mutate(domain.id)}>
-                  {t("website.domains.checkNow")}
-                </Button>
-              ) : null}
-              <Button
-                size="sm"
-                variant="ghost"
-                aria-label={t("website.domains.removeNamed", { host: domain.hostname })}
-                onClick={() => {
-                  if (window.confirm(t("website.domains.confirmRemove", { host: domain.hostname })))
-                    remove.mutate(domain.id);
-                }}
-              >
-                {t("website.remove")}
-              </Button>
-            </div>
-          ) : null}
         </Card>
       ))}
+      {canManage && options.data.custom_domain ? (
+        <Card title={t("website.domains.add")}>
+          <form
+            aria-label={t("website.domains.add")}
+            className="flex flex-wrap items-start gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              add.mutate();
+            }}
+          >
+            <div className="min-w-56 flex-1">
+              <TextField
+                label={t("website.domains.hostname")}
+                placeholder="portal.example.com"
+                value={hostname}
+                required
+                onChange={(e) => setHostname(e.target.value)}
+                error={addErrors.hostname?.[0]}
+              />
+            </div>
+            <SelectField
+              label={t("website.domains.purpose")}
+              value={purpose}
+              onChange={(e) => setPurpose(e.target.value as "app" | "site")}
+              options={[
+                { value: "app", label: t("website.domains.purposeApp") },
+                { value: "site", label: t("website.domains.purposeSite") },
+              ]}
+            />
+            <Button type="submit" className="sm:mt-6" loading={add.isPending}>
+              {t("website.domains.add")}
+            </Button>
+          </form>
+          {add.isError && !addErrors.hostname ? (
+            <Alert tone="danger">{errorText(add.error)}</Alert>
+          ) : null}
+        </Card>
+      ) : null}
     </div>
   );
 }
