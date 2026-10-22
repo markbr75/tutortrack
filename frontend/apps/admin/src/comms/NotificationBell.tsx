@@ -103,9 +103,6 @@ export function NotificationBell() {
                         </span>
                       )}
                     </p>
-                    {n.body ? (
-                      <p className="truncate text-xs text-muted-foreground">{n.body}</p>
-                    ) : null}
                   </div>
                   <time
                     dateTime={n.created_at}
@@ -113,6 +110,9 @@ export function NotificationBell() {
                   >
                     {formatDateTime(n.created_at, i18n.language)}
                   </time>
+                  {n.body ? (
+                    <p className="col-span-2 truncate text-xs text-muted-foreground">{n.body}</p>
+                  ) : null}
                 </li>
               ))}
               {list.data && !list.data.results.length ? (

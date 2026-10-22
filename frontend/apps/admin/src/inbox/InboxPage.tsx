@@ -349,7 +349,7 @@ function Conversation({ id }: { id: string }) {
       </header>
       {canAssign ? (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-rule px-5 py-3 text-sm">
-          <span className="flex items-center gap-2">
+          <span className="order-1 flex items-center gap-2">
             <label htmlFor={assigneeId} className="text-muted-foreground">
               {t("inbox.assignee")}
             </label>
@@ -367,48 +367,46 @@ function Conversation({ id }: { id: string }) {
               ))}
             </select>
           </span>
-          <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:flex-1">
-            <span className="flex min-w-0 flex-1 flex-nowrap items-center gap-2">
-              <label htmlFor={untilId} className="shrink-0 text-muted-foreground">
-                {t("inbox.snoozeUntil")}
-              </label>
-              <input
-                id={untilId}
-                type="datetime-local"
-                className={`${inlineField} w-full min-w-0 sm:max-w-56`}
-                value={until}
-                onChange={(e) => setUntil(e.target.value)}
-              />
-              <Button
-                size="sm"
-                variant="secondary"
-                className="shrink-0"
-                disabled={!until}
-                onClick={() => status.mutate("snooze")}
-              >
-                {t("inbox.snooze")}
-              </Button>
-            </span>
-            {th.status === "closed" ? (
-              <Button
-                size="sm"
-                variant="secondary"
-                className="shrink-0"
-                onClick={() => status.mutate("reopen")}
-              >
-                {t("inbox.reopen")}
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                variant="secondary"
-                className="shrink-0"
-                onClick={() => status.mutate("close")}
-              >
-                {t("inbox.close")}
-              </Button>
-            )}
-          </div>
+          {th.status === "closed" ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="order-2 ml-auto shrink-0 sm:order-3"
+              onClick={() => status.mutate("reopen")}
+            >
+              {t("inbox.reopen")}
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="order-2 ml-auto shrink-0 sm:order-3"
+              onClick={() => status.mutate("close")}
+            >
+              {t("inbox.close")}
+            </Button>
+          )}
+          <span className="order-3 flex w-full min-w-0 flex-wrap items-center gap-x-2 gap-y-1 sm:order-2 sm:w-auto">
+            <label htmlFor={untilId} className="w-full text-muted-foreground sm:w-auto">
+              {t("inbox.snoozeUntil")}
+            </label>
+            <input
+              id={untilId}
+              type="datetime-local"
+              className={`${inlineField} min-w-44 flex-1 sm:w-56 sm:flex-none`}
+              value={until}
+              onChange={(e) => setUntil(e.target.value)}
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              className="shrink-0"
+              disabled={!until}
+              onClick={() => status.mutate("snooze")}
+            >
+              {t("inbox.snooze")}
+            </Button>
+          </span>
         </div>
       ) : null}
       {(status.error ?? assign.error) ? (

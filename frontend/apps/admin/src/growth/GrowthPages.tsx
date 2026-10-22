@@ -754,24 +754,17 @@ function ReferralsSection() {
               empty={!rows.length && t("referrals.empty")}
               columns={[
                 { header: t("referrals.referee"), width: phone ? undefined : "min-w-56" },
-                ...(phone ? [] : [{ header: t("referrals.statusLabel") }]),
+                ...(phone ? [] : [{ header: t("referrals.statusLabel"), width: "min-w-40" }]),
                 {
                   header: t("referrals.rewardLabel"),
                   end: true,
                   width: phone ? undefined : "w-32",
                 },
-                ...(phone ? [] : [{ header: t("referrals.actions"), hidden: true }]),
               ]}
             >
               {rows.map((r: Referral) => {
                 const actions = canManage ? (
-                  <div
-                    className={
-                      phone
-                        ? "mt-2 flex flex-wrap gap-1"
-                        : "flex justify-end gap-1 whitespace-nowrap"
-                    }
-                  >
+                  <div className={`mt-2 flex gap-1 ${phone ? "flex-wrap" : "whitespace-nowrap"}`}>
                     {r.status === "blocked" ? (
                       <Button
                         size="sm"
@@ -785,7 +778,7 @@ function ReferralsSection() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className={phone && r.status !== "blocked" ? `-ml-3 ${ghost}` : ghost}
+                        className={r.status !== "blocked" ? `-ml-3 ${ghost}` : ghost}
                         onClick={() => act.mutate({ id: r.id, verb: "cancel" })}
                       >
                         {t("referrals.cancel")}
@@ -798,7 +791,10 @@ function ReferralsSection() {
                     <td>
                       {r.referee_name}
                       <span className="block text-xs text-muted-foreground tabular-nums">
-                        {`${t("referrals.referrer")} ${r.referrer_name} · ${formatDate(r.created_at, i18n.language)}`}
+                        {`${t("referrals.referrer")} ${r.referrer_name} · `}
+                        <span className="whitespace-nowrap">
+                          {formatDate(r.created_at, i18n.language)}
+                        </span>
                       </span>
                       {phone ? (
                         <>
@@ -820,7 +816,9 @@ function ReferralsSection() {
                       <td>
                         <span
                           className={
-                            r.status === "blocked" ? "font-semibold text-margin" : undefined
+                            r.status === "blocked"
+                              ? "font-semibold whitespace-nowrap text-margin"
+                              : "whitespace-nowrap"
                           }
                         >
                           {t(`referrals.status.${r.status}`)}
@@ -832,10 +830,10 @@ function ReferralsSection() {
                               .join(", ")}
                           </span>
                         ) : null}
+                        {actions}
                       </td>
                     )}
                     <td className={figureCell}>{money(r.referrer_credit, i18n.language)}</td>
-                    {phone ? null : <td className="text-right">{actions}</td>}
                   </tr>
                 );
               })}
