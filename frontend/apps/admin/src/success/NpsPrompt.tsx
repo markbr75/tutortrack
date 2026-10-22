@@ -38,12 +38,12 @@ export function NpsPrompt({ onClose }: { onClose: () => void }) {
     return (
       <section
         aria-labelledby={titleId}
-        className="fixed bottom-4 left-4 z-40 w-[min(380px,calc(100vw-2rem))] rounded-lg border border-border bg-background p-4 shadow-lg"
+        className="fixed bottom-4 left-4 z-40 w-[min(380px,calc(100vw-2rem))] rounded-xl border border-border bg-surface px-5 py-4 text-foreground shadow-[0_8px_24px_-8px_rgb(15_23_42/0.25)]"
       >
-        <h2 id={titleId} className="font-semibold" role="status">
+        <h2 id={titleId} className="text-base font-semibold" role="status">
           {t("nps.thanks")}
         </h2>
-        <Button size="sm" variant="ghost" className="mt-2" onClick={onClose}>
+        <Button size="sm" variant="ghost" className="mt-2 -ml-3" onClick={onClose}>
           {t("nps.close")}
         </Button>
       </section>
@@ -52,7 +52,7 @@ export function NpsPrompt({ onClose }: { onClose: () => void }) {
   return (
     <section
       aria-labelledby={titleId}
-      className="fixed bottom-4 left-4 z-40 w-[min(380px,calc(100vw-2rem))] rounded-lg border border-border bg-background p-4 shadow-lg"
+      className="fixed bottom-4 left-4 z-40 w-[min(380px,calc(100vw-2rem))] rounded-xl border border-border bg-surface px-5 py-4 text-foreground shadow-[0_8px_24px_-8px_rgb(15_23_42/0.25)]"
     >
       <form
         onSubmit={(e) => {
@@ -62,7 +62,7 @@ export function NpsPrompt({ onClose }: { onClose: () => void }) {
         className="space-y-3"
       >
         <fieldset>
-          <legend id={titleId} className="font-semibold">
+          <legend id={titleId} className="text-base font-semibold">
             {t("nps.question")}
           </legend>
           <div className="mt-2 flex flex-wrap gap-1">
@@ -76,7 +76,7 @@ export function NpsPrompt({ onClose }: { onClose: () => void }) {
                   onChange={() => setScore(n)}
                   className="peer sr-only"
                 />
-                <span className="grid size-8 place-items-center rounded-md border border-border text-sm peer-checked:bg-brand peer-checked:text-brand-foreground peer-focus-visible:outline peer-focus-visible:outline-2">
+                <span className="grid size-8 place-items-center rounded-md border border-field bg-surface text-sm tabular-nums hover:bg-muted peer-checked:border-foreground peer-checked:bg-muted peer-checked:font-semibold peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-link">
                   {n}
                 </span>
               </label>
@@ -98,7 +98,7 @@ export function NpsPrompt({ onClose }: { onClose: () => void }) {
               maxLength={2000}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+              className="w-full rounded-md border border-field bg-surface px-3 py-2 text-sm"
             />
           </div>
         ) : null}
@@ -110,6 +110,7 @@ export function NpsPrompt({ onClose }: { onClose: () => void }) {
             type="button"
             size="sm"
             variant="ghost"
+            className="text-muted-foreground"
             disabled={answer.isPending}
             onClick={() => answer.mutate(null)}
           >

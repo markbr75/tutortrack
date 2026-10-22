@@ -1,8 +1,9 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
-import { Button, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import { Button, CheckboxField, Spinner, Tabs, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouterState } from "@tanstack/react-router";
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
@@ -45,12 +46,18 @@ function Articles() {
   if (slug) {
     return (
       <article className="space-y-3">
-        <Button size="sm" variant="ghost" onClick={() => setSlug(null)}>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="-ml-3 text-muted-foreground"
+          onClick={() => setSlug(null)}
+        >
+          <ChevronLeft aria-hidden="true" className="size-4" strokeWidth={1.75} />
           {t("help.backToArticles")}
         </Button>
         {article.data ? (
           <>
-            <h3 className="text-lg font-semibold">{article.data.title}</h3>
+            <h3 className="text-base font-semibold">{article.data.title}</h3>
             <Markdown source={article.data.body} headingLevel={4} />
           </>
         ) : (
@@ -68,18 +75,18 @@ function Articles() {
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
-      <h3 className="text-sm font-medium" aria-live="polite">
+      <h3 className="text-xs font-semibold text-muted-foreground" aria-live="polite">
         {term ? t("help.results", { count: results.length }) : t("help.forThisPage")}
       </h3>
       {results.length === 0 && !list.isPending ? (
         <p className="text-sm text-muted-foreground">{t("help.noResults")}</p>
       ) : null}
-      <ul className="space-y-1">
+      <ul className="divide-y divide-rule rounded-xl border border-border bg-surface empty:hidden">
         {results.map((a) => (
           <li key={a.slug}>
             <button
               type="button"
-              className="w-full rounded-md p-2 text-left hover:bg-muted"
+              className="w-full px-4 py-2.5 text-left hover:bg-muted/60"
               onClick={() => {
                 setSlug(a.slug);
                 track("help.article_opened", { article: a.slug });
@@ -111,11 +118,11 @@ function WhatsNew() {
     if (entries.data) mutate();
   }, [entries.data, mutate]);
   return (
-    <ul className="space-y-4">
+    <ul className="divide-y divide-rule">
       {(entries.data ?? []).map((entry) => (
-        <li key={entry.slug}>
-          <h3 className="font-semibold">{entry.title}</h3>
-          <p className="text-xs text-muted-foreground">
+        <li key={entry.slug} className="space-y-2 py-4 first:pt-0">
+          <h3 className="text-base font-semibold">{entry.title}</h3>
+          <p className="text-xs text-muted-foreground tabular-nums">
             {formatDate(entry.published_on, i18n.language)}
           </p>
           <Markdown source={entry.body} headingLevel={4} />
@@ -131,12 +138,9 @@ function Tours({ onStart }: { onStart: (key: string) => void }) {
   const guidance = useGuidance();
   const done = new Set(guidance.data?.completed_tours ?? []);
   return (
-    <ul className="space-y-2">
+    <ul className="divide-y divide-rule rounded-xl border border-border bg-surface">
       {TOURS.map((tour) => (
-        <li
-          key={tour.key}
-          className="flex items-center justify-between gap-2 rounded-md border border-border p-2"
-        >
+        <li key={tour.key} className="flex items-center justify-between gap-2 px-4 py-2.5">
           <span>
             <span className="block text-sm font-medium">{t(`tours.${tour.key}.name`)}</span>
             {done.has(tour.key) ? (
@@ -161,17 +165,14 @@ function UsagePrivacy() {
     <div className="space-y-3 text-sm">
       <p>{t("productAnalytics.explain")}</p>
       {allowed ? (
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={on}
-            onChange={(e) => {
-              setAnalyticsConsent(e.target.checked);
-              setOn(e.target.checked);
-            }}
-          />
-          {t("productAnalytics.toggle")}
-        </label>
+        <CheckboxField
+          label={t("productAnalytics.toggle")}
+          checked={on}
+          onChange={(e) => {
+            setAnalyticsConsent(e.target.checked);
+            setOn(e.target.checked);
+          }}
+        />
       ) : (
         <p className="text-muted-foreground">{t("productAnalytics.offForOrganisation")}</p>
       )}
@@ -216,19 +217,24 @@ export function HelpPanel({ open, onClose, onStartTour, initialTab = "articles" 
       aria-labelledby="help-panel-title"
       onClose={onClose}
       onCancel={onClose}
-      className="m-0 ml-auto h-full max-h-none w-full max-w-md border-l border-border bg-background p-0 shadow-xl backdrop:bg-black/30"
+      className="m-0 ml-auto h-full max-h-none w-full max-w-md border-l border-border bg-surface p-0 text-foreground backdrop:bg-black/40"
     >
       {open ? (
         <div className="flex h-full flex-col">
-          <header className="flex items-center justify-between border-b border-border p-4">
-            <h2 id="help-panel-title" className="text-lg font-semibold">
+          <header className="flex items-center justify-between border-b border-border px-5 py-2.5">
+            <h2 id="help-panel-title" className="text-base font-semibold">
               {t("help.title")}
             </h2>
-            <Button size="sm" variant="ghost" onClick={onClose}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="-mr-3 text-muted-foreground"
+              onClick={onClose}
+            >
               {t("help.close")}
             </Button>
           </header>
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
             <Tabs label={t("help.title")} tabs={tabs} value={tab} onChange={setTab}>
               {tab === "articles" ? <Articles /> : null}
               {tab === "whatsNew" ? <WhatsNew /> : null}

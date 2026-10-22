@@ -71,8 +71,8 @@ describe("setup checklist", () => {
     render(<App />);
     const region = await screen.findByRole("region", { name: "Get started" });
     expect(within(region).getByText("1 of 5 done")).toBeInTheDocument();
-    const bar = within(region).getByRole("progressbar");
-    expect(bar).toHaveAttribute("aria-valuenow", "1");
+    // Progress reads in words (no bar).
+    expect(within(region).queryByRole("progressbar")).toBeNull();
     expect(within(region).getByRole("link", { name: "Add a student" })).toHaveAttribute(
       "href",
       "/students",

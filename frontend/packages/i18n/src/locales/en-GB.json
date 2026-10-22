@@ -7511,6 +7511,23 @@
       "waiting_other": "{{count}} waiting",
       "overdueCount_one": "{{count}} overdue",
       "overdueCount_other": "{{count}} overdue"
+    },
+    "ai": {
+      "askTitle": "Ask a question",
+      "autosave": "Changes are saved as you make them.",
+      "saving": "Saving…",
+      "credits": "credits",
+      "byFeature": "Usage by feature",
+      "noUsage": "No AI requests this month.",
+      "requests": "Requests",
+      "creditsHeading": "Credits"
+    },
+    "announcements": {
+      "description": "News you post here is shown to families and tutors in their portals.",
+      "published": "Published",
+      "count_one": "{{count}} post",
+      "count_other": "{{count}} posts",
+      "empty": "Nothing published yet. Posts you publish appear here and in the portals."
     }
   },
   "designS7": {
