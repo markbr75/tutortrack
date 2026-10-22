@@ -195,6 +195,7 @@ export function RoomsSection() {
 
 export function PayTiersSection() {
   const { t, i18n } = useTranslation();
+  const isPhone = useIsPhone();
   const locale = i18n.language;
   const canManage = usePermission("rates.manage");
   const queryClient = useQueryClient();
@@ -302,57 +303,65 @@ export function PayTiersSection() {
           {!grid.isPending && !tiers.length ? (
             <PanelEmpty>{t("designS6.catalogue.noTiers")}</PanelEmpty>
           ) : (
-            <RuledTable
-              caption={t("pricing.tiers.grid")}
-              loading={grid.isPending || services.isPending}
-              loadingLabel={t("grid.loading")}
-              empty={
-                !services.isPending && !serviceRows.length
-                  ? t("designS6.catalogue.noServices")
-                  : undefined
-              }
-              columns={[
-                { header: t("catalogue.tabs.services") },
-                ...tiers.map((tier) => ({
-                  key: tier.id,
-                  header: tier.name,
-                  end: true,
-                  width: "w-32",
-                })),
-              ]}
-            >
-              {serviceRows.map((service) => (
-                <tr key={service.id}>
-                  <td className="font-medium">{service.name}</td>
-                  {tiers.map((tier) => {
-                    const key = `${service.id}:${tier.id}`;
-                    const current = cell(service.id, tier.id)?.pay_rate;
-                    return (
-                      <td key={tier.id} className={canManage ? "py-1.5" : figureCell}>
-                        {canManage ? (
-                          <TextField
-                            label={t("pricing.tiers.payFor", {
-                              service: service.name,
-                              tier: tier.name,
-                            })}
-                            hideLabel
-                            size="sm"
-                            className="ml-auto w-24 text-right tabular-nums"
-                            inputMode="decimal"
-                            value={edits[key] ?? (current ? String(Number(current.amount)) : "")}
-                            onChange={(e) => setEdits({ ...edits, [key]: e.target.value })}
-                          />
-                        ) : current ? (
-                          formatRate(current, locale)
-                        ) : (
-                          <Faded>–</Faded>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </RuledTable>
+            <>
+              {isPhone && tiers.length > 1 ? (
+                <p className="px-5 pt-3 text-xs text-muted-foreground">
+                  {t("designS6.catalogue.scrollTiers")}
+                </p>
+              ) : null}
+              <RuledTable
+                caption={t("pricing.tiers.grid")}
+                tableClassName="[&_td:first-child]:min-w-36"
+                loading={grid.isPending || services.isPending}
+                loadingLabel={t("grid.loading")}
+                empty={
+                  !services.isPending && !serviceRows.length
+                    ? t("designS6.catalogue.noServices")
+                    : undefined
+                }
+                columns={[
+                  { header: t("catalogue.tabs.services") },
+                  ...tiers.map((tier) => ({
+                    key: tier.id,
+                    header: tier.name,
+                    end: true,
+                    width: "w-32",
+                  })),
+                ]}
+              >
+                {serviceRows.map((service) => (
+                  <tr key={service.id}>
+                    <td className="font-medium">{service.name}</td>
+                    {tiers.map((tier) => {
+                      const key = `${service.id}:${tier.id}`;
+                      const current = cell(service.id, tier.id)?.pay_rate;
+                      return (
+                        <td key={tier.id} className={canManage ? "py-1.5" : figureCell}>
+                          {canManage ? (
+                            <TextField
+                              label={t("pricing.tiers.payFor", {
+                                service: service.name,
+                                tier: tier.name,
+                              })}
+                              hideLabel
+                              size="sm"
+                              className="ml-auto w-24 text-right tabular-nums"
+                              inputMode="decimal"
+                              value={edits[key] ?? (current ? String(Number(current.amount)) : "")}
+                              onChange={(e) => setEdits({ ...edits, [key]: e.target.value })}
+                            />
+                          ) : current ? (
+                            formatRate(current, locale)
+                          ) : (
+                            <Faded>–</Faded>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </RuledTable>
+            </>
           )}
           {importCsv.data || save.error || importCsv.error ? (
             <div className="space-y-3 border-t border-rule px-5 py-4">

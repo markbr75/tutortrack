@@ -7505,7 +7505,8 @@
       "priceCheckHelp": "See what a lesson would charge and pay, and why, without booking it.",
       "chosen_one": "{{count}} chosen",
       "chosen_other": "{{count}} chosen",
-      "tutorShareIs": "Tutor share {{percent}}%"
+      "tutorShareIs": "Tutor share {{percent}}%",
+      "scrollTiers": "Scroll the grid sideways to see every tier."
     },
     "courses": {
       "filter": "Filter classes",
