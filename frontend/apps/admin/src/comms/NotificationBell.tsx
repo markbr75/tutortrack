@@ -1,6 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Button } from "@tutortrack/ui";
+import { Button, Spinner } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Bell } from "lucide-react";
@@ -57,40 +57,71 @@ export function NotificationBell() {
           id="notification-panel"
           role="region"
           aria-label={t("comms.notifications")}
-          className="absolute right-0 z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-lg border border-border bg-surface p-3 shadow-[0_8px_24px_-8px_rgb(15_23_42/0.25)]"
+          className="fixed inset-x-4 top-14 z-30 overflow-hidden rounded-md sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80 border border-border bg-surface shadow-[0_8px_24px_-8px_rgb(15_23_42/0.25)]"
         >
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold">{t("comms.notifications")}</h2>
+          <div className="flex min-h-11 items-center justify-between gap-2 border-b border-border py-1.5 pr-2 pl-4">
+            <h2 className="text-base font-semibold">{t("comms.notifications")}</h2>
             {unread ? (
               <Button size="sm" variant="ghost" onClick={() => read.mutate()}>
                 {t("comms.markAllRead")}
               </Button>
             ) : null}
           </div>
-          <ul className="max-h-96 space-y-2 overflow-y-auto">
-            {(list.data?.results ?? []).map((n) => (
-              <li key={n.id} className={n.read_at ? "text-muted-foreground" : ""}>
-                {n.link ? (
-                  <Link
-                    to={n.link}
-                    className="text-sm font-medium underline-offset-2 hover:underline"
-                    onClick={() => setOpen(false)}
+          {list.isPending ? (
+            <div className="px-4 py-3">
+              <Spinner label={t("grid.loading")} />
+            </div>
+          ) : (
+            <ul className="max-h-96 divide-y divide-rule overflow-y-auto overscroll-contain">
+              {(list.data?.results ?? []).map((n) => (
+                <li
+                  key={n.id}
+                  className="relative grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 px-4 py-2.5 text-sm hover:bg-muted/60"
+                >
+                  <div className="min-w-0">
+                    <p className="flex min-w-0 items-baseline gap-2">
+                      {n.read_at ? null : (
+                        <>
+                          <span
+                            aria-hidden="true"
+                            className="size-1.5 shrink-0 -translate-y-px rounded-full bg-margin"
+                          />
+                          <span className="sr-only">{t("designS8.comms.new")}</span>
+                        </>
+                      )}
+                      {n.link ? (
+                        <Link
+                          to={n.link}
+                          className={`min-w-0 underline-offset-2 after:absolute after:inset-0 hover:underline ${n.read_at ? "font-medium" : "font-semibold"}`}
+                          onClick={() => setOpen(false)}
+                        >
+                          {n.title}
+                        </Link>
+                      ) : (
+                        <span className={`min-w-0 ${n.read_at ? "font-medium" : "font-semibold"}`}>
+                          {n.title}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <time
+                    dateTime={n.created_at}
+                    className="text-right text-xs whitespace-nowrap text-muted-foreground"
                   >
-                    {n.title}
-                  </Link>
-                ) : (
-                  <p className="text-sm font-medium">{n.title}</p>
-                )}
-                {n.body ? <p className="text-xs">{n.body}</p> : null}
-                <p className="text-xs text-muted-foreground">
-                  {formatDateTime(n.created_at, i18n.language)}
-                </p>
-              </li>
-            ))}
-            {list.data && !list.data.results.length ? (
-              <li className="text-sm text-muted-foreground">{t("comms.noNotifications")}</li>
-            ) : null}
-          </ul>
+                    {formatDateTime(n.created_at, i18n.language)}
+                  </time>
+                  {n.body ? (
+                    <p className="col-span-2 truncate text-xs text-muted-foreground">{n.body}</p>
+                  ) : null}
+                </li>
+              ))}
+              {list.data && !list.data.results.length ? (
+                <li className="px-4 py-4 text-sm text-muted-foreground">
+                  {t("comms.noNotifications")}
+                </li>
+              ) : null}
+            </ul>
+          )}
         </div>
       ) : null}
     </div>

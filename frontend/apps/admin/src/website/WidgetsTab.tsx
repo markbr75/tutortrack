@@ -1,6 +1,18 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  NamePlate,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  TextField,
+} from "@tutortrack/ui";
+import { Check, Copy } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 
@@ -16,26 +28,34 @@ function CopyBlock({ label, value }: { label: string; value: string }) {
   const id = useId();
   const [copied, setCopied] = useState(false);
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       <p id={id} className="text-sm font-medium">
         {label}
       </p>
-      <pre
-        aria-labelledby={id}
-        className="overflow-x-auto whitespace-pre-wrap break-all rounded-md bg-muted p-3 text-xs"
-      >
-        {value}
-      </pre>
-      <Button
-        size="sm"
-        variant="secondary"
-        onClick={() => {
-          void navigator.clipboard?.writeText(value);
-          setCopied(true);
-        }}
-      >
-        {copied ? t("website.copied") : t("website.copyNamed", { what: label })}
-      </Button>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+        <pre
+          aria-labelledby={id}
+          className="min-w-0 flex-1 rounded-md border border-field bg-background px-3 py-2 font-sans text-xs break-all whitespace-pre-wrap"
+        >
+          {value}
+        </pre>
+        <Button
+          size="sm"
+          variant="secondary"
+          className="shrink-0"
+          onClick={() => {
+            void navigator.clipboard?.writeText(value);
+            setCopied(true);
+          }}
+        >
+          {copied ? (
+            <Check aria-hidden="true" className="size-4" strokeWidth={1.75} />
+          ) : (
+            <Copy aria-hidden="true" className="size-4" strokeWidth={1.75} />
+          )}
+          {copied ? t("website.copied") : t("website.copyNamed", { what: label })}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -113,6 +133,7 @@ function OptionsEditor({
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
+            className="size-4"
             checked={value.show_filters !== false}
             onChange={(e) => set("show_filters", e.target.checked)}
           />
@@ -128,6 +149,7 @@ function OptionsEditor({
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
+            className="size-4"
             checked={Boolean(value.show_prices)}
             onChange={(e) => set("show_prices", e.target.checked)}
           />
@@ -140,6 +162,7 @@ function OptionsEditor({
             <label key={s.id} className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
+                className="size-4"
                 checked={chosen.includes(s.id)}
                 onChange={(e) =>
                   set(
@@ -166,6 +189,7 @@ function OptionsEditor({
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
+            className="size-4"
             checked={value.show_prices !== false}
             onChange={(e) => set("show_prices", e.target.checked)}
           />
@@ -174,6 +198,7 @@ function OptionsEditor({
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
+            className="size-4"
             checked={value.show_filters !== false}
             onChange={(e) => set("show_filters", e.target.checked)}
           />
@@ -250,7 +275,7 @@ function WidgetPreview({ widget, scriptUrl }: { widget: Widget; scriptUrl: strin
       title={t("website.widgets.previewOf", { name: widget.name })}
       sandbox="allow-scripts allow-same-origin allow-forms"
       srcDoc={doc}
-      className="h-80 w-full rounded-md border border-border"
+      className="block h-80 w-full rounded-md border border-border bg-white"
     />
   );
 }
@@ -313,138 +338,163 @@ export function WidgetsTab() {
   const available = kinds.data.filter((k) => k.available);
   const description = kinds.data.find((k) => k.key === kind)?.description;
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl space-y-6">
       <p className="text-sm text-muted-foreground">{t("website.widgets.intro")}</p>
-      {canManage ? (
-        <Card title={t("website.widgets.new")}>
-          <form
-            aria-label={t("website.widgets.new")}
-            className="space-y-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              create.mutate();
-            }}
-          >
-            <div className="grid gap-3 sm:grid-cols-2">
-              <SelectField
-                label={t("website.widgets.kind")}
-                value={kind}
-                hint={description}
-                onChange={(e) => {
-                  setKind(e.target.value);
-                  setOpts({});
-                }}
-                options={available.map((k) => ({ value: k.key, label: k.title }))}
-              />
-              <TextField
-                label={t("website.widgets.name")}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <OptionsEditor kind={kind} value={opts} onChange={setOpts} />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <TextField
-                label={t("website.widgets.origins")}
-                hint={t("website.widgets.originsHint")}
-                placeholder="https://www.example.com"
-                value={origins}
-                onChange={(e) => setOrigins(e.target.value)}
-                error={errors.allowed_origins?.[0]}
-              />
-              <SelectField
-                label={t("website.widgets.corners")}
-                value={radius}
-                onChange={(e) => setRadius(e.target.value)}
-                options={[
-                  { value: "", label: t("website.widgets.cornersDefault") },
-                  { value: "0px", label: t("website.widgets.cornersSquare") },
-                  { value: "16px", label: t("website.widgets.cornersRound") },
-                ]}
-              />
-            </div>
-            {create.isError ? (
-              <Alert tone="danger">
-                {errorText(create.error)}
-                {errors.options ? ` ${JSON.stringify(errors.options)}` : ""}
-              </Alert>
-            ) : null}
-            <Button type="submit" loading={create.isPending}>
-              {t("website.widgets.create")}
-            </Button>
-          </form>
-        </Card>
-      ) : null}
       {widgets.data.results.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("website.widgets.none")}</p>
+        <p className="rounded-xl border border-border bg-surface px-5 py-6 text-sm text-muted-foreground">
+          {t("website.widgets.none")}
+        </p>
       ) : null}
       {widgets.data.results.map((widget) => (
-        <Card key={widget.id} title={widget.name}>
-          <p className="text-sm text-muted-foreground">
-            {kinds.data.find((k) => k.key === widget.kind)?.title} · <code>{widget.key}</code>
-            {!widget.active ? ` · ${t("website.widgets.inactive")}` : ""}
-          </p>
+        <Card
+          key={widget.id}
+          title={widget.name}
+          description={
+            <>
+              {kinds.data.find((k) => k.key === widget.kind)?.title} ·{" "}
+              <span className="tabular-nums">{widget.key}</span>
+              {!widget.active ? (
+                <span className="font-medium text-foreground">
+                  {" · "}
+                  {t("website.widgets.inactive")}
+                </span>
+              ) : null}
+            </>
+          }
+          footer={
+            <>
+              <Button
+                size="sm"
+                variant="secondary"
+                aria-expanded={previewing === widget.id}
+                onClick={() => setPreviewing(previewing === widget.id ? null : widget.id)}
+              >
+                {previewing === widget.id
+                  ? t("website.widgets.hidePreview")
+                  : t("website.widgets.preview")}
+              </Button>
+              {canManage ? (
+                <>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      const next = window.prompt(
+                        t("website.widgets.originsPrompt"),
+                        widget.allowed_origins.join(", "),
+                      );
+                      if (next !== null)
+                        update.mutate({
+                          id: widget.id,
+                          body: { allowed_origins: originsFrom(next) },
+                        });
+                    }}
+                  >
+                    {t("website.widgets.editOrigins")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      update.mutate({ id: widget.id, body: { active: !widget.active } })
+                    }
+                  >
+                    {widget.active
+                      ? t("website.widgets.deactivate")
+                      : t("website.widgets.activate")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-muted-foreground"
+                    aria-label={t("website.removeNamed", { name: widget.name })}
+                    onClick={() => remove.mutate(widget.id)}
+                  >
+                    {t("website.remove")}
+                  </Button>
+                </>
+              ) : null}
+            </>
+          }
+        >
           <CopyBlock label={t("website.widgets.embed")} value={widget.embed_code} />
           <CopyBlock label={t("website.widgets.shortcode")} value={widget.wordpress_shortcode} />
           <p className="text-sm">
-            {t("website.widgets.allowed")}:{" "}
-            {widget.allowed_origins.length
-              ? widget.allowed_origins.join(", ")
-              : t("website.widgets.allowedNone")}
+            <span className="text-muted-foreground">{t("website.widgets.allowed")}:</span>{" "}
+            <span className="break-all">
+              {widget.allowed_origins.length
+                ? widget.allowed_origins.join(", ")
+                : t("website.widgets.allowedNone")}
+            </span>
           </p>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              aria-expanded={previewing === widget.id}
-              onClick={() => setPreviewing(previewing === widget.id ? null : widget.id)}
-            >
-              {previewing === widget.id
-                ? t("website.widgets.hidePreview")
-                : t("website.widgets.preview")}
-            </Button>
-            {canManage ? (
-              <>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    const next = window.prompt(
-                      t("website.widgets.originsPrompt"),
-                      widget.allowed_origins.join(", "),
-                    );
-                    if (next !== null)
-                      update.mutate({
-                        id: widget.id,
-                        body: { allowed_origins: originsFrom(next) },
-                      });
-                  }}
-                >
-                  {t("website.widgets.editOrigins")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => update.mutate({ id: widget.id, body: { active: !widget.active } })}
-                >
-                  {widget.active ? t("website.widgets.deactivate") : t("website.widgets.activate")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  aria-label={t("website.removeNamed", { name: widget.name })}
-                  onClick={() => remove.mutate(widget.id)}
-                >
-                  {t("website.remove")}
-                </Button>
-              </>
-            ) : null}
-          </div>
           {previewing === widget.id ? (
             <WidgetPreview widget={widget} scriptUrl={options.data.widgets_script_url} />
           ) : null}
         </Card>
       ))}
+      {canManage ? (
+        <RuledPanel title={t("website.widgets.new")} flush>
+          <form
+            aria-label={t("website.widgets.new")}
+            onSubmit={(e) => {
+              e.preventDefault();
+              create.mutate();
+            }}
+          >
+            <div className="space-y-4 px-5 py-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <SelectField
+                  label={t("website.widgets.kind")}
+                  value={kind}
+                  hint={description}
+                  onChange={(e) => {
+                    setKind(e.target.value);
+                    setOpts({});
+                  }}
+                  options={available.map((k) => ({ value: k.key, label: k.title }))}
+                />
+                <TextField
+                  label={t("website.widgets.name")}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <OptionsEditor kind={kind} value={opts} onChange={setOpts} />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <TextField
+                  label={t("website.widgets.origins")}
+                  hint={t("website.widgets.originsHint")}
+                  placeholder="https://www.example.com"
+                  value={origins}
+                  onChange={(e) => setOrigins(e.target.value)}
+                  error={errors.allowed_origins?.[0]}
+                />
+                <SelectField
+                  label={t("website.widgets.corners")}
+                  value={radius}
+                  onChange={(e) => setRadius(e.target.value)}
+                  options={[
+                    { value: "", label: t("website.widgets.cornersDefault") },
+                    { value: "0px", label: t("website.widgets.cornersSquare") },
+                    { value: "16px", label: t("website.widgets.cornersRound") },
+                  ]}
+                />
+              </div>
+              {create.isError ? (
+                <Alert tone="danger">
+                  {errorText(create.error)}
+                  {errors.options ? ` ${JSON.stringify(errors.options)}` : ""}
+                </Alert>
+              ) : null}
+            </div>
+            <PanelFooter>
+              <Button type="submit" size="sm" loading={create.isPending}>
+                {t("website.widgets.create")}
+              </Button>
+            </PanelFooter>
+          </form>
+        </RuledPanel>
+      ) : null}
       <Card title={t("website.widgets.otherBuilders")}>
         <ul className="list-disc space-y-1 pl-5 text-sm">
           <li>{t("website.widgets.wordpress")}</li>
@@ -499,95 +549,114 @@ export function ReviewsTab() {
   if (!reviews.data) return <Spinner label={t("grid.loading")} />;
   const errors = fieldErrors(create.error);
   return (
-    <div className="space-y-4">
+    <div className="max-w-4xl space-y-6">
       <p className="text-sm text-muted-foreground">{t("website.reviews.intro")}</p>
+      <RuledPanel title={t("website.tabs.reviews")} flush>
+        {reviews.data.results.length ? (
+          <PanelRows>
+            {reviews.data.results.map((r) => (
+              <PanelRow key={r.id}>
+                <NamePlate
+                  name={<blockquote className="font-normal">“{r.quote}”</blockquote>}
+                  context={[
+                    [r.author, r.role].filter(Boolean).join(", "),
+                    r.rating ? t("website.reviews.stars", { n: r.rating }) : "",
+                    !r.published ? t("website.reviews.hidden") : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  aside={
+                    canManage ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => toggle.mutate({ id: r.id, published: !r.published })}
+                        >
+                          {r.published ? t("website.reviews.hide") : t("website.reviews.show")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-muted-foreground"
+                          aria-label={t("website.removeNamed", { name: r.author })}
+                          onClick={() => remove.mutate(r.id)}
+                        >
+                          {t("website.remove")}
+                        </Button>
+                      </>
+                    ) : null
+                  }
+                />
+              </PanelRow>
+            ))}
+          </PanelRows>
+        ) : (
+          <p className="px-5 py-4 text-sm text-muted-foreground">
+            {t("designS8.website.noTestimonials")}
+          </p>
+        )}
+      </RuledPanel>
       {canManage ? (
-        <form
-          aria-label={t("website.reviews.add")}
-          className="space-y-3 rounded-lg border border-border p-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            create.mutate();
-          }}
-        >
-          <div className="flex flex-col gap-1">
-            <label htmlFor={quoteId} className="text-sm font-medium">
-              {t("website.reviews.quote")}
-            </label>
-            <textarea
-              id={quoteId}
-              required
-              rows={3}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-              value={form.quote}
-              aria-invalid={errors.quote ? true : undefined}
-              onChange={(e) => setForm({ ...form, quote: e.target.value })}
-            />
-            {errors.quote ? (
-              <p className="text-xs text-danger" role="alert">
-                {errors.quote[0]}
-              </p>
-            ) : null}
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <TextField
-              label={t("website.reviews.author")}
-              required
-              value={form.author}
-              onChange={(e) => setForm({ ...form, author: e.target.value })}
-            />
-            <TextField
-              label={t("website.reviews.role")}
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
-            />
-            <SelectField
-              label={t("website.reviews.rating")}
-              value={form.rating}
-              onChange={(e) => setForm({ ...form, rating: e.target.value })}
-              options={[
-                { value: "", label: t("website.reviews.noRating") },
-                ...["5", "4", "3", "2", "1"].map((n) => ({ value: n, label: n })),
-              ]}
-            />
-          </div>
-          <Button type="submit" loading={create.isPending}>
-            {t("website.reviews.add")}
-          </Button>
-        </form>
-      ) : null}
-      <ul className="space-y-2">
-        {reviews.data.results.map((r) => (
-          <li key={r.id} className="rounded-lg border border-border p-3 text-sm">
-            <blockquote>“{r.quote}”</blockquote>
-            <p className="text-muted-foreground">
-              {r.author}
-              {r.role ? `, ${r.role}` : ""}
-              {r.rating ? ` · ${t("website.reviews.stars", { n: r.rating })}` : ""}
-              {!r.published ? ` · ${t("website.reviews.hidden")}` : ""}
-            </p>
-            {canManage ? (
-              <div className="mt-2 flex gap-2">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => toggle.mutate({ id: r.id, published: !r.published })}
-                >
-                  {r.published ? t("website.reviews.hide") : t("website.reviews.show")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  aria-label={t("website.removeNamed", { name: r.author })}
-                  onClick={() => remove.mutate(r.id)}
-                >
-                  {t("website.remove")}
-                </Button>
+        <RuledPanel title={t("website.reviews.add")} flush>
+          <form
+            aria-label={t("website.reviews.add")}
+            onSubmit={(e) => {
+              e.preventDefault();
+              create.mutate();
+            }}
+          >
+            <div className="space-y-4 px-5 py-4">
+              <div className="flex flex-col gap-1">
+                <label htmlFor={quoteId} className="text-sm font-medium">
+                  {t("website.reviews.quote")}
+                </label>
+                <textarea
+                  id={quoteId}
+                  required
+                  rows={3}
+                  className="w-full rounded-md border border-field bg-surface px-3 py-2 text-sm aria-[invalid=true]:border-danger"
+                  value={form.quote}
+                  aria-invalid={errors.quote ? true : undefined}
+                  onChange={(e) => setForm({ ...form, quote: e.target.value })}
+                />
+                {errors.quote ? (
+                  <p className="text-xs text-danger" role="alert">
+                    {errors.quote[0]}
+                  </p>
+                ) : null}
               </div>
-            ) : null}
-          </li>
-        ))}
-      </ul>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <TextField
+                  label={t("website.reviews.author")}
+                  required
+                  value={form.author}
+                  onChange={(e) => setForm({ ...form, author: e.target.value })}
+                />
+                <TextField
+                  label={t("website.reviews.role")}
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                />
+                <SelectField
+                  label={t("website.reviews.rating")}
+                  value={form.rating}
+                  onChange={(e) => setForm({ ...form, rating: e.target.value })}
+                  options={[
+                    { value: "", label: t("website.reviews.noRating") },
+                    ...["5", "4", "3", "2", "1"].map((n) => ({ value: n, label: n })),
+                  ]}
+                />
+              </div>
+            </div>
+            <PanelFooter>
+              <Button type="submit" size="sm" loading={create.isPending}>
+                {t("website.reviews.add")}
+              </Button>
+            </PanelFooter>
+          </form>
+        </RuledPanel>
+      ) : null}
     </div>
   );
 }

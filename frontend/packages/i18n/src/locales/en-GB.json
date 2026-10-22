@@ -1,4 +1,67 @@
 {
+  "designS8": {
+    "view": "View",
+    "edit": "Edit",
+    "recruitment": {
+      "emptyColumn": "No applications here.",
+      "applied": "Applied {{date}}",
+      "moveStage": "Move to another stage",
+      "move": "Move",
+      "rejectTitle": "Reject this application",
+      "application": "Application",
+      "qualifications": "Qualifications",
+      "experience": "Experience",
+      "postcode": "Postcode",
+      "rightToWork": "Right to work",
+      "noInterviews": "No interviews yet.",
+      "rating": "Rated {{rating}} of 5",
+      "noReferences": "No references asked for yet.",
+      "noScorecards": "No scorecards yet.",
+      "nextSteps": "Next steps",
+      "sendRequest": "Send the request",
+      "allVacancies": "See all vacancies",
+      "askAgain": "Please ask us for a new link.",
+      "noNotes": "No notes yet.",
+      "markDone": "Mark done",
+      "timesIn": "Times are in {{zone}}.",
+      "waited_one": "Waiting {{count}} day in this stage",
+      "waited_other": "Waiting {{count}} days in this stage"
+    },
+    "growth": {
+      "noLinks": "No tracking links yet.",
+      "noRules": "No commission rules yet.",
+      "rate": "Rate",
+      "percent": "{{value}}%",
+      "chosen_one": "{{count}} chosen",
+      "chosen_other": "{{count}} chosen"
+    },
+    "comms": {
+      "new": "New:",
+      "noNumbers": "No numbers yet.",
+      "noTemplates": "No WhatsApp templates yet.",
+      "noCanned": "No canned replies yet.",
+      "removeNamed": "Remove {{name}}",
+      "notConnected": "Not connected",
+      "record": "Record"
+    },
+    "messageStatus": {
+      "queued": "Sent",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "opened": "Opened",
+      "clicked": "Clicked",
+      "bounced": "Bounced",
+      "complained": "Marked as spam",
+      "failed": "Failed",
+      "suppressed": "Blocked"
+    },
+    "broadcasts": {
+      "figures": "Delivery figures"
+    },
+    "website": {
+      "noTestimonials": "No reviews added yet."
+    }
+  },
   "app": {
     "name": "TutorTrack"
   },
@@ -3358,7 +3421,13 @@
     },
     "dryRun": {
       "title": "What will happen",
-      "rows": "{{valid}} rows are ready, {{invalid}} have errors and will be left out, {{warnings}} have warnings.",
+      "rows": "{{ready}}, {{invalid}}, {{warnings}}.",
+      "ready_one": "{{count}} row is ready",
+      "ready_other": "{{count}} rows are ready",
+      "invalid_one": "{{count}} has errors and will be left out",
+      "invalid_other": "{{count}} have errors and will be left out",
+      "warnings_one": "{{count}} has warnings",
+      "warnings_other": "{{count}} have warnings",
       "create": "Create {{count}} {{what}}",
       "update": "Update {{count}} {{what}}"
     },
@@ -7358,6 +7427,61 @@
     "badDebtHelp": "When you write off an invoice, reclaim the VAT in the amount written off (bad debt relief). Write-offs then post the VAT back to the VAT account at the invoice's rates.",
     "exportBranch": "Branch",
     "allBranches": "All branches"
+  },
+  "designS9a": {
+    "showTable": "Show as a table",
+    "groupByOption": "Group by: {{name}}",
+    "any": {
+      "tutor": "Any tutor",
+      "service": "Any service",
+      "client": "Any client"
+    },
+    "fieldsOf": "{{entity}} custom fields",
+    "anyField": "Any custom field",
+    "equals": "Equals…",
+    "currencyPlaceholder": "Currency, e.g. GBP",
+    "asAt": "As at {{date}}",
+    "scrollHint": "Scroll the table sideways to see every column.",
+    "arrange": "Arrange the dashboard",
+    "arrangeHelp": "Change the order and size of the figures, or add and remove them.",
+    "addFigure": "Add a figure…",
+    "figures": "Figures for the period",
+    "libraryHelp": "Every report you can run, by area. Open one to filter, chart, save or download it.",
+    "reportCount_one": "{{count}} report",
+    "reportCount_other": "{{count}} reports",
+    "savedHelp": "Report views you saved with their filters, the ones emailed on a schedule, and recent downloads.",
+    "noRuns": "No downloads or deliveries yet.",
+    "paused": "Paused",
+    "report": "Report",
+    "when": "When",
+    "status": "Status",
+    "rowsHeading": "Rows",
+    "chooseColumn": "Choose a column…",
+    "byGrain": "By {{grain}}",
+    "chooseValue": "Choose a value…",
+    "exportsOf": "Exports to {{name}}",
+    "until": "Changes up to",
+    "files": "Files",
+    "fullExport": "Full export",
+    "importOptions": "Import options",
+    "exports": "Your exports",
+    "noExports": "No exports yet.",
+    "endpoints": "Endpoints",
+    "noApps": "No OAuth apps registered yet.",
+    "registerApp": "Register an OAuth app",
+    "noSandboxes": "No sandboxes yet.",
+    "minutes": "minutes",
+    "rowsCount_one": "{{n}} row",
+    "rowsCount_other": "{{n}} rows",
+    "allEvents": "All events",
+    "reconnect": "Reconnect",
+    "waitingCount_one": "{{count}} waiting",
+    "waitingCount_other": "{{count}} waiting",
+    "connectAnother": "Connect another integration",
+    "chooseIntegration": "Choose an integration…",
+    "connect": "Connect",
+    "openDirectory": "Open the integrations directory",
+    "nothingToCompare": "Nothing to compare with: the comparison period has no figures yet."
   },
   "designS9b": {
     "units": {
