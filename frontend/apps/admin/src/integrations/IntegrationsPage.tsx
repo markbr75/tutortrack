@@ -262,7 +262,9 @@ function ConnectionRow({ connection, showOwner }: { connection: Connection; show
           <p className="text-xs text-muted-foreground">
             {showOwner ? (
               <>
-                {connection.user ? connection.user.name : t("integrations.organisationLevel")}
+                <span>
+                  {connection.user ? connection.user.name : t("integrations.organisationLevel")}
+                </span>
                 {" · "}
               </>
             ) : null}

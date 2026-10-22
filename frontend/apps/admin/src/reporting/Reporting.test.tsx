@@ -53,7 +53,7 @@ const REVENUE_DEF = {
 };
 
 describe("reporting", () => {
-  it("shows the dashboard with KPI tiles and comparisons, and saves a customised layout", async () => {
+  it("shows the dashboard figures with comparisons in words, and saves a customised layout", async () => {
     const calls = mockApi({
       ...BASE,
       "GET /api/v1/reporting/dashboard": {
@@ -88,18 +88,18 @@ describe("reporting", () => {
       }),
     });
     render(<App />);
-    const lessons = await screen.findByRole("region", { name: "Lessons delivered" });
-    expect(await within(lessons).findByText("Same as the previous period")).toBeInTheDocument();
+    // Single figures read as one ruled strip, each with its comparison in words.
+    const figures = await screen.findByRole("group", { name: "Figures for the period" });
+    expect(await within(figures).findByText("Same as the previous period")).toBeInTheDocument();
     expect(
-      within(lessons).getByRole("link", { name: "Open the Lessons delivered report" }),
+      within(figures).getByRole("link", { name: "Open the Lessons delivered report" }),
     ).toHaveAttribute("href", "/analytics/revenue?period=this_month");
     // Home already shows revenue in its money strip, so the dashboard leaves it out…
-    expect(screen.queryByRole("region", { name: "Revenue" })).not.toBeInTheDocument();
+    expect(within(figures).queryByText("Revenue")).not.toBeInTheDocument();
     // …until you customise, when every widget can be arranged.
     fireEvent.click(screen.getByRole("button", { name: "Customise" }));
-    const revenue = await screen.findByRole("region", { name: "Revenue" });
-    expect(await within(revenue).findByText("£1,200.00")).toBeInTheDocument();
-    expect(within(revenue).getByText("Up 20% on the previous period")).toBeInTheDocument();
+    expect(await screen.findByText("£1,200.00")).toBeInTheDocument();
+    expect(screen.getByText("Up 20% on the previous period")).toBeInTheDocument();
 
     fireEvent.click(await screen.findByRole("button", { name: "Move Lessons delivered earlier" }));
     fireEvent.change(screen.getByLabelText("Size of Revenue"), { target: { value: "l" } });

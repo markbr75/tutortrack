@@ -418,7 +418,10 @@ export function Dashboard({ hide = [] }: { hide?: readonly string[] } = {}) {
     data.values.forEach((v, i) => {
       const single = data.values.length === 1;
       const comparison = change(v.value, v.previous);
-      const note = [single && v.label ? v.label : null, comparison].filter(Boolean).join(" · ");
+      // A lone value's label is either its unit ("Lessons", said by the title already) or a
+      // figure of its own ("56.4%" margin), which reads as context before the comparison.
+      const context = single && v.label && /\d/.test(v.label) ? v.label : null;
+      const note = [context, comparison].filter(Boolean).join(" · ");
       figures.push({
         key: `${item.widget}-${i}`,
         label: i === 0 ? named : v.label,
@@ -1117,7 +1120,7 @@ function SaveView({ reportKey, params }: { reportKey: string; params: Record<str
         size="sm"
         variant="secondary"
         className="h-9"
-        loading={save.isPending}
+        disabled={save.isPending}
       >
         {t("reporting.saveView")}
       </Button>

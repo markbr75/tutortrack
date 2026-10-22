@@ -18,7 +18,6 @@ import { useState } from "react";
 
 import { api } from "../api";
 import { PanelLoading } from "../billing/moneyUi";
-import { RecordLayout } from "../components/RecordHeader";
 import { codeBlock, DocPanel } from "./DeveloperPages";
 
 const SAMPLES = {
@@ -132,75 +131,69 @@ export function DeveloperDocsPage() {
           </>
         }
       />
-      <RecordLayout
-        main={
-          <>
-            <RuledPanel title={t("developer.docs.quickstart")} flush>
-              <Tabs
-                label={t("developer.docs.language")}
-                className="pt-1 [&>[role=tablist]]:mb-0 [&>[role=tablist]]:px-5 [&>[role=tablist]]:[mask-image:none]"
-                tabs={[
-                  { key: "curl", label: "curl" },
-                  { key: "python", label: "Python" },
-                  { key: "js", label: "JavaScript" },
-                ]}
-                value={lang}
-                onChange={setLang}
-              >
-                <div className="px-5 py-4">
-                  <pre className={codeBlock} tabIndex={0}>
-                    {SAMPLES[lang]}
-                  </pre>
-                </div>
-              </Tabs>
-            </RuledPanel>
-            {GUIDES.map((key) => (
-              <DocPanel key={key} title={t(`developer.docs.guides.${key}.title`)}>
-                <p className="max-w-prose">{t(`developer.docs.guides.${key}.body`)}</p>
-                {key === "webhooks" ? (
-                  <>
-                    <pre className={codeBlock} tabIndex={0}>
-                      {
-                        "Webhook-Signature: t=1760090400,v1=5257a869e7ecebeda32affa62cdca3fa51cad7e77a0e56ff536d0ce8e108d8bd"
-                      }
-                    </pre>
-                    <h3 className="pt-1 font-medium">Python</h3>
-                    <pre className={codeBlock} tabIndex={0}>
-                      {VERIFY.python}
-                    </pre>
-                    <h3 className="pt-1 font-medium">Node.js</h3>
-                    <pre className={codeBlock} tabIndex={0}>
-                      {VERIFY.js}
-                    </pre>
-                  </>
-                ) : null}
-              </DocPanel>
-            ))}
-          </>
-        }
-        side={
-          <RuledPanel title={t("developer.docs.changelog")} flush className="lg:sticky lg:top-20">
-            {!changelog.data ? (
-              <PanelLoading label={t("grid.loading")} />
-            ) : (
-              <PanelRows>
-                {changelog.data.map((entry) => (
-                  <PanelRow key={`${entry.released_on}-${entry.title}`}>
-                    <p className="font-medium">{entry.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      <span className="tabular-nums">
-                        {formatDate(entry.released_on, i18n.language)}
-                      </span>
-                      {" · "}
-                      {entry.description}
-                    </p>
-                  </PanelRow>
-                ))}
-              </PanelRows>
-            )}
-          </RuledPanel>
-        }
-      />
+      <div className="max-w-4xl space-y-6">
+        <RuledPanel title={t("developer.docs.quickstart")} flush>
+          <Tabs
+            label={t("developer.docs.language")}
+            className="pt-1 [&>[role=tablist]]:mb-0 [&>[role=tablist]]:px-5 [&>[role=tablist]]:[mask-image:none]"
+            tabs={[
+              { key: "curl", label: "curl" },
+              { key: "python", label: "Python" },
+              { key: "js", label: "JavaScript" },
+            ]}
+            value={lang}
+            onChange={setLang}
+          >
+            <div className="px-5 py-4">
+              <pre className={codeBlock} tabIndex={0}>
+                {SAMPLES[lang]}
+              </pre>
+            </div>
+          </Tabs>
+        </RuledPanel>
+        {GUIDES.map((key) => (
+          <DocPanel key={key} title={t(`developer.docs.guides.${key}.title`)}>
+            <p className="max-w-prose">{t(`developer.docs.guides.${key}.body`)}</p>
+            {key === "webhooks" ? (
+              <>
+                <pre className={codeBlock} tabIndex={0}>
+                  {
+                    "Webhook-Signature: t=1760090400,v1=5257a869e7ecebeda32affa62cdca3fa51cad7e77a0e56ff536d0ce8e108d8bd"
+                  }
+                </pre>
+                <h3 className="pt-1 font-medium">Python</h3>
+                <pre className={codeBlock} tabIndex={0}>
+                  {VERIFY.python}
+                </pre>
+                <h3 className="pt-1 font-medium">Node.js</h3>
+                <pre className={codeBlock} tabIndex={0}>
+                  {VERIFY.js}
+                </pre>
+              </>
+            ) : null}
+          </DocPanel>
+        ))}
+        <RuledPanel title={t("developer.docs.changelog")} flush>
+          {!changelog.data ? (
+            <PanelLoading label={t("grid.loading")} />
+          ) : (
+            <PanelRows>
+              {changelog.data.map((entry) => (
+                <PanelRow key={`${entry.released_on}-${entry.title}`}>
+                  <p className="font-medium">{entry.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="tabular-nums">
+                      {formatDate(entry.released_on, i18n.language)}
+                    </span>
+                    {" · "}
+                    {entry.description}
+                  </p>
+                </PanelRow>
+              ))}
+            </PanelRows>
+          )}
+        </RuledPanel>
+      </div>
     </div>
   );
 }
@@ -238,7 +231,7 @@ export function MarketplacePage() {
                 {items.map((entry) => (
                   <PanelRow
                     key={entry.key}
-                    className="grid gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_8rem_auto] sm:items-center"
+                    className="grid gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_7rem_15rem] sm:items-center"
                   >
                     <div className="min-w-0">
                       <p className="font-medium">{entry.name}</p>
