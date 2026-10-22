@@ -1,6 +1,20 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  NamePlate,
+  PageHeader,
+  Panel,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledTable,
+  SelectField,
+  Spinner,
+  Tabs,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent, type ReactNode } from "react";
 
@@ -9,6 +23,7 @@ import { api, fieldErrors } from "../api";
 const PAGE = { params: { query: { page_size: 100 } } };
 type Tab = "domains" | "numbers" | "whatsapp" | "canned" | "marketing";
 
+/** An add-something form in a ruled panel: fields in two columns, the submit in the footer. */
 function Form({
   title,
   submit,
@@ -23,26 +38,60 @@ function Form({
   children: ReactNode;
 }) {
   return (
-    <form
-      aria-label={title}
-      className="space-y-3 rounded-md border border-border p-4"
-      onSubmit={(e: FormEvent) => {
-        e.preventDefault();
-        onSubmit();
-      }}
-    >
-      <h3 className="font-semibold">{title}</h3>
-      <div className="grid gap-3 sm:grid-cols-2">{children}</div>
-      <Button type="submit" disabled={pending}>
-        {submit}
-      </Button>
-    </form>
+    <Panel title={title} level={3} flush>
+      <form
+        aria-label={title}
+        onSubmit={(e: FormEvent) => {
+          e.preventDefault();
+          onSubmit();
+        }}
+      >
+        <div className="grid gap-3 px-5 py-4 sm:grid-cols-2">{children}</div>
+        <PanelFooter>
+          <Button type="submit" size="sm" loading={pending}>
+            {submit}
+          </Button>
+        </PanelFooter>
+      </form>
+    </Panel>
   );
 }
 
 function Problem({ error }: { error: Error | null }) {
   return error ? <Alert tone="danger">{error.message}</Alert> : null;
 }
+
+/** One faded-ink line of help under a tab. */
+function Help({ children }: { children: ReactNode }) {
+  return <p className="max-w-3xl text-sm text-muted-foreground">{children}</p>;
+}
+
+/** A flush ruled panel of rows, or one faded-ink sentence when there are none. */
+function ListPanel({
+  title,
+  empty,
+  children,
+}: {
+  title: string;
+  empty: string;
+  children?: ReactNode;
+}) {
+  return (
+    <Panel title={title} level={3} flush>
+      {children ? (
+        <PanelRows>{children}</PanelRows>
+      ) : (
+        <p className="px-5 py-4 text-sm text-muted-foreground">{empty}</p>
+      )}
+    </Panel>
+  );
+}
+
+const DOMAIN_TONE: Record<string, string> = {
+  pending: "font-semibold text-margin",
+  failed: "font-medium text-danger",
+  verified: "",
+};
 
 /** Custom sending domains (FR-13-1): add, publish the DNS records, check. */
 function SenderDomains() {
@@ -80,65 +129,81 @@ function SenderDomains() {
   });
   const errors = fieldErrors(add.error);
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">{t("messaging.domains.help")}</p>
+    <div className="space-y-6">
+      <Help>{t("messaging.domains.help")}</Help>
+      {rows.isPending ? <Spinner label={t("grid.loading")} /> : null}
       {rows.data?.results.map((row) => (
-        <section key={row.id} className="space-y-2 rounded-md border border-border p-3">
-          <h3 className="font-semibold">
-            {row.from_address} · {t(`messaging.domains.status.${row.status}`)}
-            {row.is_default ? ` · ${t("messaging.domains.default")}` : ""}
-          </h3>
-          {row.last_checked_at ? (
-            <p className="text-xs text-muted-foreground">
-              {t("messaging.domains.checked", {
-                when: formatDateTime(row.last_checked_at, i18n.language),
-              })}
-            </p>
-          ) : null}
-          {row.error ? <Alert tone="warning">{row.error}</Alert> : null}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <caption className="text-left text-sm font-medium">
-                {t("messaging.domains.records")}
-              </caption>
-              <thead>
-                <tr className="text-left">
-                  <th scope="col">{t("messaging.domains.type")}</th>
-                  <th scope="col">{t("messaging.domains.host")}</th>
-                  <th scope="col">{t("messaging.domains.value")}</th>
-                  <th scope="col">{t("messaging.domains.verified")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {row.dns_records.map((r) => (
-                  <tr key={`${r.purpose}-${r.host}`} className="border-t border-border">
-                    <td>{r.record_type}</td>
-                    <td className="break-all font-mono text-xs">{r.host}</td>
-                    <td className="break-all font-mono text-xs">{r.value}</td>
-                    <td>
-                      {["spf", "dmarc"].includes(r.purpose)
-                        ? t("messaging.domains.recommended")
-                        : r.verified
-                          ? t("messaging.yes")
-                          : t("messaging.no")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" variant="secondary" onClick={() => check.mutate(row.id)}>
-              {t("messaging.domains.check")}
-            </Button>
-            {row.status === "verified" && !row.is_default ? (
-              <Button size="sm" variant="secondary" onClick={() => makeDefault.mutate(row.id)}>
-                {t("messaging.domains.makeDefault")}
+        <Panel
+          key={row.id}
+          level={3}
+          title={row.from_address}
+          description={
+            <>
+              <span className={DOMAIN_TONE[row.status] ?? ""}>
+                {t(`messaging.domains.status.${row.status}`)}
+              </span>
+              {row.is_default ? ` · ${t("messaging.domains.default")}` : ""}
+              {row.last_checked_at ? (
+                <span className="tabular-nums">
+                  {" · "}
+                  {t("messaging.domains.checked", {
+                    when: formatDateTime(row.last_checked_at, i18n.language),
+                  })}
+                </span>
+              ) : null}
+            </>
+          }
+          flush
+          footer={
+            <>
+              <Button size="sm" variant="secondary" onClick={() => check.mutate(row.id)}>
+                {t("messaging.domains.check")}
               </Button>
-            ) : null}
-          </div>
-        </section>
+              {row.status === "verified" && !row.is_default ? (
+                <Button size="sm" variant="secondary" onClick={() => makeDefault.mutate(row.id)}>
+                  {t("messaging.domains.makeDefault")}
+                </Button>
+              ) : null}
+            </>
+          }
+        >
+          {row.error ? (
+            <div className="px-5 pt-4">
+              <Alert tone="warning">{row.error}</Alert>
+            </div>
+          ) : null}
+          <RuledTable
+            bare
+            caption={t("messaging.domains.records")}
+            columns={[
+              { label: t("messaging.domains.type") },
+              { label: t("messaging.domains.host") },
+              { label: t("messaging.domains.value"), className: "min-w-64" },
+              { label: t("messaging.domains.verified") },
+            ]}
+          >
+            {row.dns_records.map((r) => (
+              <tr key={`${r.purpose}-${r.host}`}>
+                <td className="font-medium">{r.record_type}</td>
+                <td className="break-all">{r.host}</td>
+                <td className="text-xs break-all">{r.value}</td>
+                <td className="whitespace-nowrap">
+                  {["spf", "dmarc"].includes(r.purpose) ? (
+                    <span className="text-muted-foreground">
+                      {t("messaging.domains.recommended")}
+                    </span>
+                  ) : r.verified ? (
+                    t("messaging.yes")
+                  ) : (
+                    <span className="font-semibold text-margin">{t("messaging.no")}</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </RuledTable>
+        </Panel>
       ))}
+      <Problem error={check.error ?? makeDefault.error} />
       <Form
         title={t("messaging.domains.add")}
         submit={t("messaging.domains.add")}
@@ -189,23 +254,43 @@ function Numbers() {
     onSuccess: refresh,
   });
   const errors = fieldErrors(add.error);
+  const list = rows.data?.results ?? [];
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">{t("messaging.numbers.help")}</p>
-      <ul className="space-y-1 text-sm">
-        {rows.data?.results.map((row) => (
-          <li key={row.id} className="flex items-center gap-2">
-            <span>
-              {row.number} · {t(`comms.channel.${row.channel}`)}
-              {row.label ? ` · ${row.label}` : ""}
-              {row.is_default ? ` · ${t("messaging.domains.default")}` : ""}
-            </span>
-            <Button size="sm" variant="ghost" onClick={() => remove.mutate(row.id)}>
-              {t("messaging.remove")}
-            </Button>
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-6">
+      <Help>{t("messaging.numbers.help")}</Help>
+      {rows.isPending ? (
+        <Spinner label={t("grid.loading")} />
+      ) : (
+        <ListPanel title={t("messaging.tabs.numbers")} empty={t("designS8.comms.noNumbers")}>
+          {list.length
+            ? list.map((row) => (
+                <PanelRow key={row.id}>
+                  <NamePlate
+                    name={<span className="tabular-nums">{row.number}</span>}
+                    context={[
+                      t(`comms.channel.${row.channel}`),
+                      row.label,
+                      row.is_default ? t("messaging.domains.default") : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                    aside={
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-muted-foreground"
+                        aria-label={t("designS8.comms.removeNamed", { name: row.number })}
+                        onClick={() => remove.mutate(row.id)}
+                      >
+                        {t("messaging.remove")}
+                      </Button>
+                    }
+                  />
+                </PanelRow>
+              ))
+            : null}
+        </ListPanel>
+      )}
       <Form
         title={t("messaging.numbers.add")}
         submit={t("messaging.numbers.add")}
@@ -225,6 +310,7 @@ function Numbers() {
           label={t("messaging.numbers.number")}
           value={number}
           required
+          className="tabular-nums"
           hint={t("messaging.numbers.numberHint")}
           error={errors.number}
           onChange={(e) => setNumber(e.target.value)}
@@ -235,6 +321,7 @@ function Numbers() {
           onChange={(e) => setLabel(e.target.value)}
         />
       </Form>
+      <Problem error={remove.error} />
     </div>
   );
 }
@@ -277,18 +364,47 @@ function WhatsAppTemplates() {
     },
   });
   const errors = fieldErrors(add.error);
+  const usedFor = (key: string) =>
+    key
+      ? (types.data?.find((s) => s.key === key)?.label ?? key)
+      : t("messaging.whatsapp.broadcastsOnly");
+  const list = rows.data?.results ?? [];
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">{t("messaging.whatsapp.help")}</p>
-      <ul className="space-y-1 text-sm">
-        {rows.data?.results.map((row) => (
-          <li key={row.id}>
-            <span className="font-medium">{row.name}</span> ·{" "}
-            {t(`messaging.whatsapp.status.${row.status}`)}
-            {row.type_key ? ` · ${row.type_key}` : ""} — {row.body}
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-6">
+      <Help>{t("messaging.whatsapp.help")}</Help>
+      {rows.isPending ? (
+        <Spinner label={t("grid.loading")} />
+      ) : (
+        <ListPanel title={t("messaging.tabs.whatsapp")} empty={t("designS8.comms.noTemplates")}>
+          {list.length
+            ? list.map((row) => (
+                <PanelRow key={row.id}>
+                  <NamePlate
+                    name={row.name}
+                    context={
+                      <>
+                        <span
+                          className={
+                            row.status === "pending"
+                              ? "font-semibold text-margin"
+                              : row.status === "rejected"
+                                ? "font-medium text-danger"
+                                : undefined
+                          }
+                        >
+                          {t(`messaging.whatsapp.status.${row.status}`)}
+                        </span>
+                        {" · "}
+                        {usedFor(row.type_key ?? "")}
+                      </>
+                    }
+                  />
+                  <p className="mt-1 whitespace-pre-wrap">{row.body}</p>
+                </PanelRow>
+              ))
+            : null}
+        </ListPanel>
+      )}
       <Form
         title={t("messaging.whatsapp.add")}
         submit={t("messaging.whatsapp.add")}
@@ -372,20 +488,36 @@ function CannedReplies() {
     onSuccess: refresh,
   });
   const errors = fieldErrors(add.error);
+  const list = rows.data?.results ?? [];
   return (
-    <div className="space-y-4">
-      <ul className="space-y-1 text-sm">
-        {rows.data?.results.map((row) => (
-          <li key={row.id} className="flex items-center gap-2">
-            <span>
-              <span className="font-medium">{row.title}</span> — {row.body}
-            </span>
-            <Button size="sm" variant="ghost" onClick={() => remove.mutate(row.id)}>
-              {t("messaging.remove")}
-            </Button>
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-6">
+      {rows.isPending ? (
+        <Spinner label={t("grid.loading")} />
+      ) : (
+        <ListPanel title={t("messaging.tabs.canned")} empty={t("designS8.comms.noCanned")}>
+          {list.length
+            ? list.map((row) => (
+                <PanelRow key={row.id}>
+                  <NamePlate
+                    name={row.title}
+                    context={row.body}
+                    aside={
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-muted-foreground"
+                        aria-label={t("designS8.comms.removeNamed", { name: row.title })}
+                        onClick={() => remove.mutate(row.id)}
+                      >
+                        {t("messaging.remove")}
+                      </Button>
+                    }
+                  />
+                </PanelRow>
+              ))
+            : null}
+        </ListPanel>
+      )}
       <Form
         title={t("messaging.canned.add")}
         submit={t("messaging.canned.add")}
@@ -447,59 +579,8 @@ function MarketingSync() {
   });
   if (rows.isPending) return <Spinner label={t("grid.loading")} />;
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">{t("messaging.marketing.help")}</p>
-      {rows.data?.map((row) => (
-        <section key={row.provider} className="space-y-2 rounded-md border border-border p-3">
-          <h3 className="font-semibold">
-            {row.name}
-            {row.connection ? ` · ${row.account_name || t("messaging.marketing.connected")}` : ""}
-          </h3>
-          {row.connection ? (
-            <>
-              <Audiences provider={row.provider} current={row.audience_id} onChosen={refresh} />
-              {row.last_sync_at ? (
-                <p className="text-xs text-muted-foreground">
-                  {t("messaging.marketing.lastSync", {
-                    when: formatDateTime(row.last_sync_at, i18n.language),
-                  })}
-                </p>
-              ) : null}
-              {row.error ? <Alert tone="warning">{row.error}</Alert> : null}
-              {row.webhook_url ? (
-                <TextField
-                  label={t("marketingReturn.webhook", { name: row.name })}
-                  hint={t("marketingReturn.webhookHint", { name: row.name })}
-                  readOnly
-                  value={row.webhook_url}
-                  onFocus={(e) => e.target.select()}
-                />
-              ) : null}
-              <Button
-                size="sm"
-                variant="secondary"
-                disabled={!row.audience_id || sync.isPending}
-                onClick={() => sync.mutate(row.provider)}
-              >
-                {t("messaging.marketing.syncNow")}
-              </Button>
-            </>
-          ) : (
-            <div className="flex flex-wrap items-end gap-2">
-              <TextField
-                label={t("messaging.marketing.apiKey", { name: row.name })}
-                type="password"
-                autoComplete="off"
-                value={keys[row.provider] ?? ""}
-                onChange={(e) => setKeys({ ...keys, [row.provider]: e.target.value })}
-              />
-              <Button size="sm" onClick={() => connect.mutate(row.provider)}>
-                {t("messaging.marketing.connect")}
-              </Button>
-            </div>
-          )}
-        </section>
-      ))}
+    <div className="space-y-6">
+      <Help>{t("messaging.marketing.help")}</Help>
       {sync.data ? (
         <Alert tone="success">
           {t("messaging.marketing.synced", {
@@ -512,6 +593,89 @@ function MarketingSync() {
         </Alert>
       ) : null}
       <Problem error={connect.error ?? sync.error} />
+      {rows.data?.map((row) =>
+        row.connection ? (
+          <Panel
+            key={row.provider}
+            level={3}
+            title={row.name}
+            aside={<span>{row.account_name || t("messaging.marketing.connected")}</span>}
+            description={
+              row.last_sync_at ? (
+                <span className="tabular-nums">
+                  {t("messaging.marketing.lastSync", {
+                    when: formatDateTime(row.last_sync_at, i18n.language),
+                  })}
+                </span>
+              ) : undefined
+            }
+            footer={
+              <Button
+                size="sm"
+                variant="secondary"
+                disabled={!row.audience_id}
+                loading={sync.isPending && sync.variables === row.provider}
+                onClick={() => sync.mutate(row.provider)}
+              >
+                {t("messaging.marketing.syncNow")}
+              </Button>
+            }
+            bodyClassName="space-y-4"
+          >
+            <div className="max-w-sm">
+              <Audiences provider={row.provider} current={row.audience_id} onChosen={refresh} />
+            </div>
+            {row.error ? <Alert tone="warning">{row.error}</Alert> : null}
+            {row.webhook_url ? (
+              <TextField
+                label={t("marketingReturn.webhook", { name: row.name })}
+                hint={t("marketingReturn.webhookHint", { name: row.name })}
+                readOnly
+                className="bg-background"
+                value={row.webhook_url}
+                onFocus={(e) => e.target.select()}
+              />
+            ) : null}
+          </Panel>
+        ) : (
+          <Panel
+            key={row.provider}
+            level={3}
+            title={row.name}
+            aside={
+              <span className="text-muted-foreground">{t("designS8.comms.notConnected")}</span>
+            }
+            flush
+          >
+            <form
+              aria-label={row.name}
+              onSubmit={(e) => {
+                e.preventDefault();
+                connect.mutate(row.provider);
+              }}
+            >
+              <div className="max-w-sm px-5 py-4">
+                <TextField
+                  label={t("messaging.marketing.apiKey", { name: row.name })}
+                  type="password"
+                  autoComplete="off"
+                  value={keys[row.provider] ?? ""}
+                  onChange={(e) => setKeys({ ...keys, [row.provider]: e.target.value })}
+                />
+              </div>
+              <PanelFooter>
+                <Button
+                  type="submit"
+                  size="sm"
+                  loading={connect.isPending && connect.variables === row.provider}
+                >
+                  {t("messaging.marketing.connect")}
+                </Button>
+              </PanelFooter>
+            </form>
+          </Panel>
+        ),
+      )}
     </div>
   );
 }
@@ -568,8 +732,8 @@ export function MessagingSettingsPage() {
   const [tab, setTab] = useState<Tab>("domains");
   const tabs: Tab[] = ["domains", "numbers", "whatsapp", "canned", "marketing"];
   return (
-    <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("messaging.title")}</h1>
+    <section className="max-w-4xl">
+      <PageHeader title={t("messaging.title")} />
       <Tabs
         label={t("messaging.title")}
         tabs={tabs.map((key) => ({ key, label: t(`messaging.tabs.${key}`) }))}

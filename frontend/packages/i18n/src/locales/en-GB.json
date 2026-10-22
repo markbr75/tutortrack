@@ -31,6 +31,28 @@
       "percent": "{{value}}%",
       "chosen_one": "{{count}} chosen",
       "chosen_other": "{{count}} chosen"
+    },
+    "comms": {
+      "new": "New:",
+      "noNumbers": "No numbers yet.",
+      "noTemplates": "No WhatsApp templates yet.",
+      "noCanned": "No canned replies yet.",
+      "removeNamed": "Remove {{name}}",
+      "notConnected": "Not connected"
+    },
+    "messageStatus": {
+      "queued": "Sent",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "opened": "Opened",
+      "clicked": "Clicked",
+      "bounced": "Bounced",
+      "complained": "Marked as spam",
+      "failed": "Failed",
+      "suppressed": "Blocked"
+    },
+    "broadcasts": {
+      "figures": "Delivery figures"
     }
   },
   "app": {
