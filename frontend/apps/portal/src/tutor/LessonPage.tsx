@@ -10,6 +10,7 @@ import {
   SelectField,
   Spinner,
   TextField,
+  UnitField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -309,10 +310,21 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
                     >
                       <span className="font-medium">{a.name}</span>
                       <span className="flex w-14 justify-center sm:order-last sm:w-20">
-                        <RegisterMark
-                          kind={outcomeMark(outcome)}
-                          label={t(`tutor.outcome.${outcome}`)}
-                        />
+                        {/* Until attendance is saved the row carries the lesson's own mark: the
+                            red dashed ring once the lesson is over. */}
+                        {a.outcome ? (
+                          <RegisterMark
+                            kind={outcomeMark(a.outcome as Outcome)}
+                            label={t(`tutor.outcome.${a.outcome}`)}
+                          />
+                        ) : (
+                          <RegisterMark
+                            kind={mark}
+                            label={
+                              mark === "due" ? t("designS10.toMark") : t("portal.status.planned")
+                            }
+                          />
+                        )}
                       </span>
                       <div className="col-span-2 flex flex-wrap items-end gap-2 sm:col-span-1">
                         <SelectField
@@ -329,21 +341,16 @@ export function LessonPage({ lessonId }: { lessonId: string }) {
                           }))}
                         />
                         {outcome === "late" ? (
-                          <span className="flex items-center gap-2">
-                            <TextField
-                              size="sm"
-                              className="w-20 text-right tabular-nums"
-                              type="number"
-                              min={0}
-                              label={t("tutor.minutesLate")}
-                              hideLabel
-                              value={late[a.id] ?? ""}
-                              onChange={(e) => setLate((v) => ({ ...v, [a.id]: e.target.value }))}
-                            />
-                            <span aria-hidden="true" className="text-sm text-muted-foreground">
-                              {t("designS10.minutesLateUnit")}
-                            </span>
-                          </span>
+                          <UnitField
+                            size="sm"
+                            className="w-20"
+                            min={0}
+                            label={t("tutor.minutesLate")}
+                            hideLabel
+                            unit={t("designS10.minutesLateUnit")}
+                            value={late[a.id] ?? ""}
+                            onChange={(e) => setLate((v) => ({ ...v, [a.id]: e.target.value }))}
+                          />
                         ) : null}
                       </div>
                     </li>

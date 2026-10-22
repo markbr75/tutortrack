@@ -17,7 +17,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
-import { PanelLoading, PortalHeader } from "../layout/PortalPage";
+import { PanelEmpty, PanelLoading, PortalHeader } from "../layout/PortalPage";
 import { useIsPhone } from "../layout/useIsPhone";
 
 const quiet = "text-muted-foreground hover:text-foreground";
@@ -148,9 +148,11 @@ export function InvoiceReviewPage() {
   const date = (iso: string) => formatDate(iso, i18n.language);
   return (
     <div>
-      <PortalHeader title={t("g3.tutorReview.pageTitle")} description={t("g3.tutorReview.help")} />
+      <PortalHeader title={t("g3.tutorReview.nav")} description={t("g3.tutorReview.help")} />
       {!rows.length ? (
-        <p className="text-sm text-muted-foreground">{t("g3.tutorReview.nothing")}</p>
+        <RuledPanel label={t("g3.tutorReview.nav")} flush>
+          <PanelEmpty>{t("g3.tutorReview.nothing")}</PanelEmpty>
+        </RuledPanel>
       ) : null}
       <div className="space-y-6">
         {rows.map((review) => {

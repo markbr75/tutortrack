@@ -1,6 +1,6 @@
 import { unwrap } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Button, Spinner, TextAreaField } from "@tutortrack/ui";
+import { Button, PanelFooter, Spinner, TextAreaField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -11,6 +11,8 @@ function Reply({ reportId }: { reportId: string }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [body, setBody] = useState("");
+  const [open, setOpen] = useState(false);
+  const [sent, setSent] = useState(false);
   const send = useMutation({
     mutationFn: async () =>
       unwrap(
@@ -21,26 +23,59 @@ function Reply({ reportId }: { reportId: string }) {
       ),
     onSuccess: () => {
       setBody("");
+      setOpen(false);
+      setSent(true);
       void queryClient.invalidateQueries({ queryKey: ["portal", "reports"] });
     },
   });
+  if (!open) {
+    return (
+      <PanelFooter className="border-border">
+        <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
+          {t("portal.reply")}
+        </Button>
+        {sent ? (
+          <span role="status" className="text-sm text-success">
+            {t("designS10.replySent")}
+          </span>
+        ) : null}
+      </PanelFooter>
+    );
+  }
   return (
     <form
-      className="space-y-3 border-t border-border px-5 py-4"
+      className="border-t border-border"
       onSubmit={(e) => {
         e.preventDefault();
         if (body.trim()) send.mutate();
       }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") setOpen(false);
+      }}
     >
-      <TextAreaField
-        label={t("portal.reply")}
-        rows={2}
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-      />
-      <Button type="submit" size="sm" disabled={send.isPending}>
-        {t("portal.sendReply")}
-      </Button>
+      <div className="px-5 py-4">
+        <TextAreaField
+          autoFocus
+          label={t("portal.reply")}
+          rows={3}
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+        />
+      </div>
+      <PanelFooter>
+        <Button type="submit" size="sm" disabled={send.isPending}>
+          {t("portal.sendReply")}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="text-muted-foreground hover:text-foreground"
+          onClick={() => setOpen(false)}
+        >
+          {t("common.cancel")}
+        </Button>
+      </PanelFooter>
     </form>
   );
 }

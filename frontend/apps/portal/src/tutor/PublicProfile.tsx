@@ -154,7 +154,7 @@ export function PublicProfileSection() {
           ) : null}
         </div>
         <PanelFooter>
-          <Button type="submit" loading={save.isPending}>
+          <Button type="submit" variant="secondary" loading={save.isPending}>
             {t("tutor.publicProfile.submit")}
           </Button>
         </PanelFooter>

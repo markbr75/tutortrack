@@ -157,35 +157,59 @@ export function OnboardingPage() {
 
 type Requirement = components["schemas"]["RequirementType"];
 
-/** The tutor's checks: upload documents with numbers and dates (FR-18-6). */
+/** The tutor's checks (FR-18-6): one ruled panel, a row per check with its status in words
+ * and a small "Add details" that opens that check's form in place, one at a time. */
 export function ChecksPage() {
   const { t } = useTranslation();
+  const [open, setOpen] = useState<string | null>(null);
   const data = useQuery({
     queryKey: ["tutor", "compliance"],
     queryFn: async () => unwrap(await api.GET("/api/v1/me/compliance")),
   });
   if (!data.data) return <Spinner label={t("grid.loading")} />;
   const records = new Map(data.data.records.map((r) => [r.requirement, r]));
+  const requirements = data.data.requirements;
   return (
     <div>
       <PortalHeader title={t("onboard.checksTitle")} />
       <div className="space-y-6">
         {data.data.restricted ? <Alert tone="warning">{t("onboard.restricted")}</Alert> : null}
         <MyBackgroundChecks />
-        {data.data.requirements.map((req) => (
-          <CheckItem key={req.id} requirement={req} record={records.get(req.id)} />
-        ))}
+        <RuledPanel label={t("onboard.checksTitle")} flush>
+          {requirements.length ? (
+            <ul className="divide-y divide-rule">
+              {requirements.map((req) => (
+                <CheckRow
+                  key={req.id}
+                  requirement={req}
+                  record={records.get(req.id)}
+                  open={open === req.id}
+                  onOpen={() => setOpen(req.id)}
+                  onClose={() => setOpen(null)}
+                />
+              ))}
+            </ul>
+          ) : (
+            <PanelEmpty>{t("designS10.noChecks")}</PanelEmpty>
+          )}
+        </RuledPanel>
       </div>
     </div>
   );
 }
 
-function CheckItem({
+function CheckRow({
   requirement,
   record,
+  open,
+  onOpen,
+  onClose,
 }: {
   requirement: Requirement;
   record?: components["schemas"]["ComplianceRecord"];
+  open: boolean;
+  onOpen: () => void;
+  onClose: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
@@ -210,43 +234,57 @@ function CheckItem({
         }),
       );
     },
-    onSuccess: (data) => queryClient.setQueryData(["tutor", "compliance"], data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(["tutor", "compliance"], data);
+      onClose();
+    },
   });
-  const needsUpload = status !== "verified" || !record?.valid;
+  const needsDetails = status !== "verified" || !record?.valid;
   return (
-    <RuledPanel
-      title={requirement.name}
-      description={
-        record?.expiry_date ? (
-          <span className="tabular-nums">
-            {t("onboard.expiryDate")}: {formatDate(record.expiry_date, i18n.language)}
-          </span>
-        ) : undefined
-      }
-      aside={
-        <Word
-          tone={status === "submitted" ? "muted" : "ink"}
-          className={status === "verified" ? "" : "font-medium"}
-        >
-          {t(`onboard.status.${status}`)}
-        </Word>
-      }
-      flush
-    >
-      {record?.rejection_reason ? (
-        <p className="px-5 pt-3 text-sm text-danger">{record.rejection_reason}</p>
-      ) : null}
-      {needsUpload ? (
+    <li>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-2.5 text-sm">
+        <div className="min-w-0">
+          <p className="font-medium">{requirement.name}</p>
+          {record?.expiry_date || record?.rejection_reason ? (
+            <p className="text-xs text-muted-foreground tabular-nums">
+              {record?.expiry_date
+                ? `${t("onboard.expiryDate")}: ${formatDate(record.expiry_date, i18n.language)}`
+                : ""}
+              {record?.expiry_date && record?.rejection_reason ? " · " : ""}
+              {record?.rejection_reason ? (
+                <span className="text-danger">{record.rejection_reason}</span>
+              ) : null}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-3">
+          <Word tone={status === "submitted" ? "muted" : "ink"} className="font-medium">
+            {t(`onboard.status.${status}`)}
+          </Word>
+          {needsDetails && !open ? (
+            <Button size="sm" variant="secondary" onClick={onOpen}>
+              {t("designS10.addDetails")}
+              <span className="sr-only"> {requirement.name}</span>
+            </Button>
+          ) : null}
+        </div>
+      </div>
+      {open ? (
         <form
           aria-label={requirement.name}
+          className="border-t border-rule"
           onSubmit={(e) => {
             e.preventDefault();
             submit.mutate();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") onClose();
           }}
         >
           <div className="grid items-start gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
             {requirement.has_number ? (
               <TextField
+                autoFocus
                 label={t("onboard.number")}
                 className="tabular-nums"
                 value={number}
@@ -254,6 +292,7 @@ function CheckItem({
               />
             ) : null}
             <TextField
+              autoFocus={!requirement.has_number}
               label={t("onboard.issueDate")}
               className="tabular-nums"
               type="date"
@@ -281,12 +320,20 @@ function CheckItem({
             </div>
           ) : null}
           <PanelFooter>
-            <Button type="submit" size="sm" disabled={submit.isPending}>
+            <Button type="submit" disabled={submit.isPending}>
               {t("onboard.upload")}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground"
+              onClick={onClose}
+            >
+              {t("common.cancel")}
             </Button>
           </PanelFooter>
         </form>
       ) : null}
-    </RuledPanel>
+    </li>
   );
 }

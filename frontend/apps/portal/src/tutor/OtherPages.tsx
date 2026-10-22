@@ -15,12 +15,14 @@ import {
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
+import { X } from "lucide-react";
 import { useState } from "react";
 
 import { api } from "../api";
 import { PanelEmpty, PortalHeader, SavedNote } from "../layout/PortalPage";
 import { PayDetailsSection } from "./PayPages";
 import { PublicProfileSection } from "./PublicProfile";
+import { useIsPhone } from "../layout/useIsPhone";
 import { useTutorMe } from "./useTutorMe";
 
 const quiet = "text-muted-foreground hover:text-foreground";
@@ -138,8 +140,9 @@ export function AvailabilityPage() {
       ),
     onSuccess: () => setOff({ start: "", end: "", reason: "" }),
   });
-  const dayName = (d: number) =>
-    new Date(2024, 0, 1 + d).toLocaleDateString(i18n.language, { weekday: "long" });
+  const phone = useIsPhone();
+  const dayName = (d: number, width: "long" | "short") =>
+    new Date(2024, 0, 1 + d).toLocaleDateString(i18n.language, { weekday: width });
   if (availability.isPending) return <Spinner label={t("grid.loading")} />;
   return (
     <div>
@@ -156,29 +159,34 @@ export function AvailabilityPage() {
             {current.length ? (
               <ul className="divide-y divide-rule">
                 {current.map((w, i) => (
+                  // One compact row per weekly time: day, from, to, then Remove at the end.
+                  // Labels show on the first row only; later rows keep them for screen readers.
                   <li
                     key={i}
-                    className="grid grid-cols-2 items-end gap-x-3 gap-y-2 px-5 py-2.5 sm:grid-cols-[minmax(0,1fr)_7.5rem_7.5rem_auto]"
+                    className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)_2rem] items-end gap-x-2 px-5 py-2 sm:grid-cols-[minmax(0,1fr)_8rem_8rem_auto] sm:gap-x-3"
                   >
-                    <div className="col-span-2 sm:col-span-1">
-                      <SelectField
-                        size="sm"
-                        label={t("tutor.day")}
-                        value={String(w.weekday)}
-                        onChange={(e) =>
-                          setWindows(
-                            current.map((x, n) =>
-                              n === i ? { ...x, weekday: Number(e.target.value) } : x,
-                            ),
-                          )
-                        }
-                        options={DAYS.map((d) => ({ value: String(d), label: dayName(d) }))}
-                      />
-                    </div>
+                    <SelectField
+                      size="sm"
+                      hideLabel={i > 0}
+                      label={t("tutor.day")}
+                      value={String(w.weekday)}
+                      onChange={(e) =>
+                        setWindows(
+                          current.map((x, n) =>
+                            n === i ? { ...x, weekday: Number(e.target.value) } : x,
+                          ),
+                        )
+                      }
+                      options={DAYS.map((d) => ({
+                        value: String(d),
+                        label: dayName(d, phone ? "short" : "long"),
+                      }))}
+                    />
                     <TextField
                       size="sm"
-                      className="tabular-nums"
+                      className="min-w-0 px-2 tabular-nums"
                       type="time"
+                      hideLabel={i > 0}
                       label={t("tutor.from")}
                       value={w.start_time.slice(0, 5)}
                       onChange={(e) =>
@@ -191,8 +199,9 @@ export function AvailabilityPage() {
                     />
                     <TextField
                       size="sm"
-                      className="tabular-nums"
+                      className="min-w-0 px-2 tabular-nums"
                       type="time"
+                      hideLabel={i > 0}
                       label={t("tutor.to")}
                       value={w.end_time.slice(0, 5)}
                       onChange={(e) =>
@@ -205,13 +214,14 @@ export function AvailabilityPage() {
                       type="button"
                       size="sm"
                       variant="ghost"
-                      className={`${quiet} col-span-2 -ml-3 justify-self-start sm:col-span-1 sm:ml-0`}
+                      className={`${quiet} w-8 px-0 sm:w-auto sm:px-3`}
                       onClick={() => setWindows(current.filter((_x, n) => n !== i))}
                     >
-                      {t("tutor.remove")}
+                      <X aria-hidden="true" className="size-4 sm:hidden" strokeWidth={1.75} />
+                      <span className="max-sm:sr-only">{t("tutor.remove")}</span>
                       <span className="sr-only">
                         {" "}
-                        {dayName(w.weekday)} {w.start_time.slice(0, 5)}
+                        {dayName(w.weekday, "long")} {w.start_time.slice(0, 5)}
                       </span>
                     </Button>
                   </li>

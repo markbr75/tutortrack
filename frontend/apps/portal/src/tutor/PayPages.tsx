@@ -17,7 +17,6 @@ import { useState, type FormEvent, type ReactNode } from "react";
 
 import { api, uploadFile } from "../api";
 import { FileField, PanelEmpty, PortalHeader, Word } from "../layout/PortalPage";
-import { useIsPhone } from "../layout/useIsPhone";
 import { AnnualEarnings } from "./G3Pages";
 import { MyUsTaxInfo } from "./Phase3";
 
@@ -29,6 +28,12 @@ function TotalsLine({ totals }: { totals: Totals }) {
     formatMoney({ amount, currency }, i18n.language),
   );
   return <>{parts.length ? parts.join(" + ") : formatMoney({ amount: "0", currency: "GBP" })}</>;
+}
+
+/** A pay item's title without the raw ISO date the server appends ("… · 2026-10-19"); the
+ * date is shown once, formatted, in the caption. */
+function payTitle(description: string): string {
+  return description.replace(/\s*·\s*\d{4}-\d{2}-\d{2}$/, "");
 }
 
 /** A ruled row with a primary line, one caption and a fixed amount column. */
@@ -57,7 +62,6 @@ function AmountRow({
 /** Pay to come, held pay with what releases it, payouts and statements (FR-12-9). */
 export function EarningsPage() {
   const { t, i18n } = useTranslation();
-  const phone = useIsPhone();
   const earnings = useQuery({
     queryKey: ["tutor", "my-earnings"],
     queryFn: async () => unwrap(await api.GET("/api/v1/me/earnings")),
@@ -97,9 +101,12 @@ export function EarningsPage() {
               {e.held.map((item) => (
                 <AmountRow
                   key={item.id}
-                  primary={item.description}
-                  caption={(item.hold_reasons as string[]).map((reason) => (
-                    <p key={reason}>{t(`pay.holdReasons.${reason}`)}</p>
+                  primary={payTitle(item.description)}
+                  caption={(item.hold_reasons as string[]).map((reason, n) => (
+                    <p key={reason}>
+                      {n === 0 ? <span className="tabular-nums">{date(item.date)} · </span> : null}
+                      {t(`pay.holdReasons.${reason}`)}
+                    </p>
                   ))}
                   amount={money(item.amount)}
                 />
@@ -111,24 +118,18 @@ export function EarningsPage() {
           <RuledTable
             caption={t("pay.upcomingItems")}
             columns={[
-              ...(phone ? [] : [{ key: "date", header: t("pay.date"), width: "w-32" }]),
-              { key: "what", header: t("pay.description") },
+              { key: "what", header: t("g3.tutorReview.lesson") },
               { key: "amount", header: t("pay.amount"), end: true, width: "w-28" },
             ]}
             empty={e.upcoming.length ? undefined : t("designS10.nothingToCome")}
           >
             {e.upcoming.map((item) => (
               <tr key={item.id}>
-                {phone ? null : (
-                  <td className="whitespace-nowrap tabular-nums">{date(item.date)}</td>
-                )}
                 <td>
-                  {item.description}
-                  {phone ? (
-                    <span className="block text-xs text-muted-foreground tabular-nums">
-                      {date(item.date)}
-                    </span>
-                  ) : null}
+                  <span className="font-medium">{payTitle(item.description)}</span>
+                  <span className="block text-xs text-muted-foreground tabular-nums">
+                    {date(item.date)}
+                  </span>
                 </td>
                 <td className={figureCell}>{money(item.amount)}</td>
               </tr>
@@ -457,7 +458,7 @@ export function PayDetailsSection() {
               {t("pay.setUpStripe")}
             </Button>
           ) : null}
-          <Button type="submit" disabled={saveBank.isPending}>
+          <Button type="submit" variant="secondary" disabled={saveBank.isPending}>
             {t("pay.saveBank")}
           </Button>
         </PanelFooter>

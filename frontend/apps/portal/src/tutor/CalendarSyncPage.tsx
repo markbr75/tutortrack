@@ -227,7 +227,7 @@ export function CalendarSyncPage() {
         ) : null}
         <Problem error={complete.error ?? start.error ?? disconnect.error} />
 
-        <RuledPanel label={t("designS10.connections")} flush>
+        <RuledPanel title={t("designS10.calendars")} flush>
           {rows.length ? (
             <ul className="divide-y divide-border">
               {rows.map((c) => (
