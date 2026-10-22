@@ -334,7 +334,7 @@ export function ConcernPage({ concernId }: { concernId: string }) {
         </RuledPanel>
         {history.data ? (
           <Disclosure summary={t("safeguarding.accessLog")}>
-            <ul className="mt-2 divide-y divide-rule rounded-xl border border-border bg-surface text-sm">
+            <ul className="divide-y divide-rule rounded-xl border border-border bg-surface text-sm">
               {history.data.map((h, i) => (
                 <li key={i} className="px-5 py-2.5 tabular-nums">
                   {formatDateTime(h.at, i18n.language)} · {h.actor || t("safeguarding.system")} ·{" "}

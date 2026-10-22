@@ -551,7 +551,7 @@ function ExportReview({ request }: { request: DataRequest }) {
         {preview.data.sections.map((section) => (
           <li key={section.key} className="px-5 py-3.5">
             <Disclosure summary={`${section.title} (${section.records.length})`}>
-              <ul className="mt-3 divide-y divide-rule rounded-md border border-border">
+              <ul className="divide-y divide-rule rounded-md border border-border">
                 {section.records.map((record) => {
                   const id = String(record.id ?? "");
                   const ref = { section: section.key, record_id: id };

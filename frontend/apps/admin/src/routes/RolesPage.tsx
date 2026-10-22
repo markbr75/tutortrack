@@ -213,6 +213,7 @@ function RoleEditor({ role, canManage }: { role: CustomRole; canManage: boolean 
                 <Disclosure
                   open={pending || undefined}
                   summaryClassName="w-full px-5 py-3"
+                  bodyClassName="mt-0"
                   summary={
                     <>
                       <span className="min-w-0 flex-1">{name}</span>
