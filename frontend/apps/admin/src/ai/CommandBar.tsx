@@ -134,7 +134,7 @@ export function CommandBar() {
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-2.5">
           <h2 id={titleId} className="text-base font-semibold">
-            {t("ai.command.title")}
+            {t("ai.command.open")}
           </h2>
           <Button
             size="sm"
