@@ -1757,13 +1757,7 @@ export function ReEnrolPage({ token }: { token: string }) {
     onSuccess: (data) => queryClient.setQueryData(["re-enrol", token], data),
   });
   if (page.isError) return <PublicLayout title={t("courses.reEnrol.missing")}>{null}</PublicLayout>;
-  if (!page.data) {
-    return (
-      <main className="flex min-h-screen items-center justify-center px-4">
-        <Spinner label={t("grid.loading")} />
-      </main>
-    );
-  }
+  if (!page.data) return <PublicLayout loading />;
   const p = page.data;
   return (
     <PublicLayout title={t("courses.reEnrol.title", { student: p.student })}>

@@ -3,6 +3,7 @@ import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
 import {
   Alert,
   Button,
+  CheckboxField,
   FactList,
   NamePlate,
   PageHeader,
@@ -12,6 +13,7 @@ import {
   PanelRows,
   SelectField,
   Spinner,
+  TextAreaField,
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,7 +27,7 @@ import { HeaderReveal, RecordHeader, RecordLayout } from "../components/RecordHe
 import { TabLinks } from "../components/TabLinks";
 import { Turnstile } from "../components/Turnstile";
 import { PublicLayout } from "../layout/PublicLayout";
-import { PublicField, type Schema } from "../leads/MorePages";
+import { PublicField, PublicFieldset, type Schema } from "../leads/MorePages";
 
 /** The recruitment area's frame: page header and the Applications / Openings / Compliance
  * links (G5a adds Openings), ruled like tabs. */
@@ -1058,12 +1060,12 @@ export function VacancyPage({ slug }: { slug: string }) {
         </a>
       </PublicLayout>
     );
-  if (!opening.data) return <Spinner label={t("grid.loading")} />;
+  if (!opening.data) return <PublicLayout loading />;
   const schema = opening.data.schema as unknown as Schema;
   const errors = (apply.error as { problem?: { errors?: Record<string, string[]> } } | null)
     ?.problem?.errors;
   return (
-    <PublicLayout title={opening.data.title}>
+    <PublicLayout title={opening.data.title} wide>
       {opening.data.description ? (
         <p className="mb-6 whitespace-pre-line">{opening.data.description}</p>
       ) : null}
@@ -1071,17 +1073,14 @@ export function VacancyPage({ slug }: { slug: string }) {
         <p role="status">{t("recruitment.applied")}</p>
       ) : (
         <form
-          className="space-y-6"
+          className="rounded-xl border border-border bg-surface"
           onSubmit={(e) => {
             e.preventDefault();
             apply.mutate();
           }}
         >
           {schema.steps.map((step, s) => (
-            <fieldset key={s} className="space-y-3">
-              {step.title ? (
-                <legend className="mb-1 text-base font-semibold">{step.title}</legend>
-              ) : null}
+            <PublicFieldset key={s} title={step.title || undefined}>
               {step.fields.map((f) => (
                 <PublicField
                   key={f.key}
@@ -1092,15 +1091,21 @@ export function VacancyPage({ slug }: { slug: string }) {
                   uploadTarget={{ target: "opening", slug }}
                 />
               ))}
-            </fieldset>
+            </PublicFieldset>
           ))}
-          {opening.data.turnstile_site_key ? (
-            <Turnstile siteKey={opening.data.turnstile_site_key} onToken={setToken} />
+          {opening.data.turnstile_site_key || (apply.error && !errors) ? (
+            <div className="space-y-3 border-t border-rule px-5 py-4">
+              {opening.data.turnstile_site_key ? (
+                <Turnstile siteKey={opening.data.turnstile_site_key} onToken={setToken} />
+              ) : null}
+              {apply.error && !errors ? <Alert tone="danger">{apply.error.message}</Alert> : null}
+            </div>
           ) : null}
-          {apply.error && !errors ? <Alert tone="danger">{apply.error.message}</Alert> : null}
-          <Button type="submit" className="w-full sm:w-auto" loading={apply.isPending}>
-            {t("recruitment.apply")}
-          </Button>
+          <PanelFooter>
+            <Button type="submit" loading={apply.isPending}>
+              {t("recruitment.apply")}
+            </Button>
+          </PanelFooter>
         </form>
       )}
     </PublicLayout>
@@ -1133,7 +1138,7 @@ export function InterviewChoicePage({ token }: { token: string }) {
         <p className="text-sm text-muted-foreground">{t("designS8.recruitment.askAgain")}</p>
       </PublicLayout>
     );
-  if (!interview.data) return <Spinner label={t("grid.loading")} />;
+  if (!interview.data) return <PublicLayout loading />;
   const i = interview.data;
   const timeOf = (iso: string) =>
     formatDateTime(iso, i18n.language, undefined, { timeStyle: "short" });
@@ -1237,7 +1242,7 @@ export function ReferencePage({ token }: { token: string }) {
         <p className="text-sm text-muted-foreground">{t("designS8.recruitment.askAgain")}</p>
       </PublicLayout>
     );
-  if (!reference.data) return <Spinner label={t("grid.loading")} />;
+  if (!reference.data) return <PublicLayout loading />;
   const r = reference.data;
   if (give.isSuccess || r.status !== "requested") {
     return (
@@ -1249,43 +1254,40 @@ export function ReferencePage({ token }: { token: string }) {
   return (
     <PublicLayout title={t("recruitment.referenceFor", { name: r.applicant })}>
       <form
-        className="space-y-4"
+        className="rounded-xl border border-border bg-surface"
         onSubmit={(e) => {
           e.preventDefault();
           give.mutate();
         }}
       >
-        {r.questions.map((q, i) => (
-          <label key={q} className="flex flex-col gap-1 text-sm">
-            <span className="font-medium">{q}</span>
-            <textarea
-              className="rounded-md border border-field bg-surface px-3 py-2 text-sm"
-              rows={3}
+        <div className="space-y-4 px-5 py-4">
+          {r.questions.map((q, i) => (
+            <TextAreaField
+              key={q}
+              label={q}
               value={answers[`q${i + 1}`] ?? ""}
               onChange={(e) => setAnswers({ ...answers, [`q${i + 1}`]: e.target.value })}
             />
-          </label>
-        ))}
-        <SelectField
-          label={t("recruitment.overallRating")}
-          className="w-24 tabular-nums"
-          value={rating}
-          onChange={(e) => setRating(e.target.value)}
-          options={["5", "4", "3", "2", "1"].map((n) => ({ value: n, label: n }))}
-        />
-        <label className="flex items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="mt-0.5 size-4"
+          ))}
+          <SelectField
+            label={t("recruitment.overallRating")}
+            className="w-24 tabular-nums"
+            value={rating}
+            onChange={(e) => setRating(e.target.value)}
+            options={["5", "4", "3", "2", "1"].map((n) => ({ value: n, label: n }))}
+          />
+          <CheckboxField
+            label={t("recruitment.raiseConcern")}
             checked={concerns}
             onChange={(e) => setConcerns(e.target.checked)}
           />
-          {t("recruitment.raiseConcern")}
-        </label>
-        {give.error ? <Alert tone="danger">{give.error.message}</Alert> : null}
-        <Button type="submit" className="w-full sm:w-auto" loading={give.isPending}>
-          {t("recruitment.sendReference")}
-        </Button>
+          {give.error ? <Alert tone="danger">{give.error.message}</Alert> : null}
+        </div>
+        <PanelFooter>
+          <Button type="submit" loading={give.isPending}>
+            {t("recruitment.sendReference")}
+          </Button>
+        </PanelFooter>
       </form>
     </PublicLayout>
   );

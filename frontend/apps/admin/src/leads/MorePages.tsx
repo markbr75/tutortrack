@@ -3,18 +3,22 @@ import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
 import {
   Alert,
   Button,
+  CheckboxField,
   FigureStrip,
   figureCell,
   NamePlate,
   Panel,
+  PanelFooter,
   PanelRow,
   PanelRows,
   RuledTable,
+  SelectField,
   Spinner,
+  TextAreaField,
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { api } from "../api";
 import { Turnstile } from "../components/Turnstile";
@@ -560,7 +564,7 @@ export function PublicFormPage({ slug }: { slug: string }) {
     },
   });
   if (form.isError) return <PublicLayout title={t("leads.formMissing")}>{null}</PublicLayout>;
-  if (!form.data) return <Spinner label={t("grid.loading")} />;
+  if (!form.data) return <PublicLayout loading />;
   const schema = form.data.schema as unknown as Schema;
   const errors = (submit.error as { problem?: { errors?: Record<string, string[]> } } | null)
     ?.problem?.errors;
@@ -571,15 +575,14 @@ export function PublicFormPage({ slug }: { slug: string }) {
         <p role="status">{form.data.thank_you || t("leads.thanks")}</p>
       ) : (
         <form
-          className="space-y-6"
+          className="relative rounded-xl border border-border bg-surface"
           onSubmit={(e) => {
             e.preventDefault();
             submit.mutate();
           }}
         >
           {schema.steps.map((step, s) => (
-            <fieldset key={s} className="space-y-3">
-              <legend className="mb-1 text-base font-semibold">{step.title}</legend>
+            <PublicFieldset key={s} title={step.title}>
               {step.fields
                 .filter((f) => !f.show_if || answers[f.show_if.field] === f.show_if.equals)
                 .map((f) => (
@@ -592,7 +595,7 @@ export function PublicFormPage({ slug }: { slug: string }) {
                     uploadTarget={{ target: "form", slug }}
                   />
                 ))}
-            </fieldset>
+            </PublicFieldset>
           ))}
           <div aria-hidden="true" className="absolute -left-[9999px]">
             <label>
@@ -605,19 +608,37 @@ export function PublicFormPage({ slug }: { slug: string }) {
               />
             </label>
           </div>
-          {form.data.consent_text ? (
-            <p className="text-sm text-muted-foreground">{form.data.consent_text}</p>
+          {form.data.consent_text || form.data.turnstile_site_key || (submit.error && !errors) ? (
+            <div className="space-y-3 border-t border-rule px-5 py-4">
+              {form.data.consent_text ? (
+                <p className="text-sm text-muted-foreground">{form.data.consent_text}</p>
+              ) : null}
+              {form.data.turnstile_site_key ? (
+                <Turnstile siteKey={form.data.turnstile_site_key} onToken={setToken} />
+              ) : null}
+              {submit.error && !errors ? <Alert tone="danger">{submit.error.message}</Alert> : null}
+            </div>
           ) : null}
-          {form.data.turnstile_site_key ? (
-            <Turnstile siteKey={form.data.turnstile_site_key} onToken={setToken} />
-          ) : null}
-          {submit.error && !errors ? <Alert tone="danger">{submit.error.message}</Alert> : null}
-          <Button type="submit" loading={submit.isPending}>
-            {t("leads.send")}
-          </Button>
+          <PanelFooter>
+            <Button type="submit" loading={submit.isPending}>
+              {t("leads.send")}
+            </Button>
+          </PanelFooter>
         </form>
       )}
     </PublicLayout>
+  );
+}
+
+/** One part of a public form: its fields inset 16px × 20px, ruled off from the next part. */
+export function PublicFieldset({ title, children }: { title?: string; children: ReactNode }) {
+  return (
+    <fieldset className="border-t border-rule px-5 py-4 first:border-t-0">
+      {title ? (
+        <legend className="float-left mb-3 w-full text-base font-semibold">{title}</legend>
+      ) : null}
+      <div className="clear-both space-y-4">{children}</div>
+    </fieldset>
   );
 }
 
@@ -722,52 +743,49 @@ export function PublicField({
   }
   if (field.type === "checkbox" || field.type === "consent") {
     return (
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          className="size-4"
+      <div className="flex flex-col gap-0.5">
+        <CheckboxField
+          label={field.label}
+          required={field.type === "consent" && field.required}
           checked={Boolean(value)}
+          aria-invalid={error ? true : undefined}
           onChange={(e) => onChange(e.target.checked)}
         />
-        {field.label}
-        {error ? <span className="text-xs text-danger">{error}</span> : null}
-      </label>
+        {error ? (
+          <p className="pl-6 text-xs text-danger" role="alert">
+            {error}
+          </p>
+        ) : null}
+      </div>
     );
   }
   if (field.type === "select") {
     return (
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">{field.label}</span>
-        <select
-          required={field.required}
-          className="h-10 rounded-md border border-field bg-surface px-3 text-sm"
-          value={(value as string) ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-        >
-          <option value="" />
-          {(field.options ?? []).map((o) => (
-            <option key={o} value={o}>
-              {o}
-            </option>
-          ))}
-        </select>
-        {error ? <span className="text-xs text-danger">{error}</span> : null}
-      </label>
+      <SelectField
+        label={field.label}
+        required={field.required}
+        error={error}
+        value={(value as string) ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+        options={[
+          { value: "", label: "" },
+          ...(field.options ?? []).map((o) => ({ value: o, label: o })),
+        ]}
+      />
     );
   }
   const inputType =
     { email: "email", phone: "tel", number: "number", date: "date" }[field.type] ?? "text";
   if (field.type === "textarea") {
     return (
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">{field.label}</span>
-        <textarea
-          className="rounded-md border border-field bg-surface px-3 py-2"
-          rows={4}
-          value={(value as string) ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      </label>
+      <TextAreaField
+        label={field.label}
+        required={field.required}
+        error={error}
+        rows={4}
+        value={(value as string) ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+      />
     );
   }
   return (
@@ -803,7 +821,7 @@ export function OfferPage({ token }: { token: string }) {
     onSuccess: (data) => queryClient.setQueryData(["offer", token], data),
   });
   if (offer.isError) return <PublicLayout title={t("leads.offerMissing")}>{null}</PublicLayout>;
-  if (!offer.data) return <Spinner label={t("grid.loading")} />;
+  if (!offer.data) return <PublicLayout loading />;
   const o = offer.data;
   return (
     <PublicLayout title={t("leads.offerTitle", { student: o.student })}>
@@ -815,15 +833,24 @@ export function OfferPage({ token }: { token: string }) {
               {t("leads.offerUntil", { date: formatDateTime(o.expires_at) })}
             </p>
           ) : null}
-          <div className="mt-4 flex gap-2">
-            <Button onClick={() => respond.mutate(true)}>{t("leads.accept")}</Button>
-            <Button variant="secondary" onClick={() => respond.mutate(false)}>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <Button
+              loading={respond.isPending && respond.variables === true}
+              onClick={() => respond.mutate(true)}
+            >
+              {t("leads.accept")}
+            </Button>
+            <Button
+              variant="secondary"
+              loading={respond.isPending && respond.variables === false}
+              onClick={() => respond.mutate(false)}
+            >
               {t("leads.decline")}
             </Button>
           </div>
         </>
       ) : (
-        <p role="status" className="mt-4">
+        <p role="status" className="mt-6 border-y border-border py-3 text-base font-semibold">
           {t(`leads.offerStatus.${o.status}`)}
         </p>
       )}

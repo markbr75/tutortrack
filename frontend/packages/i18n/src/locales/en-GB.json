@@ -7840,5 +7840,11 @@
       "overdue_other": "({{count}} overdue)",
       "rate": "Homework handed in on time: {{rate}} of {{due}} due ({{overdue}} overdue)."
     }
+  },
+  "designS11": {
+    "poweredBy": "Powered by",
+    "invite": {
+      "invalidTitle": "This invitation can't be used"
+    }
   }
 }

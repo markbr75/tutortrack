@@ -3,11 +3,13 @@ import { formatDate, useTranslation } from "@tutortrack/i18n";
 import {
   Alert,
   Button,
+  CheckboxField,
   FigureStrip,
   PageHeader,
   Panel,
   SelectField,
   Spinner,
+  TextAreaField,
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -368,12 +370,12 @@ export function PublicFeedbackPage({ token }: { token: string }) {
   if (item.isError) {
     return <PublicLayout title={t("lessonFeedback.missing")}>{null}</PublicLayout>;
   }
-  if (!item.data) return <Spinner label={t("grid.loading")} />;
+  if (!item.data) return <PublicLayout loading />;
   const f = item.data;
   const title = t("lessonFeedback.question", { student: f.student });
   if (f.status !== "sent") {
     return (
-      <PublicLayout title={title} subtitle={f.organisation}>
+      <PublicLayout title={title}>
         <p role="status">
           {f.status === "answered" ? t("lessonFeedback.thanks") : t("lessonFeedback.closed")}
         </p>
@@ -381,16 +383,18 @@ export function PublicFeedbackPage({ token }: { token: string }) {
     );
   }
   return (
-    <PublicLayout title={title} subtitle={f.organisation}>
-      <p className="mb-6 text-muted-foreground">
-        {f.tutor
+    <PublicLayout
+      title={title}
+      subtitle={
+        f.tutor
           ? t("lessonFeedback.lessonWith", {
               lesson: f.lesson,
               tutor: f.tutor,
               date: formatDate(f.lesson_date),
             })
-          : t("lessonFeedback.lessonOn", { lesson: f.lesson, date: formatDate(f.lesson_date) })}
-      </p>
+          : t("lessonFeedback.lessonOn", { lesson: f.lesson, date: formatDate(f.lesson_date) })
+      }
+    >
       <form
         className="space-y-5 rounded-xl border border-border bg-surface px-5 py-5"
         onSubmit={(e) => {
@@ -429,27 +433,19 @@ export function PublicFeedbackPage({ token }: { token: string }) {
             ))}
           </div>
         </fieldset>
-        <div className="flex flex-col gap-1">
-          <label htmlFor="feedback-comment" className="text-sm font-medium">
-            {t("lessonFeedback.commentOptional")}
-          </label>
-          <textarea
-            id="feedback-comment"
-            className="min-h-24 rounded-md border border-field bg-surface px-3 py-2 text-sm"
-            maxLength={2000}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-        </div>
-        <label className="flex items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="mt-1 size-4"
-            checked={stopAsking}
-            onChange={(e) => setStopAsking(e.target.checked)}
-          />
-          <span>{t("gapG6.stopAskingFeedback")}</span>
-        </label>
+        <TextAreaField
+          id="feedback-comment"
+          label={t("lessonFeedback.commentOptional")}
+          rows={4}
+          maxLength={2000}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+        />
+        <CheckboxField
+          label={t("gapG6.stopAskingFeedback")}
+          checked={stopAsking}
+          onChange={(e) => setStopAsking(e.target.checked)}
+        />
         {!rating && answer.isIdle ? (
           <p className="text-xs text-muted-foreground">{t("lessonFeedback.chooseStars")}</p>
         ) : null}

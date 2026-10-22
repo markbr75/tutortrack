@@ -29,13 +29,13 @@ export function AcceptInvitePage() {
 
   if (!token || lookup.isError) {
     return (
-      <PublicLayout title={t("app.name")}>
+      <PublicLayout title={t("designS11.invite.invalidTitle")}>
         <Alert tone="danger">{t("invite.invalid")}</Alert>
       </PublicLayout>
     );
   }
   if (!invitation) {
-    return <PublicLayout title={t("app.name")}>{t("common.loading")}</PublicLayout>;
+    return <PublicLayout loading />;
   }
   const signedInAsInvitee = me.data?.user.email === invitation.email;
   const next = encodeURIComponent(`/accept-invite?token=${token}`);
@@ -45,7 +45,9 @@ export function AcceptInvitePage() {
       subtitle={t("invite.body", { role: t(`roles.${invitation.role}`), email: invitation.email })}
     >
       {accept.isError && Object.keys(errors).length === 0 ? (
-        <Alert tone="danger">{accept.error.message}</Alert>
+        <Alert tone="danger" className="mb-4">
+          {accept.error.message}
+        </Alert>
       ) : null}
       {signedInAsInvitee ? (
         <Button loading={accept.isPending} onClick={() => accept.mutate()}>
@@ -60,13 +62,13 @@ export function AcceptInvitePage() {
         </Alert>
       ) : (
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
           onSubmit={(e: FormEvent) => {
             e.preventDefault();
             accept.mutate();
           }}
         >
-          <p className="text-sm font-medium">{t("invite.create")}</p>
+          <h2 className="text-base font-semibold">{t("invite.create")}</h2>
           <TextField
             label={t("signup.firstName")}
             autoComplete="given-name"

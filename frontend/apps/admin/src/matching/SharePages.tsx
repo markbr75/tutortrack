@@ -273,15 +273,11 @@ export function PublicShortlistPage({ token }: { token: string }) {
     onSuccess: (data) => queryClient.setQueryData(["public-shortlist", token], data),
   });
   if (page.isError) return <PublicLayout title={t("shortlistShare.missing")}>{null}</PublicLayout>;
-  if (!page.data) return <Spinner label={t("grid.loading")} />;
+  if (!page.data) return <PublicLayout wide loading />;
   const p = page.data;
   const subject = [p.job.subject, p.job.level].filter(Boolean).join(" ") || p.job.service;
   return (
-    <PublicLayout
-      title={t("shortlistShare.publicTitle", { subject })}
-      subtitle={p.organisation}
-      wide
-    >
+    <PublicLayout title={t("shortlistShare.publicTitle", { subject })} wide>
       {p.message ? <p className="mb-4 whitespace-pre-line">{p.message}</p> : null}
       {p.status === "active" ? (
         <form

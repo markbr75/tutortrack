@@ -3,6 +3,7 @@ import { formatDate, formatDateTime, formatMoney, useTranslation } from "@tutort
 import {
   Alert,
   Button,
+  CheckboxField,
   PageHeader,
   Panel,
   PanelFooter,
@@ -11,6 +12,7 @@ import {
   SelectField,
   Spinner,
   Tabs,
+  TextAreaField,
   TextField,
   type RuledColumn,
 } from "@tutortrack/ui";
@@ -1634,7 +1636,7 @@ export function ReviewPage({ token }: { token: string }) {
       ),
   });
   if (page.isError) return <PublicLayout title={t("reviews.page.missing")}>{null}</PublicLayout>;
-  if (!page.data) return <Spinner label={t("grid.loading")} />;
+  if (!page.data) return <PublicLayout loading />;
   const p = page.data;
   const title = p.tutor
     ? t("reviews.page.titleTutor", { tutor: p.tutor })
@@ -1667,63 +1669,54 @@ export function ReviewPage({ token }: { token: string }) {
   return (
     <PublicLayout title={title} wide>
       <form
-        className="space-y-6"
+        className="rounded-xl border border-border bg-surface"
         aria-label={title}
         onSubmit={(e) => {
           e.preventDefault();
           if (rating) submit.mutate();
         }}
       >
-        <StarChoice
-          legend={t("reviews.page.overall")}
-          value={rating}
-          onChange={setRating}
-          required
-        />
-        {p.criteria.map((c) => (
+        <div className="space-y-6 px-5 py-4">
           <StarChoice
-            key={c}
-            legend={t(`reviews.criteria.${c}`, { defaultValue: c.replace(/_/g, " ") })}
-            value={criteria[c] ?? 0}
-            onChange={(n) => setCriteria({ ...criteria, [c]: n })}
+            legend={t("reviews.page.overall")}
+            value={rating}
+            onChange={setRating}
+            required
           />
-        ))}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="review-text" className="text-sm font-medium">
-            {t("reviews.page.comment")}
-          </label>
-          <textarea
+          {p.criteria.map((c) => (
+            <StarChoice
+              key={c}
+              legend={t(`reviews.criteria.${c}`, { defaultValue: c.replace(/_/g, " ") })}
+              value={criteria[c] ?? 0}
+              onChange={(n) => setCriteria({ ...criteria, [c]: n })}
+            />
+          ))}
+          <TextAreaField
             id="review-text"
-            className="min-h-28 rounded-md border border-field bg-surface px-3 py-2 text-sm"
+            label={t("reviews.page.comment")}
+            rows={4}
             maxLength={5000}
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
-        </div>
-        <TextField
-          label={t("reviews.page.name")}
-          hint={t("reviews.page.nameHint")}
-          value={name ?? p.reviewer_name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <label className="flex items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="mt-0.5 size-4"
+          <TextField
+            label={t("reviews.page.name")}
+            hint={t("reviews.page.nameHint")}
+            value={name ?? p.reviewer_name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <CheckboxField
+            label={t("reviews.page.consent", { organisation: p.organisation })}
             checked={consent}
             onChange={(e) => setConsent(e.target.checked)}
           />
-          {t("reviews.page.consent", { organisation: p.organisation })}
-        </label>
-        {submit.error ? <Alert tone="danger">{submit.error.message}</Alert> : null}
-        <Button
-          type="submit"
-          className="w-full sm:w-auto"
-          disabled={!rating}
-          loading={submit.isPending}
-        >
-          {t("reviews.page.submit")}
-        </Button>
+          {submit.error ? <Alert tone="danger">{submit.error.message}</Alert> : null}
+        </div>
+        <PanelFooter>
+          <Button type="submit" disabled={!rating} loading={submit.isPending}>
+            {t("reviews.page.submit")}
+          </Button>
+        </PanelFooter>
       </form>
     </PublicLayout>
   );

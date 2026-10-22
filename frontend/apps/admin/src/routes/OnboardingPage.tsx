@@ -1,6 +1,14 @@
 import { unwrap } from "@tutortrack/api-client";
 import { useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  PanelFooter,
+  SelectField,
+  TextAreaField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
@@ -229,17 +237,13 @@ export function OnboardingPage() {
 
   if (handoff === "failed" || state.isError) {
     return (
-      <PublicLayout title={t("onboarding.title")}>
+      <PublicLayout title={t("onboarding.title")} tutortrack>
         <Alert tone="danger">{t("onboarding.handoffFailed")}</Alert>
       </PublicLayout>
     );
   }
   if (!state.data || !current) {
-    return (
-      <div className="grid h-screen place-items-center">
-        <Spinner label={t("common.loading")} />
-      </div>
-    );
+    return <PublicLayout tutortrack wide loading />;
   }
 
   const index = keys.indexOf(current);
@@ -252,113 +256,97 @@ export function OnboardingPage() {
   }
 
   return (
-    <PublicLayout title={t("onboarding.title")} wide>
-      <p className="text-sm text-muted-foreground">
-        {t("onboarding.progress", { current: index + 1, total: keys.length })}
-      </p>
-      <ol className="mt-2 flex gap-1" aria-hidden="true">
-        {state.data.steps.map((s) => (
-          <li
-            key={s.key}
-            className={`h-1.5 flex-1 rounded ${s.status === "pending" ? "bg-muted" : "bg-brand"}`}
-          />
-        ))}
-      </ol>
-      <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4" noValidate>
-        <h2 className="text-lg font-medium">{t(`onboarding.steps.${current}`)}</h2>
-        {current === "payments" ? <p className="text-sm">{t("onboarding.paymentsBody")}</p> : null}
-        {submit.isError && Object.keys(errors).length === 0 ? (
-          <Alert tone="danger">{submit.error.message}</Alert>
-        ) : null}
-        {fields.map((field) => {
-          const common = {
-            label: field.optional ? `${field.label} (${t("common.optional")})` : field.label,
-            value: values[field.name] ?? "",
-            error: errors[field.name],
-          };
-          const onChange = (e: { target: { value: string } }) =>
-            setValues((v) => ({
-              ...v,
-              [field.name]: e.target.value,
-              // Sole traders and small teams usually teach; larger businesses usually don't.
-              ...(field.name === "business_type"
-                ? { owner_teaches: String(TEACHING_TYPES.has(e.target.value)) }
-                : {}),
-            }));
-          if (field.type === "select") {
-            return (
-              <SelectField
-                key={field.name}
-                {...common}
-                options={field.options ?? []}
-                onChange={onChange}
-              />
-            );
-          }
-          if (field.type === "checkbox") {
-            return (
-              <div key={field.name} className="flex items-start gap-3">
-                <input
-                  id={`f-${field.name}`}
-                  type="checkbox"
-                  className="mt-1 size-4"
+    <PublicLayout
+      title={t("onboarding.title")}
+      subtitle={t("onboarding.progress", { current: index + 1, total: keys.length })}
+      tutortrack
+      wide
+    >
+      <form
+        onSubmit={onSubmit}
+        aria-labelledby="onboarding-step"
+        className="rounded-xl border border-border bg-surface"
+        noValidate
+      >
+        <div className="border-b border-border px-5 py-3.5">
+          <h2 id="onboarding-step" className="text-base font-semibold">
+            {t(`onboarding.steps.${current}`)}
+          </h2>
+          {current === "payments" ? (
+            <p className="mt-0.5 text-sm text-muted-foreground">{t("onboarding.paymentsBody")}</p>
+          ) : null}
+        </div>
+        <div className="flex flex-col gap-4 px-5 py-4">
+          {submit.isError && Object.keys(errors).length === 0 ? (
+            <Alert tone="danger">{submit.error.message}</Alert>
+          ) : null}
+          {fields.map((field) => {
+            const common = {
+              label: field.optional ? `${field.label} (${t("common.optional")})` : field.label,
+              value: values[field.name] ?? "",
+              error: errors[field.name],
+            };
+            const onChange = (e: { target: { value: string } }) =>
+              setValues((v) => ({
+                ...v,
+                [field.name]: e.target.value,
+                // Sole traders and small teams usually teach; larger businesses usually don't.
+                ...(field.name === "business_type"
+                  ? { owner_teaches: String(TEACHING_TYPES.has(e.target.value)) }
+                  : {}),
+              }));
+            if (field.type === "select") {
+              return (
+                <SelectField
+                  key={field.name}
+                  {...common}
+                  options={field.options ?? []}
+                  onChange={onChange}
+                />
+              );
+            }
+            if (field.type === "checkbox") {
+              return (
+                <CheckboxField
+                  key={field.name}
+                  label={field.label}
+                  hint={field.hint}
                   checked={values[field.name] === "true"}
-                  aria-describedby={field.hint ? `f-${field.name}-hint` : undefined}
                   onChange={(e) =>
                     setValues((v) => ({ ...v, [field.name]: e.target.checked ? "true" : "false" }))
                   }
                 />
-                <div>
-                  <label htmlFor={`f-${field.name}`} className="text-sm font-medium">
-                    {field.label}
-                  </label>
-                  {field.hint ? (
-                    <p id={`f-${field.name}-hint`} className="text-xs text-muted-foreground">
-                      {field.hint}
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-            );
-          }
-          if (field.type === "textarea") {
-            return (
-              <div key={field.name} className="flex flex-col gap-1">
-                <label htmlFor={`f-${field.name}`} className="text-sm font-medium">
-                  {common.label}
-                </label>
-                <textarea
-                  id={`f-${field.name}`}
+              );
+            }
+            if (field.type === "textarea") {
+              return (
+                <TextAreaField
+                  key={field.name}
+                  {...common}
                   rows={4}
-                  className="rounded-md border border-border bg-background p-3 text-sm"
-                  value={common.value}
-                  aria-describedby={`f-${field.name}-hint`}
+                  hint={t("onboarding.tutorEmailsHint")}
                   onChange={onChange}
                 />
-                <p id={`f-${field.name}-hint`} className="text-xs text-muted-foreground">
-                  {t("onboarding.tutorEmailsHint")}
-                </p>
-                {common.error ? (
-                  <p className="text-xs text-danger" role="alert">
-                    {common.error}
-                  </p>
-                ) : null}
-              </div>
+              );
+            }
+            return (
+              <TextField
+                key={field.name}
+                {...common}
+                type={field.type ?? "text"}
+                inputMode={field.type === "number" ? "decimal" : undefined}
+                onChange={onChange}
+              />
             );
-          }
-          return (
-            <TextField
-              key={field.name}
-              {...common}
-              type={field.type ?? "text"}
-              inputMode={field.type === "number" ? "decimal" : undefined}
-              onChange={onChange}
-            />
-          );
-        })}
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+          })}
+        </div>
+        <PanelFooter>
           {index > 0 ? (
-            <Button type="button" variant="ghost" onClick={() => setStep(keys[index - 1] ?? null)}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setStep(keys[index - 1] ?? null)}
+            >
               {t("common.back")}
             </Button>
           ) : null}
@@ -372,17 +360,19 @@ export function OnboardingPage() {
           <Button type="submit" loading={submit.isPending}>
             {isLast ? t("onboarding.finish") : t("common.next")}
           </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            className="ml-auto"
-            onClick={() => submit.mutate({ key: "complete", skip: false })}
-          >
-            {t("onboarding.finish")}
-          </Button>
-        </div>
+          {isLast ? null : (
+            <Button
+              type="button"
+              variant="ghost"
+              className="ml-auto text-muted-foreground"
+              onClick={() => submit.mutate({ key: "complete", skip: false })}
+            >
+              {t("onboarding.finish")}
+            </Button>
+          )}
+        </PanelFooter>
       </form>
-      <div className="mt-10 border-t border-border pt-6">
+      <div className="mt-8 border-t border-border pt-6">
         {demo.isSuccess ? (
           <Alert tone="success">{t("onboarding.demoLoaded")}</Alert>
         ) : (
