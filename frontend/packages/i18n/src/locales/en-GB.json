@@ -7411,6 +7411,7 @@
     "rowsCount_one": "{{n}} row",
     "rowsCount_other": "{{n}} rows",
     "allEvents": "All events",
+    "reconnect": "Reconnect",
     "waitingCount_one": "{{count}} waiting",
     "waitingCount_other": "{{count}} waiting",
     "connectAnother": "Connect another integration",

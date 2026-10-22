@@ -94,7 +94,7 @@ const CODE_TOKENS =
 function withCode(text: string): ReactNode[] {
   return text.split(CODE_TOKENS).map((part, i) =>
     i % 2 === 1 ? (
-      <code key={i} className="rounded-sm bg-muted px-1 font-mono text-xs">
+      <code key={i} className="rounded-sm bg-muted px-1 font-mono text-xs whitespace-nowrap">
         {part}
       </code>
     ) : (

@@ -75,12 +75,13 @@ function useConnections(mine: boolean) {
 /** A connection's state in words (a failure in danger), then its account and last sync. */
 function StatusText({ connection }: { connection: Connection }) {
   const { t, i18n } = useTranslation();
-  const failing = connection.status === "error" || connection.status === "needs_reconnect";
   return (
     <>
       <span
         className={cn(
-          failing && "font-medium text-danger",
+          // Waiting on the business to reconnect is margin red; a failure is danger.
+          connection.status === "needs_reconnect" && "font-semibold text-margin",
+          connection.status === "error" && "font-medium text-danger",
           connection.status === "disconnected" && "text-muted-foreground",
         )}
       >
@@ -239,8 +240,20 @@ export function CalendarSyncPanel({ connectionId }: { connectionId: string }) {
 }
 
 /** One connection as a ruled row: the provider, its state in words, and its actions. */
-function ConnectionRow({ connection, showOwner }: { connection: Connection; showOwner: boolean }) {
+function ConnectionRow({
+  connection,
+  showOwner,
+  provider,
+}: {
+  connection: Connection;
+  showOwner: boolean;
+  /** The provider, when it can be connected again from here. */
+  provider?: Provider;
+}) {
   const { t } = useTranslation();
+  const [reconnecting, setReconnecting] = useState(false);
+  const start = useOAuthStart(connection.level as Level, RETURN_PATH);
+  const reconnect = connection.status === "needs_reconnect" && provider ? provider : undefined;
   const queryClient = useQueryClient();
   const me = useMe();
   const [open, setOpen] = useState(false);
@@ -282,6 +295,21 @@ function ConnectionRow({ connection, showOwner }: { connection: Connection; show
               {t("integrations.syncSettings")}
             </Button>
           ) : null}
+          {reconnect ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              loading={start.isPending}
+              aria-expanded={reconnect.auth === "oauth2" ? undefined : reconnecting}
+              onClick={() =>
+                reconnect.auth === "oauth2"
+                  ? start.mutate(reconnect.key)
+                  : setReconnecting(!reconnecting)
+              }
+            >
+              {t("designS9a.reconnect")}
+            </Button>
+          ) : null}
           <Button
             size="sm"
             variant="secondary"
@@ -300,19 +328,118 @@ function ConnectionRow({ connection, showOwner }: { connection: Connection; show
           </Button>
         </div>
       </div>
-      {connection.error ? (
-        <Alert
-          tone={connection.status === "needs_reconnect" ? "danger" : "warning"}
-          className="mt-2"
-        >
-          {connection.status === "needs_reconnect" ? t("integrations.reconnectNeeded") : null}{" "}
+      {connection.error && connection.status === "needs_reconnect" ? (
+        // The status word already says it waits (margin red); the reason is a plain caption.
+        <p className="mt-1 text-xs text-muted-foreground">
+          {t("integrations.reconnectNeeded")} {connection.error}
+        </p>
+      ) : connection.error ? (
+        <Alert tone="warning" className="mt-2">
           {connection.error}
         </Alert>
       ) : null}
-      <ErrorList error={act.error} />
+      {reconnect && reconnecting ? (
+        <div className="mt-3">
+          <CredentialsForm
+            provider={reconnect}
+            level={connection.level as Level}
+            onDone={() => setReconnecting(false)}
+          />
+        </div>
+      ) : null}
+      <ErrorList error={act.error ?? start.error} />
       {open ? <CalendarSyncPanel connectionId={connection.id} /> : null}
     </li>
   );
+}
+
+/** The fields a credential provider asks for (CalDAV, API keys), saved as a connection. */
+function CredentialsForm({
+  provider,
+  level,
+  onDone,
+}: {
+  provider: Provider;
+  level: Level;
+  onDone: () => void;
+}) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [fields, setFields] = useState<Record<string, string>>({});
+  const connect = useMutation({
+    mutationFn: async () =>
+      unwrap(
+        await api.POST("/api/v1/integrations/connections", {
+          body: {
+            provider: provider.key,
+            level,
+            username: fields.username ?? "",
+            password: fields.password ?? "",
+            server_url: fields.server_url ?? "",
+            api_key: fields.api_key ?? "",
+          },
+        }),
+      ),
+    onSuccess: () => {
+      onDone();
+      void queryClient.invalidateQueries({ queryKey: ["integrations"] });
+    },
+  });
+  return (
+    <>
+      <form
+        className="space-y-3 border-t border-rule pt-3"
+        aria-label={t("integrations.credentialsFor", { provider: provider.name })}
+        onSubmit={(e) => {
+          e.preventDefault();
+          connect.mutate();
+        }}
+      >
+        <div className="grid items-start gap-x-4 gap-y-3 sm:grid-cols-2">
+          {(provider.credential_fields ?? []).map((field) => (
+            <TextField
+              key={field}
+              label={t(`integrations.fields.${field}`)}
+              type={field === "password" || field === "api_key" ? "password" : "text"}
+              autoComplete="off"
+              required={field !== "server_url"}
+              hint={field === "password" ? t("integrations.appPasswordHint") : undefined}
+              value={fields[field] ?? ""}
+              onChange={(e) => setFields({ ...fields, [field]: e.target.value })}
+            />
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" type="submit" loading={connect.isPending}>
+            {t("integrations.save")}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            type="button"
+            className="text-muted-foreground"
+            onClick={onDone}
+          >
+            {t("common.cancel")}
+          </Button>
+        </div>
+      </form>
+      <ErrorList error={connect.error} />
+    </>
+  );
+}
+
+/** Starts a provider's OAuth connection and sends the browser to it. */
+function useOAuthStart(level: Level, returnPath: string) {
+  return useMutation({
+    mutationFn: async (provider: string) =>
+      unwrap(
+        await api.POST("/api/v1/integrations/oauth/start", {
+          body: { provider, level, next: returnPath },
+        }),
+      ),
+    onSuccess: (result) => window.location.assign(result.authorize_url),
+  });
 }
 
 /** Connect buttons (OAuth) and credential forms (CalDAV, API keys) for one level. */
@@ -329,41 +456,12 @@ export function ConnectProviders({
   pick?: boolean;
 }) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
   const [form, setForm] = useState<string | null>(null);
   const [chosen, setChosen] = useState("");
-  const [fields, setFields] = useState<Record<string, string>>({});
-  const start = useMutation({
-    mutationFn: async (provider: string) =>
-      unwrap(
-        await api.POST("/api/v1/integrations/oauth/start", {
-          body: { provider, level, next: returnPath },
-        }),
-      ),
-    onSuccess: (result) => window.location.assign(result.authorize_url),
-  });
-  const connect = useMutation({
-    mutationFn: async (provider: string) =>
-      unwrap(
-        await api.POST("/api/v1/integrations/connections", {
-          body: {
-            provider,
-            level,
-            username: fields.username ?? "",
-            password: fields.password ?? "",
-            server_url: fields.server_url ?? "",
-            api_key: fields.api_key ?? "",
-          },
-        }),
-      ),
-    onSuccess: () => {
-      setForm(null);
-      setFields({});
-      void queryClient.invalidateQueries({ queryKey: ["integrations"] });
-    },
-  });
+  const start = useOAuthStart(level, returnPath);
   const available = providers.filter((p) => p.levels.includes(level));
   const choice = available.find((p) => p.key === chosen);
+  const formProvider = available.find((p) => p.key === form);
   return (
     <div className="space-y-3">
       {pick ? (
@@ -414,48 +512,15 @@ export function ConnectProviders({
           ))}
         </div>
       )}
-      {form ? (
-        <form
-          className="space-y-3 border-t border-rule pt-3"
-          aria-label={t("integrations.credentialsFor", {
-            provider: available.find((p) => p.key === form)?.name ?? form,
-          })}
-          onSubmit={(e) => {
-            e.preventDefault();
-            connect.mutate(form);
-          }}
-        >
-          <div className="grid items-start gap-x-4 gap-y-3 sm:grid-cols-2">
-            {(available.find((p) => p.key === form)?.credential_fields ?? []).map((field) => (
-              <TextField
-                key={field}
-                label={t(`integrations.fields.${field}`)}
-                type={field === "password" || field === "api_key" ? "password" : "text"}
-                autoComplete="off"
-                required={field !== "server_url"}
-                hint={field === "password" ? t("integrations.appPasswordHint") : undefined}
-                value={fields[field] ?? ""}
-                onChange={(e) => setFields({ ...fields, [field]: e.target.value })}
-              />
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" type="submit" loading={connect.isPending}>
-              {t("integrations.save")}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              type="button"
-              className="text-muted-foreground"
-              onClick={() => setForm(null)}
-            >
-              {t("common.cancel")}
-            </Button>
-          </div>
-        </form>
+      {formProvider ? (
+        <CredentialsForm
+          key={formProvider.key}
+          provider={formProvider}
+          level={level}
+          onDone={() => setForm(null)}
+        />
       ) : null}
-      <ErrorList error={start.error ?? connect.error} />
+      <ErrorList error={start.error} />
     </div>
   );
 }
@@ -629,7 +694,12 @@ export function IntegrationsPage() {
           ) : mine.data.length ? (
             <ul className="divide-y divide-rule">
               {mine.data.map((c) => (
-                <ConnectionRow key={c.id} connection={c} showOwner={false} />
+                <ConnectionRow
+                  key={c.id}
+                  connection={c}
+                  showOwner={false}
+                  provider={providers.data?.find((p) => p.key === c.provider)}
+                />
               ))}
             </ul>
           ) : (
@@ -650,7 +720,12 @@ export function IntegrationsPage() {
             {others.length ? (
               <PanelRows>
                 {others.map((c) => (
-                  <ConnectionRow key={c.id} connection={c} showOwner />
+                  <ConnectionRow
+                    key={c.id}
+                    connection={c}
+                    showOwner
+                    provider={providers.data?.find((p) => p.key === c.provider)}
+                  />
                 ))}
               </PanelRows>
             ) : !all.data ? (

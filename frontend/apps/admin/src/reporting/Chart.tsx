@@ -27,38 +27,47 @@ const STRENGTH = [1, 0.7, 0.45, 0.26, 0.12];
 /**
  * Filled marks (bars, pie slices) take tokens that all keep 3:1 or better against the clean
  * leaf in both schemes: link ink, ink, faded ink and the field edge. Series whose meaning has
- * a register colour keep it (One Red: overdue and missed in margin red), and ageing buckets
- * step from link ink (not yet due) towards margin red, so older debt reads stronger.
+ * a register colour keep it (One Red: overdue and missed in margin red). Ageing buckets run
+ * from link ink (not yet due) into margin red at 40%, 60%, 80% and full strength, so older
+ * debt reads stronger; the two lightest steps are outlined in full margin red so each mark
+ * still keeps 3:1 against the leaf.
  */
-const FILLS = [
-  "hsl(var(--tt-link))",
-  "hsl(var(--tt-foreground))",
-  "hsl(var(--tt-muted-foreground))",
-  "hsl(var(--tt-field))",
+interface Fill {
+  fill: string;
+  opacity?: number;
+  /** A 1px outline in the full colour, for a fill too pale to hold 3:1 on its own. */
+  outline?: boolean;
+}
+const LINK = "hsl(var(--tt-link))";
+const MARGIN = "hsl(var(--tt-margin))";
+const FILLS: Fill[] = [
+  { fill: LINK },
+  { fill: "hsl(var(--tt-foreground))" },
+  { fill: "hsl(var(--tt-muted-foreground))" },
+  { fill: "hsl(var(--tt-field))" },
 ];
-const towardsRed = (link: number) =>
-  `color-mix(in oklab, hsl(var(--tt-link)) ${link}%, hsl(var(--tt-margin)))`;
-const SERIES_FILLS: Record<string, string> = {
+const SERIES_FILLS: Record<string, Fill> = {
   // Aged debtors.
-  current: "hsl(var(--tt-link))",
-  "1_30": towardsRed(65),
-  "31_60": towardsRed(40),
-  "61_90": towardsRed(18),
-  "90_plus": "hsl(var(--tt-margin))",
+  current: { fill: LINK },
+  "1_30": { fill: MARGIN, opacity: 0.4, outline: true },
+  "31_60": { fill: MARGIN, opacity: 0.6, outline: true },
+  "61_90": { fill: MARGIN, opacity: 0.8 },
+  "90_plus": { fill: MARGIN },
   // Lessons by status, as the register marks them.
-  completed: "hsl(var(--tt-foreground))",
-  cancelled: "hsl(var(--tt-field))",
-  missed: "hsl(var(--tt-margin))",
+  completed: { fill: "hsl(var(--tt-foreground))" },
+  cancelled: { fill: "hsl(var(--tt-field))" },
+  missed: { fill: MARGIN },
   // Lesson report deadlines.
-  on_time: "hsl(var(--tt-link))",
-  late: "hsl(var(--tt-muted-foreground))",
-  outstanding: "hsl(var(--tt-margin))",
+  on_time: { fill: LINK },
+  late: { fill: "hsl(var(--tt-muted-foreground))" },
+  outstanding: { fill: MARGIN },
 };
 
 /** The fill of series `key` at position `index` (or of pie slice `index`). */
-function fillOf(key: string | undefined, index: number): string {
+function fillOf(key: string | undefined, index: number): Fill {
   return (key && SERIES_FILLS[key]) || FILLS[index % FILLS.length] || FILLS[0]!;
 }
+
 const DASH = [undefined, "6 4", "2 3", "8 3 2 3", "1 4"];
 /** Axis text, grid and cursor take the register's tokens through CSS (it beats SVG attributes). */
 const SKIN = cn(
@@ -121,7 +130,16 @@ function Swatch({
   }
   return (
     <svg width="10" height="10" aria-hidden="true" className="shrink-0 text-link">
-      <rect width="10" height="10" rx="2" fill={fillOf(seriesKey, index)} />
+      <rect
+        x="0.5"
+        y="0.5"
+        width="9"
+        height="9"
+        rx="2"
+        fill={fillOf(seriesKey, index).fill}
+        fillOpacity={fillOf(seriesKey, index).opacity ?? 1}
+        stroke={fillOf(seriesKey, index).outline ? fillOf(seriesKey, index).fill : "none"}
+      />
     </svg>
   );
 }
@@ -256,7 +274,7 @@ export function Chart({
                   strokeWidth={2}
                 >
                   {data.map((_, i) => (
-                    <Cell key={i} fill={fillOf(undefined, i)} />
+                    <Cell key={i} fill={fillOf(undefined, i).fill} />
                   ))}
                 </Pie>
                 <Tooltip content={tip} />
@@ -331,8 +349,15 @@ export function Chart({
                     key={s.key}
                     dataKey={s.key}
                     name={s.label}
-                    fill={fillOf(s.key, i)}
-                    stroke={stacked ? "hsl(var(--tt-surface))" : undefined}
+                    fill={fillOf(s.key, i).fill}
+                    fillOpacity={fillOf(s.key, i).opacity ?? 1}
+                    stroke={
+                      fillOf(s.key, i).outline
+                        ? fillOf(s.key, i).fill
+                        : stacked
+                          ? "hsl(var(--tt-surface))"
+                          : undefined
+                    }
                     maxBarSize={across ? 24 : 56}
                     radius={stacked ? 0 : across ? [0, 2, 2, 0] : [2, 2, 0, 0]}
                     stackId={stacked ? "stack" : undefined}
