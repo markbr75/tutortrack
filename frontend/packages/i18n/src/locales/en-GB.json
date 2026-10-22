@@ -7919,6 +7919,9 @@
       "newNotice": "New notice",
       "scrollSideways": "Scroll sideways to see every column.",
       "funnel": "Onboarding funnel"
+    },
+    "auth": {
+      "sendNewLink": "Send a new sign-in link"
     }
   }
 }

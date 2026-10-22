@@ -369,7 +369,12 @@ export function OnboardingPage() {
               {t("onboarding.finish")}
             </Button>
           )}
-          <Button type="submit" className="ml-auto" loading={submit.isPending}>
+          {/* On phones the primary takes its own full-width row first, the rest below it. */}
+          <Button
+            type="submit"
+            className="max-sm:order-first max-sm:w-full sm:ml-auto"
+            loading={submit.isPending}
+          >
             {isLast ? t("onboarding.finish") : t("common.next")}
           </Button>
         </PanelFooter>

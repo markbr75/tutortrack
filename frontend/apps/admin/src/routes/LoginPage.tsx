@@ -223,6 +223,40 @@ export function LoginPage() {
   );
 }
 
+/** The way forward from a dead sign-in link: ask for a new one (the same request as the
+ * sign-in page's "Email me a sign-in link"). */
+function NewLinkForm({ next }: { next: string }) {
+  const { t } = useTranslation();
+  const [email, setEmail] = useState("");
+  const send = useMutation({
+    mutationFn: async () =>
+      unwrap(await api.POST("/api/v1/auth/magic-link", { body: { email, next } })),
+  });
+  if (send.isSuccess) return <Alert tone="success">{t("auth.magicLinkSent")}</Alert>;
+  return (
+    <form
+      className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5"
+      onSubmit={(e: FormEvent) => {
+        e.preventDefault();
+        send.mutate();
+      }}
+    >
+      <TextField
+        label={t("auth.email")}
+        type="email"
+        autoComplete="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      {send.isError ? <Alert tone="danger">{send.error.message}</Alert> : null}
+      <Button type="submit" loading={send.isPending} disabled={!email}>
+        {t("designS11.auth.sendNewLink")}
+      </Button>
+    </form>
+  );
+}
+
 export function MagicLinkPage() {
   const { t } = useTranslation();
   const [mfa, setMfa] = useState(false);
@@ -247,7 +281,13 @@ export function MagicLinkPage() {
       {mfa ? (
         <MFAStep onDone={() => window.location.assign(next)} />
       ) : verify.isError || !token ? (
-        <Alert tone="danger">{t("auth.linkInvalid")}</Alert>
+        <div className="flex flex-col gap-4">
+          <Alert tone="danger">{t("auth.linkInvalid")}</Alert>
+          <NewLinkForm next={next} />
+          <a className={`text-sm ${LINK}`} href="/login">
+            {t("auth.backToLogin")}
+          </a>
+        </div>
       ) : (
         <p role="status">{t("auth.checkingLink")}</p>
       )}
