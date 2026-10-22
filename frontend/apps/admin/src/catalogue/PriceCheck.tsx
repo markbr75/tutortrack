@@ -205,9 +205,11 @@ function QuoteLines({
     <RuledPanel
       flush
       title={
+        // One text node for the accessible name ("Charged to clients: £67.50"): a separate
+        // sr-only fragment gets a space inserted before it by the browser.
         <>
-          {title}
-          <span className="sr-only">: {total}</span>
+          <span aria-hidden="true">{title}</span>
+          <span className="sr-only">{`${title}: ${total}`}</span>
         </>
       }
     >
