@@ -1,11 +1,28 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, Tabs, TextField } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  Disclosure,
+  FactList,
+  figureCell,
+  PageHeader,
+  RuledPanel,
+  RuledTable,
+  SelectField,
+  Spinner,
+  Tabs,
+  TextField,
+  UnitField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
+import { RecordHeader } from "../components/RecordHeader";
 import {
   AreaSettings,
   Cell,
@@ -33,7 +50,7 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number]["key"];
 
-const link = "text-primary underline-offset-2 hover:underline";
+const link = "font-medium text-link underline-offset-2 hover:underline";
 
 /** The Privacy centre (E29 Part 2): data subject requests, erasures, legal holds,
  * retention, the data processing agreement and privacy settings. */
@@ -50,8 +67,11 @@ export function PrivacyPage() {
   const [tab, setTab] = useState<Tab>(tabs[0]?.key ?? "requests");
   if (!tabs.length) return <Alert tone="danger">{t("privacyCentre.forbidden")}</Alert>;
   return (
-    <section>
-      <h1 className="mb-4 text-2xl font-semibold">{t("privacyCentre.title")}</h1>
+    <section className="max-w-5xl">
+      <PageHeader
+        title={t("privacyCentre.title")}
+        description={t("designS9b.privacy.description")}
+      />
       <Tabs
         label={t("privacyCentre.title")}
         tabs={tabs.map(({ key }) => ({ key, label: t(`privacyCentre.tabs.${key}`) }))}
@@ -77,10 +97,9 @@ function DueBadge({ request }: { request: DataRequest }) {
   const { t } = useTranslation();
   if (request.closed_at) return null;
   const days = daysUntil(request.due_at);
-  const tone =
-    days < 0 ? "text-destructive font-semibold" : days <= 7 ? "text-warning" : "text-foreground";
+  // Overdue is margin red (the One Red Rule); a deadline still to come is a faded caption.
   return (
-    <span className={tone}>
+    <span className={days < 0 ? "font-semibold text-margin" : "text-muted-foreground"}>
       {days < 0
         ? t("privacyCentre.overdueBy", { count: -days })
         : t("privacyCentre.dueIn", { count: days })}
@@ -90,6 +109,7 @@ function DueBadge({ request }: { request: DataRequest }) {
 
 function RequestsSection() {
   const { t, i18n } = useTranslation();
+  const phone = useIsPhone();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState("true");
   const requests = useQuery({
@@ -131,54 +151,75 @@ function RequestsSection() {
     },
   });
   const errors = fieldErrors(create.error);
+  const rows = requests.data?.results ?? [];
   return (
     <div className="space-y-6">
-      <SelectField
-        label={t("privacyCentre.show")}
-        value={open}
-        onChange={(e) => setOpen(e.target.value)}
-        options={[
-          { value: "true", label: t("privacyCentre.openRequests") },
-          { value: "false", label: t("privacyCentre.closedRequests") },
-          { value: "", label: t("privacyCentre.allRequests") },
+      <Table
+        caption={t("privacyCentre.requests")}
+        loading={requests.isPending}
+        empty={requests.data && !rows.length ? t("designS9b.privacy.noRequests") : undefined}
+        aside={
+          <SelectField
+            label={t("privacyCentre.show")}
+            hideLabel
+            size="sm"
+            value={open}
+            onChange={(e) => setOpen(e.target.value)}
+            options={[
+              { value: "true", label: t("privacyCentre.openRequests") },
+              { value: "false", label: t("privacyCentre.closedRequests") },
+              { value: "", label: t("privacyCentre.allRequests") },
+            ]}
+          />
+        }
+        columns={[
+          { key: "ref", header: t("privacyCentre.reference") },
+          ...(phone
+            ? []
+            : [
+                { key: "kind", header: t("privacyCentre.kind") },
+                { key: "person", header: t("privacyCentre.person") },
+              ]),
+          { key: "status", header: t("privacyCentre.status") },
+          ...(phone ? [] : [{ key: "received", header: t("privacyCentre.received") }]),
+          { key: "deadline", header: t("privacyCentre.deadline") },
         ]}
-      />
-      {requests.data ? (
-        <Table
-          caption={t("privacyCentre.requests")}
-          headers={[
-            t("privacyCentre.reference"),
-            t("privacyCentre.kind"),
-            t("privacyCentre.person"),
-            t("privacyCentre.status"),
-            t("privacyCentre.received"),
-            t("privacyCentre.deadline"),
-          ]}
-        >
-          {requests.data.results.map((r) => (
-            <tr key={r.id}>
-              <Cell>
-                <Link
-                  to="/privacy/requests/$requestId"
-                  params={{ requestId: r.id }}
-                  className={link}
-                >
-                  {r.reference}
-                </Link>
+      >
+        {rows.map((r) => (
+          <tr key={r.id}>
+            <Cell className="min-w-32">
+              <Link to="/privacy/requests/$requestId" params={{ requestId: r.id }} className={link}>
+                {r.reference}
+              </Link>
+              {phone ? (
+                <span className="block text-xs text-muted-foreground">
+                  {[t(`privacyCentre.kinds.${r.kind}`), r.subject_label || r.requester_name]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              ) : null}
+            </Cell>
+            {phone ? null : (
+              <>
+                <Cell className="min-w-40">{t(`privacyCentre.kinds.${r.kind}`)}</Cell>
+                <Cell className="min-w-32">{r.subject_label || r.requester_name}</Cell>
+              </>
+            )}
+            <Cell>{t(`privacyCentre.statuses.${r.status}`)}</Cell>
+            {phone ? null : (
+              <Cell className="whitespace-nowrap tabular-nums">
+                {formatDate(r.received_at, i18n.language)}
               </Cell>
-              <Cell>{t(`privacyCentre.kinds.${r.kind}`)}</Cell>
-              <Cell>{r.subject_label || r.requester_name}</Cell>
-              <Cell>{t(`privacyCentre.statuses.${r.status}`)}</Cell>
-              <Cell>{formatDate(r.received_at, i18n.language)}</Cell>
-              <Cell>
-                {formatDate(r.due_at, i18n.language)} <DueBadge request={r} />
-              </Cell>
-            </tr>
-          ))}
-        </Table>
-      ) : (
-        <Spinner label={t("grid.loading")} />
-      )}
+            )}
+            <Cell className="whitespace-nowrap tabular-nums">
+              {formatDate(r.due_at, i18n.language)}
+              <span className="block text-xs">
+                <DueBadge request={r} />
+              </span>
+            </Cell>
+          </tr>
+        ))}
+      </Table>
       <FormCard
         title={t("privacyCentre.logRequest")}
         submit={t("privacyCentre.logRequestSubmit")}
@@ -290,132 +331,156 @@ export function DataRequestPage({ requestId }: { requestId: string }) {
   if (!request.data) return <Spinner label={t("grid.loading")} />;
   const r = request.data;
   return (
-    <article className="space-y-6">
-      <p className="text-sm">
-        <Link to="/privacy" className={link}>
-          {t("privacyCentre.title")}
-        </Link>
-      </p>
-      <header>
-        <h1 className="text-2xl font-semibold">
-          {r.reference} · {t(`privacyCentre.kinds.${r.kind}`)}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {t(`privacyCentre.statuses.${r.status}`)} ·{" "}
-          {t("privacyCentre.dueOn", { date: formatDate(r.due_at, i18n.language) })}{" "}
-          <DueBadge request={r} />
-        </p>
-      </header>
-      <dl className="grid gap-2 text-sm sm:grid-cols-2">
-        <div>
-          <dt className="font-medium">{t("privacyCentre.person")}</dt>
-          <dd>
-            {r.subject_label} ({t(`privacyCentre.subjectTypes.${r.subject_type}`)})
-          </dd>
-        </div>
-        <div>
-          <dt className="font-medium">{t("privacyCentre.requester")}</dt>
-          <dd>
-            {r.requester_name} {r.requester_email ? `<${r.requester_email}>` : ""} ·{" "}
-            {t(`privacyCentre.relationships.${r.relationship}`)}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-medium">{t("privacyCentre.received")}</dt>
-          <dd>
-            {formatDateTime(r.received_at, i18n.language)} ·{" "}
-            {t(`privacyCentre.channels.${r.channel}`)}
-          </dd>
-        </div>
-        {r.details ? (
-          <div className="sm:col-span-2">
-            <dt className="font-medium">{t("privacyCentre.details")}</dt>
-            <dd className="whitespace-pre-wrap">{r.details}</dd>
-          </div>
-        ) : null}
-      </dl>
+    <article className="max-w-3xl">
+      <RecordHeader
+        back={<Link to="/privacy">{t("privacyCentre.title")}</Link>}
+        title={`${r.reference} · ${t(`privacyCentre.kinds.${r.kind}`)}`}
+        description={
+          <span className="tabular-nums">
+            {t(`privacyCentre.statuses.${r.status}`)} ·{" "}
+            {t("privacyCentre.dueOn", { date: formatDate(r.due_at, i18n.language) })}{" "}
+            <DueBadge request={r} />
+          </span>
+        }
+      />
+      <div className="space-y-6">
+        <RuledPanel flush title={t("designS9b.privacy.details")}>
+          <FactList
+            items={[
+              [
+                t("privacyCentre.person"),
+                r.subject_label
+                  ? `${r.subject_label} (${t(`privacyCentre.subjectTypes.${r.subject_type}`)})`
+                  : "",
+              ],
+              [
+                t("privacyCentre.requester"),
+                `${r.requester_name}${r.requester_email ? ` <${r.requester_email}>` : ""} · ${t(
+                  `privacyCentre.relationships.${r.relationship}`,
+                )}`,
+              ],
+              [
+                t("privacyCentre.received"),
+                <span key="received" className="tabular-nums">
+                  {formatDateTime(r.received_at, i18n.language)} ·{" "}
+                  {t(`privacyCentre.channels.${r.channel}`)}
+                </span>,
+              ],
+              [
+                t("privacyCentre.details"),
+                r.details ? <span className="whitespace-pre-wrap">{r.details}</span> : "",
+              ],
+            ]}
+          />
+        </RuledPanel>
 
-      <section aria-labelledby="checks" className="rounded-md border border-border p-4">
-        <h2 id="checks" className="mb-2 font-semibold">
-          {t("privacyCentre.verification")}
-        </h2>
-        <ul className="space-y-1">
-          {r.checklist.map((c) => (
-            <li key={c.key}>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
+        <RuledPanel
+          flush
+          titleId="checks"
+          title={t("privacyCentre.verification")}
+          aside={
+            r.verified_at ? (
+              <span role="status" className="text-muted-foreground tabular-nums">
+                {t("privacyCentre.verifiedOn", {
+                  date: formatDateTime(r.verified_at, i18n.language),
+                })}
+              </span>
+            ) : null
+          }
+        >
+          <ul className="divide-y divide-rule">
+            {r.checklist.map((c) => (
+              <li key={c.key} className="px-5 py-2.5">
+                <CheckboxField
                   checked={c.done}
                   disabled={!!r.closed_at || verify.isPending}
                   onChange={(e) => verify.mutate({ [c.key]: e.target.checked })}
+                  label={
+                    <>
+                      {c.title}
+                      {c.is_required ? null : (
+                        <span className="text-muted-foreground">
+                          {" "}
+                          ({t("privacyCentre.optional")})
+                        </span>
+                      )}
+                    </>
+                  }
                 />
-                {c.title}
-                {c.is_required ? "" : ` (${t("privacyCentre.optional")})`}
-              </label>
-            </li>
-          ))}
-        </ul>
-        {r.verified_at ? (
-          <p role="status" className="mt-2 text-sm">
-            {t("privacyCentre.verifiedOn", {
-              date: formatDateTime(r.verified_at, i18n.language),
-            })}
-          </p>
-        ) : null}
-        {verify.error ? <Alert tone="danger">{verify.error.message}</Alert> : null}
-      </section>
-
-      {r.status === "in_review" && r.kind !== "erasure" ? <ExportReview request={r} /> : null}
-      {r.kind === "erasure" ? <ErasureReview request={r} /> : null}
-      {r.delivered_at ? (
-        <Alert tone="success">
-          {t("privacyCentre.delivered", {
-            date: formatDateTime(r.delivered_at, i18n.language),
-            expires: r.link_expires_at ? formatDateTime(r.link_expires_at, i18n.language) : "",
-            count: r.download_count,
-          })}
-        </Alert>
-      ) : null}
-
-      {!r.closed_at ? (
-        <section aria-labelledby="manage" className="space-y-3 rounded-md border border-border p-4">
-          <h2 id="manage" className="font-semibold">
-            {t("privacyCentre.manage")}
-          </h2>
-          <TextArea
-            label={t("privacyCentre.reason")}
-            value={reason}
-            onChange={setReason}
-            rows={2}
-          />
-          <div className="flex flex-wrap items-end gap-2">
-            <TextField
-              label={t("privacyCentre.extendDays")}
-              type="number"
-              min={1}
-              max={60}
-              value={String(extendDays)}
-              onChange={(e) => setExtendDays(Number(e.target.value))}
-            />
-            <Button variant="secondary" onClick={() => extend.mutate()} disabled={!reason}>
-              {t("privacyCentre.extend")}
-            </Button>
-            <Button variant="danger" onClick={() => reject.mutate()} disabled={!reason}>
-              {t("privacyCentre.reject")}
-            </Button>
-          </div>
-          {extend.error || reject.error ? (
-            <Alert tone="danger">{(extend.error ?? reject.error)?.message}</Alert>
+              </li>
+            ))}
+          </ul>
+          {verify.error ? (
+            <div className="px-5 pb-4">
+              <Alert tone="danger">{verify.error.message}</Alert>
+            </div>
           ) : null}
-        </section>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          {t("privacyCentre.closedOn", {
-            date: formatDateTime(r.closed_at, i18n.language),
-          })}
-          {r.close_reason ? ` · ${r.close_reason}` : ""}
-        </p>
-      )}
+        </RuledPanel>
+
+        {r.status === "in_review" && r.kind !== "erasure" ? <ExportReview request={r} /> : null}
+        {r.kind === "erasure" ? <ErasureReview request={r} /> : null}
+        {r.delivered_at ? (
+          <Alert tone="success">
+            {t("privacyCentre.delivered", {
+              date: formatDateTime(r.delivered_at, i18n.language),
+              expires: r.link_expires_at ? formatDateTime(r.link_expires_at, i18n.language) : "",
+              count: r.download_count,
+            })}
+          </Alert>
+        ) : null}
+
+        {!r.closed_at ? (
+          <RuledPanel
+            flush
+            titleId="manage"
+            title={t("privacyCentre.manage")}
+            footer={
+              <>
+                <Button variant="secondary" onClick={() => extend.mutate()} disabled={!reason}>
+                  {t("privacyCentre.extend")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-muted-foreground"
+                  onClick={() => reject.mutate()}
+                  disabled={!reason}
+                >
+                  {t("privacyCentre.reject")}
+                </Button>
+              </>
+            }
+          >
+            <div className="space-y-3 px-5 py-4">
+              <TextArea
+                label={t("privacyCentre.reason")}
+                value={reason}
+                onChange={setReason}
+                rows={2}
+              />
+              <UnitField
+                label={t("privacyCentre.extendDays")}
+                unit={t("privacyCentre.days")}
+                min={1}
+                max={60}
+                value={String(extendDays)}
+                onChange={(e) => setExtendDays(Number(e.target.value))}
+              />
+              {extend.error || reject.error ? (
+                <Alert tone="danger" className="sm:col-span-full">
+                  {(extend.error ?? reject.error)?.message}
+                </Alert>
+              ) : null}
+            </div>
+          </RuledPanel>
+        ) : (
+          <p className="text-sm text-muted-foreground tabular-nums">
+            {t("privacyCentre.closedOn", {
+              date: formatDateTime(r.closed_at, i18n.language),
+            })}
+            {r.close_reason ? ` · ${r.close_reason}` : ""}
+          </p>
+        )}
+      </div>
     </article>
   );
 }
@@ -465,55 +530,64 @@ function ExportReview({ request }: { request: DataRequest }) {
   });
   if (!preview.data) return <Spinner label={t("grid.loading")} />;
   return (
-    <section aria-labelledby="review" className="space-y-4 rounded-md border border-border p-4">
-      <h2 id="review" className="font-semibold">
-        {t("privacyCentre.reviewExport")}
-      </h2>
-      <p className="text-sm text-muted-foreground">{t("privacyCentre.reviewExportHint")}</p>
-      {preview.data.sections.map((section) => (
-        <details key={section.key} className="rounded-md border border-border p-2">
-          <summary className="cursor-pointer text-sm font-medium">
-            {section.title} ({section.records.length})
-          </summary>
-          <ul className="mt-2 space-y-2">
-            {section.records.map((record) => {
-              const id = String(record.id ?? "");
-              const ref = { section: section.key, record_id: id };
-              return (
-                <li key={id} className="rounded bg-muted/40 p-2 text-xs">
-                  <label className="mb-1 flex items-center gap-2 font-medium">
-                    <input type="checkbox" checked={has(ref)} onChange={() => toggle(ref)} />
-                    {t("privacyCentre.redactRecord")}
-                  </label>
-                  <pre className="whitespace-pre-wrap break-words">
-                    {JSON.stringify(record, null, 1)}
-                  </pre>
-                </li>
-              );
-            })}
-          </ul>
-        </details>
-      ))}
-      {preview.data.files.length ? (
-        <fieldset className="text-sm">
-          <legend className="font-medium">{t("privacyCentre.files")}</legend>
-          {preview.data.files.map((f) => (
-            <label key={f.id} className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={has({ file_id: f.id })}
-                onChange={() => toggle({ file_id: f.id })}
-              />
-              {t("privacyCentre.redactFile", { name: f.filename })}
-            </label>
-          ))}
-        </fieldset>
+    <RuledPanel
+      flush
+      titleId="review"
+      title={t("privacyCentre.reviewExport")}
+      description={t("privacyCentre.reviewExportHint")}
+      footer={
+        <Button onClick={() => approve.mutate()} loading={approve.isPending}>
+          {t("privacyCentre.approveExport", { count: redactions.length })}
+        </Button>
+      }
+    >
+      <ul className="divide-y divide-rule">
+        {preview.data.sections.map((section) => (
+          <li key={section.key} className="px-5 py-3.5">
+            <Disclosure summary={`${section.title} (${section.records.length})`}>
+              <ul className="mt-3 divide-y divide-rule rounded-md border border-border">
+                {section.records.map((record) => {
+                  const id = String(record.id ?? "");
+                  const ref = { section: section.key, record_id: id };
+                  return (
+                    <li key={id} className="space-y-1.5 px-3 py-2.5">
+                      <CheckboxField
+                        label={t("privacyCentre.redactRecord")}
+                        checked={has(ref)}
+                        onChange={() => toggle(ref)}
+                      />
+                      <pre className="font-sans text-xs break-words whitespace-pre-wrap text-muted-foreground">
+                        {JSON.stringify(record, null, 1)}
+                      </pre>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Disclosure>
+          </li>
+        ))}
+        {preview.data.files.length ? (
+          <li className="px-5 py-3.5">
+            <fieldset className="space-y-2">
+              <legend className="mb-2 text-sm font-medium">{t("privacyCentre.files")}</legend>
+              {preview.data.files.map((f) => (
+                <CheckboxField
+                  key={f.id}
+                  label={t("privacyCentre.redactFile", { name: f.filename })}
+                  checked={has({ file_id: f.id })}
+                  onChange={() => toggle({ file_id: f.id })}
+                />
+              ))}
+            </fieldset>
+          </li>
+        ) : null}
+      </ul>
+      {approve.error ? (
+        <div className="px-5 pb-4">
+          <Alert tone="danger">{approve.error.message}</Alert>
+        </div>
       ) : null}
-      {approve.error ? <Alert tone="danger">{approve.error.message}</Alert> : null}
-      <Button onClick={() => approve.mutate()} disabled={approve.isPending}>
-        {t("privacyCentre.approveExport", { count: redactions.length })}
-      </Button>
-    </section>
+    </RuledPanel>
   );
 }
 
@@ -542,37 +616,42 @@ function ErasureReview({ request }: { request: DataRequest }) {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["data-requests"] }),
   });
   return (
-    <section aria-labelledby="erasure" className="space-y-3 rounded-md border border-border p-4">
-      <h2 id="erasure" className="font-semibold">
-        {t("privacyCentre.erasure")}
-      </h2>
-      {preview ? (
-        <>
-          <p className="text-sm">
-            {t("privacyCentre.erasureCovers", {
-              list: Object.entries(preview.subjects)
-                .map(([k, n]) => `${n} × ${t(`privacyCentre.subjectTypes.${k}`)}`)
-                .join(", "),
-            })}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {t("privacyCentre.financialKept", { years: preview.financial_retention_years })}
-          </p>
-          {preview.holds.length ? (
-            <Alert tone="warning">{t("privacyCentre.heldWarning")}</Alert>
-          ) : null}
-        </>
-      ) : null}
-      {request.status === "in_review" ? (
-        <>
-          {approve.error ? <Alert tone="danger">{approve.error.message}</Alert> : null}
-          <Button variant="danger" onClick={() => approve.mutate()} disabled={approve.isPending}>
+    <RuledPanel
+      flush
+      titleId="erasure"
+      title={t("privacyCentre.erasure")}
+      footer={
+        request.status === "in_review" ? (
+          <Button variant="danger" onClick={() => approve.mutate()} loading={approve.isPending}>
             {t("privacyCentre.approveErasure")}
           </Button>
-        </>
+        ) : undefined
+      }
+    >
+      {preview || approve.error ? (
+        <div className="space-y-3 px-5 py-4 text-sm">
+          {preview ? (
+            <>
+              <p>
+                {t("privacyCentre.erasureCovers", {
+                  list: Object.entries(preview.subjects)
+                    .map(([k, n]) => `${n} × ${t(`privacyCentre.subjectTypes.${k}`)}`)
+                    .join(", "),
+                })}
+              </p>
+              <p className="text-muted-foreground">
+                {t("privacyCentre.financialKept", { years: preview.financial_retention_years })}
+              </p>
+              {preview.holds.length ? (
+                <Alert tone="warning">{t("privacyCentre.heldWarning")}</Alert>
+              ) : null}
+            </>
+          ) : null}
+          {approve.error ? <Alert tone="danger">{approve.error.message}</Alert> : null}
+        </div>
       ) : null}
       {record.data ? <ErasureReport record={record.data} locale={i18n.language} /> : null}
-    </section>
+    </RuledPanel>
   );
 }
 
@@ -588,33 +667,39 @@ function ErasureReport({
     string,
     { anonymised?: number; deleted?: number; retained?: number; notes?: string[] }
   >;
+  const caption = t("privacyCentre.erasureReport", {
+    status: t(`privacyCentre.erasureStatuses.${record.status}`),
+    date: record.completed_at ? formatDateTime(record.completed_at, locale) : "",
+  });
   return (
-    <Table
-      caption={t("privacyCentre.erasureReport", {
-        status: t(`privacyCentre.erasureStatuses.${record.status}`),
-        date: record.completed_at ? formatDateTime(record.completed_at, locale) : "",
-      })}
-      headers={[
-        t("privacyCentre.area"),
-        t("privacyCentre.anonymised"),
-        t("privacyCentre.deleted"),
-        t("privacyCentre.retained"),
-      ]}
-    >
-      {Object.entries(report)
-        .filter(([, v]) => v && typeof v === "object" && "anonymised" in v)
-        .map(([key, v]) => (
-          <tr key={key}>
-            <Cell>{key}</Cell>
-            <Cell>{v.anonymised}</Cell>
-            <Cell>{v.deleted}</Cell>
-            <Cell>
-              {v.retained}
-              {v.notes?.length ? ` · ${v.notes.join("; ")}` : ""}
-            </Cell>
-          </tr>
-        ))}
-    </Table>
+    <div className="border-t border-border">
+      <p className="px-5 pt-3.5 text-sm font-semibold tabular-nums">{caption}</p>
+      <RuledTable
+        caption={caption}
+        columns={[
+          { key: "area", header: t("privacyCentre.area") },
+          { key: "anon", header: t("privacyCentre.anonymised"), end: true, width: "w-28" },
+          { key: "deleted", header: t("privacyCentre.deleted"), end: true, width: "w-24" },
+          { key: "kept", header: t("privacyCentre.retained") },
+        ]}
+      >
+        {Object.entries(report)
+          .filter(([, v]) => v && typeof v === "object" && "anonymised" in v)
+          .map(([key, v]) => (
+            <tr key={key}>
+              <td>{key}</td>
+              <td className={figureCell}>{v.anonymised}</td>
+              <td className={figureCell}>{v.deleted}</td>
+              <td>
+                <span className="tabular-nums">{v.retained}</span>
+                {v.notes?.length ? (
+                  <span className="block text-xs text-muted-foreground">{v.notes.join("; ")}</span>
+                ) : null}
+              </td>
+            </tr>
+          ))}
+      </RuledTable>
+    </div>
   );
 }
 
@@ -624,25 +709,31 @@ function ErasuresSection() {
     queryKey: ["erasures"],
     queryFn: async () => unwrap(await api.GET("/api/v1/erasures", { params: { query: PAGE } })),
   });
-  if (!erasures.data) return <Spinner label={t("grid.loading")} />;
+  const rows = erasures.data?.results ?? [];
   return (
     <Table
       caption={t("privacyCentre.tabs.erasures")}
-      headers={[
-        t("privacyCentre.person"),
-        t("privacyCentre.reasonCol"),
-        t("privacyCentre.status"),
-        t("privacyCentre.completed"),
-        t("privacyCentre.financialUntil"),
+      loading={erasures.isPending}
+      empty={erasures.data && !rows.length ? t("designS9b.privacy.noErasures") : undefined}
+      columns={[
+        { key: "person", header: t("privacyCentre.person") },
+        { key: "why", header: t("privacyCentre.reasonCol") },
+        { key: "status", header: t("privacyCentre.status") },
+        { key: "done", header: t("privacyCentre.completed") },
+        { key: "until", header: t("privacyCentre.financialUntil") },
       ]}
     >
-      {erasures.data.results.map((e) => (
+      {rows.map((e) => (
         <tr key={e.id}>
-          <Cell>{(e.labels as Record<string, string>)[`${e.subject_type}:${e.subject_id}`]}</Cell>
+          <Cell className="min-w-32 font-medium">
+            {(e.labels as Record<string, string>)[`${e.subject_type}:${e.subject_id}`]}
+          </Cell>
           <Cell>{t(`privacyCentre.erasureReasons.${e.reason}`)}</Cell>
           <Cell>{t(`privacyCentre.erasureStatuses.${e.status}`)}</Cell>
-          <Cell>{e.completed_at ? formatDateTime(e.completed_at, i18n.language) : ""}</Cell>
-          <Cell>
+          <Cell className="whitespace-nowrap tabular-nums">
+            {e.completed_at ? formatDateTime(e.completed_at, i18n.language) : ""}
+          </Cell>
+          <Cell className="whitespace-nowrap tabular-nums">
             {e.financial_erased_at
               ? t("privacyCentre.financialErased")
               : e.financial_retained_until
@@ -666,6 +757,8 @@ function HoldsSection() {
   });
   const [person, setPerson] = useState<PersonRef | null>(null);
   const [reason, setReason] = useState("");
+  const [releasing, setReleasing] = useState<string | null>(null);
+  const [why, setWhy] = useState("");
   const place = useMutation({
     mutationFn: async () =>
       unwrap(
@@ -691,52 +784,95 @@ function HoldsSection() {
           body: { reason: why },
         }),
       ),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["legal-holds"] }),
+    onSuccess: () => {
+      setReleasing(null);
+      void queryClient.invalidateQueries({ queryKey: ["legal-holds"] });
+    },
   });
+  const rows = holds.data?.results ?? [];
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">{t("privacyCentre.holdsHint")}</p>
-      {holds.data ? (
-        <Table
-          caption={t("privacyCentre.tabs.holds")}
-          headers={[
-            t("privacyCentre.person"),
-            t("privacyCentre.reason"),
-            t("privacyCentre.placed"),
-            t("privacyCentre.status"),
-            "",
-          ]}
-        >
-          {holds.data.results.map((h: Hold) => (
-            <tr key={h.id}>
-              <Cell>{h.subject_label || h.subject_id}</Cell>
-              <Cell>{h.reason}</Cell>
-              <Cell>{formatDate(h.placed_at, i18n.language)}</Cell>
-              <Cell>
-                {h.active
-                  ? t("privacyCentre.holdActive")
-                  : t("privacyCentre.holdReleased", { reason: h.release_reason })}
-              </Cell>
-              <Cell>
-                {h.active ? (
+      <Table
+        caption={t("privacyCentre.tabs.holds")}
+        description={t("privacyCentre.holdsHint")}
+        loading={holds.isPending}
+        empty={holds.data && !rows.length ? t("designS9b.privacy.noHolds") : undefined}
+        columns={[
+          { key: "person", header: t("privacyCentre.person") },
+          { key: "reason", header: t("privacyCentre.reason") },
+          { key: "placed", header: t("privacyCentre.placed") },
+          { key: "status", header: t("privacyCentre.status") },
+          { key: "actions", header: t("common.actions", "Actions"), hidden: true },
+        ]}
+      >
+        {rows.map((h: Hold) => (
+          <tr key={h.id}>
+            <Cell className="min-w-32 font-medium">{h.subject_label || h.subject_id}</Cell>
+            <Cell className="min-w-40">{h.reason}</Cell>
+            <Cell className="whitespace-nowrap tabular-nums">
+              {formatDate(h.placed_at, i18n.language)}
+            </Cell>
+            <Cell className={h.active ? undefined : "text-muted-foreground"}>
+              {h.active
+                ? t("privacyCentre.holdActive")
+                : t("privacyCentre.holdReleased", { reason: h.release_reason })}
+            </Cell>
+            <Cell className="py-1.5 text-right align-middle">
+              {h.active ? (
+                releasing === h.id ? (
+                  <form
+                    className="flex flex-wrap items-center justify-end gap-2"
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setReleasing(null);
+                    }}
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (why.trim()) release.mutate({ id: h.id, why: why.trim() });
+                    }}
+                  >
+                    <TextField
+                      label={t("privacyCentre.releaseReason")}
+                      hideLabel
+                      size="sm"
+                      placeholder={t("privacyCentre.releaseReason")}
+                      className="min-w-56"
+                      autoFocus
+                      required
+                      value={why}
+                      onChange={(e) => setWhy(e.target.value)}
+                    />
+                    <Button type="submit" size="sm" loading={release.isPending}>
+                      {t("privacyCentre.release")}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="text-muted-foreground"
+                      onClick={() => setReleasing(null)}
+                    >
+                      {t("common.cancel")}
+                    </Button>
+                  </form>
+                ) : (
                   <Button
                     size="sm"
                     variant="secondary"
+                    className="whitespace-nowrap"
                     onClick={() => {
-                      const why = window.prompt(t("privacyCentre.releaseReason")) ?? "";
-                      if (why) release.mutate({ id: h.id, why });
+                      setWhy("");
+                      setReleasing(h.id);
                     }}
                   >
                     {t("privacyCentre.release")}
                   </Button>
-                ) : null}
-              </Cell>
-            </tr>
-          ))}
-        </Table>
-      ) : (
-        <Spinner label={t("grid.loading")} />
-      )}
+                )
+              ) : null}
+            </Cell>
+          </tr>
+        ))}
+      </Table>
+      {release.error ? <Alert tone="danger">{release.error.message}</Alert> : null}
       <FormCard
         title={t("privacyCentre.placeHold")}
         submit={t("privacyCentre.placeHoldSubmit")}
@@ -780,87 +916,100 @@ function RetentionSection() {
       unwrap(await api.POST("/api/v1/retention-runs", { body: { dry_run: dryRun } })),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["retention-runs"] }),
   });
+  const runRows = runs.data?.results ?? [];
   return (
     <div className="space-y-6">
-      {policies.data ? (
-        <Table
-          caption={t("privacyCentre.retentionPolicies")}
-          headers={[t("privacyCentre.category"), t("privacyCentre.keepFor"), t("privacyCentre.on")]}
-        >
-          {policies.data.map((p) => (
-            <tr key={p.id}>
-              <Cell>{p.category_label}</Cell>
-              <Cell>
-                <input
-                  aria-label={t("privacyCentre.daysFor", { category: p.category_label })}
-                  className="w-28 rounded-md border border-border bg-background px-2 py-1"
-                  type="number"
-                  min={1}
-                  defaultValue={String(p.period_days)}
-                  onBlur={(e) => {
-                    const days = Number(e.target.value);
-                    if (days && days !== p.period_days)
-                      update.mutate({ id: p.id, body: { period_days: days } });
-                  }}
-                />{" "}
-                {t("privacyCentre.days")}
-              </Cell>
-              <Cell>
-                <input
-                  type="checkbox"
-                  aria-label={t("privacyCentre.enabledFor", { category: p.category_label })}
-                  checked={p.enabled}
-                  onChange={(e) => update.mutate({ id: p.id, body: { enabled: e.target.checked } })}
-                />
-              </Cell>
-            </tr>
-          ))}
-        </Table>
-      ) : (
-        <Spinner label={t("grid.loading")} />
-      )}
+      <Table
+        caption={t("privacyCentre.retentionPolicies")}
+        loading={policies.isPending}
+        columns={[
+          { key: "category", header: t("privacyCentre.category") },
+          { key: "keep", header: t("privacyCentre.keepFor"), width: "w-40" },
+          { key: "on", header: t("privacyCentre.on"), center: true, width: "w-20" },
+        ]}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => run.mutate(true)} disabled={run.isPending}>
+              {t("privacyCentre.dryRun")}
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-muted-foreground"
+              onClick={() => {
+                if (window.confirm(t("privacyCentre.purgeConfirm"))) run.mutate(false);
+              }}
+              disabled={run.isPending}
+            >
+              {t("privacyCentre.purgeNow")}
+            </Button>
+            {run.isSuccess ? (
+              <p role="status" className="basis-full text-success">
+                {t("privacyCentre.runStarted")}
+              </p>
+            ) : null}
+          </>
+        }
+      >
+        {(policies.data ?? []).map((p) => (
+          <tr key={p.id}>
+            <Cell className="min-w-40 align-middle">{p.category_label}</Cell>
+            <Cell className="py-1.5 align-middle">
+              <UnitField
+                label={t("privacyCentre.daysFor", { category: p.category_label })}
+                hideLabel
+                size="sm"
+                unit={t("privacyCentre.days")}
+                min={1}
+                defaultValue={String(p.period_days)}
+                onBlur={(e) => {
+                  const days = Number(e.target.value);
+                  if (days && days !== p.period_days)
+                    update.mutate({ id: p.id, body: { period_days: days } });
+                }}
+              />
+            </Cell>
+            <Cell className="text-center align-middle">
+              <input
+                type="checkbox"
+                className="size-4"
+                aria-label={t("privacyCentre.enabledFor", { category: p.category_label })}
+                checked={p.enabled}
+                onChange={(e) => update.mutate({ id: p.id, body: { enabled: e.target.checked } })}
+              />
+            </Cell>
+          </tr>
+        ))}
+      </Table>
       {update.error ? <Alert tone="danger">{update.error.message}</Alert> : null}
-      <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" onClick={() => run.mutate(true)} disabled={run.isPending}>
-          {t("privacyCentre.dryRun")}
-        </Button>
-        <Button
-          variant="danger"
-          onClick={() => {
-            if (window.confirm(t("privacyCentre.purgeConfirm"))) run.mutate(false);
-          }}
-          disabled={run.isPending}
-        >
-          {t("privacyCentre.purgeNow")}
-        </Button>
-      </div>
-      {run.isSuccess ? <p role="status">{t("privacyCentre.runStarted")}</p> : null}
-      {runs.data ? (
-        <Table
-          caption={t("privacyCentre.runs")}
-          headers={[
-            t("privacyCentre.started"),
-            t("privacyCentre.mode"),
-            t("privacyCentre.status"),
-            t("privacyCentre.report"),
-          ]}
-        >
-          {runs.data.results.map((r: Run) => (
-            <tr key={r.id}>
-              <Cell>{formatDateTime(r.started_at, i18n.language)}</Cell>
-              <Cell>
-                {r.dry_run ? t("privacyCentre.dryRunMode") : t("privacyCentre.purgeMode")}
-              </Cell>
-              <Cell>{t(`privacyCentre.runStatuses.${r.status}`)}</Cell>
-              <Cell>
-                {Object.entries(r.report as Record<string, { due?: number; done?: number }>)
-                  .map(([k, v]) => `${k}: ${r.dry_run ? (v.due ?? 0) : (v.done ?? 0)}`)
-                  .join(", ")}
-              </Cell>
-            </tr>
-          ))}
-        </Table>
-      ) : null}
+      {run.error ? <Alert tone="danger">{run.error.message}</Alert> : null}
+      <Table
+        caption={t("privacyCentre.runs")}
+        loading={runs.isPending}
+        empty={runs.data && !runRows.length ? t("designS9b.privacy.noRuns") : undefined}
+        columns={[
+          { key: "started", header: t("privacyCentre.started") },
+          { key: "mode", header: t("privacyCentre.mode") },
+          { key: "status", header: t("privacyCentre.status") },
+          { key: "report", header: t("privacyCentre.report") },
+        ]}
+      >
+        {runRows.map((r: Run) => (
+          <tr key={r.id}>
+            <Cell className="whitespace-nowrap tabular-nums">
+              {formatDateTime(r.started_at, i18n.language)}
+            </Cell>
+            <Cell>{r.dry_run ? t("privacyCentre.dryRunMode") : t("privacyCentre.purgeMode")}</Cell>
+            <Cell className={r.status === "failed" ? "font-medium text-danger" : undefined}>
+              {t(`privacyCentre.runStatuses.${r.status}`)}
+            </Cell>
+            <Cell className="min-w-48 text-xs text-muted-foreground tabular-nums">
+              {Object.entries(r.report as Record<string, { due?: number; done?: number }>)
+                .map(([k, v]) => `${k}: ${r.dry_run ? (v.due ?? 0) : (v.done ?? 0)}`)
+                .join(", ")}
+            </Cell>
+          </tr>
+        ))}
+      </Table>
     </div>
   );
 }
@@ -891,77 +1040,87 @@ function AgreementSection() {
   const errors = fieldErrors(accept.error);
   if (!dpa.data) return <Spinner label={t("grid.loading")} />;
   const d = dpa.data;
+  const subs = subprocessors.data?.subprocessors ?? [];
   return (
     <div className="space-y-6">
-      <section aria-labelledby="dpa" className="space-y-2">
-        <h2 id="dpa" className="font-semibold">
-          {t("privacyCentre.dpaTitle", { version: d.version })}
-        </h2>
-        <p className="text-sm">
-          <a href={d.url} className={link} target="_blank" rel="noreferrer">
-            {t("privacyCentre.readDpa")}
-          </a>
-        </p>
-        {d.accepted && d.acceptance ? (
-          <Alert tone="success">
+      {d.accepted && d.acceptance ? (
+        <RuledPanel
+          titleId="dpa"
+          title={t("privacyCentre.dpaTitle", { version: d.version })}
+          aside={<span className="text-success">{t("designS9b.privacy.accepted")}</span>}
+          footer={
+            <a href={d.url} className={link} target="_blank" rel="noreferrer">
+              {t("privacyCentre.readDpa")}
+            </a>
+          }
+        >
+          <p className="text-sm tabular-nums">
             {t("privacyCentre.dpaAccepted", {
               name: d.acceptance.signer_name,
               company: d.acceptance.company_name,
               date: formatDate(d.acceptance.accepted_at, i18n.language),
             })}
-          </Alert>
-        ) : (
-          <FormCard
-            title={t("privacyCentre.acceptDpa")}
-            submit={t("privacyCentre.acceptDpaSubmit")}
-            pending={accept.isPending}
-            error={accept.error}
-            onSubmit={() => accept.mutate()}
-          >
-            <TextField
-              label={t("privacyCentre.signerName")}
-              required
-              value={form.signer_name}
-              error={errors.signer_name}
-              onChange={(e) => setForm({ ...form, signer_name: e.target.value })}
-            />
-            <TextField
-              label={t("privacyCentre.signerTitle")}
-              value={form.signer_title}
-              onChange={(e) => setForm({ ...form, signer_title: e.target.value })}
-            />
-            <TextField
-              label={t("privacyCentre.companyName")}
-              required
-              value={form.company_name}
-              onChange={(e) => setForm({ ...form, company_name: e.target.value })}
-            />
-          </FormCard>
-        )}
-      </section>
-      {subprocessors.data ? (
-        <Table
-          caption={t("privacyCentre.subprocessors", { version: subprocessors.data.version })}
-          headers={[
-            t("privacyCentre.subprocessor"),
-            t("privacyCentre.purpose"),
-            t("privacyCentre.data"),
-            t("privacyCentre.location"),
-          ]}
+          </p>
+        </RuledPanel>
+      ) : (
+        <FormCard
+          title={t("privacyCentre.dpaTitle", { version: d.version })}
+          description={
+            <a href={d.url} className={link} target="_blank" rel="noreferrer">
+              {t("privacyCentre.readDpa")}
+            </a>
+          }
+          submit={t("privacyCentre.acceptDpaSubmit")}
+          pending={accept.isPending}
+          error={accept.error}
+          onSubmit={() => accept.mutate()}
         >
-          {subprocessors.data.subprocessors.map((s) => (
-            <tr key={s.name}>
-              <Cell>
-                {s.name}
-                {s.optional ? ` (${t("privacyCentre.optionalIntegration")})` : ""}
-              </Cell>
-              <Cell>{s.purpose}</Cell>
-              <Cell>{s.data_categories}</Cell>
-              <Cell>{s.location}</Cell>
-            </tr>
-          ))}
-        </Table>
-      ) : null}
+          <TextField
+            label={t("privacyCentre.signerName")}
+            required
+            value={form.signer_name}
+            error={errors.signer_name}
+            onChange={(e) => setForm({ ...form, signer_name: e.target.value })}
+          />
+          <TextField
+            label={t("privacyCentre.signerTitle")}
+            value={form.signer_title}
+            onChange={(e) => setForm({ ...form, signer_title: e.target.value })}
+          />
+          <TextField
+            label={t("privacyCentre.companyName")}
+            required
+            value={form.company_name}
+            onChange={(e) => setForm({ ...form, company_name: e.target.value })}
+          />
+        </FormCard>
+      )}
+      <Table
+        caption={t("privacyCentre.subprocessors", { version: subprocessors.data?.version ?? "" })}
+        loading={subprocessors.isPending}
+        columns={[
+          { key: "name", header: t("privacyCentre.subprocessor") },
+          { key: "purpose", header: t("privacyCentre.purpose") },
+          { key: "data", header: t("privacyCentre.data") },
+          { key: "where", header: t("privacyCentre.location") },
+        ]}
+      >
+        {subs.map((sp) => (
+          <tr key={sp.name}>
+            <Cell className="min-w-36">
+              <span className="font-medium">{sp.name}</span>
+              {sp.optional ? (
+                <span className="block text-xs text-muted-foreground">
+                  {t("privacyCentre.optionalIntegration")}
+                </span>
+              ) : null}
+            </Cell>
+            <Cell className="min-w-48">{sp.purpose}</Cell>
+            <Cell className="min-w-40">{sp.data_categories}</Cell>
+            <Cell>{sp.location}</Cell>
+          </tr>
+        ))}
+      </Table>
     </div>
   );
 }

@@ -7387,7 +7387,6 @@
       "noMembers": "Nobody has joined yet."
     },
     "roles": {
-      "noneChosen": "No role chosen",
       "choose": "Choose a custom role to see and change what it can do.",
       "empty": "There are no custom roles yet.",
       "emptyCanCreate": "There are no custom roles yet. Make one from a built-in role with New role.",
@@ -7492,6 +7491,26 @@
         "login": "Signed in"
       },
       "objects": {}
+    },
+    "privacy": {
+      "description": "Requests from people about their data, legal holds, how long data is kept, and your data processing agreement.",
+      "details": "Details",
+      "noRequests": "No requests in this view.",
+      "noErasures": "Nothing has been erased yet.",
+      "noHolds": "No legal holds.",
+      "noRuns": "No purge runs yet.",
+      "accepted": "Accepted"
+    },
+    "safeguarding": {
+      "anyStatus": "Any status",
+      "noCases": "No cases in this view.",
+      "raisedOn": "Raised",
+      "noActions": "No actions recorded yet.",
+      "noVisits": "No lone-working visits yet.",
+      "waiting_one": "{{count}} waiting",
+      "waiting_other": "{{count}} waiting",
+      "overdueCount_one": "{{count}} overdue",
+      "overdueCount_other": "{{count}} overdue"
     }
   },
   "designS7": {

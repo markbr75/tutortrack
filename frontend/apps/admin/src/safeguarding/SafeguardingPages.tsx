@@ -1,11 +1,28 @@
 import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDateTime, useTranslation } from "@tutortrack/i18n";
-import { Alert, Button, SelectField, Spinner, Tabs } from "@tutortrack/ui";
+import {
+  Alert,
+  Button,
+  CheckboxField,
+  Disclosure,
+  FactList,
+  PageHeader,
+  PanelFooter,
+  PanelRow,
+  PanelRows,
+  RuledPanel,
+  SelectField,
+  Spinner,
+  Tabs,
+  TextAreaField,
+  TextField,
+} from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api, usePermission } from "../api";
+import { RecordHeader } from "../components/RecordHeader";
 import { AreaSettings, Cell, FormCard, Table, TextArea } from "../privacy/shared";
 import { PAGE } from "../privacy/util";
 
@@ -20,7 +37,8 @@ const ACTIONS = [
 ] as const; // prettier-ignore
 const STATUSES = ["open", "in_review", "referred", "closed"] as const;
 
-const link = "text-primary underline-offset-2 hover:underline";
+const link = "font-medium text-link underline-offset-2 hover:underline";
+const quiet = "text-muted-foreground";
 
 type Tab = "concerns" | "flags" | "loneWorking" | "settings";
 
@@ -39,9 +57,8 @@ export function SafeguardingPage() {
   const [tab, setTab] = useState<Tab>(tabs[0] ?? "concerns");
   if (!tabs.length) return <Alert tone="danger">{t("safeguarding.forbidden")}</Alert>;
   return (
-    <section>
-      <h1 className="mb-1 text-2xl font-semibold">{t("safeguarding.title")}</h1>
-      <p className="mb-4 text-sm text-muted-foreground">{t("safeguarding.confidential")}</p>
+    <section className="max-w-5xl">
+      <PageHeader title={t("safeguarding.title")} description={t("safeguarding.confidential")} />
       <Tabs
         label={t("safeguarding.title")}
         tabs={tabs.map((key) => ({ key, label: t(`safeguarding.tabs.${key}`) }))}
@@ -71,51 +88,56 @@ function ConcernsSection() {
         }),
       ),
   });
+  const rows = concerns.data?.results ?? [];
   return (
-    <div className="space-y-4">
-      <SelectField
-        label={t("safeguarding.status")}
-        value={status}
-        onChange={(e) => setStatus(e.target.value)}
-        options={[
-          { value: "", label: t("safeguarding.allStatuses") },
-          ...STATUSES.map((s) => ({ value: s, label: t(`safeguarding.statuses.${s}`) })),
-        ]}
-      />
-      {concerns.data ? (
-        <Table
-          caption={t("safeguarding.cases")}
-          headers={[
-            t("safeguarding.reference"),
-            t("safeguarding.student"),
-            t("safeguarding.category"),
-            t("safeguarding.status"),
-            t("safeguarding.raised"),
+    <Table
+      caption={t("safeguarding.cases")}
+      loading={concerns.isPending}
+      empty={concerns.data && !rows.length ? t("designS9b.safeguarding.noCases") : undefined}
+      aside={
+        <SelectField
+          label={t("safeguarding.status")}
+          hideLabel
+          size="sm"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          options={[
+            { value: "", label: t("designS9b.safeguarding.anyStatus") },
+            ...STATUSES.map((s) => ({ value: s, label: t(`safeguarding.statuses.${s}`) })),
           ]}
-        >
-          {concerns.data.results.map((c) => (
-            <tr key={c.id}>
-              <Cell>
-                <Link to="/safeguarding/$concernId" params={{ concernId: c.id }} className={link}>
-                  {c.reference}
-                </Link>
-                {c.immediate_risk ? (
-                  <span className="ml-2 rounded bg-destructive px-1 text-xs text-destructive-foreground">
-                    {t("safeguarding.immediateRisk")}
-                  </span>
-                ) : null}
-              </Cell>
-              <Cell>{c.student_name}</Cell>
-              <Cell>{t(`safeguarding.categories.${c.category}`)}</Cell>
-              <Cell>{t(`safeguarding.statuses.${c.status}`)}</Cell>
-              <Cell>{formatDateTime(c.raised_at, i18n.language)}</Cell>
-            </tr>
-          ))}
-        </Table>
-      ) : (
-        <Spinner label={t("grid.loading")} />
-      )}
-    </div>
+        />
+      }
+      columns={[
+        { key: "ref", header: t("safeguarding.reference") },
+        { key: "student", header: t("safeguarding.student") },
+        { key: "category", header: t("safeguarding.category") },
+        { key: "status", header: t("safeguarding.status") },
+        { key: "raised", header: t("designS9b.safeguarding.raisedOn") },
+      ]}
+    >
+      {rows.map((c) => (
+        <tr key={c.id}>
+          <Cell className="min-w-32">
+            <Link to="/safeguarding/$concernId" params={{ concernId: c.id }} className={link}>
+              {c.reference}
+            </Link>
+            {c.immediate_risk ? (
+              <span className="block text-xs font-semibold text-margin">
+                {t("safeguarding.immediateRisk")}
+              </span>
+            ) : null}
+          </Cell>
+          <Cell className="min-w-32">{c.student_name}</Cell>
+          <Cell className="min-w-36">{t(`safeguarding.categories.${c.category}`)}</Cell>
+          <Cell className={c.status === "closed" ? quiet : undefined}>
+            {t(`safeguarding.statuses.${c.status}`)}
+          </Cell>
+          <Cell className="whitespace-nowrap tabular-nums">
+            {formatDateTime(c.raised_at, i18n.language)}
+          </Cell>
+        </tr>
+      ))}
+    </Table>
   );
 }
 
@@ -171,54 +193,64 @@ export function ConcernPage({ concernId }: { concernId: string }) {
   });
   if (!concern.data) return <Spinner label={t("grid.loading")} />;
   const c: Concern = concern.data;
+  const others = STATUSES.filter((s) => s !== c.status);
   return (
-    <article className="space-y-6">
-      <p className="text-sm">
-        <Link to="/safeguarding" className={link}>
-          {t("safeguarding.title")}
-        </Link>
-      </p>
-      <header>
-        <h1 className="text-2xl font-semibold">
-          {c.reference} · {t(`safeguarding.categories.${c.category}`)}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {t(`safeguarding.statuses.${c.status}`)} ·{" "}
-          {t("safeguarding.raisedBy", {
-            name: c.raised_by_name,
-            date: formatDateTime(c.raised_at, i18n.language),
-          })}
-        </p>
+    <article className="max-w-3xl">
+      <RecordHeader
+        back={<Link to="/safeguarding">{t("safeguarding.title")}</Link>}
+        title={`${c.reference} · ${t(`safeguarding.categories.${c.category}`)}`}
+        description={
+          <span className="tabular-nums">
+            {t(`safeguarding.statuses.${c.status}`)} ·{" "}
+            {t("safeguarding.raisedBy", {
+              name: c.raised_by_name,
+              date: formatDateTime(c.raised_at, i18n.language),
+            })}
+          </span>
+        }
+      />
+      <div className="space-y-6">
         {c.immediate_risk ? (
           <Alert tone="danger">{t("safeguarding.immediateRiskAlert")}</Alert>
         ) : null}
-      </header>
-      <section aria-labelledby="what" className="rounded-md border border-border p-4">
-        <h2 id="what" className="mb-2 font-semibold">
-          {t("safeguarding.whatHappened")}
-        </h2>
-        {c.student_name ? (
-          <p className="mb-2 text-sm">
-            {t("safeguarding.student")}: {c.student_name}
+        <RuledPanel flush titleId="what" title={t("safeguarding.whatHappened")}>
+          <FactList items={[[t("safeguarding.student"), c.student_name ?? ""]]} />
+          <p
+            className={`px-5 py-4 text-sm whitespace-pre-wrap ${c.student_name ? "border-t border-rule" : ""}`}
+          >
+            {c.description}
           </p>
-        ) : null}
-        <p className="whitespace-pre-wrap text-sm">{c.description}</p>
-      </section>
-      <section aria-labelledby="timeline" className="space-y-3">
-        <h2 id="timeline" className="font-semibold">
-          {t("safeguarding.timeline")}
-        </h2>
-        <ol className="space-y-2 border-l border-border pl-4">
-          {c.actions.map((a) => (
-            <li key={a.id} className="text-sm">
-              <p className="font-medium">
-                {t(`safeguarding.actions.${a.kind}`)} · {a.actor_name} ·{" "}
-                {formatDateTime(a.occurred_at, i18n.language)}
-              </p>
-              {a.note ? <p className="whitespace-pre-wrap">{a.note}</p> : null}
-            </li>
-          ))}
-        </ol>
+        </RuledPanel>
+        <RuledPanel flush titleId="timeline" title={t("safeguarding.timeline")}>
+          {c.actions.length ? (
+            <PanelRows>
+              {c.actions.map((a) => (
+                <PanelRow
+                  key={a.id}
+                  className="grid gap-x-4 gap-y-0.5 sm:grid-cols-[9rem_minmax(0,1fr)]"
+                >
+                  <time
+                    dateTime={a.occurred_at}
+                    className="text-xs text-muted-foreground tabular-nums sm:pt-0.5"
+                  >
+                    {formatDateTime(a.occurred_at, i18n.language)}
+                  </time>
+                  <div className="min-w-0">
+                    <p>
+                      <span className="font-medium">{t(`safeguarding.actions.${a.kind}`)}</span>
+                      <span className="text-muted-foreground"> · {a.actor_name}</span>
+                    </p>
+                    {a.note ? <p className="whitespace-pre-wrap">{a.note}</p> : null}
+                  </div>
+                </PanelRow>
+              ))}
+            </PanelRows>
+          ) : (
+            <p className="px-5 py-4 text-sm text-muted-foreground">
+              {t("designS9b.safeguarding.noActions")}
+            </p>
+          )}
+        </RuledPanel>
         <FormCard
           title={t("safeguarding.addAction")}
           submit={t("safeguarding.addActionSubmit")}
@@ -234,43 +266,46 @@ export function ConcernPage({ concernId }: { concernId: string }) {
           />
           <TextArea label={t("safeguarding.note")} value={note} onChange={setNote} />
         </FormCard>
-      </section>
-      <section aria-labelledby="status" className="space-y-3 rounded-md border border-border p-4">
-        <h2 id="status" className="font-semibold">
-          {t("safeguarding.statusAndOutcome")}
-        </h2>
-        <TextArea
-          label={t("safeguarding.outcome")}
-          value={outcome ?? c.outcome ?? ""}
-          onChange={setOutcome}
-        />
-        <div className="flex flex-wrap gap-2">
-          {STATUSES.filter((s) => s !== c.status).map((s) => (
+        <RuledPanel
+          flush
+          titleId="status"
+          title={t("safeguarding.statusAndOutcome")}
+          aside={<span className={quiet}>{t(`safeguarding.statuses.${c.status}`)}</span>}
+          footer={others.map((s) => (
             <Button
               key={s}
-              variant={s === "closed" ? "danger" : "secondary"}
+              variant={s === "closed" ? "primary" : "secondary"}
               disabled={update.isPending}
+              className={s === "closed" ? "order-last" : undefined}
               onClick={() => update.mutate({ status: s, ...(outcome !== null ? { outcome } : {}) })}
             >
               {t(`safeguarding.moveTo.${s}`)}
             </Button>
           ))}
-        </div>
-        {update.error ? <Alert tone="danger">{update.error.message}</Alert> : null}
-      </section>
-      {history.data ? (
-        <details className="text-sm">
-          <summary className="cursor-pointer font-medium">{t("safeguarding.accessLog")}</summary>
-          <ul className="mt-2 space-y-1">
-            {history.data.map((h, i) => (
-              <li key={i}>
-                {formatDateTime(h.at, i18n.language)} · {h.actor || t("safeguarding.system")} ·{" "}
-                {h.action}
-              </li>
-            ))}
-          </ul>
-        </details>
-      ) : null}
+        >
+          <div className="space-y-3 px-5 py-4">
+            <TextAreaField
+              label={t("safeguarding.outcome")}
+              rows={4}
+              value={outcome ?? c.outcome ?? ""}
+              onChange={(e) => setOutcome(e.target.value)}
+            />
+            {update.error ? <Alert tone="danger">{update.error.message}</Alert> : null}
+          </div>
+        </RuledPanel>
+        {history.data ? (
+          <Disclosure summary={t("safeguarding.accessLog")}>
+            <ul className="mt-2 divide-y divide-rule rounded-xl border border-border bg-surface text-sm">
+              {history.data.map((h, i) => (
+                <li key={i} className="px-5 py-2.5 tabular-nums">
+                  {formatDateTime(h.at, i18n.language)} · {h.actor || t("safeguarding.system")} ·{" "}
+                  {t(`designS9b.audit.actions.${h.action}`, { defaultValue: h.action })}
+                </li>
+              ))}
+            </ul>
+          </Disclosure>
+        ) : null}
+      </div>
     </article>
   );
 }
@@ -297,51 +332,83 @@ function FlagsSection() {
       ),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["safeguarding"] }),
   });
-  if (!flags.data) return <Spinner label={t("grid.loading")} />;
-  if (!flags.data.results.length) return <p>{t("safeguarding.noFlags")}</p>;
+  const rows = flags.data?.results ?? [];
   return (
-    <ul className="space-y-3">
-      {flags.data.results.map((f) => (
-        <li key={f.id} className="rounded-md border border-border p-3 text-sm">
-          <p className="font-medium">
-            {f.sender_name || t("safeguarding.unknownSender")} ·{" "}
-            {formatDateTime(f.created_at, i18n.language)}
-            {f.blocked ? ` · ${t("safeguarding.blocked")}` : ""}
-          </p>
-          <p className="text-muted-foreground">
-            {(f.reasons as string[])
-              .map((r) => t(`safeguarding.reasons.${r.split(":")[0]}`))
-              .join(", ")}
-            {(f.keywords as string[]).length ? ` (${(f.keywords as string[]).join(", ")})` : ""}
-          </p>
-          <blockquote className="my-2 border-l-2 border-border pl-3 whitespace-pre-wrap">
-            {f.excerpt}
-          </blockquote>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => review.mutate({ id: f.id, decision: "dismiss" })}
-            >
-              {t("safeguarding.dismiss")}
-            </Button>
-            <Button
-              size="sm"
-              variant="danger"
-              onClick={() => review.mutate({ id: f.id, decision: "escalate" })}
-            >
-              {t("safeguarding.escalate")}
-            </Button>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <RuledPanel
+      flush
+      title={t("safeguarding.tabs.flags")}
+      rule={rows.length ? "margin" : "border"}
+      aside={
+        rows.length ? (
+          <span className="font-semibold text-margin tabular-nums">
+            {t("designS9b.safeguarding.waiting", { count: rows.length })}
+          </span>
+        ) : null
+      }
+    >
+      {flags.isPending ? (
+        <div className="px-5 py-4">
+          <Spinner label={t("grid.loading")} />
+        </div>
+      ) : !rows.length ? (
+        <p className="px-5 py-4 text-sm text-muted-foreground">{t("safeguarding.noFlags")}</p>
+      ) : (
+        <PanelRows>
+          {rows.map((f) => (
+            <PanelRow key={f.id} className="space-y-2">
+              <div>
+                <p className="font-medium tabular-nums">
+                  {f.sender_name || t("safeguarding.unknownSender")} ·{" "}
+                  {formatDateTime(f.created_at, i18n.language)}
+                  {f.blocked ? ` · ${t("safeguarding.blocked")}` : ""}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {(f.reasons as string[])
+                    .map((r) => t(`safeguarding.reasons.${r.split(":")[0]}`))
+                    .join(", ")}
+                  {(f.keywords as string[]).length
+                    ? ` (${(f.keywords as string[]).join(", ")})`
+                    : ""}
+                </p>
+              </div>
+              <blockquote className="border-l border-border pl-3 whitespace-pre-wrap">
+                {f.excerpt}
+              </blockquote>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={review.isPending}
+                  onClick={() => review.mutate({ id: f.id, decision: "dismiss" })}
+                >
+                  {t("safeguarding.dismiss")}
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={review.isPending}
+                  onClick={() => review.mutate({ id: f.id, decision: "escalate" })}
+                >
+                  {t("safeguarding.escalate")}
+                </Button>
+              </div>
+            </PanelRow>
+          ))}
+        </PanelRows>
+      )}
+      {review.error ? (
+        <div className="px-5 pb-4">
+          <Alert tone="danger">{review.error.message}</Alert>
+        </div>
+      ) : null}
+    </RuledPanel>
   );
 }
 
 function LoneWorkingSection() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
+  const [resolving, setResolving] = useState<string | null>(null);
+  const [note, setNote] = useState("");
   const visits = useQuery({
     queryKey: ["lone-working"],
     queryFn: async () =>
@@ -355,61 +422,128 @@ function LoneWorkingSection() {
           body: { note },
         }),
       ),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["lone-working"] }),
+    onSuccess: () => {
+      setResolving(null);
+      void queryClient.invalidateQueries({ queryKey: ["lone-working"] });
+    },
   });
-  if (!visits.data) return <Spinner label={t("grid.loading")} />;
+  const rows = visits.data?.results ?? [];
+  const overdue = rows.filter((v) => v.status === "overdue").length;
   return (
-    <Table
-      caption={t("safeguarding.visits")}
-      headers={[
-        t("safeguarding.tutorName"),
-        t("safeguarding.lesson"),
-        t("safeguarding.checkedIn"),
-        t("safeguarding.expectedEnd"),
-        t("safeguarding.status"),
-        "",
-      ]}
-    >
-      {visits.data.results.map((v) => (
-        <tr key={v.id}>
-          <Cell>{v.tutor_name}</Cell>
-          <Cell>{v.lesson_title}</Cell>
-          <Cell>{formatDateTime(v.checked_in_at, i18n.language)}</Cell>
-          <Cell>{formatDateTime(v.expected_end, i18n.language)}</Cell>
-          <Cell>
-            <span className={v.status === "overdue" ? "font-semibold text-destructive" : ""}>
-              {t(`safeguarding.visitStatuses.${v.status}`)}
+    <div className="space-y-4">
+      <Table
+        caption={t("safeguarding.visits")}
+        loading={visits.isPending}
+        empty={visits.data && !rows.length ? t("designS9b.safeguarding.noVisits") : undefined}
+        aside={
+          overdue ? (
+            <span className="font-semibold text-margin tabular-nums">
+              {t("designS9b.safeguarding.overdueCount", { count: overdue })}
             </span>
-          </Cell>
-          <Cell>
-            {v.status === "overdue" || v.status === "checked_in" ? (
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => {
-                  const note = window.prompt(t("safeguarding.resolvePrompt")) ?? "";
-                  if (note) resolve.mutate({ id: v.id, note });
-                }}
-              >
-                {t("safeguarding.markSafe")}
-              </Button>
-            ) : null}
-          </Cell>
-        </tr>
-      ))}
-    </Table>
+          ) : null
+        }
+        columns={[
+          { key: "tutor", header: t("safeguarding.tutorName") },
+          { key: "lesson", header: t("safeguarding.lesson") },
+          { key: "in", header: t("safeguarding.checkedIn") },
+          { key: "status", header: t("safeguarding.status") },
+          { key: "actions", header: t("common.actions", "Actions"), hidden: true },
+        ]}
+      >
+        {rows.map((v) => (
+          <tr key={v.id}>
+            <Cell className="min-w-32 font-medium">{v.tutor_name}</Cell>
+            <Cell className="min-w-40">{v.lesson_title}</Cell>
+            <Cell className="whitespace-nowrap tabular-nums">
+              {formatDateTime(v.checked_in_at, i18n.language)}
+              <span className="block text-xs text-muted-foreground">
+                {t("safeguarding.expectedEnd")}{" "}
+                {formatDateTime(v.expected_end, i18n.language, undefined, { timeStyle: "short" })}
+              </span>
+            </Cell>
+            <Cell
+              className={
+                v.status === "overdue"
+                  ? "font-semibold text-margin"
+                  : v.status === "checked_out" || v.status === "resolved"
+                    ? quiet
+                    : undefined
+              }
+            >
+              {t(`safeguarding.visitStatuses.${v.status}`)}
+            </Cell>
+            <Cell className="py-1.5 text-right align-middle">
+              {v.status === "overdue" || v.status === "checked_in" ? (
+                resolving === v.id ? (
+                  <form
+                    className="flex flex-wrap items-center justify-end gap-2"
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setResolving(null);
+                    }}
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (note.trim()) resolve.mutate({ id: v.id, note: note.trim() });
+                    }}
+                  >
+                    <TextField
+                      label={t("safeguarding.resolvePrompt")}
+                      hideLabel
+                      size="sm"
+                      placeholder={t("safeguarding.resolvePrompt")}
+                      className="min-w-64"
+                      autoFocus
+                      required
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                    />
+                    <Button type="submit" size="sm" loading={resolve.isPending}>
+                      {t("safeguarding.markSafe")}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className={quiet}
+                      onClick={() => setResolving(null)}
+                    >
+                      {t("common.cancel")}
+                    </Button>
+                  </form>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="whitespace-nowrap"
+                    onClick={() => {
+                      setNote("");
+                      setResolving(v.id);
+                    }}
+                  >
+                    {t("safeguarding.markSafe")}
+                  </Button>
+                )
+              ) : null}
+            </Cell>
+          </tr>
+        ))}
+      </Table>
+      {resolve.error ? <Alert tone="danger">{resolve.error.message}</Alert> : null}
+    </div>
   );
 }
 
-/** Raise a concern (anyone with ``safeguarding.raise``): goes only to the DSLs. */
+/** Raise a concern (anyone with ``safeguarding.raise``): goes only to the DSLs. Its fields
+ * and footer sit inside the panel that opens it. */
 export function RaiseConcernForm({
   studentId,
   lessonId,
   onRaised,
+  onCancel,
 }: {
   studentId?: string;
   lessonId?: string;
   onRaised?: (reference: string) => void;
+  onCancel?: () => void;
 }) {
   const { t } = useTranslation();
   const [category, setCategory] = useState<string>("other");
@@ -435,14 +569,15 @@ export function RaiseConcernForm({
     },
   });
   return (
-    <div className="space-y-2">
-      <FormCard
-        title={t("safeguarding.raiseTitle")}
-        submit={t("safeguarding.raiseSubmit")}
-        pending={raise.isPending}
-        error={raise.error}
-        onSubmit={() => raise.mutate()}
-      >
+    <form
+      aria-label={t("safeguarding.raiseTitle")}
+      className="border-t border-rule"
+      onSubmit={(e) => {
+        e.preventDefault();
+        raise.mutate();
+      }}
+    >
+      <div className="grid gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-2">
         <p className="text-sm text-muted-foreground sm:col-span-2">{t("safeguarding.raiseHint")}</p>
         <SelectField
           label={t("safeguarding.category")}
@@ -450,10 +585,12 @@ export function RaiseConcernForm({
           onChange={(e) => setCategory(e.target.value)}
           options={CATEGORIES.map((c) => ({ value: c, label: t(`safeguarding.categories.${c}`) }))}
         />
-        <label className="flex items-center gap-2 self-end text-sm">
-          <input type="checkbox" checked={risk} onChange={(e) => setRisk(e.target.checked)} />
-          {t("safeguarding.immediateRiskQuestion")}
-        </label>
+        <CheckboxField
+          className="self-end pb-2.5"
+          label={t("safeguarding.immediateRiskQuestion")}
+          checked={risk}
+          onChange={(e) => setRisk(e.target.checked)}
+        />
         <TextArea
           label={t("safeguarding.description")}
           required
@@ -461,14 +598,33 @@ export function RaiseConcernForm({
           onChange={setDescription}
           rows={6}
         />
-      </FormCard>
-      {raise.isSuccess ? (
-        <Alert tone="success">
-          {t("safeguarding.raised", { reference: raise.data.reference })}
-        </Alert>
-      ) : null}
-      {risk ? <Alert tone="warning">{t("safeguarding.emergency")}</Alert> : null}
-    </div>
+        {risk ? (
+          <Alert tone="warning" className="sm:col-span-2">
+            {t("safeguarding.emergency")}
+          </Alert>
+        ) : null}
+        {raise.error ? (
+          <Alert tone="danger" className="sm:col-span-2">
+            {raise.error.message}
+          </Alert>
+        ) : null}
+        {raise.isSuccess ? (
+          <Alert tone="success" className="sm:col-span-2">
+            {t("safeguarding.raised", { reference: raise.data.reference })}
+          </Alert>
+        ) : null}
+      </div>
+      <PanelFooter>
+        <Button type="submit" loading={raise.isPending}>
+          {t("safeguarding.raiseSubmit")}
+        </Button>
+        {onCancel ? (
+          <Button type="button" variant="ghost" className={quiet} onClick={onCancel}>
+            {t("common.cancel")}
+          </Button>
+        ) : null}
+      </PanelFooter>
+    </form>
   );
 }
 
@@ -487,33 +643,40 @@ export function StudentPrivacyPanel({ studentId }: { studentId: string }) {
       ),
     retry: false,
   });
+  const lines = privacy.data
+    ? [
+        privacy.data.is_child ? t("safeguarding.childDefaults") : null,
+        privacy.data.coppa_applies
+          ? privacy.data.parental_consent
+            ? t("safeguarding.coppaConsented")
+            : t("safeguarding.coppaNeeded")
+          : null,
+        !privacy.data.is_child ? t("safeguarding.adultLearner") : null,
+      ].filter((line): line is string => Boolean(line))
+    : [];
   return (
-    <section aria-labelledby="student-privacy" className="mt-4 space-y-3">
-      <h2 id="student-privacy" className="font-semibold">
-        {t("safeguarding.privacyAndSafeguarding")}
-      </h2>
-      {privacy.data ? (
-        <ul className="list-inside list-disc text-sm">
-          {privacy.data.is_child ? <li>{t("safeguarding.childDefaults")}</li> : null}
-          {privacy.data.coppa_applies ? (
-            <li>
-              {privacy.data.parental_consent
-                ? t("safeguarding.coppaConsented")
-                : t("safeguarding.coppaNeeded")}
-            </li>
-          ) : null}
-          {!privacy.data.is_child ? <li>{t("safeguarding.adultLearner")}</li> : null}
-        </ul>
-      ) : null}
-      {canRaise ? (
-        open ? (
-          <RaiseConcernForm studentId={studentId} />
-        ) : (
-          <Button variant="secondary" onClick={() => setOpen(true)}>
+    <RuledPanel
+      flush
+      titleId="student-privacy"
+      title={t("safeguarding.privacyAndSafeguarding")}
+      footer={
+        canRaise && !open ? (
+          <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
             {t("safeguarding.raiseButton")}
           </Button>
-        )
+        ) : undefined
+      }
+    >
+      {lines.length ? (
+        <PanelRows>
+          {lines.map((line) => (
+            <PanelRow key={line}>{line}</PanelRow>
+          ))}
+        </PanelRows>
       ) : null}
-    </section>
+      {canRaise && open ? (
+        <RaiseConcernForm studentId={studentId} onCancel={() => setOpen(false)} />
+      ) : null}
+    </RuledPanel>
   );
 }

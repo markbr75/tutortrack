@@ -58,7 +58,10 @@ describe("AcceptInvitePage", () => {
     window.history.pushState(null, "", "/accept-invite?token=bad");
     mockApi({
       "GET /api/v1/me": { status: 403, body: { type: "x", title: "x", status: 403 } },
-      "GET /api/v1/invitations/lookup": { status: 404, body: { type: "x", title: "x", status: 404 } },
+      "GET /api/v1/invitations/lookup": {
+        status: 404,
+        body: { type: "x", title: "x", status: 404 },
+      },
     });
     render(<App />);
     expect(await screen.findByText(/invalid or has expired/)).toBeInTheDocument();
