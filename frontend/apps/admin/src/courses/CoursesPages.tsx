@@ -779,7 +779,7 @@ function RolloverSection() {
           loadingLabel={t("grid.loading")}
           empty={rollovers.data && !rows.length ? t("designS6.courses.noRollovers") : undefined}
           columns={[
-            { header: t("courses.fromTo"), width: isPhone ? undefined : "min-w-48" },
+            { header: t("courses.fromTo"), width: isPhone ? undefined : "min-w-64" },
             ...(isPhone ? [] : [{ header: t("courses.deadline") }]),
             { header: t("courses.statusLabel") },
             ...(isPhone ? [] : [{ header: t("courses.answers") }]),
@@ -803,7 +803,7 @@ function RolloverSection() {
                 </td>
                 {isPhone ? null : <td className="tabular-nums whitespace-nowrap">{deadline}</td>}
                 <td
-                  className={`${isPhone ? "" : "whitespace-nowrap"} ${r.status === "running" ? "" : "text-muted-foreground"}`}
+                  className={`whitespace-nowrap ${r.status === "running" ? "" : "text-muted-foreground"}`}
                 >
                   {t(`courses.rolloverStatus.${r.status}`)}
                 </td>

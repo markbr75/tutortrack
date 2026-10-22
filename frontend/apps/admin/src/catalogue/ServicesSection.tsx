@@ -135,8 +135,8 @@ export function ServicesSection() {
   const formRef = useRef<HTMLDivElement>(null);
   const isPhone = useIsPhone();
   const columns = [
-    { header: t("catalogue.name"), width: isPhone ? undefined : "min-w-48" },
-    ...(isPhone ? [] : [{ header: t("catalogue.services.pricing") }]),
+    { header: t("catalogue.name"), width: isPhone ? undefined : "min-w-40" },
+    ...(isPhone ? [] : [{ header: t("catalogue.services.pricing"), width: "min-w-48" }]),
     ...(canSeeCharge ? [{ header: t("catalogue.services.charge"), end: true, width: "w-32" }] : []),
     ...(canSeePay && !isPhone
       ? [{ header: t("catalogue.services.pay"), end: true, width: "w-32" }]
