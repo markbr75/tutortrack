@@ -222,7 +222,7 @@
         <h1>TutorTrack admin guide</h1>
         <p class="lead">How to set up and configure a tutoring business on TutorTrack, and how
           the TutorTrack service itself is operated.</p>
-        <p class="meta">Last updated: 2026-10-22</p>
+        <p class="meta">Last updated: 2026-10-23</p>
       </header>
 
       <section id="overview" aria-labelledby="overview-h">
@@ -640,7 +640,7 @@
           staff, can edit or delete entries. Needs <code>audit.view</code> (owner and admin).</p>
         <ul>
           <li><strong>Filter</strong> by <span class="ui">Search</span> (record description), <span class="ui">Who</span> (email), <span class="ui">Action</span>, <span class="ui">From</span> and <span class="ui">To</span>, then <span class="ui">Apply</span>, in the filter row above the log.</li>
-          <li><strong>Reading an entry:</strong> each row shows the action with who made it and when beneath, the record (with its type) and the changes, one "field before → after" line each (the first six). On phones the record joins that line too.</li>
+          <li><strong>Reading an entry:</strong> each row shows the action with who made it and when beneath, the record (with its type) and the changes, one "field before → after" line each (the first six). Actions, record types and records are named in plain words ("Status changed", "Lesson series", "Payment request PR-0012") rather than codes or database IDs. On phones the record joins that line too.</li>
           <li><strong>Export</strong> with <span class="ui">Export CSV</span> at the top right (needs <code>audit.export</code>; up to 50,000 rows). Exports are audited too, and five exports by one person in an hour sends the owners a security alert.</li>
           <li><strong>Sensitive values</strong> such as bank details are shown as <code>[REDACTED]</code>.</li>
           <li><strong>Reads</strong> of sensitive data are logged with the action <code>read</code>: tax IDs, login history, student sensitive data, tutor bank and tax details, payment files, background-check results, data-request exports, safeguarding cases, data exports, webhook secrets and lesson recordings.</li>
@@ -1471,7 +1471,9 @@
           (dry run)</span> shows what would be removed; <span class="ui">Purge now</span> opens a
           confirmation in place, at the foot of the table: it says that purging cannot be undone,
           and the red <span class="ui">Purge now</span> beside it removes the data
-          (<span class="ui">Cancel</span> or Escape backs out).</p>
+          (<span class="ui">Cancel</span> or Escape backs out). The dry-run report, and the report on an
+          erasure, name each area of the product ("Lessons", "Invoices and charges") rather than
+          its internal key.</p>
         <div class="table-wrap">
           <table>
             <thead><tr><th scope="col">Category</th><th scope="col">Default</th></tr></thead>
@@ -2089,7 +2091,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>TutorTrack admin guide · Last updated: 2026-10-22 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
+    <p>TutorTrack admin guide · Last updated: 2026-10-23 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
   </footer>
 </body>
 </html>
