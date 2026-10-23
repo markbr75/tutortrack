@@ -29,6 +29,7 @@ import {
   RecordHeader,
   RecordLayout,
 } from "../components/RecordHeader";
+import { useTemplateOptions } from "../billing/invoiceTemplateHooks";
 import { InviteButton } from "../portal/InviteButton";
 import { RecordActivity } from "../crm/Activity";
 import { StudentJobs } from "../jobs/StudentJobs";
@@ -116,6 +117,7 @@ export function ClientPage({ clientId }: { clientId: string }) {
   const canEdit = canInvite;
   const canBilling = usePermission("billing.invoice.view");
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ["clients"] });
+  const templateOptions = useTemplateOptions(t("invoiceTemplates.organisationDefault"));
   const client = useQuery({
     queryKey: ["clients", clientId],
     queryFn: async () =>
@@ -214,6 +216,13 @@ export function ClientPage({ clientId }: { clientId: string }) {
                   kind: "number",
                 },
                 { name: "po_number", label: t("people.poNumber") },
+                {
+                  name: "invoice_template",
+                  label: t("invoiceTemplates.templateField"),
+                  kind: "select",
+                  options: templateOptions,
+                  wide: true,
+                },
                 ...addressFields(t),
               ]}
               save={async (changes) =>
@@ -234,6 +243,10 @@ export function ClientPage({ clientId }: { clientId: string }) {
                 [t("people.paymentTerms"), t("people.days", { count: c.payment_terms_days ?? 0 })],
                 [t("people.poNumber"), c.po_number],
                 [t("people.billingAddress"), address],
+                [
+                  t("invoiceTemplates.templateField"),
+                  templateOptions.find((o) => o.value === (c.invoice_template ?? ""))?.label,
+                ],
               ]}
             />
           </>

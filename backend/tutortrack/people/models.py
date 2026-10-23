@@ -115,6 +115,11 @@ class Client(NoOwnScopeMixin, BranchScopedModel, CustomisableModel):
     invoice_grouping = models.CharField(
         max_length=10, choices=InvoiceGrouping.choices, default=InvoiceGrouping.CLIENT
     )
+    # How this family's invoices look (ADR 0046); empty: the organisation's default.
+    invoice_template = models.ForeignKey(
+        "billing.InvoiceTemplate", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="+",
+    )  # fmt: skip
     preferred_payment_method = models.CharField(max_length=30, blank=True, default="")
     auto_pay = models.BooleanField(default=False)
     credit_limit_amount = models.DecimalField(

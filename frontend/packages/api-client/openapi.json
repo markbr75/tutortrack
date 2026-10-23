@@ -33339,6 +33339,459 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/invoice-templates": {
+            "get": {
+                "operationId": "invoice_templates_list",
+                "description": "Invoice templates (ADR 0046): how invoices look. The organisation's default applies\nunless a family or a job (when its invoices are one per job) chooses another. Issued\ninvoices keep the look they were sent with.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "invoice-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/InvoiceTemplate"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "invoice_templates_create",
+                "description": "Invoice templates (ADR 0046): how invoices look. The organisation's default applies\nunless a family or a job (when its invoices are one per job) chooses another. Issued\ninvoices keep the look they were sent with.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "invoice-templates"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvoiceTemplateRequest"
+                            },
+                            "examples": {
+                                "ATemplate": {
+                                    "value": {
+                                        "name": "Music lessons",
+                                        "style": "modern",
+                                        "accent_colour": "#7C3AED",
+                                        "logo_mode": "brand",
+                                        "title": "Invoice",
+                                        "trading_name": "Bright Minds Music",
+                                        "intro": "Thank you for learning with us this term.",
+                                        "payment_instructions": "Bank transfer to 12-34-56 12345678, quoting the invoice number.",
+                                        "footer": "",
+                                        "show_date": true,
+                                        "show_student": true,
+                                        "show_tutor": false,
+                                        "show_quantity": true,
+                                        "show_unit_price": true
+                                    },
+                                    "summary": "A template"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvoiceTemplateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvoiceTemplateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InvoiceTemplate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/invoice-templates/{id}": {
+            "get": {
+                "operationId": "invoice_templates_retrieve",
+                "description": "Invoice templates (ADR 0046): how invoices look. The organisation's default applies\nunless a family or a job (when its invoices are one per job) chooses another. Issued\ninvoices keep the look they were sent with.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "fields",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Comma-separated fields to return (sparse)."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this invoice template.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "invoice-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InvoiceTemplate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "patch": {
+                "operationId": "invoice_templates_partial_update",
+                "description": "Invoice templates (ADR 0046): how invoices look. The organisation's default applies\nunless a family or a job (when its invoices are one per job) chooses another. Issued\ninvoices keep the look they were sent with.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this invoice template.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "invoice-templates"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedInvoiceTemplateRequest"
+                            },
+                            "examples": {
+                                "ATemplate": {
+                                    "value": {
+                                        "name": "Music lessons",
+                                        "style": "modern",
+                                        "accent_colour": "#7C3AED",
+                                        "logo_mode": "brand",
+                                        "title": "Invoice",
+                                        "trading_name": "Bright Minds Music",
+                                        "intro": "Thank you for learning with us this term.",
+                                        "payment_instructions": "Bank transfer to 12-34-56 12345678, quoting the invoice number.",
+                                        "footer": "",
+                                        "show_date": true,
+                                        "show_student": true,
+                                        "show_tutor": false,
+                                        "show_quantity": true,
+                                        "show_unit_price": true
+                                    },
+                                    "summary": "A template"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedInvoiceTemplateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedInvoiceTemplateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InvoiceTemplate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "delete": {
+                "operationId": "invoice_templates_destroy",
+                "description": "Invoice templates (ADR 0046): how invoices look. The organisation's default applies\nunless a family or a job (when its invoices are one per job) chooses another. Issued\ninvoices keep the look they were sent with.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this invoice template.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "invoice-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/invoice-templates/preview": {
+            "post": {
+                "operationId": "invoice_templates_preview_create",
+                "description": "A sample invoice drawn with unsaved settings, as HTML for the editor's preview.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "invoice-templates"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvoiceTemplatePreviewRequest"
+                            },
+                            "examples": {
+                                "ATemplate": {
+                                    "value": {
+                                        "name": "Music lessons",
+                                        "style": "modern",
+                                        "accent_colour": "#7C3AED",
+                                        "logo_mode": "brand",
+                                        "title": "Invoice",
+                                        "trading_name": "Bright Minds Music",
+                                        "intro": "Thank you for learning with us this term.",
+                                        "payment_instructions": "Bank transfer to 12-34-56 12345678, quoting the invoice number.",
+                                        "footer": "",
+                                        "show_date": true,
+                                        "show_student": true,
+                                        "show_tutor": false,
+                                        "show_quantity": true,
+                                        "show_unit_price": true
+                                    },
+                                    "summary": "A template"
+                                },
+                                "UnsavedSettings": {
+                                    "value": {
+                                        "name": "Music lessons",
+                                        "style": "modern",
+                                        "accent_colour": "#7C3AED",
+                                        "logo_mode": "brand",
+                                        "title": "Invoice",
+                                        "trading_name": "Bright Minds Music",
+                                        "intro": "Thank you for learning with us this term.",
+                                        "payment_instructions": "Bank transfer to 12-34-56 12345678, quoting the invoice number.",
+                                        "footer": "",
+                                        "show_date": true,
+                                        "show_student": true,
+                                        "show_tutor": false,
+                                        "show_quantity": true,
+                                        "show_unit_price": true
+                                    },
+                                    "summary": "Unsaved settings"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvoiceTemplatePreviewRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvoiceTemplatePreviewRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/InvoiceTemplatePreviewResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/invoice-templates/preview-pdf": {
+            "post": {
+                "operationId": "invoice_templates_preview_pdf_create",
+                "description": "The same sample invoice as a PDF, exactly as families would receive it.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "invoice-templates"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvoiceTemplatePreviewRequest"
+                            },
+                            "examples": {
+                                "ATemplate": {
+                                    "value": {
+                                        "name": "Music lessons",
+                                        "style": "modern",
+                                        "accent_colour": "#7C3AED",
+                                        "logo_mode": "brand",
+                                        "title": "Invoice",
+                                        "trading_name": "Bright Minds Music",
+                                        "intro": "Thank you for learning with us this term.",
+                                        "payment_instructions": "Bank transfer to 12-34-56 12345678, quoting the invoice number.",
+                                        "footer": "",
+                                        "show_date": true,
+                                        "show_student": true,
+                                        "show_tutor": false,
+                                        "show_quantity": true,
+                                        "show_unit_price": true
+                                    },
+                                    "summary": "A template"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvoiceTemplatePreviewRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InvoiceTemplatePreviewRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/invoices": {
             "get": {
                 "operationId": "invoices_list",
@@ -94504,6 +94957,12 @@
                         "format": "uuid",
                         "readOnly": true,
                         "nullable": true
+                    },
+                    "invoice_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "How this family's invoices look; empty: the organisation's default."
                     }
                 },
                 "required": [
@@ -94669,6 +95128,12 @@
                         "readOnly": true,
                         "nullable": true
                     },
+                    "invoice_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "How this family's invoices look; empty: the organisation's default."
+                    },
                     "contacts": {
                         "type": "array",
                         "items": {
@@ -94802,7 +95267,13 @@
                         "format": "uuid",
                         "nullable": true
                     },
-                    "custom_fields": {}
+                    "custom_fields": {},
+                    "invoice_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "How this family's invoices look; empty: the organisation's default."
+                    }
                 },
                 "required": [
                     "display_name"
@@ -107267,6 +107738,244 @@
                     "total"
                 ]
             },
+            "InvoiceTemplate": {
+                "type": "object",
+                "description": "An invoice template (ADR 0046). Blank wording and colour fall back to the billing\nsettings and the brand kit.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "is_default": {
+                        "type": "boolean"
+                    },
+                    "style": {
+                        "$ref": "#/components/schemas/InvoiceTemplateStyleEnum"
+                    },
+                    "accent_colour": {
+                        "type": "string",
+                        "maxLength": 7
+                    },
+                    "logo_mode": {
+                        "$ref": "#/components/schemas/InvoiceTemplateLogoEnum"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Used when logo_mode is own."
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "trading_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "intro": {
+                        "type": "string"
+                    },
+                    "payment_instructions": {
+                        "type": "string"
+                    },
+                    "footer": {
+                        "type": "string"
+                    },
+                    "show_date": {
+                        "type": "boolean"
+                    },
+                    "show_student": {
+                        "type": "boolean"
+                    },
+                    "show_tutor": {
+                        "type": "boolean"
+                    },
+                    "show_quantity": {
+                        "type": "boolean"
+                    },
+                    "show_unit_price": {
+                        "type": "boolean"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "id",
+                    "name",
+                    "updated_at"
+                ]
+            },
+            "InvoiceTemplateLogoEnum": {
+                "enum": [
+                    "brand",
+                    "own",
+                    "none"
+                ],
+                "type": "string",
+                "description": "* `brand` - Brand kit logo\n* `own` - This template's logo\n* `none` - No logo"
+            },
+            "InvoiceTemplatePreviewRequest": {
+                "type": "object",
+                "description": "Unsaved template settings for the editor's preview (nothing is stored).",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "is_default": {
+                        "type": "boolean"
+                    },
+                    "style": {
+                        "$ref": "#/components/schemas/InvoiceTemplateStyleEnum"
+                    },
+                    "accent_colour": {
+                        "type": "string",
+                        "maxLength": 7
+                    },
+                    "logo_mode": {
+                        "$ref": "#/components/schemas/InvoiceTemplateLogoEnum"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Used when logo_mode is own."
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "trading_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "intro": {
+                        "type": "string"
+                    },
+                    "payment_instructions": {
+                        "type": "string"
+                    },
+                    "footer": {
+                        "type": "string"
+                    },
+                    "show_date": {
+                        "type": "boolean"
+                    },
+                    "show_student": {
+                        "type": "boolean"
+                    },
+                    "show_tutor": {
+                        "type": "boolean"
+                    },
+                    "show_quantity": {
+                        "type": "boolean"
+                    },
+                    "show_unit_price": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "InvoiceTemplatePreviewResponse": {
+                "type": "object",
+                "properties": {
+                    "html": {
+                        "type": "string",
+                        "description": "The sample invoice as HTML, for an iframe."
+                    }
+                },
+                "required": [
+                    "html"
+                ]
+            },
+            "InvoiceTemplateRequest": {
+                "type": "object",
+                "description": "An invoice template (ADR 0046). Blank wording and colour fall back to the billing\nsettings and the brand kit.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "is_default": {
+                        "type": "boolean"
+                    },
+                    "style": {
+                        "$ref": "#/components/schemas/InvoiceTemplateStyleEnum"
+                    },
+                    "accent_colour": {
+                        "type": "string",
+                        "maxLength": 7
+                    },
+                    "logo_mode": {
+                        "$ref": "#/components/schemas/InvoiceTemplateLogoEnum"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Used when logo_mode is own."
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "trading_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "intro": {
+                        "type": "string"
+                    },
+                    "payment_instructions": {
+                        "type": "string"
+                    },
+                    "footer": {
+                        "type": "string"
+                    },
+                    "show_date": {
+                        "type": "boolean"
+                    },
+                    "show_student": {
+                        "type": "boolean"
+                    },
+                    "show_tutor": {
+                        "type": "boolean"
+                    },
+                    "show_quantity": {
+                        "type": "boolean"
+                    },
+                    "show_unit_price": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            },
+            "InvoiceTemplateStyleEnum": {
+                "enum": [
+                    "classic",
+                    "modern",
+                    "compact"
+                ],
+                "type": "string",
+                "description": "* `classic` - Classic\n* `modern` - Modern\n* `compact` - Compact"
+            },
             "IssueStatementsRequest": {
                 "type": "object",
                 "properties": {
@@ -107483,6 +108192,12 @@
                         },
                         "readOnly": true,
                         "description": "Why the job needs attention (filled on ?attention=true lists)."
+                    },
+                    "invoice_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "How this job's invoices look when they are one per job; empty: the family's."
                     }
                 },
                 "required": [
@@ -107705,6 +108420,12 @@
                         },
                         "readOnly": true,
                         "description": "Why the job needs attention (filled on ?attention=true lists)."
+                    },
+                    "invoice_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "How this job's invoices look when they are one per job; empty: the family's."
                     }
                 },
                 "required": [
@@ -107874,6 +108595,12 @@
                     },
                     "policy_overrides": {},
                     "custom_fields": {},
+                    "invoice_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "How this job's invoices look when they are one per job; empty: the family's."
+                    },
                     "student_inputs": {
                         "type": "array",
                         "items": {
@@ -121997,7 +122724,13 @@
                         "format": "uuid",
                         "nullable": true
                     },
-                    "custom_fields": {}
+                    "custom_fields": {},
+                    "invoice_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "How this family's invoices look; empty: the organisation's default."
+                    }
                 }
             },
             "PatchedCommissionRuleRequest": {
@@ -123054,6 +123787,68 @@
                     }
                 }
             },
+            "PatchedInvoiceTemplateRequest": {
+                "type": "object",
+                "description": "An invoice template (ADR 0046). Blank wording and colour fall back to the billing\nsettings and the brand kit.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "is_default": {
+                        "type": "boolean"
+                    },
+                    "style": {
+                        "$ref": "#/components/schemas/InvoiceTemplateStyleEnum"
+                    },
+                    "accent_colour": {
+                        "type": "string",
+                        "maxLength": 7
+                    },
+                    "logo_mode": {
+                        "$ref": "#/components/schemas/InvoiceTemplateLogoEnum"
+                    },
+                    "logo": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Used when logo_mode is own."
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 60
+                    },
+                    "trading_name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "intro": {
+                        "type": "string"
+                    },
+                    "payment_instructions": {
+                        "type": "string"
+                    },
+                    "footer": {
+                        "type": "string"
+                    },
+                    "show_date": {
+                        "type": "boolean"
+                    },
+                    "show_student": {
+                        "type": "boolean"
+                    },
+                    "show_tutor": {
+                        "type": "boolean"
+                    },
+                    "show_quantity": {
+                        "type": "boolean"
+                    },
+                    "show_unit_price": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "PatchedInvoiceUpdateRequest": {
                 "type": "object",
                 "properties": {
@@ -123255,7 +124050,13 @@
                         "$ref": "#/components/schemas/HoursCapPeriodEnum"
                     },
                     "policy_overrides": {},
-                    "custom_fields": {}
+                    "custom_fields": {},
+                    "invoice_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "How this job's invoices look when they are one per job; empty: the family's."
+                    }
                 }
             },
             "PatchedLateFeeRuleRequest": {

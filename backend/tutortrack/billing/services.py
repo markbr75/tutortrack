@@ -840,7 +840,11 @@ def _snapshot(invoice: Invoice) -> dict[str, Any]:
     client = invoice.client
     contact = client.billing_contact or client.primary_contact
     address = client.billing_address
+    from .invoice_templates import layout, template_for_invoice
+
     org = Organisation.objects.get(pk=invoice.organisation_id)
+    # The look it is sent with (ADR 0046): later template edits don't change it.
+    look = layout(template_for_invoice(invoice))
     return {
         "client_name": client.display_name,
         "contact_name": contact.full_name if contact else "",
@@ -856,8 +860,9 @@ def _snapshot(invoice: Invoice) -> dict[str, Any]:
             if line
         ],
         "organisation": org.name,
-        "payment_instructions": get_setting("billing.payment_instructions"),
-        "footer": get_setting("billing.invoice_footer"),
+        "payment_instructions": look["payment_instructions"],
+        "footer": look["footer"],
+        "template": look,
     }
 
 

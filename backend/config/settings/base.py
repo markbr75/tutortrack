@@ -342,6 +342,9 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
     "ENUM_NAME_OVERRIDES": {
+        # Invoice templates (ADR 0046)
+        "InvoiceTemplateStyleEnum": "tutortrack.billing.models.InvoiceTemplate.Style",
+        "InvoiceTemplateLogoEnum": "tutortrack.billing.models.InvoiceTemplate.Logo",
         # Phase 2b (E05-T12, E09-T09, E17-T09, E19-T08, E23-T09)
         "PersonKindEnum": "tutortrack.people.selectors.MAP_KINDS",
         "TutorGenderEnum": "tutortrack.people.models.TUTOR_GENDERS",  # G5c matching needs

@@ -9,7 +9,6 @@ warn. Every surface uses the safe variants, so output stays WCAG 2.2 AA.
 
 from __future__ import annotations
 
-import base64
 import re
 import uuid
 from dataclasses import asdict, dataclass, field
@@ -236,23 +235,10 @@ def asset_url(organisation: Any, file_id: str | None, *, absolute: bool = True) 
 
 def _logo_data_uri(organisation: Any, file_id: str | None) -> str:
     """Logo bytes inlined for WeasyPrint (no network fetches while rendering a PDF)."""
-    if not file_id:
-        return ""
-    from tutortrack.core.models import StoredFile
-    from tutortrack.core.storage.client import bucket, s3_client
+    from tutortrack.core.storage.inline import image_data_uri
 
-    try:
-        with tenant_context(organisation):
-            stored = StoredFile.objects.filter(pk=file_id).first()
-        if stored is None or not stored.is_downloadable or stored.size_bytes > LOGO_INLINE_LIMIT:
-            return ""
-        if not stored.content_type.startswith("image/"):
-            return ""
-        body = s3_client().get_object(Bucket=bucket(), Key=stored.storage_key)["Body"].read()
-    except Exception:  # storage unavailable: render without the logo
-        logger.warning("branding.logo_unavailable", file_id=str(file_id))
-        return ""
-    return f"data:{stored.content_type};base64,{base64.b64encode(body).decode()}"
+    with tenant_context(organisation):
+        return image_data_uri(file_id, limit=LOGO_INLINE_LIMIT)
 
 
 class Provider:

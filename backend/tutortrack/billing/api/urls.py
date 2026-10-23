@@ -12,6 +12,7 @@ router.register("payment-requests", views.PaymentRequestViewSet, basename="payme
 router.register("packages", views.PackageViewSet, basename="package-purchases")
 router.register("billing-plans", views.BillingPlanViewSet, basename="billing-plans")
 router.register("billing/late-fee-rules", views.LateFeeRuleViewSet, basename="late-fee-rules")
+router.register("invoice-templates", views.InvoiceTemplateViewSet, basename="invoice-templates")
 router.register("billing/collections", views.CollectionsCaseViewSet, basename="collections")
 router.register("me/invoice-reviews", views.MyInvoiceReviewViewSet, basename="my-invoice-reviews")
 

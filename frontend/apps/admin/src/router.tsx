@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 
 import { BillingPage } from "./billing/BillingPage";
+import { InvoiceTemplatePage, InvoiceTemplatesPage } from "./billing/InvoiceTemplates";
 import { InvoicePage } from "./billing/InvoicePage";
 import { PayPage, SetupPage } from "./payments/PayPage";
 import { PaymentsSettingsPage } from "./payments/PaymentsPages";
@@ -476,6 +477,14 @@ const analyticsReportRoute = createRoute({
 const unconfirmedRoute = appPage("/unconfirmed", UnconfirmedPage);
 const deliverySettingsRoute = appPage("/lesson-policies", DeliverySettingsPage);
 const billingRoute = appPage("/billing", BillingPage);
+const invoiceTemplatesRoute = appPage("/billing/templates", InvoiceTemplatesPage);
+const invoiceTemplateRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/billing/templates/$templateId",
+  component: function InvoiceTemplateRoute() {
+    return <InvoiceTemplatePage templateId={invoiceTemplateRoute.useParams().templateId} />;
+  },
+});
 const paymentsSettingsRoute = appPage("/settings/payments", PaymentsSettingsPage);
 const notificationSettingsRoute = appPage("/settings/notifications", NotificationSettingsPage);
 const planRoute = appPage("/settings/plan", PlanPage);
@@ -653,6 +662,8 @@ const routeTree = rootRoute.addChildren([
     unconfirmedRoute,
     deliverySettingsRoute,
     billingRoute,
+    invoiceTemplatesRoute,
+    invoiceTemplateRoute,
     invoiceRoute,
     paymentsSettingsRoute,
     notificationSettingsRoute,

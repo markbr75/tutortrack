@@ -4,7 +4,8 @@ from typing import Any
 
 from rest_framework import serializers
 
-from tutortrack.core.api.serializers import BaseModelSerializer
+from tutortrack.billing.models import InvoiceTemplate
+from tutortrack.core.api.serializers import BaseModelSerializer, TenantRelatedField
 
 from ..models import (
     Address,
@@ -138,6 +139,12 @@ class ClientSerializer(BaseModelSerializer):
     last_lesson_at = _moment()
     hours_this_term = _figure()
     merged_into = serializers.UUIDField(source="merged_into_id", read_only=True, allow_null=True)
+    invoice_template = TenantRelatedField(
+        InvoiceTemplate,
+        required=False,
+        allow_null=True,
+        help_text="How this family's invoices look; empty: the organisation's default.",
+    )
 
     class Meta:
         model = Client
@@ -149,7 +156,7 @@ class ClientSerializer(BaseModelSerializer):
             "prevent_negative_balance", "tax_exempt", "tax_id", "po_number",
             "referral_source", "account_manager", "custom_fields", "students_count",
             "archived_at", "created_at", "balance", "next_lesson_at", "last_lesson_at",
-            "hours_this_term", "merged_into",
+            "hours_this_term", "merged_into", "invoice_template",
         ]  # fmt: skip
         read_only_fields = ["id", "status", "billing_contact", "archived_at", "created_at"]
         field_permissions = {"tax_id": "billing.client.view_tax"}

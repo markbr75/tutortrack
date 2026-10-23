@@ -15,6 +15,7 @@ PERMISSIONS = {
     "billing.ledger.view": "See client ledgers and statements",
     "billing.ledger.adjust": "Post manual ledger adjustments",
     "billing.settings.manage": "Change billing settings",
+    "billing.template.manage": "Create and edit invoice templates",
     "billing.package.view": "See clients' packages and their use",
     "billing.package.sell": "Sell packages to clients",
     "billing.package.manage": "Extend and cancel packages",

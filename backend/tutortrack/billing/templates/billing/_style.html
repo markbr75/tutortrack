@@ -2,16 +2,33 @@
   @page { size: A4; margin: 18mm 16mm; }
   body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 10pt; color: #111827; }
   h1 { font-size: 20pt; margin: 0 0 4mm; color: {{ brand.link_colour|default:"#111827" }}; }
-  .brand-bar { border-top: 3pt solid {{ brand.primary_colour|default:"#111827" }}; margin-bottom: 6mm; }
+  .brand-bar { border-top: 3pt solid {{ accent|default:"#111827" }}; margin-bottom: 6mm; }
   .brand-logo { max-height: 18mm; max-width: 60mm; margin-bottom: 4mm; }
   .muted { color: #4b5563; }
   .row { display: flex; justify-content: space-between; margin-bottom: 8mm; }
   table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; border-bottom: 1px solid {{ brand.primary_colour|default:"#9ca3af" }}; padding: 2mm 1mm; font-size: 9pt; }
+  th { text-align: left; border-bottom: 1px solid {{ accent|default:"#9ca3af" }}; padding: 2mm 1mm; font-size: 9pt; }
   td { border-bottom: 1px solid #e5e7eb; padding: 2mm 1mm; vertical-align: top; }
   .num { text-align: right; white-space: nowrap; }
   .totals { margin-top: 6mm; margin-left: auto; width: 45%; }
   .totals td { border: none; padding: 1mm; }
   .grand td { font-weight: bold; border-top: 1px solid #111827; }
   .footer { margin-top: 10mm; font-size: 9pt; }
+  .intro { margin: -2mm 0 6mm; }
+  /* Invoice template styles (ADR 0046). Classic is the rules above. */
+  .style-modern .brand-bar { border-top-width: 9pt; margin-bottom: 8mm; }
+  .style-modern h1 { font-size: 26pt; letter-spacing: 0.5pt; color: {{ accent|default:"#111827" }}; }
+  .style-modern th { border-bottom-width: 2pt; text-transform: uppercase; font-size: 8pt; letter-spacing: 0.4pt; }
+  .style-modern td { border-bottom-color: #f3f4f6; }
+  .style-modern .grand td { font-size: 13pt; border-top: 2pt solid {{ accent|default:"#111827" }}; }
+  .style-compact { font-size: 8.5pt; }
+  .style-compact h1 { font-size: 14pt; margin-bottom: 2mm; }
+  .style-compact .brand-bar { border-top-width: 1.5pt; margin-bottom: 4mm; }
+  .style-compact .brand-logo { max-height: 11mm; margin-bottom: 2mm; }
+  .style-compact .row { margin-bottom: 4mm; }
+  .style-compact th, .style-compact td { padding: 1mm 1mm; }
+  .style-compact th { font-size: 7.5pt; }
+  .style-compact .footer { margin-top: 6mm; font-size: 8pt; }
+  /* The editor's preview is HTML in the browser, not a PDF: give it the page's width. */
+  .preview { max-width: 178mm; margin: 0 auto; padding: 4mm 0 10mm; background: #fff; }
 </style>

@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from django_filters import rest_framework as filters
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -22,6 +22,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
+from tutortrack.core.context import require_organisation_id
 from tutortrack.core.money import Money
 from tutortrack.core.permissions import (
     HasMethodPermission,
@@ -32,7 +33,7 @@ from tutortrack.core.time import now
 from tutortrack.people.models import Client
 from tutortrack.tenancy.models import Organisation
 
-from .. import dunning, ledger, packages, pdf, plans, selectors, services, splits
+from .. import dunning, invoice_templates, ledger, packages, pdf, plans, selectors, services, splits
 from ..models import (
     BillingPlan,
     Charge,
@@ -41,6 +42,7 @@ from ..models import (
     CreditNote,
     Invoice,
     InvoiceRun,
+    InvoiceTemplate,
     LateFeeRule,
     PackagePurchase,
     PaymentRequest,
@@ -958,3 +960,95 @@ class BillingSplitView(APIView):
             user=request.user,
         )
         return Response(s.BillingSplitOutSerializer(_split_out(job, student)).data)
+
+
+TEMPLATE_EXAMPLE = {
+    "name": "Music lessons",
+    "style": "modern",
+    "accent_colour": "#7C3AED",
+    "logo_mode": "brand",
+    "title": "Invoice",
+    "trading_name": "Bright Minds Music",
+    "intro": "Thank you for learning with us this term.",
+    "payment_instructions": "Bank transfer to 12-34-56 12345678, quoting the invoice number.",
+    "footer": "",
+    "show_date": True,
+    "show_student": True,
+    "show_tutor": False,
+    "show_quantity": True,
+    "show_unit_price": True,
+}
+
+
+@extend_schema(examples=[OpenApiExample("A template", value=TEMPLATE_EXAMPLE, request_only=True)])
+class InvoiceTemplateViewSet(
+    TenantScopedViewMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Invoice templates (ADR 0046): how invoices look. The organisation's default applies
+    unless a family or a job (when its invoices are one per job) chooses another. Issued
+    invoices keep the look they were sent with."""
+
+    model = InvoiceTemplate
+    serializer_class = s.InvoiceTemplateSerializer
+    pagination_class = None
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+    permission_classes = perms(
+        {
+            "GET": "billing.invoice.view",
+            "POST": "billing.template.manage",
+            "PATCH": "billing.template.manage",
+            "DELETE": "billing.template.manage",
+        }
+    )
+
+    def get_tenant_queryset(self) -> QuerySet[InvoiceTemplate]:
+        return invoice_templates.templates()
+
+    def perform_create(self, serializer: Any) -> None:
+        serializer.instance = invoice_templates.create_template(**serializer.validated_data)
+
+    def perform_update(self, serializer: Any) -> None:
+        serializer.instance = invoice_templates.update_template(
+            serializer.instance, **serializer.validated_data
+        )
+
+    def perform_destroy(self, instance: InvoiceTemplate) -> None:
+        invoice_templates.delete_template(instance)
+
+    def _preview_layout(self, request: Request) -> dict[str, Any]:
+        payload = s.InvoiceTemplatePreviewSerializer(
+            data=request.data, context=self.get_serializer_context()
+        )
+        payload.is_valid(raise_exception=True)
+        draft = InvoiceTemplate(**{"name": "preview", **payload.validated_data})
+        return invoice_templates.layout(draft)
+
+    @extend_schema(
+        request=s.InvoiceTemplatePreviewSerializer,
+        responses=s.InvoiceTemplatePreviewResponse,
+        examples=[OpenApiExample("Unsaved settings", value=TEMPLATE_EXAMPLE, request_only=True)],
+    )
+    @action(detail=False, methods=["post"], url_path="preview")
+    def preview(self, request: Request) -> Response:
+        """A sample invoice drawn with unsaved settings, as HTML for the editor's preview."""
+        org = Organisation.objects.get(pk=require_organisation_id())
+        html = pdf.invoice_preview_html(self._preview_layout(request), org)
+        return Response({"html": html})
+
+    @extend_schema(
+        request=s.InvoiceTemplatePreviewSerializer,
+        responses={(200, "application/pdf"): OpenApiTypes.BINARY},
+    )
+    @action(detail=False, methods=["post"], url_path="preview-pdf")
+    def preview_pdf(self, request: Request) -> HttpResponse:
+        """The same sample invoice as a PDF, exactly as families would receive it."""
+        org = Organisation.objects.get(pk=require_organisation_id())
+        return _pdf(
+            pdf.invoice_preview_pdf(self._preview_layout(request), org), "sample-invoice.pdf"
+        )

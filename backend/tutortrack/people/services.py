@@ -82,7 +82,7 @@ CLIENT_FIELDS = {
     "invoice_grouping", "preferred_payment_method", "auto_pay", "credit_limit_amount",
     "prevent_negative_balance", "tax_exempt", "tax_id", "po_number", "referral_source",
     "account_manager", "account_manager_id", "branch", "branch_id", "primary_contact",
-    "billing_contact",
+    "billing_contact", "invoice_template",
 }  # fmt: skip
 
 

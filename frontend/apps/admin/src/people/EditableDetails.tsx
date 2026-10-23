@@ -5,6 +5,7 @@ import {
   CheckboxField,
   FactList,
   Panel,
+  SelectField,
   TextAreaField,
   TextField,
 } from "@tutortrack/ui";
@@ -152,6 +153,19 @@ export function DetailsForm({
           );
         }
         const common = { label: field.label, hint: field.hint, error: errors[field.name] };
+        if (field.kind === "select") {
+          return (
+            <div key={field.name} className={field.wide ? "sm:col-span-2" : undefined}>
+              <SelectField
+                ref={ref}
+                {...common}
+                value={String(value)}
+                options={[...(field.options ?? [])]}
+                onChange={(e) => set(e.target.value)}
+              />
+            </div>
+          );
+        }
         if (field.kind === "textarea") {
           return (
             <div key={field.name} className="sm:col-span-2">
@@ -203,6 +217,8 @@ function toInput(field: DetailField, value: unknown): string | boolean {
 function fromInput(field: DetailField, value: string | boolean | undefined): Value {
   if (field.kind === "checkbox") return Boolean(value);
   const text = String(value ?? "").trim();
-  if (field.kind === "number" || field.kind === "date") return text === "" ? null : text;
+  if (field.kind === "number" || field.kind === "date" || field.kind === "select") {
+    return text === "" ? null : text;
+  }
   return text;
 }
