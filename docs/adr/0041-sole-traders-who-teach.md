@@ -1,6 +1,6 @@
 # ADR 0041: Sole traders who teach (solo mode)
 
-- **Status:** Accepted
+- **Status:** Accepted (menu and tutor rules extended by ADR 0045)
 - **Date:** 2026-10-20
 - **Scope:** people (tutor records), tenancy (onboarding, organisation mode), identity (`/me`),
   the admin app (menu, Home, settings) and the portal (tutor shell). Product principle 1,

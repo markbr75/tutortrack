@@ -11,6 +11,8 @@ afterEach(() => {
 const PERMISSIONS = {
   "scheduling.lesson.view": "all",
   "matching.search": "all",
+  "jobs.job.view": "all",
+  "team.invite": "all",
   "billing.invoice.view": "all",
   "payroll.view": "all",
   "recruitment.application.view": "all",
@@ -29,7 +31,7 @@ function routes(mode: "solo" | "multi", teaches = false) {
       body: {
         ...ME,
         organisation: { ...ME.organisation, mode },
-        membership: { ...ME.membership, role: "owner", teaches },
+        membership: { ...ME.membership, role: "owner", teaches, tutor_id: teaches ? "t1" : null },
         permissions: PERMISSIONS,
       },
     },
@@ -50,9 +52,42 @@ describe("sole traders", () => {
     render(<App />);
     const nav = await screen.findByRole("navigation", { name: "Main" });
     expect(await within(nav).findByRole("link", { name: "Billing" })).toBeInTheDocument();
-    for (const name of ["Matching", "Payroll", "Recruitment", "Compliance"]) {
+    for (const name of ["Jobs", "Matching", "Payroll", "Recruitment", "Compliance", "Tutors"]) {
       expect(within(nav).queryByRole("link", { name })).not.toBeInTheDocument();
     }
+  });
+
+  it("open their own tutor profile instead of a list of tutors", async () => {
+    mockApi(routes("solo", true));
+    render(<App />);
+    const nav = await screen.findByRole("navigation", { name: "Main" });
+    expect(await within(nav).findByRole("link", { name: "My tutor profile" })).toHaveAttribute(
+      "href",
+      "/tutors/t1",
+    );
+  });
+
+  it("find Add yourself as a tutor from My tutor profile before they teach", async () => {
+    mockApi(routes("solo"));
+    render(<App />);
+    const nav = await screen.findByRole("navigation", { name: "Main" });
+    expect(await within(nav).findByRole("link", { name: "My tutor profile" })).toHaveAttribute(
+      "href",
+      "/tutors",
+    );
+  });
+
+  it("can't invite someone as a tutor", async () => {
+    window.history.pushState(null, "", "/team");
+    mockApi({
+      ...routes("solo"),
+      "GET /api/v1/memberships": { body: { next: null, previous: null, results: [] } },
+      "GET /api/v1/invitations": { body: { next: null, previous: null, results: [] } },
+    });
+    render(<App />);
+    const role = await screen.findByLabelText("Role");
+    expect(role).toHaveValue("admin");
+    expect(within(role).queryByRole("option", { name: "Tutor" })).not.toBeInTheDocument();
   });
 
   it("see what is ready to invoice instead of the next pay run", async () => {
@@ -76,11 +111,11 @@ describe("sole traders", () => {
 });
 
 describe("teams", () => {
-  it("keep matching, payroll, recruitment and compliance", async () => {
+  it("keep tutors, jobs, matching, payroll, recruitment and compliance", async () => {
     mockApi(routes("multi"));
     render(<App />);
     const nav = await screen.findByRole("navigation", { name: "Main" });
-    for (const name of ["Matching", "Payroll", "Recruitment", "Compliance"]) {
+    for (const name of ["Tutors", "Jobs", "Matching", "Payroll", "Recruitment", "Compliance"]) {
       expect(await within(nav).findByRole("link", { name })).toBeInTheDocument();
     }
   });

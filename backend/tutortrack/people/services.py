@@ -101,6 +101,31 @@ def _check_tutor_capacity() -> None:
     entitlements.require_capacity("max_tutors", used=used)
 
 
+def solo_mode() -> bool:
+    """Whether the current organisation is a sole trader (mode "solo", from its business type)."""
+    from tutortrack.core.context import require_organisation_id
+    from tutortrack.tenancy.selectors import get_organisation
+
+    return bool(get_organisation(require_organisation_id()).mode == "solo")
+
+
+def check_solo_tutor(*, exclude: Any = None, inviting: bool = False) -> None:
+    """Sole traders teach on their own (ADR 0045): the business has one tutor, the owner.
+    Refuses another tutor while one is counted (onboarding, active or restricted), and any
+    invitation to join as a tutor (that is always someone else)."""
+    if not solo_mode():
+        return
+    others = TutorProfile.objects.filter(status__in=COUNTED_TUTOR_STATUSES)
+    if exclude is not None:
+        others = others.exclude(pk=exclude)
+    if inviting or others.exists():
+        message = _(
+            "You're set up as a sole trader, so you are the only tutor. To add tutors, change "
+            "Type of business in your organisation settings."
+        )
+        raise BusinessRuleViolation(message, extra={"errors": {"email": [message]}})
+
+
 def _check_student_capacity() -> None:
     used = Student.objects.filter(status__in=ACTIVE_STUDENT_STATUSES).count()
     entitlements.require_capacity("max_active_students", used=used)
@@ -440,6 +465,7 @@ def create_tutor(
     if tutor.membership is not None:
         tutor.status = TutorProfile.Status.ACTIVE
     if tutor.status in COUNTED_TUTOR_STATUSES:
+        check_solo_tutor()
         _check_tutor_capacity()
     tutor.save()
     tutor.branches.set(list(branches))
@@ -498,6 +524,7 @@ def change_tutor_status(tutor: TutorProfile, status: str) -> TutorProfile:
     if old == status:
         return tutor
     if status in COUNTED_TUTOR_STATUSES and old not in COUNTED_TUTOR_STATUSES:
+        check_solo_tutor(exclude=tutor.pk)
         _check_tutor_capacity()
     with audit.track(tutor, action="status_change"):
         tutor.status = status

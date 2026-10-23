@@ -59,6 +59,8 @@ type NavItem = {
   icon?: LucideIcon;
   /** Only for businesses with a team of tutors: hidden for sole traders (mode "solo"). */
   team?: boolean;
+  /** What sole traders see instead: they are the only tutor, so one record, not a list. */
+  solo?: { key: string; to: (tutorId: string | null) => string };
 };
 
 /** The sidebar's sections, in the order of the user guide ("grouped by job"). */
@@ -100,6 +102,8 @@ const NAV: NavItem[] = [
     permission: "people.tutor.view",
     group: "people",
     icon: UserRound,
+    // Not a tutor yet: the list, which offers "Add yourself as a tutor".
+    solo: { key: "nav.myTutorProfile", to: (id) => (id ? `/tutors/${id}` : "/tutors") },
   },
   {
     to: "/people/map",
@@ -156,6 +160,7 @@ const NAV: NavItem[] = [
     permission: "jobs.job.view",
     group: "scheduling",
     icon: Briefcase,
+    team: true,
   },
   {
     to: "/matching",
@@ -362,10 +367,20 @@ function settingsItemFor(pathname: string): NavItem | undefined {
 function useAllowed(): (item: NavItem) => boolean {
   const { data } = useMe();
   const permissions = data?.permissions ?? {};
-  // Sole traders don't match, pay, recruit or vet a team of tutors.
+  // Sole traders don't offer jobs to, match, pay, recruit or vet a team of tutors.
   const solo = data?.organisation?.mode === "solo";
   return (item) =>
     !(item.team && solo) && (!item.permission || Boolean(permissions[item.permission]));
+}
+
+/** The menu for this business: sole traders get each item's `solo` stand-in. */
+function useNav(): NavItem[] {
+  const { data } = useMe();
+  if (data?.organisation?.mode !== "solo") return NAV;
+  const tutorId = data.membership?.tutor_id ?? null;
+  return NAV.map((item) =>
+    item.solo ? { ...item, key: item.solo.key, to: item.solo.to(tutorId) } : item,
+  );
 }
 
 function NavLink({
@@ -488,10 +503,11 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useTranslation();
   const { data: org } = useOrganisation();
   const allowed = useAllowed();
+  const nav = useNav();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const settings = SETTINGS_ITEMS.filter(allowed);
   const inSettings = Boolean(settingsItemFor(pathname));
-  const visible = NAV.filter(
+  const visible = nav.filter(
     (item) => (GROUPS as readonly string[]).includes(item.group) && allowed(item),
   ).length;
   const collapsible = visible > COLLAPSE_AFTER;
@@ -529,7 +545,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         className="mt-3 flex-1 overflow-y-auto pb-12 [mask-image:linear-gradient(to_bottom,black_calc(100%-2.5rem),transparent)] [scrollbar-width:thin]"
       >
         {GROUPS.map((group) => {
-          const items = NAV.filter((item) => item.group === group && allowed(item));
+          const items = nav.filter((item) => item.group === group && allowed(item));
           if (items.length === 0) return null;
           const heading = group === "main" ? null : t(`nav.groups.${group}`);
           const open = groups.isOpen(group);

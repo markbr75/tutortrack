@@ -145,6 +145,8 @@ def update_organisation(organisation: Organisation, **changes: Any) -> Organisat
             change_slug(organisation, new_slug)
         if "business_type" in changes and "mode" not in changes:
             changes["mode"] = mode_for(changes["business_type"])
+        if changes.get("mode") == Organisation.Mode.SOLO and organisation.mode != changes["mode"]:
+            _check_can_go_solo()
         with audit.track(organisation) as tracker:
             for field, value in changes.items():
                 setattr(organisation, field, value)
@@ -158,6 +160,19 @@ def update_organisation(organisation: Organisation, **changes: Any) -> Organisat
                 organisation_id=organisation.pk,
             )
     return organisation
+
+
+def _check_can_go_solo() -> None:
+    """A sole trader is the only tutor (ADR 0045), so a business with a team of tutors can't
+    become one until the others are inactive or archived."""
+    from tutortrack.people.selectors import teaching_tutor_count
+
+    if teaching_tutor_count() > 1:
+        message = _(
+            "You have more than one tutor. Make the other tutors inactive or archive them "
+            "before you change to a sole trader."
+        )
+        raise BusinessRuleViolation(message, extra={"errors": {"business_type": [message]}})
 
 
 @transaction.atomic
