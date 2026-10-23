@@ -2,6 +2,8 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
+import { guides } from "./guides.plugin";
+
 // In development the app is served at http://<org-slug>.localhost:5173 and proxies the API to
 // Django with the Host header preserved, so the tenant resolves from the subdomain and session
 // cookies + CSRF work same-origin, exactly as in production.
@@ -13,7 +15,7 @@ const proxied = { target: apiTarget, changeOrigin: false, xfwd: true };
 const portalTarget = process.env.PORTAL_DEV_URL ?? "http://localhost:5174";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), guides()],
   // Crawl the app *and* the linked workspace packages at startup so every dependency is
   // pre-bundled before the first request. Otherwise a cold dev server discovers deps from
   // packages/* lazily, re-optimises mid-load and serves 504 "Outdated Optimize Dep" chunks

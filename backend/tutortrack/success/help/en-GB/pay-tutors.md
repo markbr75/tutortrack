@@ -1,13 +1,14 @@
 ---
 title: Pay your tutors
-summary: Approve pay items and run a pay run.
+summary: Check pay items and make a pay run.
 routes: /payroll
-tags: payroll, pay run, tutors, payouts, expenses
+tags: payroll, pay run, tutors, expenses
 ---
 Each completed lesson makes a pay item for the tutor. Tutors can also claim expenses.
 
-1. Go to **Payroll**.
-2. Approve the pay items that are ready.
-3. Make a pay run for the period, check it and approve it.
+1. Go to **Payroll** and select **New pay run**.
+2. Choose the period. The items that are ready go into the run.
+3. Open the run, check the warnings and the items, then approve it.
 
-TutorTrack makes payslips or self-billing statements for each tutor.
+To correct an item, select **Edit** and say why it changes. TutorTrack keeps the original
+and adds a correction. Sole traders don't see Payroll, because they have no tutors to pay.

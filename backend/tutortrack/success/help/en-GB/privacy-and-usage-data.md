@@ -8,6 +8,8 @@ If you agree, TutorTrack records which pages and features you use. We use this t
 product better. We never record names, email addresses, the records you open or the text
 you type, and we cannot see who you are from this data.
 
-- Usage data is off until you turn it on in the help panel (or accept analytics cookies).
-- You can turn it off at any time.
-- Your organisation's owner can turn it off for everyone in **Settings → Privacy**.
+- Usage data is off until you turn it on in the help panel (**Usage data**) or accept
+  analytics cookies.
+- You can turn it off at any time in the same place.
+- Your organisation can turn it off for everyone. Ask TutorTrack support, or change the
+  `privacy.product_analytics` setting through the API.

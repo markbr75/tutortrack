@@ -8,9 +8,11 @@ tour: calendar
 To schedule a lesson:
 
 1. Open the **Calendar**.
-2. Select a free time, or select **New lesson**.
-3. Choose the job (or the student, tutor and service).
-4. To make the lesson repeat, set a repeat rule, for example every week.
+2. Select **New lesson**, or select an empty time.
+3. Choose the service, the student and the tutor.
+4. For a regular lesson, tick **Repeat weekly**, choose the days and when it ends.
+5. Select **Schedule lesson** or **Schedule series**.
 
-Lessons keep their local time when the clocks change. Tutors see their lessons in the
-tutor portal and in their own calendar app if they connect it.
+You can also open a student and select **Set up lessons**. Lessons keep their local time
+when the clocks change. Tutors see their lessons in the tutor app and in their own calendar
+app if they connect it.

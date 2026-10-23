@@ -19,9 +19,10 @@ export function mockApi(routes: Record<string, Route>): RecordedCall[] {
   vi.stubGlobal(
     "fetch",
     vi.fn(async (input: Request | string, init?: RequestInit) => {
-      // Direct uploads (G5a) call fetch(url, init) for the presigned PUT.
+      // Direct uploads (G5a) call fetch(url, init) for the presigned PUT; the Help panel
+      // fetches /guides/routes.json the same way.
       if (typeof input === "string") {
-        const url = new URL(input);
+        const url = new URL(input, window.location.origin);
         calls.push({
           method: init?.method ?? "GET",
           path: url.pathname,
@@ -29,7 +30,10 @@ export function mockApi(routes: Record<string, Route>): RecordedCall[] {
           body: undefined,
         });
         const route = routes[`${init?.method ?? "GET"} ${url.pathname}`];
-        return new Response(null, { status: route ? 200 : 404 });
+        const reply = typeof route === "function" ? route(undefined, url) : route;
+        return new Response(reply?.body === undefined ? null : JSON.stringify(reply.body), {
+          status: reply ? (reply.status ?? 200) : 404,
+        });
       }
       const request = input;
       const url = new URL(request.url);

@@ -5586,7 +5586,14 @@
     "results_one": "{{count}} article found",
     "results_other": "{{count}} articles found",
     "noResults": "No articles match. Try other words, or chat with support.",
-    "backToArticles": "Back to articles"
+    "backToArticles": "Back to articles",
+    "fullGuide": "The full guides",
+    "guideForPage": "Read about this page in the {{guide}}",
+    "userGuide": "user guide",
+    "adminGuide": "admin guide",
+    "openUserGuide": "User guide: day-to-day use",
+    "openAdminGuide": "Admin guide: setup, settings and the console",
+    "newTab": "(opens in a new tab)"
   },
   "tours": {
     "progress": "Step {{current}} of {{total}}",

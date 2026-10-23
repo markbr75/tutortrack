@@ -117,6 +117,33 @@ describe("help panel", () => {
     expect(calls.some((c) => c.search.includes("route=%2F"))).toBe(true);
   });
 
+  it("links to the full guide's section about this page", async () => {
+    window.history.pushState(null, "", "/tutors");
+    mockApi(
+      shell({
+        "GET /api/v1/help/articles": { body: [] },
+        "GET /guides/routes.json": {
+          body: [
+            { guide: "user-guide.html", id: "people-lists", routes: ["admin:/tutors"] },
+            { guide: "admin-guide.html", id: "plan", routes: ["admin:/settings/plan"] },
+          ],
+        },
+        "GET /api/v1/tutors": { body: { results: [], next: null, previous: null } },
+      }),
+    );
+    render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: "Help" }));
+    const dialog = await screen.findByRole("dialog", { name: "Help" });
+    const page = await within(dialog).findByRole("link", {
+      name: "Read about this page in the user guide (opens in a new tab)",
+    });
+    expect(page).toHaveAttribute("href", "/guides/user-guide.html#people-lists");
+    expect(page).toHaveAttribute("target", "_blank");
+    expect(
+      within(dialog).getByRole("link", { name: /Admin guide: setup, settings and the console/ }),
+    ).toHaveAttribute("href", "/guides/admin-guide.html");
+  });
+
   it("sends a question to support", async () => {
     const me = { ...ME, permissions: { ...ME.permissions, "success.support.chat": "own" } };
     const calls = mockApi(

@@ -11,7 +11,7 @@ charge rate and a pay rate.
 To add a service:
 
 1. Go to **Catalogue**.
-2. Select **Add service**.
+2. Select **New service**.
 3. Give the service a name and the default rates.
 
 You can change rates for one job, student or tutor later. The charge rate is what the
