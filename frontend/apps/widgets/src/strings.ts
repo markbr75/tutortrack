@@ -89,6 +89,11 @@ const enGB = {
   classesBack: "Back to classes",
   classesEnrolled: "{name} is enrolled. We've sent you the details.",
   classesWaitlisted: "You're on the waitlist (number {n}). We'll email you if a place comes up.",
+  cookieHeading: "Cookies",
+  cookieBody:
+    "We use necessary cookies to make this site work. With your permission we also use analytics and marketing cookies.",
+  cookieAccept: "Accept all",
+  cookieReject: "Reject non-essential",
 };
 
 export type MessageKey = keyof typeof enGB;
@@ -118,7 +123,14 @@ export function locale(): string {
   );
 }
 
+/** The override table for a locale, matched without regard to case ("en-us" is "en-US"). */
+function localeOverrides(): Partial<Messages> | undefined {
+  const wanted = locale().toLowerCase();
+  const match = Object.keys(overrides).find((key) => key.toLowerCase() === wanted);
+  return match ? overrides[match] : undefined;
+}
+
 export function t(key: MessageKey, vars: Record<string, string | number> = {}): string {
-  const text = window.TutorTrackWidgets?.messages?.[key] ?? overrides[locale()]?.[key] ?? enGB[key];
+  const text = window.TutorTrackWidgets?.messages?.[key] ?? localeOverrides()?.[key] ?? enGB[key];
   return text.replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? ""));
 }

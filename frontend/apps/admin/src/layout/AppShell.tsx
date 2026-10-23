@@ -46,6 +46,7 @@ import { CommandBar } from "../ai/CommandBar";
 import { api, isAuthError, useMe, useMyOrganisations, useOrganisation } from "../api";
 import { SubscriptionBanner } from "../subscription/SubscriptionBanner";
 import { SuccessLayer } from "../success/SuccessLayer";
+import { AccountMenu, accountMenuItem } from "./AccountMenu";
 import { StatusBanner } from "./StatusBanner";
 import { UpgradeDialog } from "../subscription/UpgradePrompts";
 
@@ -619,82 +620,24 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 function UserMenu() {
   const { t } = useTranslation();
   const { data: me } = useMe();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const logout = useMutation({
-    mutationFn: async () => unwrap(await api.POST("/api/v1/auth/logout")),
-    onSettled: () => window.location.assign("/login"),
-  });
-  useEffect(() => {
-    if (!open) return;
-    const close = (event: MouseEvent | KeyboardEvent) => {
-      if (
-        event instanceof KeyboardEvent
-          ? event.key === "Escape"
-          : !ref.current?.contains(event.target as Node)
-      ) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", close);
-    document.addEventListener("keydown", close);
-    return () => {
-      document.removeEventListener("mousedown", close);
-      document.removeEventListener("keydown", close);
-    };
-  }, [open]);
   const user = me?.user;
   const name = [user?.first_name, user?.last_name].filter(Boolean).join(" ") || user?.email || "";
-  const initials = name
-    .split(/\s+/)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
   return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-haspopup="true"
-        onClick={() => setOpen((value) => !value)}
-        className="flex items-center gap-1.5 rounded-full p-0.5 pr-1.5 hover:bg-muted"
-      >
-        <span
-          aria-hidden="true"
-          className="grid size-8 place-items-center rounded-full bg-shell text-xs font-semibold text-shell-foreground"
-        >
-          {initials || "?"}
-        </span>
-        <span className="sr-only">{t("nav.userMenu", { name })}</span>
-        <ChevronDown aria-hidden="true" className="size-4 text-muted-foreground" />
-      </button>
-      {open ? (
-        <div className="absolute right-0 z-30 mt-2 w-56 rounded-lg border border-border bg-surface p-1 text-sm shadow-[0_8px_24px_-8px_rgb(15_23_42/0.25)]">
-          <p className="truncate px-3 py-2 text-muted-foreground">{name}</p>
-          <Link
-            to="/account"
-            onClick={() => setOpen(false)}
-            className="block rounded-md px-3 py-2 hover:bg-muted"
-          >
+    <AccountMenu name={name}>
+      {(close) => (
+        <>
+          <Link to="/account" onClick={close} className={accountMenuItem}>
             {t("nav.account")}
           </Link>
           {me?.membership?.teaches ? (
             // The phone-first tutor app (a separate app under /portal/).
-            <a href="/portal/tutor" className="block rounded-md px-3 py-2 hover:bg-muted">
+            <a href="/portal/tutor" className={accountMenuItem}>
               {t("nav.tutorApp")}
             </a>
           ) : null}
-          <button
-            type="button"
-            className="block w-full rounded-md px-3 py-2 text-left hover:bg-muted"
-            onClick={() => logout.mutate()}
-          >
-            {t("nav.signOut")}
-          </button>
-        </div>
-      ) : null}
-    </div>
+        </>
+      )}
+    </AccountMenu>
   );
 }
 

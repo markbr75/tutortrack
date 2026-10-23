@@ -16,6 +16,7 @@ import { Link } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
+import { BackTrail } from "../components/RecordHeader";
 import { EndHead, Figure, PanelEmpty, PanelLoading, rowClass } from "../billing/moneyUi";
 import { useIsPhone } from "../billing/useIsPhone";
 import { withoutIsoDate } from "./describe";
@@ -79,11 +80,9 @@ function Page({
   return (
     <section className="max-w-6xl">
       {back ? (
-        <p className="mb-6 text-sm">
-          <Link to="/payroll" className="font-medium text-link hover:underline">
-            {t("payroll.title")}
-          </Link>
-        </p>
+        <BackTrail>
+          <Link to="/payroll">{t("payroll.title")}</Link>
+        </BackTrail>
       ) : null}
       <PageHeader title={title} description={description} actions={actions} />
       {back ? null : <PayrollNav />}

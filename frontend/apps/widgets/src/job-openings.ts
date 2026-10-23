@@ -3,7 +3,7 @@ import { html, nothing } from "lit";
 import { TtWidget } from "./base";
 import { referralCode } from "./referral";
 import { cached } from "./runtime";
-import { t } from "./strings";
+import { locale, t } from "./strings";
 
 interface Opening {
   slug: string;
@@ -45,7 +45,7 @@ export class TtJobOpenings extends TtWidget {
   render() {
     if (!this.openings) return this.status();
     if (!this.openings.length) return html`<p class="muted">${t("noVacancies")}</p>`;
-    const dates = new Intl.DateTimeFormat(document.documentElement.lang || undefined, {
+    const dates = new Intl.DateTimeFormat(locale(), {
       dateStyle: "medium",
     });
     return html`<ul>

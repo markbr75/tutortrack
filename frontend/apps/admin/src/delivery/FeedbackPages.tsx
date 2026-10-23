@@ -18,6 +18,7 @@ import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { api, fieldErrors, usePermission } from "../api";
+import { useIsPhone } from "../billing/useIsPhone";
 import { PublicLayout } from "../layout/PublicLayout";
 
 type Feedback = components["schemas"]["LessonFeedback"];
@@ -139,6 +140,7 @@ export function LessonFeedbackPage() {
   const queryClient = useQueryClient();
   const canManage = usePermission("delivery.feedback.manage");
   const canSeeSettings = usePermission("org.settings.view");
+  const phone = useIsPhone();
   const [status, setStatus] = useState<FeedbackStatus | "">("");
   const [rating, setRating] = useState("");
   const query = { ...(status ? { status } : {}), ...(rating ? { rating } : {}) };
@@ -231,12 +233,12 @@ export function LessonFeedbackPage() {
               <thead className="border-b border-border">
                 <tr>
                   <th scope="col">{t("lessonFeedback.lesson")}</th>
-                  <th scope="col" className="max-md:hidden">
-                    {t("lessonFeedback.tutor")}
+                  {phone ? null : <th scope="col">{t("lessonFeedback.tutor")}</th>}
+                  <th scope="col" className={phone ? "w-24 text-right" : undefined}>
+                    {t("lessonFeedback.rating")}
                   </th>
-                  <th scope="col">{t("lessonFeedback.rating")}</th>
-                  <th scope="col">{t("lessonFeedback.status")}</th>
-                  {canManage ? (
+                  {phone ? null : <th scope="col">{t("lessonFeedback.status")}</th>}
+                  {canManage && !phone ? (
                     <th scope="col">
                       <span className="sr-only">{t("common.actions")}</span>
                     </th>
@@ -258,48 +260,63 @@ export function LessonFeedbackPage() {
                     </td>
                   </tr>
                 ) : null}
-                {rows.map((row) => (
-                  <tr key={row.id} className="align-top">
-                    <td className="min-w-56">
-                      <span className="font-medium">{row.lesson_title}</span>
-                      <span className="block text-xs text-muted-foreground tabular-nums">
-                        {[formatDate(row.lesson_date), row.student.name].join(" · ")}
-                        <span className="md:hidden">
-                          {row.tutor?.name ? ` · ${row.tutor.name}` : ""}
+                {rows.map((row) => {
+                  const status = t(`lessonFeedback.statuses.${row.status}`);
+                  const skipReason = row.skip_reason
+                    ? t(`lessonFeedback.skipReasons.${row.skip_reason}`)
+                    : "";
+                  // Below 768px the tutor and status fold into the lesson's one caption, and
+                  // Withdraw sits under the text, so the table never scrolls sideways.
+                  const caption = [
+                    formatDate(row.lesson_date),
+                    row.student.name,
+                    ...(phone ? [row.tutor?.name ?? "", status, skipReason] : []),
+                  ].filter(Boolean);
+                  const withdrawButton =
+                    canManage && row.status === "sent" ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => withdraw.mutate(row.id)}
+                        aria-label={t("lessonFeedback.withdrawFor", { name: row.student.name })}
+                      >
+                        {t("lessonFeedback.withdraw")}
+                      </Button>
+                    ) : null;
+                  return (
+                    <tr key={row.id} className="align-top">
+                      <td className={phone ? undefined : "min-w-56"}>
+                        <span className="font-medium">{row.lesson_title}</span>
+                        <span className="block text-xs text-muted-foreground tabular-nums">
+                          {caption.join(" · ")}
                         </span>
-                      </span>
-                      {row.comment ? (
-                        <p className="mt-1 max-w-prose whitespace-pre-wrap">{row.comment}</p>
-                      ) : null}
-                    </td>
-                    <td className="max-md:hidden">{row.tutor?.name ?? ""}</td>
-                    <td>
-                      <Stars rating={row.rating} />
-                    </td>
-                    <td className="min-w-32">
-                      {t(`lessonFeedback.statuses.${row.status}`)}
-                      {row.skip_reason ? (
-                        <span className="block text-xs text-muted-foreground">
-                          {t(`lessonFeedback.skipReasons.${row.skip_reason}`)}
-                        </span>
-                      ) : null}
-                    </td>
-                    {canManage ? (
-                      <td className="text-right">
-                        {row.status === "sent" ? (
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => withdraw.mutate(row.id)}
-                            aria-label={t("lessonFeedback.withdrawFor", { name: row.student.name })}
-                          >
-                            {t("lessonFeedback.withdraw")}
-                          </Button>
+                        {row.comment ? (
+                          <p className="mt-1 max-w-prose whitespace-pre-wrap">{row.comment}</p>
+                        ) : null}
+                        {phone && withdrawButton ? (
+                          <div className="mt-2">{withdrawButton}</div>
                         ) : null}
                       </td>
-                    ) : null}
-                  </tr>
-                ))}
+                      {phone ? null : <td>{row.tutor?.name ?? ""}</td>}
+                      <td className={phone ? "text-right" : undefined}>
+                        <Stars rating={row.rating} />
+                      </td>
+                      {phone ? null : (
+                        <td className="min-w-32">
+                          {status}
+                          {skipReason ? (
+                            <span className="block text-xs text-muted-foreground">
+                              {skipReason}
+                            </span>
+                          ) : null}
+                        </td>
+                      )}
+                      {canManage && !phone ? (
+                        <td className="text-right">{withdrawButton}</td>
+                      ) : null}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

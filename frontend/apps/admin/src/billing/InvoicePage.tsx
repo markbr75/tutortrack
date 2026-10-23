@@ -17,6 +17,7 @@ import { useState } from "react";
 import { api, usePermission } from "../api";
 import { RecordSyncBadge } from "../accounting/SyncBadge";
 import { ErrorList } from "../calendar/ErrorList";
+import { BackTrail } from "../components/RecordHeader";
 import { InvoiceStatus, rowClass } from "./moneyUi";
 
 type Invoice = components["schemas"]["InvoiceDetail"];
@@ -168,110 +169,112 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
 
   return (
     <article className="space-y-6">
-      <p className="text-sm">
-        <Link to="/billing" className="font-medium text-link hover:underline">
-          {t("billing.title")}
-        </Link>
-      </p>
-      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-semibold">
-            <span className="tabular-nums">{inv.number || t("billing.draftInvoice")}</span>
-            {/* "Draft invoice" already says it; the status word follows a number only. */}
-            {inv.number ? (
+      <div>
+        <BackTrail>
+          <Link to="/billing">{t("billing.title")}</Link>
+        </BackTrail>
+        <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold">
+              <span className="tabular-nums">{inv.number || t("billing.draftInvoice")}</span>
+              {/* "Draft invoice" already says it; the status word follows a number only. */}
+              {inv.number ? (
+                <>
+                  {" "}
+                  <InvoiceStatus
+                    status={inv.status}
+                    overdue={inv.is_overdue}
+                    className="ml-2 align-middle text-base font-medium"
+                  />
+                </>
+              ) : null}
+            </h1>
+            <p className="mt-1 text-muted-foreground">
+              <Link
+                to="/clients/$clientId"
+                params={{ clientId: inv.client }}
+                className="text-foreground underline-offset-2 hover:underline"
+              >
+                {inv.client_name}
+              </Link>
+              {context.length ? (
+                <span className="tabular-nums"> · {context.join(" · ")}</span>
+              ) : null}
+              {inv.status !== "draft" ? (
+                <span className="ml-2 text-sm">
+                  <RecordSyncBadge objectType="invoice" id={inv.id} />
+                </span>
+              ) : null}
+            </p>
+          </div>
+          {/* Secondary actions first, the one primary next, destructive ghosts quietest at the end. */}
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              className={buttonClass({ variant: "secondary", size: "sm" })}
+              href={`/api/v1/invoices/${inv.id}/pdf`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t("billing.pdf")}
+            </a>
+            {issued && canIssue ? (
+              <Button size="sm" variant="secondary" onClick={() => act.mutate("send")}>
+                {t("billing.send")}
+              </Button>
+            ) : null}
+            {open && canCredit ? (
               <>
-                {" "}
-                <InvoiceStatus
-                  status={inv.status}
-                  overdue={inv.is_overdue}
-                  className="ml-2 align-middle text-base font-medium"
-                />
+                <Button size="sm" variant="secondary" onClick={() => setMode("credit")}>
+                  {t("billing.creditNote")}
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => act.mutate("apply")}>
+                  {t("billing.applyCredit")}
+                </Button>
               </>
             ) : null}
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            <Link
-              to="/clients/$clientId"
-              params={{ clientId: inv.client }}
-              className="text-foreground underline-offset-2 hover:underline"
-            >
-              {inv.client_name}
-            </Link>
-            {context.length ? <span className="tabular-nums"> · {context.join(" · ")}</span> : null}
-            {inv.status !== "draft" ? (
-              <span className="ml-2 text-sm">
-                <RecordSyncBadge objectType="invoice" id={inv.id} />
-              </span>
+            {open && canCollect ? (
+              <Button size="sm" onClick={() => act.mutate("collect")}>
+                {t("payments.collectNow")}
+              </Button>
             ) : null}
-          </p>
-        </div>
-        {/* Secondary actions first, the one primary next, destructive ghosts quietest at the end. */}
-        <div className="flex flex-wrap items-center gap-2">
-          <a
-            className={buttonClass({ variant: "secondary", size: "sm" })}
-            href={`/api/v1/invoices/${inv.id}/pdf`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t("billing.pdf")}
-          </a>
-          {issued && canIssue ? (
-            <Button size="sm" variant="secondary" onClick={() => act.mutate("send")}>
-              {t("billing.send")}
-            </Button>
-          ) : null}
-          {open && canCredit ? (
-            <>
-              <Button size="sm" variant="secondary" onClick={() => setMode("credit")}>
-                {t("billing.creditNote")}
+            {draft && canIssue ? (
+              <Button onClick={() => act.mutate("issue")} disabled={act.isPending}>
+                {t("billing.issue")}
               </Button>
-              <Button size="sm" variant="secondary" onClick={() => act.mutate("apply")}>
-                {t("billing.applyCredit")}
+            ) : null}
+            {open && canVoid ? (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={() => setMode("void")}
+              >
+                {t("billing.void")}
               </Button>
-            </>
-          ) : null}
-          {open && canCollect ? (
-            <Button size="sm" onClick={() => act.mutate("collect")}>
-              {t("payments.collectNow")}
-            </Button>
-          ) : null}
-          {draft && canIssue ? (
-            <Button onClick={() => act.mutate("issue")} disabled={act.isPending}>
-              {t("billing.issue")}
-            </Button>
-          ) : null}
-          {open && canVoid ? (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-muted-foreground"
-              onClick={() => setMode("void")}
-            >
-              {t("billing.void")}
-            </Button>
-          ) : null}
-          {open && canWriteOff ? (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-muted-foreground"
-              onClick={() => setMode("write_off")}
-            >
-              {t("billing.writeOff")}
-            </Button>
-          ) : null}
-          {draft && canCreate ? (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-muted-foreground"
-              onClick={() => act.mutate("delete")}
-            >
-              {t("billing.deleteDraft")}
-            </Button>
-          ) : null}
-        </div>
-      </header>
+            ) : null}
+            {open && canWriteOff ? (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={() => setMode("write_off")}
+              >
+                {t("billing.writeOff")}
+              </Button>
+            ) : null}
+            {draft && canCreate ? (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={() => act.mutate("delete")}
+              >
+                {t("billing.deleteDraft")}
+              </Button>
+            ) : null}
+          </div>
+        </header>
+      </div>
       {act.isSuccess && !act.data && mode === "view" ? (
         <Alert tone="success">{t("billing.done")}</Alert>
       ) : null}

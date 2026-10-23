@@ -152,6 +152,42 @@ describe("lesson feedback (E09-T09)", () => {
       expect(calls.some((c) => c.path === "/api/v1/lesson-feedback/f1/withdraw")).toBe(true),
     );
   });
+
+  it("folds the tutor and status into the lesson's caption on phones", async () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query === "(max-width: 767px)",
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }));
+    window.history.pushState(null, "", "/lesson-feedback");
+    const row = {
+      id: "f1", lesson: "l1", lesson_title: "GCSE Maths", lesson_start: "2026-10-13T16:00:00Z",
+      lesson_date: "2026-10-13", student: { id: "s1", name: "Arjun Patel" },
+      tutor: { id: "t1", name: "Nia Clarke" }, contact_name: "Priya", status: "sent",
+      skip_reason: "", sent_at: "2026-10-13T18:00:00Z", expires_at: "2026-10-20T18:00:00Z",
+      rating: null, comment: "", answered_at: null, low_score_alerted: false,
+    }; // prettier-ignore
+    mockApi(
+      signedIn(
+        { "delivery.feedback.view": "all", "delivery.feedback.manage": "all" },
+        {
+          "GET /api/v1/lesson-feedback": { body: { results: [row], next: null, previous: null } },
+          "GET /api/v1/lesson-feedback/summary": {
+            body: { asked: 1, answered: 0, answer_rate: "0.0", average: null, stars: {}, tutors: [] },
+          },
+        },
+      ),
+    );
+    render(<App />);
+    const lesson = (await screen.findByText("GCSE Maths")).closest("td")!;
+    expect(lesson).toHaveTextContent("Arjun Patel · Nia Clarke · Waiting for an answer");
+    const table = lesson.closest("table")!;
+    expect(table.querySelectorAll("th")).toHaveLength(2);
+    expect(
+      screen.getByRole("button", { name: "Withdraw the request for Arjun Patel" }).closest("td"),
+    ).toBe(lesson);
+  });
 });
 
 describe("proposals (E17-T09)", () => {

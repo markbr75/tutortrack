@@ -1350,7 +1350,7 @@
           <li><span class="ui">Emails and documents</span>: email header line and footer, invoice and statement footer.</li>
           <li>App name, and social media links.</li>
           <li>Hiding "Powered by TutorTrack" needs white-labelling (Enterprise, or the white-label add-on). If you lose the feature, the footer comes back automatically.</li>
-          <li>The pages families, applicants and referees open on your address (sign-in, enquiry forms, proposals, shortlists, pay links, reviews, lesson feedback, re-enrolment, waitlist offers, vacancies, interview times and references) open with your logo, or your business name, ruled off above the title, and your main colour fills their buttons. The "Powered by TutorTrack" credit sits quietly at the foot. Embedded widgets take your colour and font and otherwise follow your own website's text colour and background.</li>
+          <li>The pages families, applicants and referees open on your address (sign-in, enquiry forms, proposals, shortlists, pay links, reviews, lesson feedback, re-enrolment, waitlist offers, vacancies, interview times and references) open with your logo, or your business name, ruled off above the title, and your main colour fills their buttons. The "Powered by TutorTrack" credit sits quietly at the foot, and the browser tab shows your favicon. Embedded widgets take your colour and font and otherwise follow your own website's text colour and background.</li>
         </ul>
 
         <h3 id="website-domains">Custom domains</h3>
@@ -1376,6 +1376,9 @@
           <span class="ui">Embed code</span> or the <span class="ui">WordPress shortcode</span>
           (with the TutorTrack Widgets plugin); instructions for Wix and Squarespace are shown.
           <span class="ui">Switch off</span> hides a widget without removing the code.</p>
+        <p>Widget text, including the cookie banner, follows the language of the page it sits on:
+          the <code>data-locale</code> attribute on the embed script, otherwise the page's
+          <code>lang</code>, otherwise British English.</p>
         <p>The <span class="ui">Reviews</span> tab holds testimonials you enter yourself, shown by
           the reviews widget and website blocks.</p>
 
@@ -1563,7 +1566,9 @@
           (Organisations, Health, Support, Customer notices), <span class="ui">Product</span>
           (Plans and prices, Feature flags, Feedback and usage), <span class="ui">Revenue</span>
           (SaaS metrics, Revenue share) and <span class="ui">Operations</span> (Operations,
-          Workflows). On a phone the menu opens from the button at the top left.</p>
+          Workflows). On a phone the menu opens from the button at the top left. The round button at
+          the top right opens the account menu, with your email and <span class="ui">Sign out</span>
+          (which returns you to the console's sign-in page).</p>
 
         <h3 id="p-access">Who can use the console</h3>
         <p>Four conditions must all be true. If one fails, the console shows a red alert instead of
@@ -1653,8 +1658,9 @@
             <span class="ui">New flag key</span> and <span class="ui">Add</span>. For each flag you
             can set <span class="ui">On for everyone</span>, a <span class="ui">Rollout %</span>
             (0–100), a list of <span class="ui">Plans</span>, and per-organisation overrides
-            (<span class="ui">Organisation ID</span> › <span class="ui">Turn on for
-            organisation</span>).</p>
+            (<span class="ui">Find an organisation</span>, where you search by name or subdomain
+            and pick from the list, › <span class="ui">Turn on for organisation</span>;
+            organisations that already have an override are not offered).</p>
           <p>A flag resolves in this order: an unexpired organisation override, then the plan
             list, then the percentage rollout, then the global default. Rollout uses a stable hash
             of flag and organisation, so raising the percentage only adds organisations. Changes
@@ -1802,7 +1808,7 @@
           <ol class="steps">
             <li>Choose a template: <span class="ui">Personal data breach (72-hour notice)</span>, <span class="ui">Security incident (no personal data breach found)</span>, <span class="ui">Service incident</span>, or <span class="ui">Change to our terms, DPA or sub-processors</span>.</li>
             <li>Fill in the template fields (what happened, when, data involved, what we have done, what customers may need to do, contact).</li>
-            <li>Enter <span class="ui">Organisation IDs</span> separated by commas, or leave it empty to send to every open organisation.</li>
+            <li>Under <span class="ui">Organisations</span>, search by name or subdomain and pick each organisation to notify (each one shows under <span class="ui">Chosen organisations</span> with a remove button), or leave it empty to send to every open organisation.</li>
             <li>Select <span class="ui">Preview</span> and check the number of organisations, the subject and the body.</li>
             <li>Enter a <span class="ui">Reason</span> such as the incident reference and select <span class="ui">Send notice</span>.</li>
           </ol>

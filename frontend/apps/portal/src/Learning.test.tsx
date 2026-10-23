@@ -40,6 +40,36 @@ function routes(extra: Routes = {}): Routes {
   };
 }
 
+describe("goals in the family portal", () => {
+  it("marks a milestone still to come with the pale dashed ring, not the missed ring", async () => {
+    window.history.pushState(null, "", "/portal/learning");
+    const goal = {
+      id: "g1", student: "s1", student_name: "Arjun Patel", title: "Grade 7 in Maths",
+      status: "active", progress_percent: 50, achieved_at: null, created_at: "2026-09-01T00:00:00Z",
+      milestones: [
+        { id: "m1", title: "Algebra", done: true },
+        { id: "m2", title: "Geometry", done: false },
+      ],
+    }; // prettier-ignore
+    mockApi(
+      routes({
+        "GET /api/v1/portal/learning/homework": { body: [] },
+        "GET /api/v1/portal/learning/goals": { body: [goal] },
+      }),
+    );
+    render(<App />);
+    fireEvent.click(await screen.findByRole("tab", { name: "Goals" }));
+    const open = (await screen.findByText("Geometry")).closest("li")!;
+    expect(open).toHaveTextContent("(Not yet)");
+    const ring = open.querySelector("circle")!;
+    expect(ring.getAttribute("stroke-dasharray")).toBe("3 2.6");
+    expect(ring.closest("svg")).toHaveClass("text-field");
+    const done = screen.getByText("Algebra").closest("li")!;
+    expect(done).toHaveTextContent("(Done)");
+    expect(done.querySelector("circle")).toBeNull();
+  });
+});
+
 describe("learning in the family portal", () => {
   it("lists homework and hands in a written answer", async () => {
     window.history.pushState(null, "", "/portal/learning");

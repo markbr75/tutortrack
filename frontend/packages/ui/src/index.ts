@@ -1,4 +1,4 @@
-export { applyBrandTheme, hexToHslTriplet, type BrandTheme } from "./brandTheme";
+export { applyBrandFavicon, applyBrandTheme, hexToHslTriplet, type BrandTheme } from "./brandTheme";
 export { Button, Spinner, type ButtonProps } from "./Button";
 export { buttonClass } from "./buttonStyles";
 export { cn } from "./cn";

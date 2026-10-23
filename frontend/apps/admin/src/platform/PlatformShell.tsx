@@ -22,6 +22,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 
 import { api, isAuthError } from "../api";
+import { AccountMenu } from "../layout/AccountMenu";
 import { LoadingLine } from "../layout/AppShell";
 
 interface ConsoleItem {
@@ -222,7 +223,8 @@ export function PlatformShell() {
           )}
           <div className="flex-1" />
           {access?.email ? (
-            <span className="truncate text-muted-foreground max-sm:hidden">{access.email}</span>
+            // Staff have an email, not a name: it heads the menu and names the disc.
+            <AccountMenu name={access.email} afterSignOut="/login?next=%2Fplatform" />
           ) : null}
           <LoadingLine />
         </header>

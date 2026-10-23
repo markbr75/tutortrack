@@ -10,6 +10,7 @@ import {
   Spinner,
   Tabs,
   TextField,
+  UnitField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -150,27 +151,30 @@ export function PolicyForm({
         />
       </div>
       <div className="border-t border-border">
+        {/* Each situation's charge and pay are short "%" fields in two 8rem columns; on
+            phones the situation takes its own line above them. */}
         <div
           aria-hidden="true"
-          className="grid grid-cols-[minmax(0,1fr)_5.5rem_5.5rem] gap-x-3 border-b border-rule px-5 py-2.5 text-xs font-semibold text-muted-foreground sm:grid-cols-[minmax(0,1fr)_8rem_8rem]"
+          className="grid grid-cols-[8rem_8rem] gap-x-3 border-b border-rule px-5 py-2.5 text-xs font-semibold text-muted-foreground sm:grid-cols-[minmax(0,1fr)_8rem_8rem]"
         >
-          <span>{t("designS5.policy.situation")}</span>
-          <span>{t("delivery.settings.charge")}</span>
-          <span>{t("delivery.settings.pay")}</span>
+          <span className="max-sm:hidden">{t("designS5.policy.situation")}</span>
+          <span>{t("followUps.policy.charge")}</span>
+          <span>{t("followUps.policy.pay")}</span>
         </div>
         {PAIRS.map(([key, label]) => (
           <fieldset
             key={key}
-            className="grid grid-cols-[minmax(0,1fr)_5.5rem_5.5rem] items-center gap-x-3 border-b border-rule px-5 py-2 last:border-0 sm:grid-cols-[minmax(0,1fr)_8rem_8rem]"
+            className="grid grid-cols-[8rem_8rem] items-center gap-x-3 gap-y-1.5 border-b border-rule px-5 py-2 last:border-0 sm:grid-cols-[minmax(0,1fr)_8rem_8rem]"
           >
-            <legend className="float-left text-sm">{t(`delivery.settings.${label}`)}</legend>
-            <TextField
-              type="number"
+            <legend className="float-left col-span-2 text-sm sm:col-span-1">
+              {t(`delivery.settings.${label}`)}
+            </legend>
+            <UnitField
               min={0}
               max={100}
               size="sm"
               hideLabel
-              className="tabular-nums"
+              unit="%"
               label={t("delivery.settings.charge")}
               value={value[key]?.charge_percent ?? "0"}
               onChange={(e) =>
@@ -179,13 +183,12 @@ export function PolicyForm({
                 } as Partial<Rules>)
               }
             />
-            <TextField
-              type="number"
+            <UnitField
               min={0}
               max={100}
               size="sm"
               hideLabel
-              className="tabular-nums"
+              unit="%"
               label={t("delivery.settings.pay")}
               value={value[key]?.pay_percent ?? "0"}
               onChange={(e) =>

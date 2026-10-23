@@ -19,6 +19,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "../api";
+import { OrganisationPicker, type OrganisationChoice } from "./OrganisationPicker";
 
 type Flag = components["schemas"]["Flag"];
 
@@ -79,7 +80,7 @@ function FlagPanel({ flag }: { flag: Flag }) {
   const refresh = useRefresh();
   const [percent, setPercent] = useState(String(flag.rollout_percent));
   const [plans, setPlans] = useState((flag.plan_keys ?? []).join(", "));
-  const [orgId, setOrgId] = useState("");
+  const [organisation, setOrganisation] = useState<OrganisationChoice | null>(null);
   const update = useMutation({
     mutationFn: async (body: components["schemas"]["PatchedFlagUpdateRequest"]) =>
       unwrap(
@@ -91,15 +92,15 @@ function FlagPanel({ flag }: { flag: Flag }) {
     onSuccess: refresh,
   });
   const override = useMutation({
-    mutationFn: async () =>
+    mutationFn: async (id: string) =>
       unwrap(
         await api.PUT("/api/v1/platform/flags/{key}/overrides", {
           params: { path: { key: flag.key } },
-          body: { organisation: orgId, enabled: true, expires_at: null, reason: "" },
+          body: { organisation: id, enabled: true, expires_at: null, reason: "" },
         }),
       ),
     onSuccess: () => {
-      setOrgId("");
+      setOrganisation(null);
       refresh();
     },
   });
@@ -204,25 +205,22 @@ function FlagPanel({ flag }: { flag: Flag }) {
         className="flex flex-wrap items-center gap-2 border-t border-border px-5 py-3"
         onSubmit={(e) => {
           e.preventDefault();
-          override.mutate();
+          if (organisation) override.mutate(organisation.id);
         }}
       >
-        <div className="min-w-56 flex-1 sm:max-w-sm">
-          <TextField
-            label={t("platform.organisationId")}
-            hideLabel
-            size="sm"
-            placeholder={t("platform.organisationId")}
-            className="font-mono"
-            value={orgId}
-            onChange={(e) => setOrgId(e.target.value)}
-          />
-        </div>
+        <OrganisationPicker
+          label={t("followUps.orgPicker.label")}
+          value={organisation}
+          onChange={setOrganisation}
+          exclude={flag.overrides.map((o) => o.organisation)}
+          className="min-w-56 flex-1 sm:max-w-sm"
+        />
         <Button
           type="submit"
           size="sm"
           variant="secondary"
           className="h-9"
+          disabled={!organisation}
           loading={override.isPending}
         >
           {t("platform.turnOnFor")}
