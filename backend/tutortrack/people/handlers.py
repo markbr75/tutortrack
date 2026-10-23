@@ -41,3 +41,22 @@ def link_portal_user(event: EventEnvelope) -> None:
     )
     if invitation is not None:
         link(invitation.target_type, invitation.target_id, membership.user)
+
+
+@subscribe("membership.renamed")
+def rename_own_tutor_profile(event: EventEnvelope) -> None:
+    """A member renamed themselves on their account: their own tutor record follows, so
+    "My tutor profile" and lessons show the new name. Idempotent (no change, no write)."""
+    from .models import TutorProfile
+    from .services import update_tutor
+
+    tutor = TutorProfile.objects.filter(membership_id=event.subject["id"]).first()
+    if tutor is None:
+        return
+    names = {
+        "first_name": event.data.get("first_name", tutor.first_name),
+        "last_name": event.data.get("last_name", tutor.last_name),
+    }
+    changes = {k: v for k, v in names.items() if v and v != getattr(tutor, k)}
+    if changes:
+        update_tutor(tutor, **changes)

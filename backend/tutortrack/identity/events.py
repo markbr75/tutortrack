@@ -43,6 +43,18 @@ class UserJoined(DomainEvent):
 
 
 @dataclass(frozen=True, kw_only=True)
+class MemberRenamed(DomainEvent):
+    """A member changed their name on their account; their tutor record follows."""
+
+    event_type: ClassVar[str] = "membership.renamed"
+    subject_type: ClassVar[str] = "membership"
+
+    user_id: str
+    first_name: str
+    last_name: str
+
+
+@dataclass(frozen=True, kw_only=True)
 class MembershipRoleChanged(DomainEvent):
     event_type: ClassVar[str] = "membership.role_changed"
     subject_type: ClassVar[str] = "membership"
