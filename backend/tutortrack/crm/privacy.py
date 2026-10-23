@@ -9,6 +9,7 @@ from typing import Any
 
 from django.db.models import Q
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from tutortrack.privacy.registry import (
     ErasureContext,
@@ -151,4 +152,12 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
     return out
 
 
-register(Provider(key="crm", label="Notes and documents", export=export, files=files, erase=erase))
+register(
+    Provider(
+        key="crm",
+        label=gettext_lazy("Notes and documents"),
+        export=export,
+        files=files,
+        erase=erase,
+    )
+)

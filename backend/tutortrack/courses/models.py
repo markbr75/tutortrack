@@ -75,6 +75,9 @@ class TermBreak(TenantModel):
             )
         ]
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class Course(TenantModel):
     """A curriculum product (FR-20-2). ``price`` is per term, month, session or for the
@@ -330,6 +333,9 @@ class Enrolment(BranchScopedModel):
     @classmethod
     def own_scope_q(cls, user: Any) -> Q:
         return Q(group_class__in=GroupClass.objects.filter(GroupClass.own_scope_q(user)))
+
+    def __str__(self) -> str:
+        return f"{self.group_class.name} from {self.start_date:%Y-%m-%d}"
 
 
 class EnrolmentTransfer(TenantModel):

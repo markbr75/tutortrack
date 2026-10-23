@@ -17,6 +17,7 @@ from typing import Any
 
 from django.db import models
 
+from .audit_labels import display_repr
 from .context import current_organisation_id, get_request_context
 from .events.base import to_json_safe
 from .models import AuditEntry
@@ -86,7 +87,7 @@ def record(
         action=action,
         object_type=object_type_of(instance),
         object_id=str(instance.pk),
-        object_repr=(object_repr if object_repr is not None else str(instance))[:200],
+        object_repr=(object_repr if object_repr is not None else display_repr(instance))[:200],
         changes=to_json_safe(changes or {}),
         ip=ctx.ip,
         user_agent=(ctx.user_agent or "")[:500],

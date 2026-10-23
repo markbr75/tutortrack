@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from tutortrack.privacy.registry import (
     ErasureContext,
@@ -165,6 +166,11 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
 
 register(
     Provider(
-        key="learning", label="Learning records", export=export, files=files, erase=erase, order=32
+        key="learning",
+        label=gettext_lazy("Learning records"),
+        export=export,
+        files=files,
+        erase=erase,
+        order=32,
     )
 )

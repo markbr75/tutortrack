@@ -4,6 +4,7 @@ is taken down and its photos released; testimonials lose the person's name."""
 from __future__ import annotations
 
 from django.db.models import Q
+from django.utils.translation import gettext_lazy
 
 from tutortrack.privacy.registry import ErasureContext, ErasureOutcome, Person, Provider, register
 
@@ -36,4 +37,4 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
     return out
 
 
-register(Provider(key="sites", label="Website", erase=erase, order=39))
+register(Provider(key="sites", label=gettext_lazy("Website"), erase=erase, order=39))

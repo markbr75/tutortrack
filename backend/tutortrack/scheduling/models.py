@@ -57,6 +57,9 @@ class LessonSeries(TenantModel):
         ordering = ["start_date"]
         verbose_name_plural = "lesson series"
 
+    def __str__(self) -> str:
+        return f"Lesson series from {self.start_date:%Y-%m-%d} at {self.start_time:%H:%M}"
+
 
 class Lesson(BranchScopedModel, CustomisableModel):
     class Status(models.TextChoices):
@@ -264,6 +267,9 @@ class CalendarEvent(TenantModel):
     def own_scope_q(cls, user: Any) -> Q:
         mine = CalendarEventParticipant.objects.filter(tutor__membership__user=user)
         return Q(org_wide=True) | Q(pk__in=mine.values("event_id"))
+
+    def __str__(self) -> str:
+        return f"{self.title} {self.start:%Y-%m-%d}"
 
 
 class CalendarEventParticipant(TenantModel):

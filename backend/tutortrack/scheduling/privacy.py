@@ -8,6 +8,7 @@ from typing import Any
 
 from django.db.models import Q
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from tutortrack.core.time import now
 from tutortrack.privacy.registry import (
@@ -126,5 +127,12 @@ def revoke(person: Person) -> int:
 
 
 register(
-    Provider(key="scheduling", label="Lessons", export=export, erase=erase, revoke=revoke, order=30)
+    Provider(
+        key="scheduling",
+        label=gettext_lazy("Lessons"),
+        export=export,
+        erase=erase,
+        revoke=revoke,
+        order=30,
+    )
 )

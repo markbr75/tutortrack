@@ -156,7 +156,9 @@ def _purge_messages(cutoff: datetime, dry_run: bool, limit: int) -> int:
     return len(ids) + len(note_ids)
 
 
-register(Provider(key="comms", label="Messages", export=export, erase=erase, order=50))
+register(
+    Provider(key="comms", label=gettext_lazy("Messages"), export=export, erase=erase, order=50)
+)
 register_retention(
     RetentionCategory(
         key="messages",

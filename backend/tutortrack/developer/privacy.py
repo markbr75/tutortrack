@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from tutortrack.core.time import now
 from tutortrack.privacy.registry import Person, Provider, Section, register
@@ -51,4 +52,8 @@ def revoke(person: Person) -> int:
     return count
 
 
-register(Provider(key="developer", label="API access", export=export, revoke=revoke, order=95))
+register(
+    Provider(
+        key="developer", label=gettext_lazy("API access"), export=export, revoke=revoke, order=95
+    )
+)

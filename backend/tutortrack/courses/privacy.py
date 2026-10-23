@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from django.db.models import Q
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from tutortrack.privacy.registry import (
     ErasureContext,
@@ -59,4 +60,12 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
     return out
 
 
-register(Provider(key="courses", label="Classes and courses", export=export, erase=erase, order=33))
+register(
+    Provider(
+        key="courses",
+        label=gettext_lazy("Classes and courses"),
+        export=export,
+        erase=erase,
+        order=33,
+    )
+)

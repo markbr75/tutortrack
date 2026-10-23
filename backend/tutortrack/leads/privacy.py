@@ -162,7 +162,14 @@ def _purge_submissions(cutoff: datetime, dry_run: bool, limit: int) -> int:
 
 
 register(
-    Provider(key="leads", label="Enquiries", export=export, files=files, erase=erase, order=34)
+    Provider(
+        key="leads",
+        label=gettext_lazy("Enquiries"),
+        export=export,
+        files=files,
+        erase=erase,
+        order=34,
+    )
 )
 register_retention(
     RetentionCategory(

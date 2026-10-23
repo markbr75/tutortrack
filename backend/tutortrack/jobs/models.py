@@ -171,6 +171,9 @@ class JobTutor(TenantModel):
             )
         ]
 
+    def __str__(self) -> str:
+        return f"{self.get_role_display()} tutor on {self.job.reference}"
+
 
 class JobStatusHistory(TenantModel):
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="status_history")

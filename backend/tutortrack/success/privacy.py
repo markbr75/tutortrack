@@ -103,7 +103,11 @@ def _purge_usage(cutoff: datetime, dry_run: bool, limit: int) -> int:
     return len(ids)
 
 
-register(Provider(key="success", label="Support chat and feedback", export=export, erase=erase))
+register(
+    Provider(
+        key="success", label=gettext_lazy("Support chat and feedback"), export=export, erase=erase
+    )
+)
 register_retention(
     RetentionCategory(
         key="product_usage",

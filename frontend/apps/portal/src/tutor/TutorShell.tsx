@@ -39,9 +39,9 @@ import {
 import { OfflineIndicator } from "../offline/OfflineIndicator";
 import { useTutorMe } from "./useTutorMe";
 
-/** What waits for the tutor, for the tab bar's count pills: today's lessons that are over and
- * still to mark plus reports to write (on Today), job offers, unread messages and
- * notifications. Shares its caches with Today and Messages. */
+/** What waits for the tutor, for the tab bar's count pills: lessons that are over and still
+ * to mark (today and earlier days) plus reports to write (on Today), job offers, unread
+ * messages and notifications. Shares its caches with Today and Messages. */
 function useTutorWaiting(enabled: boolean) {
   const today = useQuery({
     queryKey: ["tutor", "today"],
@@ -57,9 +57,13 @@ function useTutorWaiting(enabled: boolean) {
   });
   const d = today.data;
   const now = Date.now();
-  const due = (d?.lessons ?? []).filter(
-    (lesson) => lesson.status === "planned" && new Date(lesson.end).getTime() <= now,
-  ).length;
+  // The API counts every lesson still to mark over the last 60 days; a response cached
+  // before that field existed (offline) falls back to today's lessons.
+  const due =
+    d?.unmarked_lessons ??
+    (d?.lessons ?? []).filter(
+      (lesson) => lesson.status === "planned" && new Date(lesson.end).getTime() <= now,
+    ).length;
   return {
     toMark: due + (d?.reports_due ?? 0),
     offers: d?.offers ?? 0,

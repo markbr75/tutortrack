@@ -4,6 +4,7 @@ student removes the login and switches off its sign-in."""
 from __future__ import annotations
 
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from tutortrack.privacy.registry import (
     ErasureContext,
@@ -43,4 +44,8 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
     return out
 
 
-register(Provider(key="portal", label="Portal logins", export=export, erase=erase, order=90))
+register(
+    Provider(
+        key="portal", label=gettext_lazy("Portal logins"), export=export, erase=erase, order=90
+    )
+)

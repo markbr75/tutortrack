@@ -380,7 +380,7 @@ def erase(person: Person, ctx: ErasureContext) -> ErasureOutcome:
 register(
     Provider(
         key="people",
-        label="People",
+        label=gettext_lazy("People"),
         expand=expand,
         export=export,
         files=files,

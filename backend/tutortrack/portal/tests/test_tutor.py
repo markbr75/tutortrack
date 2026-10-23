@@ -26,7 +26,13 @@ def snap(moment):
 
 @pytest.fixture
 def setup(org):
-    membership = MembershipFactory(organisation=org, role="tutor")
+    return tutor_setup(org)
+
+
+def tutor_setup(org, user=None):
+    membership = MembershipFactory(
+        organisation=org, role="tutor", **({"user": user} if user else {})
+    )
     tutor = TutorProfileFactory(
         organisation=org, status="active", first_name="Nia", membership=membership
     )
@@ -40,7 +46,8 @@ def setup(org):
             tutors=[{"tutor": tutor}], status="active",
         )  # fmt: skip
     return {"api": client_for(org, membership.user), "tutor": tutor, "other": other,
-            "student": student, "service": service, "job": job}  # fmt: skip
+            "student": student, "service": service, "job": job,
+            "user": membership.user}  # fmt: skip
 
 
 def lesson(org, s, *, hours, tutor=None):
@@ -88,3 +95,28 @@ def test_staff_without_a_tutor_profile_are_refused(org):
     assert admin.get("/api/v1/tutor/today").status_code == 403
     family = client_for(org, MembershipFactory(organisation=org, role="client").user)
     assert family.get("/api/v1/tutor/today").status_code == 403
+
+
+def test_unmarked_lessons_counts_earlier_days_for_this_tutor_only(org, other_org, setup):
+    """Follow-up to "The Register": the Today pill counts every lesson still to mark (ended,
+    still planned) in the last 60 days, not only today's."""
+    from tutortrack.portal.tutor import UNMARKED_LOOKBACK_DAYS
+
+    s = setup
+    lesson(org, s, hours=-3)  # ended today (or late last night), still planned
+    lesson(org, s, hours=-24 * 5)  # five days ago, still planned
+    marked = lesson(org, s, hours=-24 * 2)
+    with tenant_context(org):
+        delivery.complete_lesson(marked)
+    lesson(org, s, hours=-24 * (UNMARKED_LOOKBACK_DAYS + 2))  # past the bound
+    lesson(org, s, hours=-24 * 3, tutor=s["other"])  # someone else's
+    lesson(org, s, hours=2)  # not over yet
+    # The same person tutors for another organisation: those lessons never count here.
+    elsewhere = tutor_setup(other_org, user=s["user"])
+    lesson(other_org, elsewhere, hours=-24)
+
+    today = s["api"].get("/api/v1/tutor/today").json()
+    assert today["unmarked_lessons"] == 2
+    assert (
+        client_for(other_org, s["user"]).get("/api/v1/tutor/today").json()["unmarked_lessons"] == 1
+    )

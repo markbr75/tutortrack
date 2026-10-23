@@ -136,7 +136,11 @@ def _purge_reports(cutoff: datetime, dry_run: bool, limit: int) -> int:
     return LessonReport.objects.filter(pk__in=ids).update(answers={})
 
 
-register(Provider(key="delivery", label="Lesson reports", export=export, erase=erase, order=31))
+register(
+    Provider(
+        key="delivery", label=gettext_lazy("Lesson reports"), export=export, erase=erase, order=31
+    )
+)
 register_retention(
     RetentionCategory(
         key="lesson_reports",

@@ -645,6 +645,9 @@ class AssessmentResult(BranchScopedModel):
     def own_scope_q(cls, user: Any) -> Q:
         return _mine(user)
 
+    def __str__(self) -> str:
+        return f"{self.assessment} {self.taken_on:%Y-%m-%d}"
+
 
 # --- progress reports (FR-21-6) -----------------------------------------------------------------
 
@@ -757,6 +760,9 @@ class Loan(BranchScopedModel):
     @classmethod
     def own_scope_q(cls, user: Any) -> Q:
         return _mine(user)
+
+    def __str__(self) -> str:
+        return f"{self.item} due {self.due_date:%Y-%m-%d}"
 
 
 # --- built-in quizzes (FR-21-5, Phase 3b) -------------------------------------------------------

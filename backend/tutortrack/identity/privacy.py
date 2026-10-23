@@ -10,6 +10,7 @@ from typing import Any
 
 from django.db.models import Q
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from tutortrack.privacy.registry import (
     ErasureContext,
@@ -139,7 +140,7 @@ def revoke(person: Person) -> int:
 register(
     Provider(
         key="identity",
-        label="Logins",
+        label=gettext_lazy("Logins"),
         expand=expand,
         export=export,
         erase=erase,
