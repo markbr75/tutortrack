@@ -9,5 +9,5 @@ reply in the same conversation, and the help button shows a dot when there is a 
 
 Do not send passwords, card numbers or safeguarding details in the chat.
 
-If support needs to see your account, the owner can give support time-limited access in
-**Settings**.
+To control when TutorTrack support can look at your account, the owner goes to
+**Settings → TutorTrack support access**.

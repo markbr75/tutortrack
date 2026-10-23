@@ -3,12 +3,13 @@ import { formatDate, useTranslation } from "@tutortrack/i18n";
 import { Button, CheckboxField, Spinner, Tabs, TextField } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouterState } from "@tanstack/react-router";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ExternalLink } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { api, usePermission } from "../api";
 import { analyticsConsented, setAnalyticsConsent, track } from "./analytics";
 import { GUIDANCE_KEY, useGuidance } from "./guidance";
+import { sectionFor, type GuideSection } from "./guideIndex";
 import { Markdown } from "./Markdown";
 import { SupportChat } from "./SupportChat";
 import { TOURS } from "./tours";
@@ -98,7 +99,61 @@ function Articles() {
           </li>
         ))}
       </ul>
+      <FullGuide pathname={route} />
     </div>
+  );
+}
+
+/** Links to the full HTML guides, served with the app at /guides/ (docs/guides), starting at
+ * the section about this page when the guides document it. */
+function FullGuide({ pathname }: { pathname: string }) {
+  const { t } = useTranslation();
+  const sections = useQuery({
+    queryKey: ["help", "guide-sections"],
+    staleTime: Infinity,
+    queryFn: async () => {
+      const response = await fetch("/guides/routes.json");
+      if (!response.ok) throw new Error(response.statusText);
+      return (await response.json()) as GuideSection[];
+    },
+  });
+  const section = sections.data ? sectionFor(sections.data, "admin", pathname) : null;
+  const guideName = (guide: string) =>
+    guide === "admin-guide.html" ? t("help.adminGuide") : t("help.userGuide");
+  const links = [
+    ...(section
+      ? [
+          {
+            href: `/guides/${section.guide}#${section.id}`,
+            label: t("help.guideForPage", { guide: guideName(section.guide) }),
+          },
+        ]
+      : []),
+    { href: "/guides/user-guide.html", label: t("help.openUserGuide") },
+    { href: "/guides/admin-guide.html", label: t("help.openAdminGuide") },
+  ];
+  return (
+    <section aria-labelledby="help-full-guide" className="space-y-1.5 border-t border-rule pt-3">
+      <h3 id="help-full-guide" className="text-xs font-semibold text-muted-foreground">
+        {t("help.fullGuide")}
+      </h3>
+      <ul className="space-y-1 text-sm">
+        {links.map((link) => (
+          <li key={link.href}>
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 font-medium text-link underline-offset-2 hover:underline"
+            >
+              {link.label}
+              <ExternalLink aria-hidden="true" className="size-3.5 shrink-0" />
+              <span className="sr-only">{t("help.newTab")}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

@@ -10,6 +10,16 @@ as static files.
 | [admin-guide.html](admin-guide.html) | Organisation owners and admins who set up and configure TutorTrack, plus platform operators who run the service |
 | [api-guide.html](api-guide.html) | Developers who integrate through the public REST API, OAuth apps and webhooks |
 
+## Where people read them
+
+The admin app serves the guides at `/guides/` (for example
+http://brightminds.localhost:5173/guides/user-guide.html locally) and copies them into its
+build (`frontend/apps/admin/guides.plugin.ts`). It also publishes `/guides/routes.json`,
+built from the `data-route` attributes, so the in-app Help panel can link to the section
+about the page you are on. The Help panel's short articles are separate: Markdown files in
+`backend/tutortrack/success/help/` (with "What's new" entries in `help/changelog/`). Keep
+both current when a change affects what people see.
+
 ## Keeping them up to date
 
 The guides are part of the definition of done (see `CLAUDE.md`, "Ticket workflow"). When a

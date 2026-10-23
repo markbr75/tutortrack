@@ -18,8 +18,9 @@ need real provider credentials or infrastructure are listed at the end of
 | [Admin guide](docs/guides/admin-guide.html) | Organisation admins who set TutorTrack up, and operators who run the platform |
 | [API guide](docs/guides/api-guide.html) | Developers integrating through the REST API, OAuth apps and webhooks |
 
-The guides are static HTML: open them in a browser straight from the repo. How they are kept
-current: [docs/guides/README.md](docs/guides/README.md).
+The guides are static HTML: open them in a browser straight from the repo, or in the running
+admin app at `/guides/` (the Help panel links to the section about each page). How they are
+kept current: [docs/guides/README.md](docs/guides/README.md).
 
 ## Quick start (Linux / macOS / WSL)
 
