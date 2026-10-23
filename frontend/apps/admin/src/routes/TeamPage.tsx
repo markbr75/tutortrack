@@ -41,6 +41,9 @@ export function TeamPage() {
   const canInvite = usePermission("team.invite");
   const canImpersonate = usePermission("impersonation.start");
   const roleOptions = ROLES.map((r) => ({ value: r, label: t(`roles.${r}`) }));
+  // A sole trader is the only tutor (ADR 0045), so they can't invite one.
+  const solo = me?.organisation?.mode === "solo";
+  const inviteRoles = solo ? roleOptions.filter((o) => o.value !== "tutor") : roleOptions;
 
   const members = useQuery({
     queryKey: ["memberships"],
@@ -55,15 +58,16 @@ export function TeamPage() {
   const refresh = () => void queryClient.invalidateQueries();
 
   const [invite, setInvite] = useState({ email: "", role: "tutor" });
+  const inviteRole = solo && invite.role === "tutor" ? "admin" : invite.role;
   const send = useMutation({
     mutationFn: async () =>
       unwrap(
         await api.POST("/api/v1/invitations", {
-          body: { email: invite.email, role: invite.role as (typeof ROLES)[number] },
+          body: { email: invite.email, role: inviteRole as (typeof ROLES)[number] },
         }),
       ),
     onSuccess: () => {
-      setInvite({ email: "", role: invite.role });
+      setInvite({ email: "", role: inviteRole });
       refresh();
     },
   });
@@ -236,8 +240,8 @@ export function TeamPage() {
               />
               <SelectField
                 label={t("team.role")}
-                value={invite.role}
-                options={roleOptions}
+                value={inviteRole}
+                options={inviteRoles}
                 onChange={(e) => setInvite((i) => ({ ...i, role: e.target.value }))}
               />
             </FormPanel>

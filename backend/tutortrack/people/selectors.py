@@ -553,6 +553,19 @@ def map_points(
     return {"points": points, "missing": missing}
 
 
+def teaching_tutor_count() -> int:
+    """Tutors who count as on the team (onboarding, active or restricted): a sole trader has
+    at most one (ADR 0045)."""
+    return TutorProfile.objects.filter(status__in=("onboarding", "active", "restricted")).count()
+
+
+def own_tutor_id(membership: Any) -> Any:
+    """The id of this login's own tutor record, if it has one ("My tutor profile")."""
+    if membership is None:
+        return None
+    return TutorProfile.objects.filter(membership=membership).values_list("pk", flat=True).first()
+
+
 def teaches(membership: Any) -> bool:
     """Whether this login has its own tutor record (it can use the tutor app)."""
     return membership is not None and TutorProfile.objects.filter(membership=membership).exists()

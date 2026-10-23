@@ -96,7 +96,20 @@ def sample_people(ctx: DemoContext) -> None:
         clients[contact["last_name"]] = client
         for student in created:
             students[student.first_name] = student
+    # A sole trader is the only tutor (ADR 0045): every sample lesson goes to their own tutor
+    # record, or to one sample tutor if they don't teach yet.
+    solo = services.solo_mode()
+    own = (
+        TutorProfile.objects.filter(status__in=services.COUNTED_TUTOR_STATUSES)
+        .order_by("created_at")
+        .first()
+        if solo
+        else None
+    )
     for email, first, last, subjects in TUTORS:
+        if solo and own is not None:
+            tutors[first] = own
+            continue
         tutor = TutorProfile.objects.filter(email=email).first()
         if tutor is None:
             tutor = services.create_tutor(
@@ -108,4 +121,5 @@ def sample_people(ctx: DemoContext) -> None:
             with contextlib.suppress(BusinessRuleViolation):
                 services.change_tutor_status(tutor, TutorProfile.Status.ACTIVE)
         tutors[first] = tutor
+        own = tutor if solo else None
     ctx.extras.update(clients=clients, students=students, tutors=tutors)

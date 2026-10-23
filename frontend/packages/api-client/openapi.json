@@ -112744,13 +112744,20 @@
                     "teaches": {
                         "type": "boolean",
                         "description": "This login has its own tutor record, so it can use the tutor app."
+                    },
+                    "tutor_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "This login's own tutor record, if it has one (a sole trader's tutor profile)."
                     }
                 },
                 "required": [
                     "branch_scope",
                     "id",
                     "role",
-                    "teaches"
+                    "teaches",
+                    "tutor_id"
                 ]
             },
             "MeOrganisation": {

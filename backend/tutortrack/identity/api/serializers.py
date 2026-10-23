@@ -51,6 +51,10 @@ class MeMembershipSerializer(serializers.Serializer):
     teaches = serializers.BooleanField(
         help_text="This login has its own tutor record, so it can use the tutor app."
     )
+    tutor_id = serializers.UUIDField(
+        allow_null=True,
+        help_text="This login's own tutor record, if it has one (a sole trader's tutor profile).",
+    )
 
 
 class ImpersonatorSerializer(serializers.Serializer):

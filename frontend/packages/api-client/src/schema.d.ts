@@ -31509,6 +31509,11 @@ export interface components {
       branch_scope: string;
       /** @description This login has its own tutor record, so it can use the tutor app. */
       teaches: boolean;
+      /**
+       * Format: uuid
+       * @description This login's own tutor record, if it has one (a sole trader's tutor profile).
+       */
+      tutor_id: string | null;
     };
     MeOrganisation: {
       /** Format: uuid */

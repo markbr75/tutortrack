@@ -206,6 +206,9 @@ def invite(
             extra={"errors": {"email": ["Invitation already pending."]}},
         )
     if role == Membership.Role.TUTOR and target_type != "people.tutor":
+        from tutortrack.people.services import check_solo_tutor
+
+        check_solo_tutor(inviting=True)
         _check_tutor_capacity()
     branch_ids = sorted({str(getattr(b, "pk", b)) for b in branches})
     if branch_scope == Membership.BranchScope.SELECTED and not branch_ids:

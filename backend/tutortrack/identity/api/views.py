@@ -361,6 +361,7 @@ def me_payload(request: Request) -> dict[str, Any]:
                 "role": membership.role,
                 "branch_scope": membership.branch_scope,
                 "teaches": people_selectors.teaches(membership),
+                "tutor_id": people_selectors.own_tutor_id(membership),
             }
             if membership is not None
             else None

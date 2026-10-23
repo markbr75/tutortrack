@@ -372,12 +372,16 @@
           <dt><span class="ui">Type of business</span></dt>
           <dd>Sole trader, Small team, Agency, Tuition centre or Online school, first set at sign-up.
             A <strong>sole trader</strong> doesn't see the menus for running a team of tutors
-            (<span class="ui">Matching</span>, <span class="ui">Payroll</span>,
-            <span class="ui">Recruitment</span> and <span class="ui">Compliance</span>), and Home shows
-            what is <span class="ui">Not yet invoiced</span> instead of the next pay run. The pages
-            still exist; they are only left out of the menu. Choose another type when you take on
-            tutors and the menus come back. The type also decides the plan you move to after the
-            trial.</dd>
+            (<span class="ui">Jobs</span>, <span class="ui">Matching</span>,
+            <span class="ui">Payroll</span>, <span class="ui">Recruitment</span> and
+            <span class="ui">Compliance</span>), and Home shows what is <span class="ui">Not yet
+            invoiced</span> instead of the next pay run. A sole trader is the only tutor:
+            <span class="ui">Tutors</span> becomes <span class="ui">My tutor profile</span> (their own
+            tutor record), and TutorTrack refuses a second tutor, bringing back an inactive one, or
+            an invitation with the Tutor role. Choose another type when you take on tutors and the
+            menus come back. You can't change to Sole trader while more than one tutor is
+            onboarding, active or restricted: make the others inactive or archive them first. The
+            type also decides the plan you move to after the trial.</dd>
         </dl>
         <p>Address, company number, VAT or tax number, fiscal year start, week start, date and
           time formats are part of the organisation record and can be set through the API. The
@@ -490,7 +494,7 @@
         <h3 id="team-invite">Invite someone</h3>
         <ol class="steps">
           <li>Under <span class="ui">Invite someone</span>, enter the <span class="ui">Email</span>.</li>
-          <li>Choose the <span class="ui">Role</span> (default Tutor). Only an owner can invite another owner.</li>
+          <li>Choose the <span class="ui">Role</span> (default Tutor; Admin for a sole trader, who can't invite tutors). Only an owner can invite another owner.</li>
           <li>Select <span class="ui">Send invitation</span>. The link is valid for 7 days and opens on your subdomain; people who already have a TutorTrack account sign in with the invited email.</li>
           <li>Manage open invitations under <span class="ui">Pending invitations</span> (the five most recent show; <span class="ui">Show all</span> lists the rest): <span class="ui">Resend</span> creates a new link (the old one stops working) and <span class="ui">Revoke</span> cancels it.</li>
         </ol>

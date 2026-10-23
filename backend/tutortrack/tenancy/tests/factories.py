@@ -17,6 +17,8 @@ class OrganisationFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: f"Tutoring Co {n}")
     slug = factory.Sequence(lambda n: f"tutoring-co-{n}")
     status = Organisation.Status.ACTIVE
+    # Most tests model a business with a team of tutors; sole-trader tests set mode "solo".
+    mode = Organisation.Mode.MULTI
 
     @factory.post_generation
     def default_branch(self, create: bool, extracted: object, **kwargs: object) -> None:
