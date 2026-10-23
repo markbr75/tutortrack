@@ -73,9 +73,7 @@ def test_renaming_yourself_renames_your_own_tutor_record(org, api, user):
     mine = api.post("/api/v1/tutors/add-me").json()
     with tenant_context(org):
         other = TutorProfileFactory(organisation=org, first_name="Sam", last_name="Clarke")
-    response = api.patch(
-        "/api/v1/me", {"first_name": "Robin", "last_name": "Hale"}, format="json"
-    )
+    response = api.patch("/api/v1/me", {"first_name": "Robin", "last_name": "Hale"}, format="json")
     assert response.status_code == 200, response.json()
     with tenant_context(org):
         dispatch_batch()
