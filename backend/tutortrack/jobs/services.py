@@ -41,7 +41,7 @@ EDITABLE = {
     "default_schedule", "start_date", "expected_end_date", "lessons_per_week",
     "expected_total_hours", "goals", "notes_internal", "notes_for_tutor", "notes_for_client",
     "account_manager", "hours_cap", "hours_cap_period", "policy_overrides", "custom_fields",
-    "branch",
+    "branch", "invoice_template",
 }  # fmt: skip
 
 

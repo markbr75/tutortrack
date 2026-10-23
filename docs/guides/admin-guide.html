@@ -92,6 +92,7 @@
           <li><a href="#billing-options-h">Billing and payroll options</a>
             <ol>
               <li><a href="#billing-options-billing">Billing options</a></li>
+              <li><a href="#invoice-templates">Invoice templates</a></li>
               <li><a href="#billing-options-payroll">Payroll options</a></li>
             </ol>
           </li>
@@ -773,6 +774,39 @@
             nothing has been paid or credited, or write it off. The same applies to payments,
             refunds and approved pay items, which are corrected with adjustments.</p>
         </div>
+        <h3 id="invoice-templates">Invoice templates</h3>
+        <p><span class="path">Billing › Invoice templates</span> sets how invoices look. Everyone
+          who can see invoices can see the templates; creating and changing them needs
+          <code>billing.template.manage</code> (owner, admin, finance and branch manager). Select
+          <span class="ui">New template</span>, or a template's name, to open the editor: the
+          settings on the left and a live <span class="ui">Preview</span> of a sample invoice on
+          the right (below on a phone). The preview is drawn by the same code that makes the PDF,
+          so what you see is what families get. <span class="ui">Download sample PDF</span> makes
+          the real file.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Section</th><th scope="col">Settings</th></tr></thead>
+            <tbody>
+              <tr><td><span class="ui">Template</span></td><td><span class="ui">Name</span> (only you see it) and <span class="ui">Use as the default</span>. The first template you create is the default.</td></tr>
+              <tr><td><span class="ui">Look</span></td><td><span class="ui">Style</span>: <span class="ui">Classic</span> (a thin colour rule and a plain table), <span class="ui">Modern</span> (a bold colour band, a large title and a strong total) or <span class="ui">Compact</span> (smaller type and tighter rows, for long invoices). <span class="ui">Accent colour</span> (empty: the brand colour). <span class="ui">Logo</span>: the brand kit logo, a logo for this template, or none.</td></tr>
+              <tr><td><span class="ui">Wording</span></td><td><span class="ui">Title</span> (empty: "Invoice"; for example "Tax invoice"), <span class="ui">Trading name</span> under the title (empty: the organisation's name), a <span class="ui">Message above the lines</span>, <span class="ui">How to pay</span> and a <span class="ui">Footer</span>. Empty <span class="ui">How to pay</span> and <span class="ui">Footer</span> use the organisation-wide billing text, if one is set.</td></tr>
+              <tr><td><span class="ui">Columns</span></td><td><span class="ui">Date</span>, <span class="ui">Student</span>, the tutor's name under the description, <span class="ui">Quantity</span> and <span class="ui">Price</span>. Description and amount always show; tax shows when the invoice has tax.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Which template an invoice uses.</strong> When every lesson on an invoice is for
+          one job and that job has a template (on the job page, <span class="ui">Invoices</span> ›
+          <span class="ui">Edit</span>), that one. Otherwise the family's template (on the family
+          page, <span class="ui">Billing details</span> › <span class="ui">Edit</span> ›
+          <span class="ui">Invoice template</span>), otherwise the default. To give a job its own
+          look, set the family's invoices to one per job. With no templates at all, invoices use
+          the Classic look with the brand kit.</p>
+        <p>Issuing an invoice stores the look with it, so changing or deleting a template later
+          never changes an invoice already sent; drafts always show the current template.
+          Deleting a template sends the families and jobs that used it back to the default. A
+          template has no free HTML: this keeps every invoice readable, correctly translated and
+          safe to send. Invoices, credit notes and statements also use the brand kit of the
+          client's branch when it has its own.</p>
         <h3 id="billing-options-payroll">Payroll options</h3>
         <p>Payroll options are set through the API (<code>/api/v1/settings/payroll</code>): pay
           period (monthly by default; weekly, fortnightly, twice a month or manual) and cut-off day

@@ -1,13 +1,14 @@
 {% load i18n %}<!doctype html>
 <html lang="{{ org.locale|default:'en-GB' }}">
-<head><meta charset="utf-8"><title>{% trans "Invoice" %} {{ invoice.number }}</title>
+<head><meta charset="utf-8">{% trans "Invoice" as default_title %}<title>{{ layout.title|default:default_title }} {{ invoice.number }}</title>
 {% include "billing/_style.html" %}</head>
-<body>
+<body class="style-{{ layout.style|default:'classic' }}">
+<div{% if preview %} class="preview"{% endif %}>
   {% include "billing/_brand.html" %}
   <div class="row">
     <div>
-      <h1>{% trans "Invoice" %}</h1>
-      <div><strong>{{ snapshot.organisation|default:org.name }}</strong></div>
+      <h1>{{ layout.title|default:default_title }}</h1>
+      <div><strong>{{ trading_name }}</strong></div>
     </div>
     <div class="muted">
       <div>{% trans "Invoice number" %}: <strong>{{ invoice.number }}</strong></div>
@@ -27,21 +28,25 @@
     <div class="muted">{% trans "Period" %}: {{ invoice.period_start|date:"j M Y" }} – {{ invoice.period_end|date:"j M Y" }}</div>
     {% endif %}
   </div>
+  {% if layout.intro %}<div class="intro">{{ layout.intro|linebreaksbr }}</div>{% endif %}
   <table>
     <thead><tr>
-      <th>{% trans "Date" %}</th><th>{% trans "Description" %}</th><th>{% trans "Student" %}</th>
-      <th class="num">{% trans "Qty" %}</th><th class="num">{% trans "Price" %}</th>
+      {% if layout.columns.date %}<th>{% trans "Date" %}</th>{% endif %}
+      <th>{% trans "Description" %}</th>
+      {% if layout.columns.student %}<th>{% trans "Student" %}</th>{% endif %}
+      {% if layout.columns.quantity %}<th class="num">{% trans "Qty" %}</th>{% endif %}
+      {% if layout.columns.unit_price %}<th class="num">{% trans "Price" %}</th>{% endif %}
       {% if has_tax %}<th class="num">{% trans "Tax" %}</th>{% endif %}
       <th class="num">{% trans "Amount" %}</th>
     </tr></thead>
     <tbody>
     {% for line in lines %}
       <tr>
-        <td>{{ line.date|date:"j M" }}</td>
-        <td>{{ line.description }}{% if line.tutor %}<div class="muted">{{ line.tutor }}</div>{% endif %}</td>
-        <td>{{ line.student }}</td>
-        <td class="num">{{ line.quantity }}</td>
-        <td class="num">{{ line.unit_price }}</td>
+        {% if layout.columns.date %}<td>{{ line.date|date:"j M" }}</td>{% endif %}
+        <td>{{ line.description }}{% if layout.columns.tutor and line.tutor %}<div class="muted">{{ line.tutor }}</div>{% endif %}</td>
+        {% if layout.columns.student %}<td>{{ line.student }}</td>{% endif %}
+        {% if layout.columns.quantity %}<td class="num">{{ line.quantity }}</td>{% endif %}
+        {% if layout.columns.unit_price %}<td class="num">{{ line.unit_price }}</td>{% endif %}
         {% if has_tax %}<td class="num">{{ line.tax_percent }}%</td>{% endif %}
         <td class="num">{{ line.amount }}</td>
       </tr>
@@ -58,9 +63,10 @@
     {% if invoice.amount_paid_amount %}<tr><td>{% trans "Paid" %}</td><td class="num">−{{ totals.amount_paid }}</td></tr>{% endif %}
     <tr class="grand"><td>{% trans "Amount due" %}</td><td class="num">{{ totals.balance_due }}</td></tr>
   </table>
-  {% if snapshot.payment_instructions %}<div class="footer"><strong>{% trans "How to pay" %}</strong><div>{{ snapshot.payment_instructions|linebreaksbr }}</div></div>{% endif %}
+  {% if layout.payment_instructions %}<div class="footer"><strong>{% trans "How to pay" %}</strong><div>{{ layout.payment_instructions|linebreaksbr }}</div></div>{% endif %}
   {% if invoice.notes %}<div class="footer">{{ invoice.notes|linebreaksbr }}</div>{% endif %}
-  {% if snapshot.footer %}<div class="footer muted">{{ snapshot.footer|linebreaksbr }}</div>{% endif %}
+  {% if layout.footer %}<div class="footer muted">{{ layout.footer|linebreaksbr }}</div>{% endif %}
   {% include "billing/_brand_footer.html" %}
+</div>
 </body>
 </html>

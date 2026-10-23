@@ -26,7 +26,9 @@ import {
   RecordHeader,
   RecordLayout,
 } from "../components/RecordHeader";
+import { useTemplateOptions } from "../billing/invoiceTemplateHooks";
 import { RecordActivity } from "../crm/Activity";
+import { EditableDetails } from "../people/EditableDetails";
 import { NEXT_STATUSES, type JobStatus } from "./statuses";
 
 type Job = components["schemas"]["Job"];
@@ -464,6 +466,47 @@ function JobStudentRow({ link }: { link: Job["students"][number] }) {
   );
 }
 
+/** How this job's invoices look (ADR 0046): it applies when the family's invoices are one per
+ * job; otherwise the family's template (or the organisation's default) is used. */
+function JobInvoiceTemplate({ job }: { job: components["schemas"]["Job"] }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const canEdit = usePermission("jobs.job.edit");
+  const options = useTemplateOptions(t("invoiceTemplates.familysTemplate"));
+  return (
+    <EditableDetails
+      title={t("invoiceTemplates.jobPanel")}
+      editLabel={t("invoiceTemplates.editJob", { name: job.name ?? "" })}
+      canEdit={canEdit}
+      record={job}
+      fields={[
+        {
+          name: "invoice_template",
+          label: t("invoiceTemplates.templateField"),
+          hint: t("invoiceTemplates.jobHint"),
+          kind: "select",
+          options,
+        },
+      ]}
+      save={async (changes) =>
+        unwrap(
+          await api.PATCH("/api/v1/jobs/{id}", {
+            params: { path: { id: job.id } },
+            body: changes as components["schemas"]["PatchedJobRequest"],
+          }),
+        )
+      }
+      onSaved={() => void queryClient.invalidateQueries({ queryKey: ["job", job.id] })}
+      facts={[
+        [
+          t("invoiceTemplates.templateField"),
+          options.find((o) => o.value === (job.invoice_template ?? ""))?.label,
+        ],
+      ]}
+    />
+  );
+}
+
 export function JobPage({ jobId }: { jobId: string }) {
   const { t, i18n } = useTranslation();
   const canSeeCharge = usePermission("billing.rates.view_charge");
@@ -564,6 +607,7 @@ export function JobPage({ jobId }: { jobId: string }) {
                 </p>
               ) : null}
             </Panel>
+            <JobInvoiceTemplate job={j} />
             {canSeeCharge ? <Summary jobId={j.id} /> : null}
           </>
         }

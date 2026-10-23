@@ -671,3 +671,52 @@ class TutorInvoiceReview(TenantModel):
                 fields=["invoice_run", "tutor"], name="tutor_invoice_review_unique"
             )
         ]
+
+
+class InvoiceTemplate(TenantModel):
+    """How an invoice looks (ADR 0046): a style, colour and logo, the wording around the
+    lines and which columns show. Families and jobs can choose one; the organisation's
+    default applies otherwise. Issued invoices keep a copy in their billing snapshot, so
+    editing a template never changes an invoice already sent."""
+
+    class Style(models.TextChoices):
+        CLASSIC = "classic", _("Classic")
+        MODERN = "modern", _("Modern")
+        COMPACT = "compact", _("Compact")
+
+    class Logo(models.TextChoices):
+        BRAND = "brand", _("Brand kit logo")
+        OWN = "own", _("This template's logo")
+        NONE = "none", _("No logo")
+
+    name = models.CharField(max_length=100)
+    is_default = models.BooleanField(default=False)
+    style = models.CharField(max_length=10, choices=Style.choices, default=Style.CLASSIC)
+    accent_colour = models.CharField(max_length=7, blank=True, default="")  # blank: brand kit
+    logo_mode = models.CharField(max_length=5, choices=Logo.choices, default=Logo.BRAND)
+    logo = models.ForeignKey(
+        "core.StoredFile", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    title = models.CharField(max_length=60, blank=True, default="")  # blank: "Invoice"
+    trading_name = models.CharField(max_length=200, blank=True, default="")  # blank: org name
+    intro = models.TextField(blank=True, default="")
+    payment_instructions = models.TextField(blank=True, default="")  # blank: billing setting
+    footer = models.TextField(blank=True, default="")  # blank: billing setting
+    show_date = models.BooleanField(default=True)
+    show_student = models.BooleanField(default=True)
+    show_tutor = models.BooleanField(default=True)
+    show_quantity = models.BooleanField(default=True)
+    show_unit_price = models.BooleanField(default=True)
+
+    class Meta(TenantModel.Meta):
+        ordering = ["-is_default", "name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation"],
+                condition=Q(is_default=True),
+                name="billing_one_default_invoice_template",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return self.name

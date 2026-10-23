@@ -23,6 +23,7 @@ import { useCursorList } from "../lists";
 import { BillingOptions, BulkPayments, RunTutorReviews } from "../g3/BillingExtras";
 import { BankReconciliation } from "../payments/BankReconciliation";
 import { PaymentsList } from "../payments/PaymentsPages";
+import { InvoiceTemplatesList } from "./InvoiceTemplates";
 import { LateFeesTab, PackagesTab, PlansTab, SplitsTab } from "./Phase2Tabs";
 import { EndHead, Figure, InvoiceStatus, PanelEmpty, PanelLoading, rowClass } from "./moneyUi";
 import { sumByCurrency } from "./sumMoney";
@@ -41,6 +42,7 @@ type Tab =
   | "splits"
   | "bank"
   | "record"
+  | "templates"
   | "options";
 type InvoiceFilter = "draft" | "open" | "overdue" | "paid" | "all";
 type Money = { amount: string; currency: string };
@@ -710,6 +712,7 @@ export function BillingPage() {
     ...(canSplits ? [{ key: "splits" as const, label: t("splits.title") }] : []),
     ...(canBank ? [{ key: "bank" as const, label: t("bank.title") }] : []),
     ...(canRecord ? [{ key: "record" as const, label: t("g3.bulkPayments.tab") }] : []),
+    { key: "templates" as const, label: t("invoiceTemplates.tab") },
     ...(canSettings ? [{ key: "options" as const, label: t("g3.billingOptions.tab") }] : []),
   ];
   const [tab, setTab] = useState<Tab>("invoices");
@@ -729,6 +732,7 @@ export function BillingPage() {
         {tab === "splits" ? <SplitsTab /> : null}
         {tab === "bank" ? <BankReconciliation /> : null}
         {tab === "record" ? <BulkPayments /> : null}
+        {tab === "templates" ? <InvoiceTemplatesList /> : null}
         {tab === "options" ? <BillingOptions /> : null}
       </Tabs>
     </section>

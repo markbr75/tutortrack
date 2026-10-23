@@ -8620,6 +8620,97 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/invoice-templates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Invoice templates (ADR 0046): how invoices look. The organisation's default applies
+     *     unless a family or a job (when its invoices are one per job) chooses another. Issued
+     *     invoices keep the look they were sent with.
+     */
+    get: operations["invoice_templates_list"];
+    put?: never;
+    /**
+     * @description Invoice templates (ADR 0046): how invoices look. The organisation's default applies
+     *     unless a family or a job (when its invoices are one per job) chooses another. Issued
+     *     invoices keep the look they were sent with.
+     */
+    post: operations["invoice_templates_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoice-templates/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Invoice templates (ADR 0046): how invoices look. The organisation's default applies
+     *     unless a family or a job (when its invoices are one per job) chooses another. Issued
+     *     invoices keep the look they were sent with.
+     */
+    get: operations["invoice_templates_retrieve"];
+    put?: never;
+    post?: never;
+    /**
+     * @description Invoice templates (ADR 0046): how invoices look. The organisation's default applies
+     *     unless a family or a job (when its invoices are one per job) chooses another. Issued
+     *     invoices keep the look they were sent with.
+     */
+    delete: operations["invoice_templates_destroy"];
+    options?: never;
+    head?: never;
+    /**
+     * @description Invoice templates (ADR 0046): how invoices look. The organisation's default applies
+     *     unless a family or a job (when its invoices are one per job) chooses another. Issued
+     *     invoices keep the look they were sent with.
+     */
+    patch: operations["invoice_templates_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/invoice-templates/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description A sample invoice drawn with unsaved settings, as HTML for the editor's preview. */
+    post: operations["invoice_templates_preview_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/invoice-templates/preview-pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description The same sample invoice as a PDF, exactly as families would receive it. */
+    post: operations["invoice_templates_preview_pdf_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/invoices": {
     parameters: {
       query?: never;
@@ -25629,6 +25720,11 @@ export interface components {
       readonly hours_this_term: string | null;
       /** Format: uuid */
       readonly merged_into: string | null;
+      /**
+       * Format: uuid
+       * @description How this family's invoices look; empty: the organisation's default.
+       */
+      invoice_template?: string | null;
     };
     ClientDetail: {
       /** Format: uuid */
@@ -25677,6 +25773,11 @@ export interface components {
       readonly hours_this_term: string | null;
       /** Format: uuid */
       readonly merged_into: string | null;
+      /**
+       * Format: uuid
+       * @description How this family's invoices look; empty: the organisation's default.
+       */
+      invoice_template?: string | null;
       readonly contacts: components["schemas"]["Contact"][];
       readonly students: components["schemas"]["Student"][];
     };
@@ -25708,6 +25809,11 @@ export interface components {
       /** Format: uuid */
       account_manager?: string | null;
       custom_fields?: unknown;
+      /**
+       * Format: uuid
+       * @description How this family's invoices look; empty: the organisation's default.
+       */
+      invoice_template?: string | null;
     };
     /**
      * @description * `prospect` - Prospect
@@ -29752,6 +29858,105 @@ export interface components {
       pdf_url: string;
       hosted_url: string;
     };
+    /**
+     * @description An invoice template (ADR 0046). Blank wording and colour fall back to the billing
+     *     settings and the brand kit.
+     */
+    InvoiceTemplate: {
+      /** Format: uuid */
+      readonly id: string;
+      name: string;
+      is_default?: boolean;
+      style?: components["schemas"]["InvoiceTemplateStyleEnum"];
+      accent_colour?: string;
+      logo_mode?: components["schemas"]["InvoiceTemplateLogoEnum"];
+      /**
+       * Format: uuid
+       * @description Used when logo_mode is own.
+       */
+      logo?: string | null;
+      title?: string;
+      trading_name?: string;
+      intro?: string;
+      payment_instructions?: string;
+      footer?: string;
+      show_date?: boolean;
+      show_student?: boolean;
+      show_tutor?: boolean;
+      show_quantity?: boolean;
+      show_unit_price?: boolean;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    /**
+     * @description * `brand` - Brand kit logo
+     *     * `own` - This template's logo
+     *     * `none` - No logo
+     * @enum {string}
+     */
+    InvoiceTemplateLogoEnum: "brand" | "own" | "none";
+    /** @description Unsaved template settings for the editor's preview (nothing is stored). */
+    InvoiceTemplatePreviewRequest: {
+      name?: string;
+      is_default?: boolean;
+      style?: components["schemas"]["InvoiceTemplateStyleEnum"];
+      accent_colour?: string;
+      logo_mode?: components["schemas"]["InvoiceTemplateLogoEnum"];
+      /**
+       * Format: uuid
+       * @description Used when logo_mode is own.
+       */
+      logo?: string | null;
+      title?: string;
+      trading_name?: string;
+      intro?: string;
+      payment_instructions?: string;
+      footer?: string;
+      show_date?: boolean;
+      show_student?: boolean;
+      show_tutor?: boolean;
+      show_quantity?: boolean;
+      show_unit_price?: boolean;
+    };
+    InvoiceTemplatePreviewResponse: {
+      /** @description The sample invoice as HTML, for an iframe. */
+      html: string;
+    };
+    /**
+     * @description An invoice template (ADR 0046). Blank wording and colour fall back to the billing
+     *     settings and the brand kit.
+     */
+    InvoiceTemplateRequest: {
+      name: string;
+      is_default?: boolean;
+      style?: components["schemas"]["InvoiceTemplateStyleEnum"];
+      accent_colour?: string;
+      logo_mode?: components["schemas"]["InvoiceTemplateLogoEnum"];
+      /**
+       * Format: uuid
+       * @description Used when logo_mode is own.
+       */
+      logo?: string | null;
+      title?: string;
+      trading_name?: string;
+      intro?: string;
+      payment_instructions?: string;
+      footer?: string;
+      show_date?: boolean;
+      show_student?: boolean;
+      show_tutor?: boolean;
+      show_quantity?: boolean;
+      show_unit_price?: boolean;
+    };
+    /**
+     * @description * `classic` - Classic
+     *     * `modern` - Modern
+     *     * `compact` - Compact
+     * @enum {string}
+     */
+    InvoiceTemplateStyleEnum: "classic" | "modern" | "compact";
     IssueStatementsRequest: {
       /** Format: date */
       period_end?: string | null;
@@ -29826,6 +30031,11 @@ export interface components {
       readonly created_at: string;
       /** @description Why the job needs attention (filled on ?attention=true lists). */
       readonly attention_reasons: components["schemas"]["AttentionReasonsEnum"][];
+      /**
+       * Format: uuid
+       * @description How this job's invoices look when they are one per job; empty: the family's.
+       */
+      invoice_template?: string | null;
     };
     JobCreate: {
       /** Format: uuid */
@@ -29898,6 +30108,11 @@ export interface components {
       readonly created_at: string;
       /** @description Why the job needs attention (filled on ?attention=true lists). */
       readonly attention_reasons: components["schemas"]["AttentionReasonsEnum"][];
+      /**
+       * Format: uuid
+       * @description How this job's invoices look when they are one per job; empty: the family's.
+       */
+      invoice_template?: string | null;
     };
     JobCreateRequest: {
       name?: string;
@@ -29956,6 +30171,11 @@ export interface components {
       hours_cap_period?: components["schemas"]["HoursCapPeriodEnum"];
       policy_overrides?: unknown;
       custom_fields?: unknown;
+      /**
+       * Format: uuid
+       * @description How this job's invoices look when they are one per job; empty: the family's.
+       */
+      invoice_template?: string | null;
       student_inputs: components["schemas"]["StudentInputRequest"][];
       tutor_inputs?: components["schemas"]["TutorInputRequest"][];
     };
@@ -35120,6 +35340,11 @@ export interface components {
       /** Format: uuid */
       account_manager?: string | null;
       custom_fields?: unknown;
+      /**
+       * Format: uuid
+       * @description How this family's invoices look; empty: the organisation's default.
+       */
+      invoice_template?: string | null;
     };
     PatchedCommissionRuleRequest: {
       /** Format: uuid */
@@ -35447,6 +35672,32 @@ export interface components {
       grade_scale?: string | null;
       resources?: string[];
     };
+    /**
+     * @description An invoice template (ADR 0046). Blank wording and colour fall back to the billing
+     *     settings and the brand kit.
+     */
+    PatchedInvoiceTemplateRequest: {
+      name?: string;
+      is_default?: boolean;
+      style?: components["schemas"]["InvoiceTemplateStyleEnum"];
+      accent_colour?: string;
+      logo_mode?: components["schemas"]["InvoiceTemplateLogoEnum"];
+      /**
+       * Format: uuid
+       * @description Used when logo_mode is own.
+       */
+      logo?: string | null;
+      title?: string;
+      trading_name?: string;
+      intro?: string;
+      payment_instructions?: string;
+      footer?: string;
+      show_date?: boolean;
+      show_student?: boolean;
+      show_tutor?: boolean;
+      show_quantity?: boolean;
+      show_unit_price?: boolean;
+    };
     PatchedInvoiceUpdateRequest: {
       po_number?: string;
       notes?: string;
@@ -35518,6 +35769,11 @@ export interface components {
       hours_cap_period?: components["schemas"]["HoursCapPeriodEnum"];
       policy_overrides?: unknown;
       custom_fields?: unknown;
+      /**
+       * Format: uuid
+       * @description How this job's invoices look when they are one per job; empty: the family's.
+       */
+      invoice_template?: string | null;
     };
     PatchedLateFeeRuleRequest: {
       /** Format: uuid */
@@ -60667,6 +60923,188 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["RunPreview"];
+        };
+      };
+    };
+  };
+  invoice_templates_list: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceTemplate"][];
+        };
+      };
+    };
+  };
+  invoice_templates_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["InvoiceTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["InvoiceTemplateRequest"];
+        "multipart/form-data": components["schemas"]["InvoiceTemplateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceTemplate"];
+        };
+      };
+    };
+  };
+  invoice_templates_retrieve: {
+    parameters: {
+      query?: {
+        /** @description Comma-separated fields to return (sparse). */
+        fields?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this invoice template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceTemplate"];
+        };
+      };
+    };
+  };
+  invoice_templates_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this invoice template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  invoice_templates_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this invoice template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedInvoiceTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedInvoiceTemplateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedInvoiceTemplateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceTemplate"];
+        };
+      };
+    };
+  };
+  invoice_templates_preview_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["InvoiceTemplatePreviewRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["InvoiceTemplatePreviewRequest"];
+        "multipart/form-data": components["schemas"]["InvoiceTemplatePreviewRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["InvoiceTemplatePreviewResponse"];
+        };
+      };
+    };
+  };
+  invoice_templates_preview_pdf_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["InvoiceTemplatePreviewRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["InvoiceTemplatePreviewRequest"];
+        "multipart/form-data": components["schemas"]["InvoiceTemplatePreviewRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/pdf": string;
         };
       };
     };

@@ -3,6 +3,7 @@ from __future__ import annotations
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from tutortrack.billing.models import InvoiceTemplate
 from tutortrack.catalogue.models import Service
 from tutortrack.core.api.serializers import (
     BaseModelSerializer,
@@ -83,6 +84,13 @@ class JobSerializer(BaseModelSerializer):
     def get_attention_reasons(self, obj: Job) -> list[str]:
         return attention_reasons(obj)
 
+    invoice_template = TenantRelatedField(
+        InvoiceTemplate,
+        required=False,
+        allow_null=True,
+        help_text="How this job's invoices look when they are one per job; empty: the family's.",
+    )
+
     class Meta:
         model = Job
         fields = [
@@ -94,7 +102,7 @@ class JobSerializer(BaseModelSerializer):
             "expected_total_hours", "goals", "notes_internal", "notes_for_tutor",
             "notes_for_client", "account_manager", "hours_cap", "hours_cap_period",
             "policy_overrides", "custom_fields", "students", "tutors", "created_at",
-            "attention_reasons",
+            "attention_reasons", "invoice_template",
         ]  # fmt: skip
         read_only_fields = [
             "id", "reference", "client", "service", "status", "status_changed_at", "currency",

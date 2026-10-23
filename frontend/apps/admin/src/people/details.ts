@@ -5,7 +5,9 @@ export type Value = string | number | boolean | null | undefined;
 export type DetailField = {
   name: string;
   label: string;
-  kind?: "text" | "email" | "tel" | "number" | "date" | "textarea" | "checkbox";
+  kind?: "text" | "email" | "tel" | "number" | "date" | "textarea" | "checkbox" | "select";
+  /** For `select`: the choices; the "" value saves as empty (null). */
+  options?: ReadonlyArray<{ value: string; label: string }>;
   autoComplete?: string;
   hint?: string;
   /** Takes the whole row (long text). */

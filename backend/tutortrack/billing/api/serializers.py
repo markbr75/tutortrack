@@ -3,6 +3,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
+from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -13,6 +14,7 @@ from tutortrack.core.api.serializers import (
     MoneySerializerField,
     TenantRelatedField,
 )
+from tutortrack.core.models import StoredFile
 from tutortrack.jobs.models import Job
 from tutortrack.people.models import Client, Student, TutorProfile
 from tutortrack.tenancy.models import Branch
@@ -27,6 +29,7 @@ from ..models import (
     Invoice,
     InvoiceLine,
     InvoiceRun,
+    InvoiceTemplate,
     LateFeeRule,
     PackageConsumption,
     PackagePurchase,
@@ -681,3 +684,42 @@ class BillingSplitOutSerializer(serializers.Serializer):
     job = serializers.UUIDField(allow_null=True)
     student = serializers.UUIDField(allow_null=True)
     shares = SplitShareOutSerializer(many=True)
+
+
+class InvoiceTemplateSerializer(BaseModelSerializer):
+    """An invoice template (ADR 0046). Blank wording and colour fall back to the billing
+    settings and the brand kit."""
+
+    logo = TenantRelatedField(
+        StoredFile, required=False, allow_null=True, help_text="Used when logo_mode is own."
+    )
+
+    class Meta:
+        model = InvoiceTemplate
+        fields = [
+            "id", "name", "is_default", "style", "accent_colour", "logo_mode", "logo", "title",
+            "trading_name", "intro", "payment_instructions", "footer", "show_date",
+            "show_student", "show_tutor", "show_quantity", "show_unit_price", "created_at",
+            "updated_at",
+        ]  # fmt: skip
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate_accent_colour(self, value: str) -> str:
+        # It goes into the document's CSS: only a hex colour (the preview isn't saved, so
+        # the service's checks don't run for it).
+        from ..invoice_templates import HEX
+
+        if value and not HEX.match(value):
+            raise serializers.ValidationError(_("Use a colour like #1D4ED8, or leave it empty."))
+        return value
+
+
+class InvoiceTemplatePreviewSerializer(InvoiceTemplateSerializer):
+    """Unsaved template settings for the editor's preview (nothing is stored)."""
+
+    class Meta(InvoiceTemplateSerializer.Meta):
+        extra_kwargs = {"name": {"required": False, "allow_blank": True}}
+
+
+class InvoiceTemplatePreviewResponse(serializers.Serializer):
+    html = serializers.CharField(help_text="The sample invoice as HTML, for an iframe.")

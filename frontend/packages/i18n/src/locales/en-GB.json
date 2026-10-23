@@ -7969,5 +7969,80 @@
     "city": "Town or city",
     "postcode": "Postcode",
     "emailLinked": "The email is the one they sign in with, so it can't be changed here."
+  },
+  "invoiceTemplates": {
+    "tab": "Invoice templates",
+    "title": "Invoice templates",
+    "intro": "How your invoices look. The default is used unless a family, or a job whose invoices are one per job, chooses another. An issued invoice keeps the look it was sent with.",
+    "new": "New template",
+    "newTitle": "New invoice template",
+    "none": "No templates yet: invoices use the built-in look with your brand kit.",
+    "isDefault": "Default",
+    "editorLabel": "Invoice template",
+    "sections": {
+      "template": "Template",
+      "look": "Look",
+      "wording": "Wording",
+      "columns": "Columns"
+    },
+    "name": "Name",
+    "nameHint": "For you, for example \"Music lessons\". Families don't see it.",
+    "makeDefault": "Use as the default",
+    "makeDefaultHint": "For every invoice unless a family or a job chooses another template.",
+    "style": "Style",
+    "styles": {
+      "classic": "Classic",
+      "modern": "Modern",
+      "compact": "Compact"
+    },
+    "styleHints": {
+      "classic": "A thin colour rule and a plain table: the familiar look.",
+      "modern": "A bold colour band, a large title and a strong total.",
+      "compact": "Smaller type and tighter rows, for invoices with many lessons."
+    },
+    "accent": "Accent colour",
+    "accentHint": "Colours the rule, table headings and total. Leave it empty to use your brand colour.",
+    "useBrandColour": "Use the brand colour",
+    "logo": "Logo",
+    "logos": {
+      "brand": "Brand kit logo",
+      "own": "A logo for this template",
+      "none": "No logo"
+    },
+    "ownLogo": "Template logo",
+    "titleField": "Title",
+    "titleHint": "For example \"Tax invoice\" or \"Bill\". Leave it empty for \"Invoice\".",
+    "defaultTitle": "Invoice",
+    "tradingName": "Trading name",
+    "tradingNameHint": "The business name under the title. Leave it empty to use your organisation's name.",
+    "introField": "Message above the lines",
+    "introHint": "For example a thank-you or term dates. Leave it empty for none.",
+    "howToPay": "How to pay",
+    "footer": "Footer",
+    "fallbackHint": "Leave it empty to use your organisation-wide billing text, if one is set.",
+    "columnsHint": "Description and amount always show. Tax shows when an invoice has tax.",
+    "columns": {
+      "show_date": "Date",
+      "show_student": "Student",
+      "show_tutor": "Tutor's name, under the description",
+      "show_quantity": "Quantity",
+      "show_unit_price": "Price"
+    },
+    "create": "Create template",
+    "delete": "Delete template",
+    "deleteConfirm": "Delete this template? Families and jobs that use it go back to the default. Invoices already issued keep their look.",
+    "preview": "Preview",
+    "previewHint": "A sample invoice. Your real invoices show the family's details and lessons.",
+    "previewFrame": "Invoice preview",
+    "previewFailed": "The preview couldn't be drawn. Check the fields, then try again.",
+    "updating": "Updating…",
+    "samplePdf": "Download sample PDF",
+    "sampleFailed": "The sample PDF couldn't be made. Try again.",
+    "templateField": "Invoice template",
+    "organisationDefault": "The organisation's default",
+    "familysTemplate": "The family's template",
+    "jobPanel": "Invoices",
+    "editJob": "Edit the invoice template for {{name}}",
+    "jobHint": "Used when the family's invoices are one per job. Otherwise the family's template is used."
   }
 }

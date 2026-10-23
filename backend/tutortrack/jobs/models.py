@@ -88,6 +88,11 @@ class Job(BranchScopedModel, CustomisableModel):
     notes_internal = models.TextField(blank=True, default="")
     notes_for_tutor = models.TextField(blank=True, default="")
     notes_for_client = models.TextField(blank=True, default="")
+    # How this job's invoices look when they are one per job (ADR 0046); empty: the family's.
+    invoice_template = models.ForeignKey(
+        "billing.InvoiceTemplate", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="+",
+    )  # fmt: skip
     account_manager = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
         related_name="+",
