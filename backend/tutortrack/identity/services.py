@@ -8,7 +8,7 @@ from typing import Any
 from django.db import transaction
 
 from tutortrack.core import audit
-from tutortrack.core.context import require_organisation_id
+from tutortrack.core.context import current_organisation_id, require_organisation_id
 from tutortrack.core.exceptions import BusinessRuleViolation
 from tutortrack.core.time import now
 
@@ -424,9 +424,28 @@ def update_profile(user: User, **changes: Any) -> User:
         raise BusinessRuleViolation(f"Cannot change: {', '.join(sorted(unknown))}")
     if "phone" in changes and changes["phone"] != user.phone:
         changes["phone_verified_at"] = None
+    renamed = any(
+        field in changes and changes[field] != getattr(user, field)
+        for field in ("first_name", "last_name")
+    )
     for field, value in changes.items():
         setattr(user, field, value)
     user.save(update_fields=[*changes])
+    if renamed and current_organisation_id() is not None:
+        from tutortrack.core.events import publish
+
+        from .events import MemberRenamed
+
+        # Their records in this organisation (a tutor profile) follow the new name.
+        for membership in Membership.objects.filter(user=user, status=Membership.Status.ACTIVE):
+            publish(
+                MemberRenamed(
+                    subject_id=membership.pk,
+                    user_id=str(user.pk),
+                    first_name=user.first_name,
+                    last_name=user.last_name,
+                )
+            )
     return user
 
 

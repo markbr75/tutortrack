@@ -1,11 +1,10 @@
-import { unwrap } from "@tutortrack/api-client";
+import { unwrap, type components } from "@tutortrack/api-client";
 import { formatDate, useTranslation } from "@tutortrack/i18n";
 import {
   Alert,
   Button,
   buttonClass,
   ErrorFallback,
-  FactList,
   NamePlate,
   Panel,
   PanelRow,
@@ -34,6 +33,15 @@ import { InviteButton } from "../portal/InviteButton";
 import { RecordActivity } from "../crm/Activity";
 import { StudentJobs } from "../jobs/StudentJobs";
 import { StudentPrivacyPanel } from "../safeguarding/SafeguardingPages";
+import {
+  addressFields,
+  addressValues,
+  useEditing,
+  withAddress,
+  type DetailField,
+  type Value,
+} from "./details";
+import { DetailsForm, EditableDetails, EditButton } from "./EditableDetails";
 import { StudentMatchingCard, TutorMatchingCard } from "./MatchingProfileCard";
 import { STUDENT_STATUSES, TUTOR_STATUSES } from "./statuses";
 
@@ -103,8 +111,11 @@ function Loading({
 /** The family page: household, contacts, students, billing and activity (E05-T11). */
 export function ClientPage({ clientId }: { clientId: string }) {
   const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
   const canInvite = usePermission("people.client.edit");
+  const canEdit = canInvite;
   const canBilling = usePermission("billing.invoice.view");
+  const refresh = () => void queryClient.invalidateQueries({ queryKey: ["clients"] });
   const client = useQuery({
     queryKey: ["clients", clientId],
     queryFn: async () =>
@@ -147,29 +158,12 @@ export function ClientPage({ clientId }: { clientId: string }) {
               {c.contacts.length ? (
                 <PanelRows>
                   {c.contacts.map((contact) => (
-                    <PanelRow key={contact.id}>
-                      <NamePlate
-                        name={contact.full_name}
-                        context={[
-                          t(`people.relationship.${contact.relationship ?? "parent"}`),
-                          contact.is_primary ? t("people.primary") : "",
-                          contact.is_bill_payer ? t("people.billPayer") : "",
-                          contact.email,
-                          contact.phone || contact.mobile,
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
-                        aside={
-                          canInvite && contact.email ? (
-                            <InviteButton
-                              contactId={contact.id}
-                              name={contact.full_name}
-                              variant="secondary"
-                            />
-                          ) : null
-                        }
-                      />
-                    </PanelRow>
+                    <ContactRow
+                      key={contact.id}
+                      contact={contact}
+                      canEdit={canEdit}
+                      onSaved={refresh}
+                    />
                   ))}
                 </PanelRows>
               ) : (
@@ -207,23 +201,121 @@ export function ClientPage({ clientId }: { clientId: string }) {
                 <p className="px-5 py-4 text-sm text-muted-foreground">{t("people.noStudents")}</p>
               )}
             </Panel>
-            <Panel title={t("designS5.client.billingDetails")} flush>
-              <FactList
-                items={[
-                  [t("people.currency"), c.currency],
-                  [
-                    t("people.paymentTerms"),
-                    t("people.days", { count: c.payment_terms_days ?? 0 }),
-                  ],
-                  [t("people.poNumber"), c.po_number],
-                  [t("people.billingAddress"), address],
-                ]}
-              />
-            </Panel>
+            <EditableDetails
+              title={t("designS5.client.billingDetails")}
+              editLabel={t("editDetails.client", { name: c.display_name })}
+              canEdit={canEdit}
+              record={{ ...c, ...addressValues(c.billing_address) }}
+              fields={[
+                { name: "display_name", label: t("people.name"), wide: true },
+                {
+                  name: "payment_terms_days",
+                  label: t("editDetails.paymentTermsDays"),
+                  kind: "number",
+                },
+                { name: "po_number", label: t("people.poNumber") },
+                ...addressFields(t),
+              ]}
+              save={async (changes) =>
+                unwrap(
+                  await api.PATCH("/api/v1/clients/{id}", {
+                    params: { path: { id: c.id } },
+                    body: withAddress(
+                      changes,
+                      "billing_address_input",
+                      c.billing_address,
+                    ) as Patch<"Client">,
+                  }),
+                )
+              }
+              onSaved={refresh}
+              facts={[
+                [t("people.currency"), c.currency],
+                [t("people.paymentTerms"), t("people.days", { count: c.payment_terms_days ?? 0 })],
+                [t("people.poNumber"), c.po_number],
+                [t("people.billingAddress"), address],
+              ]}
+            />
           </>
         }
       />
     </article>
+  );
+}
+
+type ContactRecord = components["schemas"]["Contact"];
+/** A PATCH body; the details form only sends fields from the record it was given. */
+type Patch<T extends "Client" | "Contact" | "Student" | "Tutor"> =
+  components["schemas"][`Patched${T}Request`];
+
+/** One contact on the family page; "Edit" swaps the row for their contact details. */
+function ContactRow({
+  contact,
+  canEdit,
+  onSaved,
+}: {
+  contact: ContactRecord;
+  canEdit: boolean;
+  onSaved: () => void;
+}) {
+  const { t } = useTranslation();
+  const edit = useEditing();
+  const label = t("editDetails.contact", { name: contact.full_name });
+  const fields: DetailField[] = [
+    { name: "first_name", label: t("people.firstName"), autoComplete: "off" },
+    { name: "last_name", label: t("people.lastName"), autoComplete: "off" },
+    { name: "email", label: t("people.email"), kind: "email", autoComplete: "off", wide: true },
+    { name: "phone", label: t("people.phone"), kind: "tel", autoComplete: "off" },
+    { name: "mobile", label: t("editDetails.mobile"), kind: "tel", autoComplete: "off" },
+  ];
+  if (edit.open) {
+    return (
+      <PanelRow className="p-0">
+        <DetailsForm
+          label={label}
+          fields={fields}
+          record={contact}
+          save={async (changes: Record<string, Value>) =>
+            unwrap(
+              await api.PATCH("/api/v1/contacts/{id}", {
+                params: { path: { id: contact.id } },
+                body: changes as Patch<"Contact">,
+              }),
+            )
+          }
+          onDone={(saved) => {
+            if (saved) onSaved();
+            edit.stop();
+          }}
+        />
+      </PanelRow>
+    );
+  }
+  return (
+    <PanelRow>
+      <NamePlate
+        name={contact.full_name}
+        context={[
+          t(`people.relationship.${contact.relationship ?? "parent"}`),
+          contact.is_primary ? t("people.primary") : "",
+          contact.is_bill_payer ? t("people.billPayer") : "",
+          contact.email,
+          contact.phone || contact.mobile,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+        aside={
+          canEdit ? (
+            <span className="flex flex-wrap justify-end gap-2">
+              <EditButton buttonRef={edit.buttonRef} name={label} onClick={edit.start} />
+              {contact.email ? (
+                <InviteButton contactId={contact.id} name={contact.full_name} variant="secondary" />
+              ) : null}
+            </span>
+          ) : null
+        }
+      />
+    </PanelRow>
   );
 }
 
@@ -344,27 +436,55 @@ export function StudentPage({ studentId }: { studentId: string }) {
         }
         side={
           <>
-            <Panel title={t("people.details")} flush>
-              <FactList
-                none={t("designS5.noDetails")}
-                items={[
-                  [t("people.yearGroup"), s.year_group],
-                  [t("people.school"), s.school],
-                  [
-                    t("people.dateOfBirth"),
-                    s.date_of_birth ? formatDate(s.date_of_birth, i18n.language) : "",
-                  ],
-                  [
-                    t("people.subjects"),
-                    (s.subjects ?? [])
-                      .map((x) => [x.subject, x.level].filter(Boolean).join(" "))
-                      .join(", "),
-                  ],
-                  [t("people.goals"), s.goals],
-                  [t("people.learningNeeds"), s.learning_needs],
-                ]}
-              />
-            </Panel>
+            <EditableDetails
+              title={t("people.details")}
+              editLabel={t("editDetails.student", { name: s.full_name ?? "" })}
+              canEdit={canEdit}
+              record={s}
+              fields={[
+                { name: "first_name", label: t("people.firstName"), autoComplete: "off" },
+                { name: "last_name", label: t("people.lastName"), autoComplete: "off" },
+                {
+                  name: "preferred_name",
+                  label: t("editDetails.preferredName"),
+                  autoComplete: "off",
+                },
+                { name: "year_group", label: t("people.yearGroup") },
+                { name: "school", label: t("people.school"), wide: true },
+                { name: "date_of_birth", label: t("people.dateOfBirth"), kind: "date" },
+                { name: "goals", label: t("people.goals"), kind: "textarea" },
+                { name: "learning_needs", label: t("people.learningNeeds"), kind: "textarea" },
+              ]}
+              save={async (changes) =>
+                unwrap(
+                  await api.PATCH("/api/v1/students/{id}", {
+                    params: { path: { id: s.id } },
+                    body: changes as Patch<"Student">,
+                  }),
+                )
+              }
+              onSaved={() => {
+                void queryClient.invalidateQueries({ queryKey: ["students"] });
+                void queryClient.invalidateQueries({ queryKey: ["clients"] });
+              }}
+              none={t("designS5.noDetails")}
+              facts={[
+                [t("people.yearGroup"), s.year_group],
+                [t("people.school"), s.school],
+                [
+                  t("people.dateOfBirth"),
+                  s.date_of_birth ? formatDate(s.date_of_birth, i18n.language) : "",
+                ],
+                [
+                  t("people.subjects"),
+                  (s.subjects ?? [])
+                    .map((x) => [x.subject, x.level].filter(Boolean).join(" "))
+                    .join(", "),
+                ],
+                [t("people.goals"), s.goals],
+                [t("people.learningNeeds"), s.learning_needs],
+              ]}
+            />
             <StudentMatchingCard student={s} />
           </>
         }
@@ -518,26 +638,79 @@ export function TutorPage({ tutorId }: { tutorId: string }) {
         }
         side={
           <>
-            <Panel title={t("people.details")} flush>
-              <FactList
-                none={t("designS5.noDetails")}
-                items={[
-                  [t("people.email"), p.email],
-                  [t("people.phone"), p.phone],
-                  [t("people.headline"), p.headline],
-                  [t("people.payRate"), p.pay_rate_amount],
+            <EditableDetails
+              title={t("people.details")}
+              editLabel={t("editDetails.tutor", { name: p.full_name })}
+              canEdit={canEdit}
+              record={p}
+              fields={[
+                { name: "first_name", label: t("people.firstName"), autoComplete: "off" },
+                { name: "last_name", label: t("people.lastName"), autoComplete: "off" },
+                {
+                  name: "display_name",
+                  label: t("editDetails.displayName"),
+                  hint: t("editDetails.displayNameHint"),
+                  autoComplete: "off",
+                  wide: true,
+                },
+                // A tutor who has joined signs in with their email: it isn't edited here.
+                ...(p.has_joined
+                  ? []
+                  : [
+                      {
+                        name: "email",
+                        label: t("people.email"),
+                        kind: "email" as const,
+                        autoComplete: "off",
+                        wide: true,
+                      },
+                    ]),
+                { name: "phone", label: t("people.phone"), kind: "tel", autoComplete: "off" },
+                { name: "pay_rate_amount", label: t("people.payRate"), kind: "number" },
+                { name: "headline", label: t("people.headline"), wide: true },
+                { name: "bio_public", label: t("editDetails.bioPublic"), kind: "textarea" },
+                { name: "bio_private", label: t("editDetails.bioPrivate"), kind: "textarea" },
+                { name: "travel_radius_km", label: t("editDetails.travelRadius"), kind: "number" },
+                {
+                  name: "delivers_online",
+                  label: t("editDetails.deliversOnline"),
+                  kind: "checkbox",
+                },
+                {
+                  name: "delivers_in_person",
+                  label: t("editDetails.deliversInPerson"),
+                  kind: "checkbox",
+                },
+              ]}
+              save={async (changes) =>
+                unwrap(
+                  await api.PATCH("/api/v1/tutors/{id}", {
+                    params: { path: { id: p.id } },
+                    body: { ...changes, invite: false } as Patch<"Tutor">,
+                  }),
+                )
+              }
+              onSaved={() => {
+                refresh();
+                void queryClient.invalidateQueries({ queryKey: ["me"] });
+              }}
+              none={t("designS5.noDetails")}
+              facts={[
+                [t("people.email"), p.email],
+                [t("people.phone"), p.phone],
+                [t("people.headline"), p.headline],
+                [t("people.payRate"), p.pay_rate_amount],
+                [
+                  t("people.delivery"),
                   [
-                    t("people.delivery"),
-                    [
-                      p.delivers_online ? t("people.online") : "",
-                      p.delivers_in_person ? t("people.inPerson") : "",
-                    ]
-                      .filter(Boolean)
-                      .join(", "),
-                  ],
-                ]}
-              />
-            </Panel>
+                    p.delivers_online ? t("people.online") : "",
+                    p.delivers_in_person ? t("people.inPerson") : "",
+                  ]
+                    .filter(Boolean)
+                    .join(", "),
+                ],
+              ]}
+            />
             <TutorMatchingCard tutor={p} />
           </>
         }

@@ -7940,5 +7940,27 @@
       "charge": "Client charged",
       "pay": "Tutor paid"
     }
+  },
+  "editDetails": {
+    "edit": "Edit",
+    "tutor": "Edit {{name}}'s details",
+    "student": "Edit {{name}}'s details",
+    "client": "Edit billing details for {{name}}",
+    "contact": "Edit {{name}}'s contact details",
+    "displayName": "Display name",
+    "displayNameHint": "Shown everywhere instead of the first and last name. Leave it empty to use those.",
+    "preferredName": "Preferred name",
+    "mobile": "Mobile",
+    "bioPublic": "About (shown on the public profile)",
+    "bioPrivate": "Private notes",
+    "travelRadius": "Travel radius (km)",
+    "deliversOnline": "Teaches online",
+    "deliversInPerson": "Teaches in person",
+    "paymentTermsDays": "Payment terms (days)",
+    "line1": "Address line 1",
+    "line2": "Address line 2",
+    "city": "Town or city",
+    "postcode": "Postcode",
+    "emailLinked": "The email is the one they sign in with, so it can't be changed here."
   }
 }
