@@ -21,6 +21,7 @@ from typing import Any
 
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_noop as N_
+from django.utils.translation import ngettext
 
 from tutortrack.core.exceptions import BusinessRuleViolation, Conflict
 
@@ -137,10 +138,23 @@ DATE_STARTS = (
 # Schedule starts with a name: "statement due" is a monthly schedule on clients.
 SCHEDULE_STARTS = (
     {"key": "statement.due", "label": "When monthly statements are due", "subject": "client",
-     "config": {"frequency": "monthly", "day": 1, "time": "06:00"}},
+     "config": {"frequency": "monthly", "day": 1, "time": "07:00", "start": "statement.due"}},
     {"key": "invoice_run.due", "label": "When invoicing is due (each branch)",
-     "subject": "branch", "config": {"frequency": "monthly", "day": 1, "time": "06:00"}},
+     "subject": "branch", "config": {"frequency": "monthly", "day": 1, "time": "06:00",
+                                     "start": "invoice_run.due"}},
 )  # fmt: skip
+
+
+def statement_clients(on: date) -> list[str]:
+    """Families with something on last month's statement (activity or a balance)."""
+    from tutortrack.billing import statements
+
+    start, end = statements.last_month(on)
+    return sorted({client for client, _currency in statements.due(start, end)})
+
+
+# The records a named schedule start picks, instead of every record of its type.
+SCHEDULE_RECORDS = {"statement.due": statement_clients}
 register_trigger("package.activated", "Package activated", "package")
 
 # --- plain questions -----------------------------------------------------------------------------
@@ -287,16 +301,56 @@ def start_invoice_run(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]
     mode = "advance" if config.get("mode") == "advance" else "arrears"
     run, created = billing.create_run(
         period_start=start, period_end=end, mode=mode,
-        branch=Branch.objects.get(pk=_branch_id(ctx)), user=ctx.author,
+        branch=Branch.objects.get(pk=_branch_id(ctx)), user=ctx.author, **run_options(config),
     )  # fmt: skip
     return {"invoice_run": str(run.pk), "created": created, "period": [str(start), str(end)]}
+
+
+def run_options(config: dict[str, Any]) -> dict[str, Any]:
+    """The review window, issuing and emailing a workflow sets for its runs (E33 T04): the
+    drafts wait ``review_days``, then are issued (``issue: after_review``) or wait for
+    someone to approve them (``when_approved``); ``email`` sends each invoice when issued.
+    Left out, the run follows the billing settings, as a run started by hand does."""
+    out: dict[str, Any] = {}
+    if config.get("review_days") not in (None, ""):
+        out["review_days"] = max(0, min(int(config["review_days"]), 30))
+    if config.get("issue") in ("after_review", "when_approved"):
+        out["auto_issue"] = config["issue"] == "after_review"
+    if config.get("email") is not None:
+        out["send_invoices"] = bool(config["email"])
+    return out
 
 
 def describe_start_run(ctx: RunContext, config: dict[str, Any]) -> str:
     from tutortrack.billing.services import org_today
 
     start, end = period_for(str(config.get("period") or "schedule"), org_today(), ctx)
-    return _("Start an invoice run for %(start)s to %(end)s") % {"start": start, "end": end}
+    text = _("Start an invoice run for %(start)s to %(end)s") % {"start": start, "end": end}
+    options = run_options(config)
+    if options.get("auto_issue") is False:
+        text += _(", then wait for someone to approve the drafts")
+    elif "review_days" in options:
+        text += ngettext(
+            ", review the drafts for %(n)s day, then issue them",
+            ", review the drafts for %(n)s days, then issue them",
+            options["review_days"],
+        ) % {"n": options["review_days"]}
+    if options.get("send_invoices"):
+        text += _(" and email them")
+    return text
+
+
+def send_invoice_reminder(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    """The payment reminder (worded for before, on or after the due date). Reminders after
+    the due date also mark the invoice overdue, as the old dunning did."""
+    from tutortrack.billing import services as billing
+
+    invoice = ctx.obj
+    if not invoice.is_open or not invoice.balance_due.is_positive():
+        return skipped(_("invoice already paid"))
+    offset = (billing.org_today() - invoice.due_date).days
+    billing.send_reminder(invoice.pk, offset, dedupe_key=ctx.key)
+    return {"reminded": str(invoice.pk), "days_from_due": offset}
 
 
 def issue_invoice_run(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
@@ -467,10 +521,16 @@ for _action in (
     Action("start_invoice_run", "Start an invoice run", start_invoice_run, describe_start_run, (
         A("period", "Period", "choice", True, PERIODS),
         A("mode", "Invoice", "choice", False, ("arrears", "advance")),
+        A("review_days", "Days to review the drafts", "number"),
+        A("issue", "Then", "choice", False, ("after_review", "when_approved")),
+        A("email", "Email each invoice when it is issued", "bool"),
     ), subjects=("branch",), permission="billing.invoice.create"),
     Action("issue_invoice_run", "Issue the invoice run", issue_invoice_run,
            _describe(N_("Issue the run's draft invoices")), (),
            subjects=("invoice_run",), permission="billing.invoice.issue"),
+    Action("send_invoice_reminder", "Send a payment reminder", send_invoice_reminder,
+           _describe(N_("Remind the family the invoice is due or overdue")), (),
+           subjects=BILLING),
     Action("email_invoice", "Email the invoice", email_invoice,
            _describe(N_("Email the invoice with its PDF to the family")),
            (A("only_unpaid", "Only if still unpaid", "bool"),),

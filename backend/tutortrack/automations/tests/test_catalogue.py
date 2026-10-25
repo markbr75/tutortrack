@@ -363,3 +363,14 @@ def test_pause_and_resume_through_the_api(org, api):
         rule.refresh_from_db()
         assert rule.version == 1  # pausing isn't a new version
         assert AuditEntry.objects.filter(object_id=str(rule.pk), action="pause").exists()
+
+
+def test_every_start_and_stop_when_event_reaches_the_engine():
+    """Triggers registered by the catalogue (and g4) are subscribed too, not only E14's."""
+    from tutortrack.core.events.registry import subscribers_for
+
+    missing = [
+        t.event for t in registry.triggers()
+        if "automations.on_event" not in {s.name for s in subscribers_for(t.event)}
+    ]  # fmt: skip
+    assert missing == []

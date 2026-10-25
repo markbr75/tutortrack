@@ -129,7 +129,7 @@
 <header>
 <h1>TutorTrack user guide</h1>
 <p class="lead">How to use TutorTrack day to day: for the office team in the admin app, tutors in the tutor app, families and students in the client portal, and affiliates in the partner portal.</p>
-<p class="meta">Last updated: 2026-10-23</p>
+<p class="meta">Last updated: 2026-10-25</p>
 </header>
 <p>Setting up the organisation (settings, roles, payments, integrations, the website and data import) is covered in the <a href="admin-guide.html">admin guide</a>. Developers should read the <a href="api-guide.html">API guide</a>.</p>
 
@@ -597,7 +597,7 @@
 <p>On <span class="ui">Record payments</span> (<code>payments.payment.record</code>), add a row per payment (client, amount, method, date received, reference) with <span class="ui">Add a row</span>, then select <span class="ui">Record … payments</span>. Each payment pays that client's oldest invoices first; anything left becomes credit. If any row can't be recorded, none are, so you can fix it and try again without creating duplicates.</p>
 
 <h5 id="chasing">Reminders, late fees and collections</h5>
-<p>TutorTrack sends payment reminders for overdue invoices automatically. If your organisation uses late fees, they are added after the set number of days overdue, once or monthly. Clients can be put <span class="ui">In collections</span>; select <span class="ui">Take out of collections</span> when sorted. Card and direct debit payments are set up by an admin; see <a href="admin-guide.html#payments-h">payments setup in the admin guide</a>.</p>
+<p>TutorTrack sends payment reminders before and after an invoice is due, and adds late fees if your organisation uses them, following the <span class="ui">Payment chasing</span> built-in workflow your admin can change (see <a href="admin-guide.html#automations-builtin">built-in workflows</a>). Reminders stop once the invoice is paid. Clients can be put <span class="ui">In collections</span>; select <span class="ui">Take out of collections</span> when sorted. Card and direct debit payments are set up by an admin; see <a href="admin-guide.html#payments-h">payments setup in the admin guide</a>.</p>
 </section>
 
 <section id="payroll" data-route="admin:/payroll" aria-labelledby="payroll-h">

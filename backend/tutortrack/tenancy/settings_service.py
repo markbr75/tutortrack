@@ -6,6 +6,7 @@ import copy
 from typing import Any
 
 from django.db import transaction
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from tutortrack.core import audit
@@ -60,12 +61,15 @@ def branch_overrides(area: str, branch: Branch) -> list[str]:
 
 @transaction.atomic
 def update_settings(
-    area: str, changes: dict[str, Any], *, branch: Branch | None = None
-) -> dict[str, Any]:
+    area: str, changes: dict[str, Any], *, branch: Branch | None = None,
+    allow_replaced: bool = False,
+) -> dict[str, Any]:  # fmt: skip
     """Validate and store ``changes`` (``{key: value}``) for an area.
 
     At organisation level ``None`` resets a key to its default. At branch level only
     ``scope="branch"`` keys are accepted and ``None`` removes the branch override.
+    Settings a built-in workflow replaced (``replaced_by``) are refused unless
+    ``allow_replaced`` (data conversion and tests).
     Emits ``organisation.settings_updated`` when anything changed.
     """
     definitions = {d.key: d for d in registry.area(area)}
@@ -80,6 +84,9 @@ def update_settings(
             continue
         if branch is not None and definition.scope != "branch":
             errors[key] = ["This setting cannot be overridden per branch."]
+            continue
+        if definition.replaced_by and not allow_replaced:
+            errors[key] = [_("This is now set in Workflows, in a built-in workflow.")]
             continue
         if value is None:
             cleaned[key] = None

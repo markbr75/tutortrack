@@ -12,18 +12,16 @@ from pathlib import Path
 import pytest
 from django.db import transaction
 
-from tutortrack.billing import dunning, packages, plans, services
-from tutortrack.billing.models import BillingPlan, Charge, CollectionsCase, Invoice, PackagePurchase
+from tutortrack.billing import packages, plans, services
+from tutortrack.billing.models import BillingPlan, Charge, Invoice, PackagePurchase
 from tutortrack.billing.processes import (
     BillingPlanWorkflow,
     InvoiceDunningWorkflow,
     PackageExpiryWorkflow,
-    dunning_workflow_id,
 )
 from tutortrack.billing.tests.test_billing import events_of, gbp, set_settings
 from tutortrack.catalogue.models import PackageTemplate
 from tutortrack.core.context import tenant_context
-from tutortrack.core.events.dispatcher import dispatch_batch
 from tutortrack.people.tests.factories import ClientFactory, ContactFactory, StudentFactory
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -38,7 +36,7 @@ def client_(org):
         client.billing_contact = contact
         client.save()
         StudentFactory(organisation=org, client=client)
-    set_settings(org, "billing", {"billing.auto_send": False, "billing.reminders_enabled": False})
+    set_settings(org, "billing", {"billing.auto_send": False})
     return client
 
 
@@ -133,27 +131,6 @@ def test_pausing_then_ending_a_plan_charges_nothing(org, client_, temporal_env):
     assert temporal_env.result(plan.workflow_id) == "charged:0"
 
 
-def test_dunning_applies_late_fees_and_opens_collections(org, client_, temporal_env):
-    set_settings(
-        org,
-        "billing",
-        {"billing.reminders_enabled": True, "billing.reminder_offsets": [0],
-         "billing.collections_after_days": 3},
-    )  # fmt: skip
-    with tenant_context(org), transaction.atomic():
-        dunning.save_rule(None, kind="fixed", amount=Decimal("5"), days_overdue=1)
-        services.create_ad_hoc_charge(client=client_, description="Fee", unit_price=gbp("50"))
-        draft = services.update_draft(
-            services.create_draft(client_), due_date=server_today(temporal_env)
-        )
-        invoice = services.issue_invoice(draft)
-    dispatch_batch()  # invoice.issued → dunning
-    assert temporal_env.result(dunning_workflow_id(org.pk, invoice.pk)) == "sent:1"
-    with tenant_context(org):
-        assert Charge.objects.get(kind="late_fee").gross == gbp("5.00")
-        assert CollectionsCase.objects.get().invoice_id == invoice.pk
-
-
 REPLAYED = (PackageExpiryWorkflow, BillingPlanWorkflow, InvoiceDunningWorkflow)
 
 
@@ -196,17 +173,5 @@ def test_record_phase2_histories_if_requested(org, client_, temporal_env):
     (HISTORIES / "BillingPlanWorkflow-ended.json").write_text(
         temporal_env.history_json(plan.workflow_id)
     )
-    set_settings(
-        org, "billing", {"billing.reminders_enabled": True, "billing.reminder_offsets": [0]}
-    )
-    with tenant_context(org), transaction.atomic():
-        dunning.save_rule(None, kind="fixed", amount=Decimal("5"), days_overdue=1)
-        services.create_ad_hoc_charge(client=client_, description="Fee", unit_price=gbp("50"))
-        draft = services.update_draft(
-            services.create_draft(client_), due_date=server_today(temporal_env)
-        )
-        invoice = services.issue_invoice(draft)
-    dispatch_batch()
-    wid = dunning_workflow_id(org.pk, invoice.pk)
-    temporal_env.result(wid)
-    (HISTORIES / "InvoiceDunningWorkflow-late-fees.json").write_text(temporal_env.history_json(wid))
+    # InvoiceDunningWorkflow-late-fees.json stays as recorded: the Payment chasing built-in
+    # workflow replaced it (E33 T04), so nothing starts it any more.

@@ -6899,7 +6899,9 @@
       "tab": "Options",
       "review": "Tutors check draft invoices",
       "statements": "Monthly statements",
-      "discounts": "Discounts on invoices"
+      "discounts": "Discounts on invoices",
+      "statementsMoved": "Statements are now sent by the “Monthly statements” built-in workflow, where you choose the day or switch them on or off.",
+      "openWorkflows": "Open Automations"
     },
     "tutorReview": {
       "title": "Tutor checks",

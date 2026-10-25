@@ -143913,6 +143913,10 @@
                     "schema": {
                         "type": "object",
                         "additionalProperties": {}
+                    },
+                    "replaced_by": {
+                        "type": "string",
+                        "description": "The built-in workflow that now decides this; the setting is read-only and has no effect."
                     }
                 },
                 "required": [

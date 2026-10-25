@@ -6,7 +6,9 @@ from __future__ import annotations
 
 from tutortrack.core.events import EventEnvelope, subscribe
 
-from . import builtins, registry  # noqa: F401  (builtins registers the triggers)
+# Every module that registers triggers is imported first: this module can be loaded (by the
+# event registry's discovery) before ``AutomationsConfig.ready`` imports them.
+from . import builtins, catalogue, g4, registry  # noqa: F401
 
 
 def run_matching_automations(event: EventEnvelope) -> None:

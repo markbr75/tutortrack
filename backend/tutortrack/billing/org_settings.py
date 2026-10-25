@@ -36,6 +36,7 @@ register(
         ("monthly", _("Monthly")),
     ),
     label=_("Create invoices"),
+    replaced_by="invoicing_cycle",
 )
 register(
     "billing.invoice_day",
@@ -44,6 +45,7 @@ register(
     min_value=1,
     max_value=28,
     label=_("Invoice on this day of the month (or weekday 1\N{EN DASH}7 for weekly)"),
+    replaced_by="invoicing_cycle",
 )
 register(
     "billing.review_days",
@@ -94,13 +96,20 @@ register(
 register(
     "billing.invoice_footer", type="str", default="", max_length=1000, label=_("Invoice footer")
 )
-register("billing.reminders_enabled", type="bool", default=True, label=_("Send payment reminders"))
+register(
+    "billing.reminders_enabled",
+    type="bool",
+    default=True,
+    label=_("Send payment reminders"),
+    replaced_by="payment_chasing",
+)
 register(
     "billing.reminder_offsets",
     type="object",
     default=[-3, 0, 3, 7, 14, 30],
     label=_("Reminder days relative to the due date"),
     help_text=_("Negative numbers are before the due date."),
+    replaced_by="payment_chasing",
 )
 register(
     "billing.prevent_negative_balance",
@@ -170,6 +179,7 @@ register(
     min_value=0,
     max_value=365,
     label=_("Put clients in collections when an invoice is this many days overdue (0: off)"),
+    replaced_by="payment_chasing",
 )
 register(
     "billing.collections_block",
@@ -211,6 +221,7 @@ register(
     choices=(("none", _("Don't send")), ("monthly", _("Every month"))),
     label=_("Email clients a statement"),
     help_text=_("Clients with account activity or a balance get last month's statement."),
+    replaced_by="monthly_statements",
 )
 register(
     "billing.statement_day",
@@ -219,4 +230,5 @@ register(
     min_value=1,
     max_value=28,
     label=_("Day of the month statements are sent"),
+    replaced_by="monthly_statements",
 )

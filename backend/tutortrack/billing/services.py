@@ -1525,8 +1525,13 @@ def create_run(
     client: Client | None = None,
     user: Any = None,
     start_workflow: bool = True,
+    review_days: int | None = None,
+    auto_issue: bool | None = None,
+    send_invoices: bool | None = None,
 ) -> tuple[InvoiceRun, bool]:
-    """Idempotent per branch, period and mode: running it again returns the same run."""
+    """Idempotent per branch, period and mode: running it again returns the same run.
+    ``review_days``, ``auto_issue`` and ``send_invoices`` come from the workflow that
+    starts it (E33); left out, the billing settings apply (runs started by hand)."""
     from tutortrack.tenancy.selectors import default_branch_id
 
     if period_end < period_start:
@@ -1537,7 +1542,13 @@ def create_run(
         period_start=period_start,
         period_end=period_end,
         mode=mode,
-        defaults={"filters": {"client": str(client.pk)} if client else {}, "requested_by": user},
+        defaults={
+            "filters": {"client": str(client.pk)} if client else {},
+            "requested_by": user,
+            "review_days": review_days,
+            "auto_issue": auto_issue,
+            "send_invoices": send_invoices,
+        },
     )
     if created and start_workflow:
         from tutortrack.core.workflows import start
@@ -1568,7 +1579,16 @@ def collect_run(run_id: Any) -> dict[str, Any]:
     totals: dict[str, Decimal] = defaultdict(Decimal)
     for invoice in drafts:
         totals[invoice.currency] += invoice.total.amount
-    review_days = int(get_setting("billing.review_days", branch=run.branch))
+    review_days = (
+        run.review_days
+        if run.review_days is not None
+        else int(get_setting("billing.review_days", branch=run.branch))
+    )
+    auto_issue = (
+        run.auto_issue
+        if run.auto_issue is not None
+        else bool(get_setting("billing.auto_issue", branch=run.branch))
+    )
     from . import tutor_review
 
     tutors = tutor_review.enabled(run) and bool(drafts)
@@ -1578,7 +1598,7 @@ def collect_run(run_id: Any) -> dict[str, Any]:
     run.stats = {
         "drafts": len(drafts),
         "totals": {k: str(v) for k, v in totals.items()},
-        "auto_issue": bool(get_setting("billing.auto_issue", branch=run.branch)),
+        "auto_issue": auto_issue,
         "review_days": review_days,
     }
     run.save(update_fields=["status", "review_until", "stats", "updated_at"])
@@ -1631,7 +1651,7 @@ def issue_run(run_id: Any) -> dict[str, Any]:
             continue
         try:
             with transaction.atomic():
-                issue_invoice(invoice)
+                issue_invoice(invoice, send=run.send_invoices)
             issued += 1
         except BusinessRuleViolation:
             failed += 1

@@ -105,6 +105,11 @@ class SettingDescriptionSerializer(serializers.Serializer):
             "max_value": serializers.IntegerField(required=False),
             "max_length": serializers.IntegerField(required=False),
             "schema": serializers.DictField(required=False),
+            "replaced_by": serializers.CharField(
+                required=False,
+                help_text="The built-in workflow that now decides this; the setting is "
+                "read-only and has no effect.",
+            ),
         }
 
 

@@ -10,6 +10,7 @@ import {
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api, useOrganisation } from "../api";
@@ -44,7 +45,8 @@ export function RunTutorReviews({ runId }: { runId: string }) {
   );
 }
 
-/** Gap G3 billing options: tutor pre-review, monthly statements and how discounts show. */
+/** Gap G3 billing options: tutor pre-review and how discounts show. Monthly statements are
+ * the "Monthly statements" built-in workflow now (E33 T04). */
 export function BillingOptions() {
   const { t } = useTranslation();
   const sections = [
@@ -53,15 +55,18 @@ export function BillingOptions() {
       area: "billing",
       keys: ["billing.tutor_review", "billing.tutor_review_days"],
     },
-    {
-      id: "statements",
-      area: "billing",
-      keys: ["billing.statement_schedule", "billing.statement_day"],
-    },
     { id: "discounts", area: "pricing", keys: ["pricing.discount_display"] },
   ] as const;
   return (
     <div className="max-w-3xl space-y-6">
+      <RuledPanel titleId="g3-billing-statements" title={t("g3.billingOptions.statements")}>
+        <p className="px-5 py-4 text-sm">
+          {t("g3.billingOptions.statementsMoved")}{" "}
+          <Link to="/automations" className="font-medium underline underline-offset-2">
+            {t("g3.billingOptions.openWorkflows")}
+          </Link>
+        </p>
+      </RuledPanel>
       {sections.map((section) => (
         <RuledPanel
           key={section.id}

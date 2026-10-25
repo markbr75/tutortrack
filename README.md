@@ -8,7 +8,9 @@ PostgreSQL backend, React and TypeScript frontends.
 **Status:** all 32 epics (E01–E32) are built, plus every gap batch (G1–G6). The items that
 need real provider credentials or infrastructure are listed at the end of
 [docs/05-gap-backlog.md](docs/05-gap-backlog.md). E33 (the workflow designer) is in
-progress: the sequence engine, its catalogue and the built-in workflow framework are done. Build order and progress:
+progress: the sequence engine, its catalogue, the built-in workflow framework and the
+billing built-ins (invoicing cycle, payment chasing, payment request reminders, monthly
+statements) are done. Build order and progress:
 [docs/04-roadmap.md](docs/04-roadmap.md).
 
 ## Guides

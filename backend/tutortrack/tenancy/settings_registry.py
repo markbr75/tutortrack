@@ -45,6 +45,9 @@ class SettingDefinition:
     # and a validator that returns the cleaned value or raises serializers.ValidationError.
     schema: dict[str, Any] = field(default_factory=dict)
     validator: Callable[[Any], Any] | None = None
+    # The built-in workflow that now decides this (E33): still readable for one release,
+    # but it no longer has any effect and can't be changed.
+    replaced_by: str = ""
 
     @property
     def area(self) -> str:
@@ -87,6 +90,8 @@ class SettingDefinition:
         for name in ("min_value", "max_value", "max_length"):
             if getattr(self, name) is not None:
                 out[name] = getattr(self, name)
+        if self.replaced_by:
+            out["replaced_by"] = self.replaced_by
         if self.schema:
             out["schema"] = self.schema
         return out

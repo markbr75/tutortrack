@@ -50,14 +50,16 @@ FOLLOW_UP = BuiltinWorkflow(
 
 @pytest.fixture
 def shipped():
-    """Two built-ins registered for the test (T04 to T06 ship the real ones)."""
-    before = {b.key: b for b in builtin_workflows.all_builtins()}
+    """Only these two built-ins are shipped during the test."""
+    before = builtin_workflows.all_builtins()
+    for b in before:
+        builtin_workflows.unregister(b.key)
     for b in (WELCOME, FOLLOW_UP):
         builtin_workflows.register(b)
     yield
-    for b in (WELCOME, FOLLOW_UP):
+    for b in builtin_workflows.all_builtins():
         builtin_workflows.unregister(b.key)
-    for b in before.values():
+    for b in before:
         builtin_workflows.register(b)
 
 
