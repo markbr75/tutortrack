@@ -17,6 +17,7 @@ class AutomationSerializer(serializers.ModelSerializer):
             "subject_type",
             "conditions",
             "steps",
+            "stop_when",
             "version",
             "enabled",
             "max_runs_per_record",
@@ -34,6 +35,12 @@ class AutomationWriteSerializer(serializers.Serializer):
     trigger_config = serializers.DictField()
     conditions = serializers.DictField(required=False, default=dict)
     steps = serializers.ListField(child=serializers.DictField())
+    stop_when = serializers.ListField(
+        child=serializers.CharField(max_length=80),
+        required=False,
+        default=list,
+        help_text="Events about the record that end a run early, e.g. invoice.paid.",
+    )
     enabled = serializers.BooleanField(required=False, default=False)
     max_runs_per_record = serializers.IntegerField(min_value=1, max_value=50, default=1)
 
@@ -45,6 +52,7 @@ class AutomationPatchSerializer(serializers.Serializer):
     trigger_config = serializers.DictField(required=False)
     conditions = serializers.DictField(required=False)
     steps = serializers.ListField(child=serializers.DictField(), required=False)
+    stop_when = serializers.ListField(child=serializers.CharField(max_length=80), required=False)
     max_runs_per_record = serializers.IntegerField(min_value=1, max_value=50, required=False)
 
 
@@ -74,6 +82,7 @@ class AutomationRunSerializer(serializers.ModelSerializer):
             "causation_depth",
             "attempts",
             "error",
+            "stop_reason",
         ]
 
 

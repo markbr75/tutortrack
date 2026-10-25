@@ -2459,7 +2459,8 @@
       "waiting": "Waiting",
       "completed": "Completed",
       "failed": "Failed",
-      "skipped": "Skipped"
+      "skipped": "Skipped",
+      "stopped": "Stopped"
     },
     "triggers": {
       "event": "When something happens",

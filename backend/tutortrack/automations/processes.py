@@ -8,10 +8,17 @@
   top-level step.
 * ``AutomationScheduleWorkflow``: started by the automation's Temporal Schedule (schedule
   and date triggers); one activity picks the records and starts a run for each.
+
+E33 (patch ``stop-when``): the ``stop`` signal (sent when a stop-when event arrives for the
+run's record) ends the run before its next step, waking it from a wait. Actions with an
+"only if" that no longer holds are skipped by ``execute_step``; waits can count from a date
+on the record, end at a time of day, on a business day or outside quiet hours
+(``services.start_wait``).
 """
 
 from __future__ import annotations
 
+import contextlib
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
@@ -25,6 +32,7 @@ from tutortrack.core.workflows.links import report_step
 
 TIMEOUT = timedelta(minutes=5)
 RETRY = RetryPolicy(maximum_attempts=5)
+STOP_WHEN = "stop-when"  # workflow.patched id (E33 T01)
 RUN_PROCESS = "automation"
 SCHEDULE_PROCESS = "automation-schedule"
 
@@ -48,6 +56,7 @@ class FinishInput(WorkflowInput):
     run_id: str
     status: str
     error: str = ""
+    reason: str = ""
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -97,7 +106,7 @@ def end_wait(input: StepInput) -> None:
 def finish_run(input: FinishInput) -> None:
     from . import services
 
-    services.finish(input.run_id, input.status, input.error)
+    services.finish(input.run_id, input.status, input.error, input.reason)
 
 
 @tenant_activity
@@ -113,12 +122,31 @@ def fan_out(input: ScheduleInput) -> int:
 @register_workflow(process=RUN_PROCESS, task_queue="default", cancel_permission="automation.manage")
 @workflow.defn
 class AutomationRunWorkflow:
+    def __init__(self) -> None:
+        self._stop_reason = ""
+
+    @workflow.signal
+    def stop(self, reason: str = "") -> None:
+        """A stop-when event arrived for the run's record (E33)."""
+        self._stop_reason = reason or "stopped"
+
+    async def _wait(self, delay: timedelta) -> None:
+        if delay <= timedelta(0):
+            return
+        if not workflow.patched(STOP_WHEN):
+            await workflow.sleep(delay)  # runs started before stop-when: as they were
+            return
+        with contextlib.suppress(TimeoutError):  # the time came
+            await workflow.wait_condition(lambda: bool(self._stop_reason), timeout=delay)
+
     async def _steps(
         self, input: RunInput, steps: list[dict[str, Any]], prefix: str, start_at: int = 0
     ) -> str:
         for index, step in enumerate(steps):
             if index < start_at:
                 continue
+            if self._stop_reason:
+                return "stopped"
             key = f"{prefix}{index}"
             si = StepInput(organisation_id=input.organisation_id, run_id=input.run_id, key=key,
                            step=step, now=workflow.now().isoformat())  # fmt: skip
@@ -133,9 +161,9 @@ class AutomationRunWorkflow:
                 until = await workflow.execute_activity(
                     start_wait, si, start_to_close_timeout=TIMEOUT
                 )
-                delay = datetime.fromisoformat(until) - workflow.now()
-                if delay > timedelta(0):
-                    await workflow.sleep(delay)
+                await self._wait(datetime.fromisoformat(until) - workflow.now())
+                if self._stop_reason:
+                    return "stopped"
                 await workflow.execute_activity(end_wait, si, start_to_close_timeout=TIMEOUT)
             elif kind == "branch":
                 matched = await workflow.execute_activity(
@@ -143,8 +171,8 @@ class AutomationRunWorkflow:
                 )
                 arm = "then" if matched else "else"
                 outcome = await self._steps(input, step.get(arm) or [], f"{key}.{arm}.")
-                if outcome == "failed":
-                    return "failed"
+                if outcome in ("failed", "stopped"):
+                    return outcome
         return "completed"
 
     @workflow.run
@@ -158,7 +186,7 @@ class AutomationRunWorkflow:
         await workflow.execute_activity(
             finish_run,
             FinishInput(organisation_id=input.organisation_id, run_id=input.run_id,
-                        status=outcome, error=error),
+                        status=outcome, error=error, reason=self._stop_reason),
             start_to_close_timeout=TIMEOUT,
         )  # fmt: skip
         await report_step(input, outcome, status="completed")

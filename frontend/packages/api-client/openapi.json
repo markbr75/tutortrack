@@ -89323,6 +89323,7 @@
                     },
                     "conditions": {},
                     "steps": {},
+                    "stop_when": {},
                     "version": {
                         "type": "integer",
                         "readOnly": true
@@ -89418,6 +89419,10 @@
                     },
                     "error": {
                         "type": "string"
+                    },
+                    "stop_reason": {
+                        "type": "string",
+                        "maxLength": 80
                     }
                 },
                 "required": [
@@ -89487,6 +89492,10 @@
                     "error": {
                         "type": "string"
                     },
+                    "stop_reason": {
+                        "type": "string",
+                        "maxLength": 80
+                    },
                     "steps": {
                         "type": "array",
                         "items": {
@@ -89511,10 +89520,11 @@
                     "waiting",
                     "completed",
                     "failed",
-                    "skipped"
+                    "skipped",
+                    "stopped"
                 ],
                 "type": "string",
-                "description": "* `running` - Running\n* `waiting` - Waiting\n* `completed` - Completed\n* `failed` - Failed\n* `skipped` - Skipped"
+                "description": "* `running` - Running\n* `waiting` - Waiting\n* `completed` - Completed\n* `failed` - Failed\n* `skipped` - Skipped\n* `stopped` - Stopped"
             },
             "AutomationSchema": {
                 "type": "object",
@@ -89607,6 +89617,15 @@
                             "type": "object",
                             "additionalProperties": {}
                         }
+                    },
+                    "stop_when": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
+                        },
+                        "description": "Events about the record that end a run early, e.g. invoice.paid."
                     },
                     "enabled": {
                         "type": "boolean",
@@ -122233,6 +122252,14 @@
                         "items": {
                             "type": "object",
                             "additionalProperties": {}
+                        }
+                    },
+                    "stop_when": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 80
                         }
                     },
                     "max_runs_per_record": {

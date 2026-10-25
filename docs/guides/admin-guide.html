@@ -223,7 +223,7 @@
         <h1>TutorTrack admin guide</h1>
         <p class="lead">How to set up and configure a tutoring business on TutorTrack, and how
           the TutorTrack service itself is operated.</p>
-        <p class="meta">Last updated: 2026-10-23</p>
+        <p class="meta">Last updated: 2026-10-25</p>
       </header>
 
       <section id="overview" aria-labelledby="overview-h">
@@ -1193,6 +1193,14 @@
           <li>Use <span class="ui">Test with a record</span> with a record ID to see whether it matches and what it would do. Nothing is sent.</li>
           <li>Switch it <span class="ui">On</span> in the list. Watch the <span class="ui">Runs</span> tab; a failed run can be retried from the failed step.</li>
         </ol>
+        <p>Through the API, automations can also (the editor for these comes with the Workflows
+          area): wait until a number of days before or after a date on the record, at a time of
+          day, on the next business day (your business hours and holidays) or outside quiet
+          hours; skip a step with an <code>only_if</code> condition, shown as
+          <span class="ui">Skipped</span> in the run; and stop early with
+          <code>stop_when</code>, up to three events about the same record (for example
+          <code>invoice.paid</code>), shown as <span class="ui">Stopped</span> with the event
+          that stopped it.</p>
 
         <h3 id="automations-catalogue">Triggers, actions and recipes</h3>
         <details class="ref">
@@ -2135,7 +2143,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>TutorTrack admin guide · Last updated: 2026-10-23 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
+    <p>TutorTrack admin guide · Last updated: 2026-10-25 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
   </footer>
 </body>
 </html>
