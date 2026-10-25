@@ -14,16 +14,7 @@ BEAT_SCHEDULE = {
         "task": "tutortrack.scheduling.tasks.extend_all_series_horizons",
         "schedule": crontab(hour=2, minute=30),
     },
-    # Lessons that just ended while still planned get an UnconfirmedLessonWorkflow (E09).
-    "start-unconfirmed-checks": {
-        "task": "tutortrack.delivery.tasks.start_all_unconfirmed_checks",
-        "schedule": timedelta(minutes=15),
-    },
-    # Lesson reminders at each configured offset (E13-T06); dedupe keys make it idempotent.
-    "lesson-reminders": {
-        "task": "tutortrack.comms.tasks.send_all_lesson_reminders",
-        "schedule": timedelta(minutes=5),
-    },
+    # Lesson reminders and the unconfirmed lesson chaser are built-in workflows (E33 T05).
     # Digests at each person's local time, card expiry notices and statements (G4).
     "scheduled-comms": {
         "task": "tutortrack.comms.tasks.send_all_scheduled_comms",

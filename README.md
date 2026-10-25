@@ -9,8 +9,8 @@ PostgreSQL backend, React and TypeScript frontends.
 need real provider credentials or infrastructure are listed at the end of
 [docs/05-gap-backlog.md](docs/05-gap-backlog.md). E33 (the workflow designer) is in
 progress: the sequence engine, its catalogue, the built-in workflow framework and the
-billing built-ins (invoicing cycle, payment chasing, payment request reminders, monthly
-statements) are done. Build order and progress:
+billing and lesson communications built-ins (invoicing, payment chasing, statements, lesson
+reminders, report chasing, feedback requests, unconfirmed lessons) are done. Build order and progress:
 [docs/04-roadmap.md](docs/04-roadmap.md).
 
 ## Guides
@@ -44,7 +44,7 @@ Then run each of these in its own terminal:
 ```bash
 cd backend && uv run python manage.py runserver 127.0.0.1:8010         # API
 cd backend && uv run celery -A config worker -l INFO                    # background jobs, all queues (-P solo on Windows)
-cd backend && uv run celery -A config beat -l INFO                      # timed jobs: reminders, checks, retries
+cd backend && uv run celery -A config beat -l INFO                      # timed jobs: digests, checks, retries
 cd backend && uv run python manage.py temporal_worker --task-queue all  # workflows
 pnpm --dir frontend dev                                                 # admin app
 pnpm --dir frontend/apps/portal dev                                     # client and tutor portal

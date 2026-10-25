@@ -32,6 +32,7 @@ register(
     label=_("Lessons not marked after this many hours are unconfirmed"),
     min_value=1,
     max_value=720,
+    replaced_by="unconfirmed_lessons",
 )
 register(
     "delivery.unconfirmed_action",
@@ -64,6 +65,7 @@ register(
     label=_("Remind tutors this many hours before a report is due"),
     min_value=0,
     max_value=168,
+    replaced_by="report_chasing",
 )
 register(
     "delivery.report_escalate_hours",
@@ -72,6 +74,7 @@ register(
     label=_("Tell staff when a report is this many hours overdue"),
     min_value=1,
     max_value=720,
+    replaced_by="report_chasing",
 )
 register(
     "delivery.report_edit_window_hours",
@@ -118,6 +121,7 @@ register(
     type="bool",
     default=False,
     label=_("Ask families for quick feedback after lessons"),
+    replaced_by="lesson_feedback",
 )
 register(
     "delivery.feedback_delay_hours",
@@ -126,6 +130,7 @@ register(
     label=_("Send the feedback request this many hours after the lesson"),
     min_value=0,
     max_value=72,
+    replaced_by="lesson_feedback",
 )
 register(
     "delivery.feedback_every_n_lessons",
@@ -142,6 +147,7 @@ register(
     label=_("Feedback links stop working after this many days"),
     min_value=1,
     max_value=60,
+    replaced_by="lesson_feedback",
 )
 register(
     "delivery.feedback_alert_at_or_below",

@@ -45,7 +45,8 @@ def _setting_out(key: str) -> dict[str, Any]:
         "available_channels": list(e.type.channels),
         "enabled": e.enabled,
         "timing": list(e.timing),
-        "has_timing": bool(e.type.default_timing),
+        "has_timing": False,  # E33 T05: reminder timing is a built-in workflow's now
+        "timing_in_workflow": bool(e.type.default_timing),
         "transactional": e.type.transactional,
         "locked": e.type.locked,
         "customised": e.customised,

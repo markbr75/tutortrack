@@ -80,6 +80,9 @@ def _subject_for(trigger_type: str, config: dict[str, Any]) -> tuple[str, str]:
     elif trigger_type == Automation.Trigger.DATE:
         if config.get("field") not in subject.date_fields:
             raise _invalid("trigger_config", _("Choose a date on the record."))
+        if "minutes" in config:
+            _check_near(config, subject)
+            return subject.key, ""
         try:
             int(config.get("offset_days") or 0)
         except (TypeError, ValueError) as exc:
@@ -88,6 +91,54 @@ def _subject_for(trigger_type: str, config: dict[str, Any]) -> tuple[str, str]:
     elif trigger_type != Automation.Trigger.MANUAL:
         raise _invalid("trigger_type", _("Unknown trigger."))
     return subject.key, ""
+
+
+# "Near a date" starts (E33 T05): a run per record when its date plus each of ``minutes``
+# (negative before, positive after) comes round, e.g. a lesson reminder 24 hours and 1 hour
+# before the start. A Temporal Schedule every 15 minutes picks the records whose moment fell
+# in the last ``catch_up_minutes`` (60 by default), so a moved lesson is picked at its new
+# time and nothing waits for weeks; the run key carries the moment, so each runs once.
+NEAR_EVERY_MINUTES = 15
+MAX_NEAR_MINUTES = 60 * 24 * 30
+
+
+def _check_near(config: dict[str, Any], subject: registry.Subject) -> None:
+    minutes = config.get("minutes")
+    model = subject.model_class()
+    field = model._meta.get_field(str(config["field"]))
+    if field.get_internal_type() != "DateTimeField":
+        raise _invalid("trigger_config", _("Choose a date and time on the record."))
+    valid = isinstance(minutes, list) and 0 < len(minutes) <= 6 and all(
+        isinstance(m, int) and abs(m) <= MAX_NEAR_MINUTES for m in minutes
+    )  # fmt: skip
+    if not valid:
+        raise _invalid("trigger_config", _("Give up to six times, up to 30 days before or after."))
+    catch_up = config.get("catch_up_minutes", 60)
+    if not isinstance(catch_up, int) or not NEAR_EVERY_MINUTES <= catch_up <= 24 * 60:
+        raise _invalid("trigger_config", _("Catch up between 15 minutes and a day."))
+
+
+def near_records(automation: Automation, moment: datetime) -> list[tuple[str, str]]:
+    """(record id, run key) for each record whose date plus one of the start's minutes fell
+    in the catch-up window before ``moment``."""
+    subject = registry.subject(automation.subject_type)
+    if subject is None:
+        return []
+    config = automation.trigger_config or {}
+    name = str(config["field"])
+    catch_up = timedelta(minutes=int(config.get("catch_up_minutes", 60)))
+    out: list[tuple[str, str]] = []
+    for minutes in config.get("minutes") or []:
+        offset = timedelta(minutes=int(minutes))
+        rows = (
+            subject.model_class()
+            .objects.filter(
+                **{f"{name}__gt": moment - offset - catch_up, f"{name}__lte": moment - offset}
+            )
+            .values_list("pk", name)[:FAN_OUT_LIMIT]
+        )
+        out += [(str(pk), f"schedule:near:{minutes}:{value.isoformat()}") for pk, value in rows]
+    return out
 
 
 def _check_steps(
@@ -1041,8 +1092,17 @@ def fan_out(automation_id: str, on: date | None = None) -> int:
     automation = Automation.objects.filter(pk=automation_id, enabled=True).first()
     if automation is None:
         return 0
-    day = on or org_today()
     started = 0
+    if automation.trigger_type == Automation.Trigger.DATE and "minutes" in (
+        automation.trigger_config or {}
+    ):
+        for subject_id, run_key in near_records(automation, now()):
+            run = prepare_run(automation, subject_id=subject_id, run_key=run_key)
+            if run is not None:
+                launch(run)
+                started += 1
+        return started
+    day = on or org_today()
     for subject_id in due_records(automation, day):
         run = prepare_run(automation, subject_id=subject_id, run_key=f"schedule:{day.isoformat()}")
         if run is not None:
@@ -1069,12 +1129,13 @@ def sync_schedule(automation_id: str) -> str | None:
     config = dict(automation.trigger_config or {})
     if automation.trigger_type == Automation.Trigger.DATE:
         config["frequency"] = "daily"
+    near = automation.trigger_type == Automation.Trigger.DATE and "minutes" in config
     org = Organisation.objects.get(pk=org_id)
     return ensure_schedule(
         process=SCHEDULE_PROCESS,
         workflow=AutomationScheduleWorkflow,
         input=ScheduleInput(organisation_id=str(org_id), automation_id=str(automation_id)),
-        cron=_cron(config),
+        cron=[f"*/{NEAR_EVERY_MINUTES} * * * *"] if near else _cron(config),
         timezone=org.timezone,
         parts=(automation_id,),
     )

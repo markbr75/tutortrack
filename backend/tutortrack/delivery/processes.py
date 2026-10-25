@@ -1,5 +1,10 @@
 """Lesson delivery workflows (E09-TW1, E32).
 
+Replaced by built-in workflows in E33 T05 and no longer started (kept for one release so
+runs under way finish, and for history replay): ``LessonReportSlaWorkflow`` (Lesson report
+chasing), ``LessonFeedbackWorkflow`` (Lesson feedback request) and
+``UnconfirmedLessonWorkflow`` (Unconfirmed lesson chaser).
+
 ``LessonReportSlaWorkflow`` ``report-sla:{org}:{report}``: started by
 ``lesson_report.requested``. Reminder before the due time → at the due time mark overdue
 (``lesson_report.overdue``, optional pay hold) → after M more hours escalate to staff.
@@ -11,8 +16,8 @@ the report, so a missed signal never sends a wrong reminder.
 then waits until every request is answered (signal ``answered`` from
 ``lesson_feedback.received``) or the links expire, and expires the rest.
 
-``UnconfirmedLessonWorkflow`` ``unconfirmed:{org}:{lesson}``: started (by a beat task,
-see ``tasks.py``) when a lesson's end passes while still planned. After N hours it
+``UnconfirmedLessonWorkflow`` ``unconfirmed:{org}:{lesson}``: was started (by a beat task)
+when a lesson's end passes while still planned. After N hours it
 auto-completes the lesson or flags it and nudges the tutor (setting). Signal ``resolved``
 (lesson completed or cancelled) ends it early.
 """

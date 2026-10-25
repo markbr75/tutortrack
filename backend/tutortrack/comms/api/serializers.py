@@ -22,7 +22,11 @@ class NotificationSettingSerializer(serializers.Serializer):
     available_channels = serializers.ListField(child=serializers.ChoiceField(choices=CHANNELS))
     enabled = serializers.BooleanField()
     timing = serializers.ListField(child=serializers.IntegerField())
-    has_timing = serializers.BooleanField()
+    has_timing = serializers.BooleanField(help_text="Always false: see timing_in_workflow.")
+    timing_in_workflow = serializers.BooleanField(
+        help_text="When it is sent is set in a built-in workflow (Lesson reminders); "
+        "timing is the value it started from and is read-only."
+    )
     transactional = serializers.BooleanField()
     locked = serializers.BooleanField(help_text="Account emails: can be edited, not switched off.")
     customised = serializers.BooleanField()

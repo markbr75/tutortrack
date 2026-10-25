@@ -1516,7 +1516,9 @@
       "staff": "Staff alerts",
       "messages": "Messages",
       "marketing": "Marketing"
-    }
+    },
+    "timingInWorkflow": "When reminders go out is set in the “Lesson reminders” built-in workflow.",
+    "openWorkflows": "Open Automations"
   },
   "portal": {
     "signIn": "Sign in",
@@ -5947,7 +5949,9 @@
     "chooseStars": "Choose from 1 to 5 stars.",
     "send": "Send feedback",
     "thanks": "Thank you for your feedback.",
-    "closed": "This feedback request has closed."
+    "closed": "This feedback request has closed.",
+    "inWorkflow": "Whether families are asked, how soon after the lesson and when the links close are set in the “Lesson feedback request” built-in workflow.",
+    "openWorkflows": "Open Automations"
   },
   "proposals": {
     "title": "Proposals",

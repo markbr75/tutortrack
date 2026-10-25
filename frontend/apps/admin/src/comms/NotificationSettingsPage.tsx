@@ -12,6 +12,7 @@ import {
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { api, usePermission } from "../api";
@@ -93,6 +94,14 @@ function SettingRow({ setting, onEdit }: { setting: Setting; onEdit: () => void 
               </label>
             ))}
           </fieldset>
+          {setting.timing_in_workflow ? (
+            <p className="text-sm text-muted-foreground lg:pt-1">
+              {t("comms.timingInWorkflow")}{" "}
+              <Link to="/automations" className="font-medium text-foreground underline">
+                {t("comms.openWorkflows")}
+              </Link>
+            </p>
+          ) : null}
           {setting.has_timing ? (
             <TextField
               className="w-32 tabular-nums"

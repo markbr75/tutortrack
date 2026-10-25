@@ -143,7 +143,7 @@ def test_installing_removes_the_replaced_schedules(
     deleted = []
     monkeypatch.setattr(  # Temporal's delete call
         "tutortrack.core.workflows.schedules.runtime.run",
-        lambda coro: deleted.append(1) or coro.close(),
+        lambda coro: deleted.append(coro.__name__) or coro.close(),
     )
     with tenant_context(org):
         branch = Branch.objects.get(is_default=True)
@@ -157,7 +157,7 @@ def test_installing_removes_the_replaced_schedules(
         assert not ScheduleLink.objects.filter(
             schedule_id__in=[invoice_sid, statement_sid]
         ).exists()
-    assert len(deleted) == 2
+    assert deleted.count("_each") == 2  # one delete each (other calls set up new schedules)
 
 
 def test_replaced_settings_stay_readable_but_cant_be_changed(org, api):

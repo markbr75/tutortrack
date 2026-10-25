@@ -57,7 +57,7 @@ def enabled(org):
     with tenant_context(org):
         settings_service.update_settings(
             "delivery",
-            {"delivery.feedback_enabled": True, "delivery.feedback_every_n_lessons": 1},
+            {"delivery.feedback_every_n_lessons": 1},
         )
 
 
@@ -105,11 +105,6 @@ def test_feedback_is_sent_to_the_family_once(
         assert "/feedback/" in message.body
         assert OutboxEvent.objects.filter(event_type="lesson_feedback.requested").count() == 1
     assert send(org, lesson, django_capture_on_commit_callbacks) == []  # idempotent
-
-
-def test_nothing_is_sent_when_surveys_are_off(org, people, django_capture_on_commit_callbacks):
-    lesson = completed_lesson(org, people)
-    assert send(org, lesson, django_capture_on_commit_callbacks) == []
 
 
 def test_absent_students_are_not_asked(org, people, enabled, django_capture_on_commit_callbacks):
