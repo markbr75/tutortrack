@@ -937,6 +937,19 @@ def issue_invoice(invoice: Invoice, *, user: Any = None, send: bool | None = Non
     return invoice
 
 
+def email_invoice(invoice: Invoice, *, key: str) -> bool:
+    """Email an issued invoice with its PDF to the client's invoice contacts (a workflow's
+    "Email the invoice"; ``key`` makes each send once). True if sent."""
+    from tutortrack.comms import services as comms
+
+    if invoice.status in {Invoice.Status.DRAFT, Invoice.Status.VOID}:
+        return False
+    messages = comms.notify(
+        "invoice_issued", invoice, key=key, immediate=True, only_channel="email"
+    )
+    return any(m.status == "sent" for m in messages)
+
+
 def _send_later(organisation_id: Any, invoice_id: Any) -> None:
     from .tasks import send_invoice_email
 
@@ -1263,6 +1276,20 @@ def send_reminder(invoice_id: Any, offset: int, *, dedupe_key: str | None = None
 
 
 @transaction.atomic
+def remind_payment_request(request_id: Any, *, dedupe_key: str | None = None) -> bool:
+    """Send the family a reminder for an open payment request (``payment_request.sent``)."""
+    request = PaymentRequest.objects.filter(pk=request_id).first()
+    if request is None or request.status != PaymentRequest.Status.OPEN:
+        return False
+    publish(
+        events.PaymentRequestSent(subject_id=request.pk, client_id=str(request.client_id)),
+        branch_id=request.branch_id,
+        dedupe_key=dedupe_key,
+    )
+    return True
+
+
+@transaction.atomic
 def create_payment_request(
     *,
     client: Client,
@@ -1558,6 +1585,17 @@ def collect_run(run_id: Any) -> dict[str, Any]:
     if tutors and tutor_review.open_reviews(run):  # gap G3: tutors check their lessons
         run.stats = {**run.stats, "tutor_review": True, "tutor_review_days": tutor_days}
         run.save(update_fields=["stats", "updated_at"])
+    publish(
+        events.InvoiceRunDrafted(
+            subject_id=run.pk,
+            drafts=len(drafts),
+            period_start=run.period_start.isoformat(),
+            period_end=run.period_end.isoformat(),
+            review_until=run.review_until.isoformat() if run.review_until else None,
+        ),
+        branch_id=run.branch_id,
+        dedupe_key=f"invoice-run-drafted:{run.pk}",
+    )
     return dict(run.stats)
 
 
@@ -1604,6 +1642,11 @@ def issue_run(run_id: Any) -> dict[str, Any]:
         if held:
             run.stats["held"] = len(held)
         run.save(update_fields=["status", "stats", "updated_at"])
+        publish(
+            events.InvoiceRunIssued(subject_id=run.pk, issued=issued, failed=failed),
+            branch_id=run.branch_id,
+            dedupe_key=f"invoice-run-issued:{run.pk}",
+        )
     return dict(run.stats)
 
 

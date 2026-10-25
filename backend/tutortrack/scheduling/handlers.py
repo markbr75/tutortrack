@@ -136,6 +136,16 @@ def follow_job_status(event: EventEnvelope) -> None:
             services.end_series(series, reason=reason)
 
 
+@subscribe("lesson.completed")
+def first_lesson_for_family(event: EventEnvelope) -> None:
+    """E33: ``client.first_lesson_completed`` for families whose first lesson this was."""
+    from . import services
+
+    lesson = Lesson.objects.filter(pk=event.subject["id"]).first()
+    if lesson is not None:
+        services.note_first_lessons(lesson)
+
+
 @subscribe("tutor.tier_assigned")
 def recalculate_after_tier_change(event: EventEnvelope) -> None:
     """E06-T07 retroactive tool: re-price the tutor's unlocked lessons from the date."""

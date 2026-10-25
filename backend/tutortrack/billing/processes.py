@@ -166,23 +166,9 @@ def invoice_is_open(input: DunningInput) -> bool:
 
 @tenant_activity
 def remind_payment_request(input: RequestInput) -> bool:
-    from django.db import transaction
+    from . import services
 
-    from tutortrack.core.events import publish
-
-    from .events import PaymentRequestSent
-    from .models import PaymentRequest
-
-    request = PaymentRequest.objects.filter(pk=input.request_id).first()
-    if request is None or request.status != PaymentRequest.Status.OPEN:
-        return False
-    with transaction.atomic():
-        publish(
-            PaymentRequestSent(subject_id=request.pk, client_id=str(request.client_id)),
-            branch_id=request.branch_id,
-            dedupe_key=idempotency_key(),
-        )
-    return True
+    return services.remind_payment_request(input.request_id, dedupe_key=idempotency_key())
 
 
 # --- Phase 2 activities -----------------------------------------------------------------------

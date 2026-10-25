@@ -159,7 +159,14 @@ def lesson_ctx(lesson: Any) -> dict[str, Any]:
         "students": [a.student.full_name for a in attendees],
         "tutors": [t.tutor.full_name for t in lesson.tutors.select_related("tutor")],
         "first_for_student": first,
+        "trial": _is_trial(lesson),
     }
+
+
+def _is_trial(lesson: Any) -> bool:
+    from tutortrack.leads.models import Enquiry
+
+    return Enquiry.objects.filter(trial_lesson_id=lesson.pk).exists()
 
 
 def report_ctx(report: Any) -> dict[str, Any]:
@@ -168,6 +175,8 @@ def report_ctx(report: Any) -> dict[str, Any]:
         "status": report.status,
         "due_at": _d(report.due_at),
         "submitted_at": _d(report.submitted_at),
+        "overdue": report.overdue_at is not None,
+        "escalated": report.escalated_at is not None,
         "tutor": report.tutor.full_name,
         "lesson": lesson_ctx(report.lesson),
     }
@@ -185,6 +194,8 @@ def enquiry_ctx(enquiry: Any) -> dict[str, Any]:
         "expected_start": _d(enquiry.expected_start),
         "stage_entered_at": _d(enquiry.stage_entered_at),
         "created_at": _d(enquiry.created_at),
+        "trial_booked": enquiry.trial_lesson_id is not None,
+        "trial_outcome": enquiry.trial_outcome,
         "tags": _tags("leads.enquiry", enquiry.pk),
         "client": client_ctx(enquiry.client),
     }

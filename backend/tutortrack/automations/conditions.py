@@ -3,6 +3,7 @@
     {"all": [cond, ...]}  {"any": [cond, ...]}  {"not": cond}
     {"field": "student.status", "op": "equals", "value": "active"}
     {"predicate": "first_lesson_for_student"}
+    {"predicate": "invoice.unpaid"}  (a plain question, E33)
 
 Fields are dot paths into the whitelisted context (``registry.Subject.fields``) plus
 ``event.*``. ``changed``, ``changed_from`` and ``changed_to`` read the event's changes.
@@ -27,18 +28,31 @@ MAX_DEPTH = 5
 
 Predicate = Callable[[dict[str, Any]], bool]
 _predicates: dict[str, tuple[str, Predicate]] = {}
+_question_subjects: dict[str, str] = {}  # plain questions: predicate key → record type
 
 
 class InvalidCondition(ValueError):
     pass
 
 
-def register_predicate(key: str, label: str, fn: Predicate) -> None:
+def register_predicate(key: str, label: str, fn: Predicate, *, subject: str = "") -> None:
+    """A named check. With ``subject`` it is a *plain question* about that kind of record
+    ("the invoice is still unpaid"), offered for "only if" and Yes / No splits (E33)."""
     _predicates[key] = (label, fn)
+    if subject:
+        _question_subjects[key] = subject
 
 
 def predicates() -> dict[str, str]:
     return {k: label for k, (label, _fn) in _predicates.items()}
+
+
+def questions() -> list[dict[str, str]]:
+    """The plain questions, per kind of record, in registration order."""
+    return [
+        {"key": key, "label": _predicates[key][0], "subject": subject}
+        for key, subject in _question_subjects.items()
+    ]
 
 
 def resolve(context: dict[str, Any], path: str) -> Any:
@@ -185,8 +199,11 @@ def evaluate(
     raise InvalidCondition("A condition needs all, any, not, field or predicate.")
 
 
-def validate(cond: dict[str, Any] | None, paths: set[str], _depth: int = 0) -> list[str]:
-    """Problems with a condition tree (unknown fields, operators, predicates)."""
+def validate(
+    cond: dict[str, Any] | None, paths: set[str], _depth: int = 0, *, subject: str = ""
+) -> list[str]:
+    """Problems with a condition tree (unknown fields, operators, predicates, or a question
+    about another kind of record than ``subject``)."""
     if not cond:
         return []
     if not isinstance(cond, dict):
@@ -199,12 +216,18 @@ def validate(cond: dict[str, Any] | None, paths: set[str], _depth: int = 0) -> l
             if not isinstance(cond[key], list):
                 return [f"'{key}' needs a list."]
             for child in cond[key]:
-                errors += validate(child, paths, _depth + 1)
+                errors += validate(child, paths, _depth + 1, subject=subject)
             return errors
     if "not" in cond:
-        return validate(cond["not"], paths, _depth + 1)
+        return validate(cond["not"], paths, _depth + 1, subject=subject)
     if "predicate" in cond:
-        return [] if cond["predicate"] in _predicates else [f"Unknown check {cond['predicate']}"]
+        name = cond["predicate"]
+        if name not in _predicates:
+            return [f"Unknown check {name}"]
+        about = _question_subjects.get(name)
+        if subject and about and about != subject:
+            return [f"“{_predicates[name][0]}” is a question about another kind of record"]
+        return []
     path = cond.get("field")
     if not path:
         return ["A condition needs all, any, not, field or predicate."]

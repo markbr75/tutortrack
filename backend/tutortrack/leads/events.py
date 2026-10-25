@@ -69,6 +69,15 @@ class TrialLessonCompleted(DomainEvent):
 
 
 @dataclass(frozen=True, kw_only=True)
+class TrialLessonNoShow(DomainEvent):
+    """The enquiry's trial lesson was marked missed (E33: a workflow can follow up)."""
+
+    event_type: ClassVar[str] = "trial_lesson.no_show"
+    subject_type: ClassVar[str] = "enquiry"
+    lesson_id: str
+
+
+@dataclass(frozen=True, kw_only=True)
 class _WaitlistEvent(DomainEvent):
     subject_type: ClassVar[str] = "waitlist_entry"
     student_id: str

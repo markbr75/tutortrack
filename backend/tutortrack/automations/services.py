@@ -120,11 +120,21 @@ def _check_steps(
                 if f.required and config.get(f.name) in (None, "", []):
                     errors.append(_("Step %(n)s: fill in %(f)s.") % {"n": label, "f": f.label})
             if step.get("only_if"):
-                errors += [f"{label}: {e}" for e in conditions.validate(step["only_if"], paths)]
+                errors += [
+                    f"{label}: {e}"
+                    for e in conditions.validate(step["only_if"], paths, subject=subject.key)
+                ]
+            if action.key == "start_workflow" and not _same_kind(config, subject.key):
+                errors.append(
+                    _("Step %(n)s: choose a workflow about the same kind of record.") % {"n": label}
+                )
         elif kind == "wait":
             errors += _check_wait(step, label, paths)
         elif kind == "branch":
-            errors += [f"{label}: {e}" for e in conditions.validate(step.get("if"), paths)]
+            errors += [
+                f"{label}: {e}"
+                for e in conditions.validate(step.get("if"), paths, subject=subject.key)
+            ]
             for arm in ("then", "else"):
                 more, n = _check_steps(step.get(arm) or [], subject, user, depth + 1)
                 errors += more
@@ -132,6 +142,16 @@ def _check_steps(
         else:
             errors.append(_("Step %(n)s: unknown step type.") % {"n": label})
     return errors, count
+
+
+def _same_kind(config: dict[str, Any], subject_type: str) -> bool:
+    """ "Start another workflow" needs one about the same kind of record."""
+    workflow = str(config.get("workflow") or "")
+    try:
+        uuid.UUID(workflow)
+    except ValueError:
+        return False
+    return Automation.objects.filter(pk=workflow, subject_type=subject_type).exists()
 
 
 def _number(value: Any) -> float | None:
@@ -200,7 +220,7 @@ def validate_definition(
     subject = registry.subject(subject_type)
     if subject is None:
         raise _invalid("trigger_config", _("This kind of record isn't supported yet."))
-    problems = conditions.validate(conditions_, subject.field_paths())
+    problems = conditions.validate(conditions_, subject.field_paths(), subject=subject.key)
     if problems:
         raise _invalid("conditions", problems)
     stopping = _check_stop_when(stop_when or [], subject_type)
@@ -318,6 +338,33 @@ def set_enabled(automation: Automation, enabled: bool, *, user: Any = None) -> A
 
 
 @transaction.atomic
+def pause(automation: Automation, *, user: Any = None) -> Automation:
+    """No new runs start; runs under way hold before their next action (E33 FR-33-3)."""
+    automation = Automation.objects.select_for_update().get(pk=automation.pk)
+    with audit.track(automation, action="pause"):
+        automation.paused = True
+        automation.save(update_fields=["paused", "updated_at"])
+    return automation
+
+
+@transaction.atomic
+def resume(automation: Automation, *, user: Any = None) -> Automation:
+    """Carry on: held runs continue from the action they stopped before."""
+    from tutortrack.core.workflows import signal
+
+    automation = Automation.objects.select_for_update().get(pk=automation.pk)
+    with audit.track(automation, action="resume"):
+        automation.paused = False
+        automation.save(update_fields=["paused", "updated_at"])
+    held = AutomationRun.objects.filter(
+        automation=automation, status=AutomationRun.Status.PAUSED
+    ).exclude(workflow_id="")
+    for run in held:
+        signal(run.workflow_id, "resume")
+    return automation
+
+
+@transaction.atomic
 def delete_automation(automation: Automation) -> None:
     audit.record(automation, "delete")
     publish(events.AutomationDeleted(subject_id=automation.pk))
@@ -373,9 +420,11 @@ def prepare_run(
     run_key: str,
     event: EventEnvelope | None = None,
     manual: bool = False,
+    depth: int | None = None,
 ) -> AutomationRun | None:
-    """Guardrails and conditions; returns the new run, or ``None`` when it shouldn't run."""
-    if not manual and not automation.enabled:
+    """Guardrails and conditions; returns the new run, or ``None`` when it shouldn't run.
+    ``depth`` is how many workflows deep it is when another workflow started it."""
+    if automation.paused or (not manual and not automation.enabled):
         return None
     if not _setting("automations.enabled"):
         return None
@@ -400,7 +449,7 @@ def prepare_run(
             logger.warning("automation.rate_limited", automation_id=str(automation.pk))
             return None
     version = automation.versions.get(version=automation.version)
-    depth = _depth_of(event)
+    depth = _depth_of(event) if depth is None else depth
     status = AutomationRun.Status.RUNNING
     error = ""
     if depth > MAX_CAUSATION_DEPTH:
@@ -567,6 +616,11 @@ def execute_step(run_id: str, key: str, step: dict[str, Any]) -> dict[str, Any]:
             action = registry.action(str(step.get("action") or ""))
             if action is None:
                 raise BusinessRuleViolation(_("Unknown action."))
+            if run.automation.paused:
+                AutomationRun.objects.filter(pk=run.pk).update(status=AutomationRun.Status.PAUSED)
+                return {"status": "paused"}
+            if run.status == AutomationRun.Status.PAUSED:  # resumed
+                AutomationRun.objects.filter(pk=run.pk).update(status=AutomationRun.Status.RUNNING)
             if step.get("only_if") and not conditions.evaluate(
                 step["only_if"], build_context(subject, obj)
             ):
@@ -582,9 +636,13 @@ def execute_step(run_id: str, key: str, step: dict[str, Any]) -> dict[str, Any]:
             ctx = RunContext(
                 automation=run.automation, subject=subject, obj=obj,
                 context=build_context(subject, obj), key=f"automation:{run.pk}:{key}",
-                author=author,
+                author=author, run=run,
             )  # fmt: skip
             result = action.run(ctx, step.get("config") or {})
+            if isinstance(result.get("skipped"), str):  # "skipped: invoice already paid"
+                _record(run, key, "action", AutomationRunStep.Status.SKIPPED, result=result,
+                        error="")  # fmt: skip
+                return {"status": "skipped", "result": result}
             _record(run, key, "action", AutomationRunStep.Status.COMPLETED, result=result, error="")
     except (BusinessRuleViolation, PermissionDenied, ValueError) as exc:
         message = str(getattr(exc, "detail", exc))

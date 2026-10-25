@@ -90,6 +90,15 @@ class LessonMissed(DomainEvent):
 
 
 @dataclass(frozen=True, kw_only=True)
+class ClientFirstLessonCompleted(DomainEvent):
+    """A family's first lesson took place (E33: welcome and review workflows start here)."""
+
+    event_type: ClassVar[str] = "client.first_lesson_completed"
+    subject_type: ClassVar[str] = "client"
+    lesson_id: str
+
+
+@dataclass(frozen=True, kw_only=True)
 class LockedLessonEdited(DomainEvent):
     """A locked (invoiced or paid) lesson changed: E10/E12 raise credit notes or pay
     adjustments from the before/after amounts."""

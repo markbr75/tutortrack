@@ -9,6 +9,7 @@ router.register("automation-runs", v.AutomationRunViewSet, basename="automation-
 
 urlpatterns = [
     path("automation-schema", v.AutomationSchemaView.as_view(), name="automation-schema"),
+    path("workflow-schema", v.WorkflowSchemaView.as_view(), name="workflow-schema"),
     path("automation-recipes", v.RecipesView.as_view(), name="automation-recipes"),
     path(
         "automation-recipes/<slug:key>/install",

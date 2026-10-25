@@ -324,3 +324,28 @@ class StatementSent(DomainEvent):
     currency: str
     period_start: str
     period_end: str
+
+
+# --- E33: invoice runs as workflow starts --------------------------------------------------------
+
+
+@dataclass(frozen=True, kw_only=True)
+class InvoiceRunDrafted(DomainEvent):
+    """An invoice run's drafts are ready for review (a workflow can wait, then issue it)."""
+
+    event_type: ClassVar[str] = "invoice_run.drafted"
+    subject_type: ClassVar[str] = "invoice_run"
+    drafts: int
+    period_start: str
+    period_end: str
+    review_until: str | None = None
+
+
+@dataclass(frozen=True, kw_only=True)
+class InvoiceRunIssued(DomainEvent):
+    """An invoice run finished issuing its drafts."""
+
+    event_type: ClassVar[str] = "invoice_run.issued"
+    subject_type: ClassVar[str] = "invoice_run"
+    issued: int
+    failed: int = 0

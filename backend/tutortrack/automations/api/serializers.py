@@ -20,12 +20,15 @@ class AutomationSerializer(serializers.ModelSerializer):
             "stop_when",
             "version",
             "enabled",
+            "paused",
             "max_runs_per_record",
             "recipe_key",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["subject_type", "version", "recipe_key", "created_at", "updated_at"]
+        read_only_fields = [
+            "subject_type", "version", "paused", "recipe_key", "created_at", "updated_at",
+        ]  # fmt: skip
 
 
 class AutomationWriteSerializer(serializers.Serializer):
@@ -175,3 +178,58 @@ class AutomationSchemaSerializer(serializers.Serializer):
     actions = SchemaActionSerializer(many=True)
     operators = serializers.ListField(child=serializers.CharField())
     predicates = serializers.DictField(child=serializers.CharField())
+
+
+# --- E33 workflow schema ------------------------------------------------------------------------
+
+
+class WorkflowQuestionSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    subject = serializers.CharField()
+
+
+class WorkflowDateFieldSerializer(serializers.Serializer):
+    path = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    type = serializers.CharField()
+
+
+class WorkflowRecordTypeSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    recipients = serializers.ListField(child=serializers.CharField())
+    taggable = serializers.BooleanField()
+    date_fields = WorkflowDateFieldSerializer(many=True)
+    stop_when = serializers.ListField(
+        child=serializers.CharField(), help_text="Events that can end a run for this record type."
+    )
+
+
+class WorkflowDateStartSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    subject = serializers.CharField()
+    event = serializers.CharField(help_text="The event the run starts on.")
+    date = serializers.CharField(help_text="The date its first wait counts from.")
+
+
+class WorkflowScheduleStartSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    subject = serializers.CharField()
+    config = serializers.DictField(help_text="The schedule's trigger_config.")
+
+
+class WorkflowStartsSerializer(serializers.Serializer):
+    events = SchemaTriggerSerializer(many=True)
+    dates = WorkflowDateStartSerializer(many=True)
+    schedules = WorkflowScheduleStartSerializer(many=True)
+    frequencies = serializers.ListField(child=serializers.CharField())
+
+
+class WorkflowSchemaSerializer(serializers.Serializer):
+    record_types = WorkflowRecordTypeSerializer(many=True)
+    starts = WorkflowStartsSerializer()
+    questions = WorkflowQuestionSerializer(many=True)
+    actions = SchemaActionSerializer(many=True)

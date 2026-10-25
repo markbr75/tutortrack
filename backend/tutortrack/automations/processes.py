@@ -14,6 +14,10 @@ run's record) ends the run before its next step, waking it from a wait. Actions 
 "only if" that no longer holds are skipped by ``execute_step``; waits can count from a date
 on the record, end at a time of day, on a business day or outside quiet hours
 (``services.start_wait``).
+
+E33 T02: a paused workflow's runs hold before their next action (``execute_step`` answers
+``paused``) until the ``resume`` signal, re-checking every few hours in case it was missed.
+Only runs that meet a pause take the new path, so older histories replay unchanged.
 """
 
 from __future__ import annotations
@@ -33,6 +37,7 @@ from tutortrack.core.workflows.links import report_step
 TIMEOUT = timedelta(minutes=5)
 RETRY = RetryPolicy(maximum_attempts=5)
 STOP_WHEN = "stop-when"  # workflow.patched id (E33 T01)
+PAUSE_RECHECK = timedelta(hours=6)
 RUN_PROCESS = "automation"
 SCHEDULE_PROCESS = "automation-schedule"
 
@@ -124,11 +129,17 @@ def fan_out(input: ScheduleInput) -> int:
 class AutomationRunWorkflow:
     def __init__(self) -> None:
         self._stop_reason = ""
+        self._resumed = False
 
     @workflow.signal
     def stop(self, reason: str = "") -> None:
         """A stop-when event arrived for the run's record (E33)."""
         self._stop_reason = reason or "stopped"
+
+    @workflow.signal
+    def resume(self) -> None:
+        """The workflow was resumed: a held run carries on (E33)."""
+        self._resumed = True
 
     async def _wait(self, delay: timedelta) -> None:
         if delay <= timedelta(0):
@@ -152,9 +163,22 @@ class AutomationRunWorkflow:
                            step=step, now=workflow.now().isoformat())  # fmt: skip
             kind = step.get("type")
             if kind == "action":
+                self._resumed = False
                 result = await workflow.execute_activity(
                     execute_step, si, start_to_close_timeout=TIMEOUT, retry_policy=RETRY
                 )
+                while result.get("status") == "paused":
+                    with contextlib.suppress(TimeoutError):
+                        await workflow.wait_condition(
+                            lambda: self._resumed or bool(self._stop_reason),
+                            timeout=PAUSE_RECHECK,
+                        )
+                    if self._stop_reason:
+                        return "stopped"
+                    self._resumed = False
+                    result = await workflow.execute_activity(
+                        execute_step, si, start_to_close_timeout=TIMEOUT, retry_policy=RETRY
+                    )
                 if result.get("status") == "failed":
                     return "failed"
             elif kind == "wait":
