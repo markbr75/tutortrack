@@ -25,37 +25,44 @@ Owner decisions (2026-10-25):
 - Automations merges into Workflows; existing automations and recipes move across.
 - Access: every plan (Solo included) can edit and test the built-in workflows; new custom
   workflows follow today's plan limits (Team 10, Agency 50, Enterprise unlimited).
+- **Keep it simple enough for a tutoring business** (2026-10-25): a workflow is a
+  *sequence* on one timeline, not a flowchart. Steps run top to bottom; a step can split
+  into **Yes / No** paths on one plain question, one level deep, and the paths join again
+  afterwards. A "Stop when" rule ends the sequence (for example, when the invoice is paid).
+  No approval steps, loops or draft/publish screens in the first release.
 
 ## 2. Functional requirements
 
-### FR-33-1 One workflow model
-A workflow is a **trigger**, optional **entry conditions** and a list of **steps**, stored
-as JSON and checked against the registry when saved (ADR 0014). Saving a change writes a new
-version; runs keep the version they started with.
+### FR-33-1 One workflow model: a sequence
+A workflow is a **sequence**: a start, an optional **Stop when** rule and a list of steps,
+stored as JSON and checked against the registry when saved (ADR 0014). Saving writes a new
+version silently; runs already under way keep their version, new runs use the new one.
 
-Triggers:
-- **Event:** a domain event (the E14 list plus the new ones in FR-33-4).
-- **Schedule:** "every month on day N at HH:MM", "every week on DAY at HH:MM", "every
-  term start", in each branch's time zone (one Temporal Schedule per workflow and branch).
-- **Relative date:** N minutes, hours or days before or after a date on a record (a lesson's
-  start, an invoice's due date, a package's expiry, a check's expiry).
-- **Manual:** started from a record or the workflow page.
+**Starts** (a plain sentence from a short list per area):
+- **When something happens:** a domain event ("When an invoice is sent", "When a lesson is
+  booked", "When an enquiry arrives"; the E14 list plus FR-33-4).
+- **On a schedule:** "Every month on the [1st] at [06:00]", "Every week on [Monday] at
+  [06:00]", in each branch's time zone (one Temporal Schedule per workflow and branch).
+- **By hand:** from a record or the workflow page.
 
-Step types (existing ✓, new ★):
-- ✓ **Action**: one of the registered actions (FR-33-4).
-- ✓ **Wait for a duration**.
-- ★ **Wait until**: a date on the record ± an offset, a time of day, the next business day
-  (organisation business hours, `general.business_hours`), or outside quiet hours.
-- ✓ **If / else** on conditions, evaluated against the record when reached.
-- ★ **Wait for something**: an event about the record (for example "invoice paid",
-  "report submitted") with a time limit; continues on the "happened" or "timed out" path.
-- ★ **Approval**: asks people with a permission (or a named role) to approve, through a
-  task and a notification; continues on "approved", "rejected" or "timed out".
-- ★ **Repeat**: repeats its inner steps until a condition is true or N times (at most 12).
-- ★ **Stop**: ends the run (optionally "and stop other runs of this workflow for this
-  record").
+**Stop when** (optional): an event about the record ends the run ("the invoice is paid",
+"the enquiry is won", "the lesson is cancelled"). Up to three.
 
-### FR-33-2 Built-in workflows
+**Steps.** Each step is a card with:
+- **When:** straight away; after N minutes, hours or days; or N days before or after a date
+  on the record (the due date, the lesson start, the expiry date), optionally at a time of
+  day, the next business day, or outside quiet hours.
+- **Only if** (optional): one plain check from the record type's list ("the invoice is
+  still unpaid", "the family pays automatically", "this is the student's first lesson").
+- **Do:** one or more actions (FR-33-4), done in order.
+
+**Yes / No split.** A step can instead ask one plain question from the same list. Each
+answer has its own steps (each with When and Do, but no further split: one level only).
+After the split, the steps below it run for both paths. A sequence can have up to 20 steps
+and 5 splits.
+
+There are no loops, approval steps or free-form branching in the first release. Approvals
+stay where they already are (the invoice run's review window and "approve run").### FR-33-2 Built-in workflows
 Each built-in workflow is a definition shipped in code with a stable key, installed for
 every organisation (and for new organisations at sign-up). In the designer it is marked
 **Built-in**: it can be edited, switched off where that is safe, tested, and **Reset to
@@ -90,30 +97,32 @@ checks, organisation closure, broadcasts and platform processes. They have legal
 financial rules that a workflow must not be able to skip. Designed workflows reach them only
 through actions ("Start an invoice run", "Issue the run") and events ("Invoice run drafted").
 
-### FR-33-3 The designer
-- **Workflows** replaces **Automations** in the menu (`/workflows`; `/automations` redirects).
-  Tabs: **Built-in**, **Custom**, **Templates** (the recipe library) and **Runs**.
-- **Flow view:** the trigger, then the steps as a vertical flow; branches and waits show
-  their paths side by side from 1024px and stacked on phones. Each step reads as a plain
-  sentence ("Wait until 3 days before the due date, at 09:00"). Add a step with **+**
-  between steps; move steps with Move up and Move down buttons as well as dragging, so it
-  works by keyboard. Selecting a step opens its settings beside the flow (below on phones).
-- **Validation as you go:** a step with a problem shows why in words; publishing is blocked
-  until every step is valid.
-- **Draft and publish:** edits are a draft until **Publish**; **Discard draft** goes back.
-  **Versions** lists every published version with who and when, and can restore one.
-- **Test:** choose a real record (or a sample) and run the workflow as a dry run. Every
-  step says what it would do, and waits are skipped and labelled. Nothing is sent, charged
-  or changed.
-- **Coming up:** for schedule and relative-date workflows, the next 5 times it will run
-  and, where possible, how many records each would pick ("1 Nov 06:00: 38 families").
-- **Runs:** each run's timeline (steps done, waiting, next wake-up), with **Cancel run**,
-  **Retry from this step** and, for a workflow, **Pause** and **Resume**. The organisation
-  kill switch (E14) stays.
-- **Message steps** choose a message template and channel; **Edit message** opens the
-  template with its merge fields, and a preview shows a sample.
-
-### FR-33-4 New triggers, actions and record types
+### FR-33-3 The sequence editor
+- **Workflows** replaces **Automations** in the menu (`/workflows`; `/automations`
+  redirects). Tabs: **Built-in**, **Custom**, **Templates** (the recipe library) and
+  **Runs**.
+- **One timeline, top to bottom.** The start and **Stop when** sit at the top; each step is
+  a card on a vertical line that reads as a sentence ("3 days before the due date, at
+  09:00 · Send "Friendly reminder" by email"). A Yes / No split shows its two paths side by
+  side from 768px and one under the other on phones, then the line joins again.
+- **Editing in place.** Select a card to edit its When, Only if and Do in the card itself;
+  **+ Add a step** sits between cards; **Move up**, **Move down** and **Delete** are on
+  each card (so it all works by keyboard and on a phone). Every choice is a list or a
+  number, never a formula.
+- **Messages:** a Do that sends a message picks a message template and channels, and
+  **Edit wording** opens it (Settings › Notifications) with a sample.
+- **Problems in words:** a card that can't run says why ("Choose which message to send");
+  **Save** is blocked until every card is complete.
+- **Save and switch on.** Saving applies to new runs; a note says how many runs are
+  already under way and that they finish on the old steps. A built-in can be **Reset to
+  default**. Old versions are kept for the record but not shown as a screen.
+- **Preview for a family** (or a lesson, an enquiry): choose a real record and see the
+  timeline with real dates, which path each split would take and what each step would
+  send. Nothing is sent or changed. For scheduled sequences, **Coming up** lists the next 5
+  dates and how many records each would pick ("1 Nov, 06:00: 38 families").
+- **Runs:** a list of runs with where each one is ("waiting until 12 Nov, 09:00"), its
+  steps so far, **Cancel** and **Retry**; **Pause** on a workflow; the kill switch (E14)
+  stays.### FR-33-4 New triggers, actions and record types
 - Events: `invoice_run.drafted`, `invoice_run.issued`, `invoice.due_soon` (relative date),
   `payment_request.created`, `lesson.reminder_due` (relative date), `lesson_report.due`,
   `lesson.unconfirmed`, `package.expiring` (relative date), `trial_lesson.no_show`,
@@ -144,9 +153,7 @@ Added:
   invoice already paid".
 - A built-in workflow that is switched off falls back to the manual way (for example,
   invoicing becomes manual) and Home says so.
-- Publishing a change to a workflow with waiting runs asks whether those runs continue on
-  their version (default) or move to the new one at their next step (only when the new
-  version still has that step).
+- Runs already under way always finish on the version they started with.
 - Messages respect quiet hours and contact preferences unless the step is marked urgent
   (owner only).
 
@@ -161,16 +168,13 @@ Added:
 ## 3. Data model
 Grows the E14 tables rather than adding new ones:
 - `Automation` gains `kind` (`custom` | `builtin`), `builtin_key`, `builtin_version` (the
-  default it came from), `edited` (bool), `draft` (JSON: trigger, conditions, steps), and
-  `paused`.
+  default it came from), `edited` (bool), `stop_when` (event list) and `paused`.
 - `AutomationVersion` unchanged (it already stores trigger, conditions and steps).
-- `AutomationRun` gains `waiting_for` (event type, approval id or wake time, shown on the
+- `AutomationRun` gains `waiting_for` (the wake time or the stop-when events, shown on the
   timeline) and `next_wake_at`, both for display only. Temporal holds the real timers;
   nothing sweeps these columns (CLAUDE.md 4a).
-- `AutomationRunStep` gains `path` labels for branch arms and `outcome` ("timed out",
-  "approved", "skipped: …").
-- New `WorkflowApproval` (tenant): run, step key, permission or role, status, decided_by,
-  decided_at, reason, and the task it created.
+- `AutomationRunStep` gains `path` labels for split arms and `outcome` ("skipped: only if
+  not met", "skipped: invoice already paid", "stopped: invoice paid").
 - Code: built-in definitions in `<app>/workflows_builtin.py`, registered with
   `@builtin_workflow(key, group)` and discovered like recipes.
 
@@ -178,65 +182,63 @@ The models keep their `automations` names in code; only the product says "Workfl
 
 ## 4. API
 - `/api/v1/workflows` (alias of `/automations`, which stays for one release): list, create,
-  retrieve, update draft, `publish`, `discard-draft`, `pause`, `resume`, `reset-to-default`,
-  `versions`, `test` (dry run), `upcoming`.
+  retrieve, update, `pause`, `resume`, `reset-to-default`, `preview` (dry run for a
+  record), `upcoming`.
 - `/api/v1/workflow-runs`: list and detail (timeline), `cancel`, `retry`.
-- `/api/v1/workflow-approvals`: list mine, `approve`, `reject`.
-- `/api/v1/workflow-schema`: triggers, record types, fields, actions, step types (the
-  designer is driven by it).
-- Webhooks: `workflow.run_failed`, `workflow.approval_requested`.
+- `/api/v1/workflow-schema`: starts, stop-when events, record types, plain questions (the
+  "only if" and split list), date fields and actions. The editor is driven by it.
+- Webhooks: `workflow.run_failed`.
 
 ## 5. Permissions
 - `automation.view`: see workflows and runs (unchanged codename).
-- `automation.manage`: edit, test, publish and pause custom workflows (owner, admin, branch
+- `automation.manage`: edit, preview, save and pause custom workflows (owner, admin, branch
   manager).
-- `automation.builtin.manage` (new): edit, publish, pause and reset built-in workflows
+- `automation.builtin.manage` (new): edit, save, pause and reset built-in workflows
   (owner, admin, branch manager, finance). As in ADR 0014 §6, saving also needs the
   permission of every action in the workflow, so finance can change the billing built-ins
   but not, say, the enquiry follow-up.
-- Approvals use the permission named on the step.
 - Plans: built-in workflows are on every plan; custom workflows keep the E14 limits.
 
 ## 6. Delivery plan
 Each ticket is one pull request, merged when CI is green.
 
-- [ ] **T01 — Engine: new step types.** `wait until`, `wait for something` (bridge signals
-  the run when the awaited event arrives), approvals (`WorkflowApproval`, a task and a
-  notification, then a signal on decision), `repeat`, `stop`. Interpreter changes are
-  versioned with `workflow.patched`, with replay histories for each new step type
-  (02-architecture §9). Hypothesis tests for "wait until" across time zones and DST.
-- [ ] **T02 — Draft, publish, versions and pause.** Draft column, publish and discard,
-  restore a version, pause and resume (Temporal Schedules paused too), and the
-  move-waiting-runs option.
-- [ ] **T03 — Catalogue.** The new triggers, record types and actions in FR-33-4, with
-  permissions, idempotency keys and tests per action. `/workflow-schema`.
-- [ ] **T04 — Built-in workflow framework.** `@builtin_workflow`, install for new and
+- [ ] **T01 — Engine: sequences.** "N days before or after a date, at a time" waits,
+  business-day and quiet-hours timing, **Stop when** (the bridge signals the run; it ends
+  before its next step), Yes / No splits that rejoin, and "only if" per step. Interpreter
+  changes are versioned with `workflow.patched`, with replay histories (02-architecture
+  §9). Hypothesis tests for date-relative waits across time zones and DST.
+- [ ] **T02 — Plain questions and the catalogue.** The per-record-type list of plain
+  questions (each a named predicate with tests), the new starts, stop-when events, record
+  types and actions in FR-33-4 (with permissions and idempotency keys), silent versions,
+  pause and resume. `/workflow-schema`.
+- [ ] **T03 — Built-in workflow framework.** `@builtin_workflow`, install for new and
   existing organisations, reset to default, default upgrades, `edited` tracking, switching
-  off safely, and plan rules (built-ins on every plan).
-- [ ] **T05 — Built-ins: invoicing and payment chasing.** Invoicing cycle, payment
+  off safely, and built-ins on every plan.
+- [ ] **T04 — Built-ins: invoicing and payment chasing.** Invoicing cycle, payment
   chasing, payment request reminders, statements. Each organisation's settings convert to
-  its first version. Retire the replaced schedules, workflows and settings. Billing guide
-  updates.
-- [ ] **T06 — Built-ins: lesson communications.** Lesson reminders (retire the beat task),
+  its first version. Retire the replaced schedules, workflows and settings.
+- [ ] **T05 — Built-ins: lesson communications.** Lesson reminders (retire the beat task),
   report chasing, feedback request, unconfirmed lesson chaser.
-- [ ] **T07 — Built-ins: sales and onboarding, and expiry reminders.** Enquiry follow-up,
+- [ ] **T06 — Built-ins: sales and onboarding, and expiry reminders.** Enquiry follow-up,
   trial follow-up, welcome a new family, review request, package expiry, compliance expiry.
-- [ ] **T08 — Designer UI.** Workflows area (Built-in, Custom, Templates, Runs), flow view
-  with branch lanes, step settings panel, plain-English summaries, keyboard moves,
-  validation, draft and publish, versions. Replaces the Automations pages. WCAG 2.2 AA.
-- [ ] **T09 — Test, coming up and runs.** Dry run against a real or sample record,
-  upcoming runs with counts, run timeline with cancel and retry, approvals inbox.
-- [ ] **T10 — Migration and docs.** Automations → custom workflows, recipes → templates,
-  `/automations` redirect, guides (user, admin, API), help articles, What's new, roadmap
+- [ ] **T07 — Sequence editor.** The Workflows area, the timeline with in-place cards,
+  splits, Stop when, + Add a step, Move up and down, problems in words, Save and switch on,
+  Reset to default. Replaces the Automations pages. WCAG 2.2 AA; usability check with the
+  built-ins (a first-time owner can change "when invoices go out" in under a minute).
+- [ ] **T08 — Preview, coming up and runs.** Preview for a family, coming-up dates with
+  counts, the runs list with where each run is, cancel and retry.
+- [ ] **T09 — Migration and docs.** Automations → custom workflows (their branches map to
+  splits; any that don't fit stay as they are and open read-only with "Contact support"),
+  recipes → templates, `/automations` redirect, guides, help articles, What's new, roadmap
   and README.
 
-Order: T01 → T02 → T03 → T04 → (T05, T06, T07) → T08 → T09 → T10. T08 can start after T02
+Order: T01 → T02 → T03 → (T04, T05, T06) → T07 → T08 → T09. T07 can start after T02
 against the API.
 
 ## Temporal workflows (E32)
-- `AutomationRunWorkflow` (E14) interprets every workflow; the new step types are timers,
-  `wait_condition` on signals from the bridge, and approval signals. Histories stay small:
-  every step is an activity or a timer, and repeats continue-as-new after 50 iterations.
+- `AutomationRunWorkflow` (E14) interprets every workflow. Date-relative waits are timers;
+  **Stop when** is a signal from the bridge that ends the run at its next wait. Histories
+  stay small: every step is an activity or a timer.
 - `AutomationScheduleWorkflow` (E14) runs schedule and relative-date triggers, one Temporal
   Schedule per workflow and branch.
 - The replaced per-process workflows (FR-33-2 table) are removed after T05 to T07.

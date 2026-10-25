@@ -32,15 +32,16 @@ system or the database would be better. We considered:
    revisited when the deploy is planned, mainly on cost. Because designed workflows are
    data interpreted by one workflow, a later engine change would touch the interpreter and
    the protected processes, not the designer or the definitions.
-2. **One designer, one engine.** Automations becomes Workflows. The E14
-   `AutomationRunWorkflow` stays the only interpreter and gains new step types:
-   - wait until a date or time;
-   - wait for an event, with a time limit;
-   - approval;
-   - repeat;
-   - stop.
-   Waits for events are signals sent by the bridge; approvals are signals sent by the
-   approval service. Interpreter changes use `workflow.patched` with replay histories.
+2. **One editor, one engine, kept simple.** Automations becomes Workflows. A workflow is
+   a *sequence* on one timeline, because the people using it run tutoring businesses, not
+   software teams (owner, 2026-10-25). It has:
+   - steps with *When*, *Only if* and *Do*;
+   - Yes / No splits on one plain question, one level deep, that join again afterwards;
+   - an optional *Stop when* rule.
+   There are no loops, approval steps or free-form flowcharts. The E14
+   `AutomationRunWorkflow` stays the only interpreter. It gains waits relative to a date
+   and time of day, splits that rejoin, and stop-when, which is a signal from the bridge.
+   Interpreter changes use `workflow.patched` with replay histories.
 3. **Built-in workflows are definitions shipped in code.** They are installed for every
    organisation, editable and resettable. They replace the hard-wired timing of invoicing,
    payment chasing, statements, lesson reminders, report chasing, feedback requests,
