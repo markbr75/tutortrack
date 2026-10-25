@@ -2360,6 +2360,23 @@ export interface paths {
     patch: operations["automations_partial_update"];
     trace?: never;
   };
+  "/api/v1/automations/{id}/default": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A built-in's current default, to compare with the organisation's version. */
+    get: operations["automations_default_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/automations/{id}/disable": {
     parameters: {
       query?: never;
@@ -2405,6 +2422,26 @@ export interface paths {
     put?: never;
     /** @description Pause: no new runs start, and runs under way hold before their next action. */
     post: operations["automations_pause_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automations/{id}/reset-to-default": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Put a built-in workflow back to TutorTrack's current default (a new version; runs
+     *     under way finish on theirs).
+     */
+    post: operations["automations_reset_to_default_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -2473,6 +2510,23 @@ export interface paths {
     put?: never;
     /** @description Dry run against a record: whether it matches and what each step would do. */
     post: operations["automations_test_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automations/notices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Built-in workflows Home mentions: switched off, or with a newer default. */
+    get: operations["automations_notices_list"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -23982,11 +24036,23 @@ export interface components {
       readonly paused: boolean;
       max_runs_per_record?: number;
       readonly recipe_key: string;
+      readonly kind: components["schemas"]["AutomationKindEnum"];
+      readonly builtin_key: string;
+      readonly builtin_version: number | null;
+      readonly edited: boolean;
+      readonly builtin: components["schemas"]["BuiltinInfo"] | null;
+      readonly runs_under_way: number;
       /** Format: date-time */
       readonly created_at: string;
       /** Format: date-time */
       readonly updated_at: string;
     };
+    /**
+     * @description * `custom` - Custom
+     *     * `builtin` - Built-in
+     * @enum {string}
+     */
+    AutomationKindEnum: "custom" | "builtin";
     AutomationRun: {
       /** Format: uuid */
       readonly id: string;
@@ -24993,6 +25059,44 @@ export interface components {
       units: number;
       topics: number;
       installed: boolean;
+    };
+    BuiltinDefault: {
+      key: string;
+      version: number;
+      name: string;
+      description: string;
+      group: string;
+      trigger_type: string;
+      trigger_config: {
+        [key: string]: unknown;
+      };
+      conditions: {
+        [key: string]: unknown;
+      };
+      steps: {
+        [key: string]: unknown;
+      }[];
+      stop_when: string[];
+    };
+    BuiltinInfo: {
+      /** @description invoicing, lessons, sales or expiry. */
+      group: string;
+      group_label: string;
+      /** @description TutorTrack's current default version. */
+      latest_version: number;
+      /** @description Edited, and TutorTrack has improved the default since. */
+      update_available: boolean;
+      can_switch_off: boolean;
+      /** @description What happens instead while it's switched off. */
+      off_means: string;
+    };
+    BuiltinNotice: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      notice: components["schemas"]["NoticeEnum"];
+      /** @description For off: what happens instead. */
+      message: string;
     };
     BulkInviteRequest: {
       emails: string[];
@@ -32243,6 +32347,12 @@ export interface components {
       /** Format: date-time */
       readonly created_at: string;
     };
+    /**
+     * @description * `off` - off
+     *     * `update` - update
+     * @enum {string}
+     */
+    NoticeEnum: "off" | "update";
     NoticeRequest: {
       message: string;
       severity?: components["schemas"]["NoticeSeverityEnum"];
@@ -48841,6 +48951,8 @@ export interface operations {
   automations_list: {
     parameters: {
       query?: {
+        /** @description Built-in or not */
+        kind?: "builtin" | "custom";
         /** @description Which field to use when ordering the results. */
         ordering?: string;
       };
@@ -48987,6 +49099,28 @@ export interface operations {
       };
     };
   };
+  automations_default_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BuiltinDefault"];
+        };
+      };
+    };
+  };
   automations_disable_create: {
     parameters: {
       query?: never;
@@ -49038,6 +49172,31 @@ export interface operations {
     };
   };
   automations_pause_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  automations_reset_to_default_create: {
     parameters: {
       query?: never;
       header?: {
@@ -49170,6 +49329,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["DryRun"];
+        };
+      };
+    };
+  };
+  automations_notices_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BuiltinNotice"][];
         };
       };
     };

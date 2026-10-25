@@ -143,6 +143,7 @@
           <li><a href="#automations-h">Automations</a>
             <ol>
               <li><a href="#automations-build">Build an automation</a></li>
+              <li><a href="#automations-builtin">Built-in workflows</a></li>
               <li><a href="#automations-catalogue">Triggers, actions and recipes</a></li>
               <li><a href="#automations-safety">Safety limits</a></li>
             </ol>
@@ -540,7 +541,7 @@
               <tr><td>Admin</td><td>Everything else in the organisation.</td><td>Change the subscription, transfer ownership, close the account, grant support access, run a full data export, manage the DPA, open safeguarding cases, make changes while viewing as someone.</td></tr>
               <tr><td>Branch manager</td><td>Admin rights over records in their branches, and view settings.</td><td>See the plan, change organisation settings or branches, see the audit log, import or export data, manage data requests, retention or legal holds, change AI settings, merge duplicates.</td></tr>
               <tr><td>Coordinator</td><td>Day-to-day operations in full: people, notes and tasks, jobs, scheduling, lesson delivery, communications, leads, courses, learning and matching. Views invoices, charge rates, the catalogue, settings, team, dashboards and most reports; moderates reviews and runs referrals; uses the AI assistant; raises safeguarding concerns.</td><td>See tutor financial details, edit locked lessons, change matching settings, merge duplicates, manage billing or payroll.</td></tr>
-              <tr><td>Finance</td><td>Billing, payments, payroll, accounting integrations and all reports; manages rates; views clients, settings, team, notes, catalogue, courses and the plan; affiliates and commission; AI usage.</td><td>Manage people, scheduling or communications.</td></tr>
+              <tr><td>Finance</td><td>Billing, payments, payroll, accounting integrations and all reports; manages rates; views clients, settings, team, notes, catalogue, courses and the plan; affiliates and commission; AI usage; edits the built-in workflows that use billing steps.</td><td>Manage people, scheduling or communications.</td></tr>
               <tr><td>Tutor</td><td>Their own lessons, availability, profile, jobs, students, lesson reports and attendance, feedback, pay and expenses, learning tools, class registers, dashboards, inbox, website profile and reviews. Raises safeguarding concerns and uses the AI assistant. Uses the tutor app, not the admin app.</td><td>See other tutors' records, curriculum, approvals or the resource library settings. Some actions can be switched on with the tutor access options (see <a href="#settings-registry">settings without a screen</a>).</td></tr>
               <tr><td>Client, Student, Affiliate</td><td>Their own records in the client portal or affiliate portal.</td><td>Use the admin app.</td></tr>
             </tbody>
@@ -1180,8 +1181,10 @@
           <code>automation.view</code>; building, switching on and testing need
           <code>automation.manage</code> (owner, admin, branch manager). Automations run on the
           durable workflow engine, so waits of days or weeks survive restarts.</p>
-        <p><span class="badge">Plan</span> Automations are a Team, Agency and Enterprise feature
-          (10, 50 and unlimited rules).</p>
+        <p><span class="badge">Plan</span> Your own automations are a Team, Agency and Enterprise
+          feature (10, 50 and unlimited rules); adding one more than the plan allows asks you to
+          upgrade. <a href="#automations-builtin">Built-in workflows</a> are on every plan,
+          Solo included, and don't count towards the limit.</p>
 
         <h3 id="automations-build">Build an automation</h3>
         <ol class="steps">
@@ -1211,6 +1214,29 @@
           under way wait before their next action, shown as <span class="ui">Paused</span>.
           Resume and they carry on from that action. Switching an automation off stops new
           runs only.</p>
+
+        <h3 id="automations-builtin">Built-in workflows</h3>
+        <p>TutorTrack installs a set of <strong>built-in workflows</strong> for every
+          organisation, marked <span class="ui">Built-in</span> in the list. They decide when
+          things happen that used to follow fixed rules: invoicing, payment chasing, lesson
+          communications, sales follow-ups and expiry reminders. They arrive in stages; each
+          one starts from your current settings, so nothing changes on the day it appears.</p>
+        <ul>
+          <li>Changing, switching off, pausing and resetting a built-in needs
+            <code>automation.builtin.manage</code> (owner, admin, branch manager, finance). As
+            with any automation, saving also needs the permission for every step in it, so
+            finance can change the billing ones but not, say, enquiry follow-ups.</li>
+          <li>A built-in keeps its name and the kind of record it is about. Once you change its
+            steps it shows <span class="ui">Changed from the default</span>.</li>
+          <li><span class="ui">Reset to default</span> puts TutorTrack's current default back.
+            Runs already under way finish on the steps they started with.</li>
+          <li>When TutorTrack improves a default, workflows you haven't changed move to it
+            automatically. If you have changed it, the page and Home tell you a newer default is
+            available, and you can reset to it.</li>
+          <li>Built-ins can't be deleted. Switching one off falls back to the manual way (for
+            example, invoices are made by hand), and Home says so until you switch it back on.
+            A few can't be switched off; pause them or change their steps instead.</li>
+        </ul>
 
         <h3 id="automations-catalogue">Triggers, actions and recipes</h3>
         <details class="ref">
@@ -1895,7 +1921,7 @@
               <tr><td>Web API</td><td>ECS Fargate service <code>web</code> (gunicorn, Django 5 + DRF)</td><td>Serves <code>/api/v1/</code>, provider webhooks (<code>/webhooks/…</code>), <code>/healthz</code> and <code>/readyz</code> (checks the database and Redis).</td></tr>
               <tr><td>Background jobs</td><td>ECS service <code>worker</code> (Celery) on the queues <code>default</code>, <code>outbox</code>, <code>notifications</code>, <code>billing</code>, <code>integrations</code>, <code>imports</code>, <code>reports</code></td><td>Short, stateless tasks: dispatching the event outbox, sending messages, webhook deliveries, syncs.</td></tr>
               <tr><td>Scheduler</td><td>ECS service <code>beat</code> (Celery Beat)</td><td>Global housekeeping crons (fan out one task per organisation). It also writes the application metrics that the alarms read.</td></tr>
-              <tr><td>Workflow workers</td><td>ECS service <code>temporal-worker</code></td><td>Runs every Temporal task queue: dunning, invoice runs, reminders, automations, imports, erasure and other long-running processes. Runs <code>ensure_platform_schedules</code> at start.</td></tr>
+              <tr><td>Workflow workers</td><td>ECS service <code>temporal-worker</code></td><td>Runs every Temporal task queue: dunning, invoice runs, reminders, automations, imports, erasure and other long-running processes. Runs <code>ensure_platform_schedules</code> and <code>sync_builtin_workflows</code> (installs the built-in workflows each organisation is missing and moves unedited ones to newer defaults) at start.</td></tr>
               <tr><td>Migrations</td><td>One-off ECS task <code>migrate</code></td><td>Runs <code>ensure_db_roles</code> then <code>migrate</code> as the table owner.</td></tr>
               <tr><td>Database</td><td>RDS PostgreSQL 16 (encrypted, 35-day point-in-time recovery)</td><td>Shared schema; every tenant row carries <code>organisation_id</code> and row-level security (RLS) policies enforce isolation.</td></tr>
               <tr><td>Cache and broker</td><td>ElastiCache Redis 7 (TLS)</td><td>Cache, Celery broker, locks and the pub/sub channel for the realtime notification bell.</td></tr>

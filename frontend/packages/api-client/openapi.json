@@ -7663,6 +7663,18 @@
                 "description": "Automations: When → If → Then.",
                 "parameters": [
                     {
+                        "in": "query",
+                        "name": "kind",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "builtin",
+                                "custom"
+                            ]
+                        },
+                        "description": "Built-in or not"
+                    },
+                    {
                         "name": "ordering",
                         "required": false,
                         "in": "query",
@@ -7935,6 +7947,45 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/automations/{id}/default": {
+            "get": {
+                "operationId": "automations_default_retrieve",
+                "description": "A built-in's current default, to compare with the organisation's version.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BuiltinDefault"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/automations/{id}/disable": {
             "post": {
                 "operationId": "automations_disable_create",
@@ -8033,6 +8084,53 @@
             "post": {
                 "operationId": "automations_pause_create",
                 "description": "Pause: no new runs start, and runs under way hold before their next action.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Automation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/automations/{id}/reset-to-default": {
+            "post": {
+                "operationId": "automations_reset_to_default_create",
+                "description": "Put a built-in workflow back to TutorTrack's current default (a new version; runs\nunder way finish on theirs).",
                 "parameters": [
                     {
                         "in": "header",
@@ -8299,6 +8397,47 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/DryRun"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/automations/notices": {
+            "get": {
+                "operationId": "automations_notices_list",
+                "description": "Built-in workflows Home mentions: switched off, or with a newer default.",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BuiltinNotice"
+                                    }
                                 }
                             }
                         },
@@ -89465,6 +89604,40 @@
                         "type": "string",
                         "readOnly": true
                     },
+                    "kind": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AutomationKindEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "builtin_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "builtin_version": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "edited": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "builtin": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BuiltinInfo"
+                            }
+                        ],
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "runs_under_way": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
@@ -89477,16 +89650,30 @@
                     }
                 },
                 "required": [
+                    "builtin",
+                    "builtin_key",
+                    "builtin_version",
                     "created_at",
+                    "edited",
                     "id",
+                    "kind",
                     "name",
                     "paused",
                     "recipe_key",
+                    "runs_under_way",
                     "subject_type",
                     "trigger_type",
                     "updated_at",
                     "version"
                 ]
+            },
+            "AutomationKindEnum": {
+                "enum": [
+                    "custom",
+                    "builtin"
+                ],
+                "type": "string",
+                "description": "* `custom` - Custom\n* `builtin` - Built-in"
             },
             "AutomationRun": {
                 "type": "object",
@@ -92655,6 +92842,122 @@
                     "subject",
                     "topics",
                     "units"
+                ]
+            },
+            "BuiltinDefault": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "group": {
+                        "type": "string"
+                    },
+                    "trigger_type": {
+                        "type": "string"
+                    },
+                    "trigger_config": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "conditions": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "stop_when": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "conditions",
+                    "description",
+                    "group",
+                    "key",
+                    "name",
+                    "steps",
+                    "stop_when",
+                    "trigger_config",
+                    "trigger_type",
+                    "version"
+                ]
+            },
+            "BuiltinInfo": {
+                "type": "object",
+                "properties": {
+                    "group": {
+                        "type": "string",
+                        "description": "invoicing, lessons, sales or expiry."
+                    },
+                    "group_label": {
+                        "type": "string"
+                    },
+                    "latest_version": {
+                        "type": "integer",
+                        "description": "TutorTrack's current default version."
+                    },
+                    "update_available": {
+                        "type": "boolean",
+                        "description": "Edited, and TutorTrack has improved the default since."
+                    },
+                    "can_switch_off": {
+                        "type": "boolean"
+                    },
+                    "off_means": {
+                        "type": "string",
+                        "description": "What happens instead while it's switched off."
+                    }
+                },
+                "required": [
+                    "can_switch_off",
+                    "group",
+                    "group_label",
+                    "latest_version",
+                    "off_means",
+                    "update_available"
+                ]
+            },
+            "BuiltinNotice": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "notice": {
+                        "$ref": "#/components/schemas/NoticeEnum"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "For off: what happens instead."
+                    }
+                },
+                "required": [
+                    "id",
+                    "message",
+                    "name",
+                    "notice"
                 ]
             },
             "BulkInviteRequest": {
@@ -115127,6 +115430,14 @@
                     "message",
                     "starts_at"
                 ]
+            },
+            "NoticeEnum": {
+                "enum": [
+                    "off",
+                    "update"
+                ],
+                "type": "string",
+                "description": "* `off` - off\n* `update` - update"
             },
             "NoticeRequest": {
                 "type": "object",

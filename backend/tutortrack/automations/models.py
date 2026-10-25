@@ -10,6 +10,10 @@ from tutortrack.core.models import TenantModel
 
 
 class Automation(TenantModel):
+    class Kind(models.TextChoices):
+        CUSTOM = "custom", _("Custom")
+        BUILTIN = "builtin", _("Built-in")
+
     class Trigger(models.TextChoices):
         EVENT = "event", _("When something happens")
         SCHEDULE = "schedule", _("On a schedule")
@@ -33,12 +37,24 @@ class Automation(TenantModel):
     paused = models.BooleanField(default=False)
     max_runs_per_record = models.PositiveSmallIntegerField(default=1)  # per 24 hours
     recipe_key = models.CharField(max_length=60, blank=True, default="")
+    # Built-in workflows (E33 FR-33-2): shipped in code, installed for every organisation.
+    kind = models.CharField(max_length=8, choices=Kind.choices, default=Kind.CUSTOM)
+    builtin_key = models.CharField(max_length=60, blank=True, default="")
+    builtin_version = models.PositiveIntegerField(null=True, blank=True)  # the default it came from
+    edited = models.BooleanField(default=False)  # changed since the default; upgrades skip it
     webhook_secret = EncryptedField(blank=True, default="")
 
     audit_sensitive_fields = frozenset({"webhook_secret"})
 
     class Meta(TenantModel.Meta):
         ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organisation", "builtin_key"],
+                condition=~models.Q(builtin_key=""),
+                name="automation_builtin_unique",
+            )
+        ]
 
     def __str__(self) -> str:
         return self.name

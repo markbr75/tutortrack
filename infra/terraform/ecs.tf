@@ -128,7 +128,7 @@ locals {
     worker  = { command = ["celery", "-A", "config", "worker", "-l", "INFO", "-Q", "default,outbox,notifications,billing,integrations,imports,reports"], cpu = 512, memory = 1024, port = false, extra_secrets = [] }
     beat    = { command = ["celery", "-A", "config", "beat", "-l", "INFO"], cpu = 256, memory = 512, port = false, extra_secrets = [] }
     # Temporal workers (E32): every task queue; split per queue when load needs it.
-    temporal-worker = { command = ["sh", "-c", "python manage.py ensure_platform_schedules && python manage.py temporal_worker --task-queue all"], cpu = 512, memory = 1024, port = false, extra_secrets = [] }
+    temporal-worker = { command = ["sh", "-c", "python manage.py ensure_platform_schedules && python manage.py sync_builtin_workflows && python manage.py temporal_worker --task-queue all"], cpu = 512, memory = 1024, port = false, extra_secrets = [] }
     migrate = { command = ["sh", "-c", "python manage.py ensure_db_roles && python manage.py migrate --noinput"], cpu = 256, memory = 512, port = false, extra_secrets = ["DATABASE_OWNER_URL"] }
   }
 }

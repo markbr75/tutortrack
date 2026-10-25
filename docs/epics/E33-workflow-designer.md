@@ -1,6 +1,6 @@
 # E33 — Workflow Designer
 
-- **Status:** In progress (T01, T02 done 2026-10-25)
+- **Status:** In progress (T01 to T03 done 2026-10-25)
 - **Depends on:** E14 Automation (the engine it grows from), E32 Temporal, E10 Billing, E13
   Communications, E09 Delivery, E17 Leads, E18 Recruitment, E24 Growth
 - **ADR:** [0047](../adr/0047-workflow-designer-on-the-automation-engine.md)
@@ -211,7 +211,7 @@ Each ticket is one pull request, merged when CI is green.
   questions (each a named predicate with tests), the new starts, stop-when events, record
   types and actions in FR-33-4 (with permissions and idempotency keys), silent versions,
   pause and resume. `/workflow-schema`.
-- [ ] **T03 — Built-in workflow framework.** `@builtin_workflow`, install for new and
+- [x] **T03 — Built-in workflow framework.** `@builtin_workflow`, install for new and
   existing organisations, reset to default, default upgrades, `edited` tracking, switching
   off safely, and built-ins on every plan.
 - [ ] **T04 — Built-ins: invoicing and payment chasing.** Invoicing cycle, payment
@@ -317,3 +317,49 @@ against the API.
   date starts, named schedules, frequencies), plain questions and actions (with `allowed`
   for the caller). `/automation-schema` stays for the current Automations pages. The
   `/workflows` aliases come with the editor (T07).
+
+**T03 (2026-10-25).**
+- **Registry:** `automations/builtin_workflows.py`. Apps declare built-ins in
+  `<app>/workflows_builtin.py` with `@builtin_workflow(key, group, name=, description=,
+  version=, first_version=, can_switch_off=, off_means=, enabled=)` on a function that
+  returns the default definition; `AutomationsConfig.ready` discovers the modules. Groups:
+  `invoicing`, `lessons`, `sales`, `expiry`. `first_version` builds an organisation's first
+  version from its current settings (used from T04). No built-ins ship in T03; a test
+  checks that every registered one validates.
+- **Model:** `Automation.kind` (`custom` | `builtin`), `builtin_key` (unique per
+  organisation), `builtin_version` and `edited`. `edited` is worked out on every save by
+  comparing the definition with the current default, so changing it back clears it. A first
+  version built from non-default settings counts as edited, so a later default never
+  overwrites the organisation's settings; it is offered instead.
+- **Install and upgrade:** `services.install_builtins()` (idempotent) installs missing
+  built-ins switched on, and moves unedited ones whose `builtin_version` is behind to the new
+  default (a new version, audited as `upgrade`). Edited ones are left alone and report
+  `update_available`. It runs on `organisation.created` and, for existing organisations and
+  new defaults, from the `sync_builtin_workflows` management command, which the Temporal
+  worker task runs at start (ecs.tf, docker-compose) as with `ensure_platform_schedules`.
+  This was chosen over a data migration because definitions are code and are checked
+  against the registry.
+- **Rules for built-ins:** they keep their name, description and record type (edits to
+  those are ignored or refused); they can't be deleted (422); `can_switch_off=False` refuses
+  switching off (pausing still works); **Reset to default** (`POST
+  /automations/{id}/reset-to-default`, audited `reset`) writes the default as a new version,
+  so runs under way keep theirs, and checks the caller's permission for every action in it.
+  `GET /automations/{id}/default` returns the default to compare with.
+- **Authority:** an unedited built-in is TutorTrack's own default, so its steps run with the
+  platform's authority (`_authorised`); once edited, steps need the editor's permission at
+  run time, as for custom automations (ADR 0014 §6).
+- **Switched off safely (FR-33-5):** `off_means` says what happens instead; `GET
+  /automations/notices` lists built-ins that are switched off or have a newer default, and
+  Home shows them to staff with `automation.view`.
+- **Permissions and plans:** new `automation.builtin.manage` (owner and admin through `*`,
+  branch manager through `*:branch`, finance by grant; finance also gets
+  `automation.view`). Writes to a built-in need it, writes to a custom one need
+  `automation.manage`, creating always needs `automation.manage`. The plan's
+  `automation_rules` limit, listed since E04 but not enforced, is now checked when creating
+  a custom automation (recipes included); built-ins don't count and work on every plan.
+- **API and UI:** the automation serializer gained `kind`, `builtin_key`,
+  `builtin_version`, `edited`, `builtin` (group, latest version, `update_available`,
+  `can_switch_off`, `off_means`) and `runs_under_way`; the list takes `?kind=`. The current
+  Automations pages show **Built-in**, keep a built-in's name read-only, disable the switch
+  for ones that can't be switched off, and offer **Reset to default**; the full editor is
+  T07.

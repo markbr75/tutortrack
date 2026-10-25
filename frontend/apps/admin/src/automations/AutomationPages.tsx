@@ -108,11 +108,18 @@ export function AutomationsPage() {
   );
 }
 
+/** Built-ins are changed with ``automation.builtin.manage``, custom ones with ``.manage``. */
+function useCanChange(): (a?: Automation) => boolean {
+  const custom = usePermission("automation.manage");
+  const builtin = usePermission("automation.builtin.manage");
+  return (a) => (a?.kind === "builtin" ? builtin : custom);
+}
+
 function AutomationList() {
   const { t } = useTranslation();
   const schema = useSchema();
   const queryClient = useQueryClient();
-  const canManage = usePermission("automation.manage");
+  const canChange = useCanChange();
   const list = useQuery({
     queryKey: ["automations"],
     queryFn: async () => unwrap(await api.GET("/api/v1/automations")),
@@ -143,14 +150,26 @@ function AutomationList() {
                     {a.name}
                   </Link>
                 }
-                context={`${describeTrigger(a, schema.data, t)} · ${t("automations.version", { n: a.version })}`}
+                context={[
+                  a.kind === "builtin" ? t("automations.builtIn") : null,
+                  describeTrigger(a, schema.data, t),
+                  t("automations.version", { n: a.version }),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
                 aside={
-                  canManage ? (
+                  canChange(a) ? (
                     <label className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
                         className="size-4"
                         checked={a.enabled}
+                        disabled={a.enabled && a.builtin?.can_switch_off === false}
+                        title={
+                          a.enabled && a.builtin?.can_switch_off === false
+                            ? t("automations.cantSwitchOff")
+                            : undefined
+                        }
                         onChange={() => toggle.mutate(a)}
                         aria-label={t("automations.enabledFor", { name: a.name })}
                       />
@@ -877,6 +896,8 @@ export function AutomationBuilderPage({ id }: { id: string }) {
       unwrap(await api.GET("/api/v1/automations/{id}", { params: { path: { id } } })),
     enabled: !isNew,
   });
+  // The version a reset produced: the builder remounts on a new version, so the page keeps it.
+  const [resetTo, setResetTo] = useState<number | null>(null);
   if (!schema.data || (!isNew && !automation.data)) return <Spinner label={t("grid.loading")} />;
   return (
     <Builder
@@ -884,6 +905,8 @@ export function AutomationBuilderPage({ id }: { id: string }) {
       id={id}
       schema={schema.data}
       automation={automation.data}
+      wasReset={resetTo !== null && resetTo === automation.data?.version}
+      onReset={setResetTo}
     />
   );
 }
@@ -892,15 +915,20 @@ function Builder({
   id,
   schema,
   automation,
+  wasReset = false,
+  onReset,
 }: {
   id: string;
   schema: Schema;
   automation?: Automation;
+  wasReset?: boolean;
+  onReset?: (version: number) => void;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const canManage = usePermission("automation.manage");
+  const canManage = useCanChange()(automation);
+  const builtIn = automation?.kind === "builtin";
   const [draft, setDraft] = useState<Draft>(() => toDraft(automation));
   const [record, setRecord] = useState("");
   const subject =
@@ -931,6 +959,17 @@ function Builder({
       if (!automation) void navigate({ to: "/automations/$id", params: { id: saved.id } });
     },
   });
+  const reset = useMutation({
+    mutationFn: async () =>
+      unwrap(
+        await api.POST("/api/v1/automations/{id}/reset-to-default", { params: { path: { id } } }),
+      ),
+    onSuccess: (saved) => {
+      void queryClient.invalidateQueries({ queryKey: ["automations"] });
+      onReset?.(saved.version);
+      queryClient.setQueryData(["automation", saved.id], saved);
+    },
+  });
   const test = useMutation({
     mutationFn: async () =>
       unwrap(
@@ -953,17 +992,27 @@ function Builder({
         title={automation ? automation.name : t("automations.new")}
         description={
           automation
-            ? `${t("automations.version", { n: automation.version })} · ${
-                automation.enabled ? t("automations.on") : t("automations.off")
-              }`
+            ? [
+                builtIn ? t("automations.builtIn") : null,
+                t("automations.version", { n: automation.version }),
+                automation.enabled ? t("automations.on") : t("automations.off"),
+                automation.edited ? t("automations.edited") : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")
             : undefined
         }
       />
       <div className="max-w-4xl space-y-6">
+        {automation?.builtin?.update_available ? (
+          <Alert tone="info">{t("automations.updateAvailable")}</Alert>
+        ) : null}
         <div className="max-w-md">
           <TextField
             label={t("automations.name")}
             value={draft.name}
+            readOnly={builtIn}
+            hint={builtIn ? t("automations.builtInName") : undefined}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
           />
         </div>
@@ -1028,9 +1077,25 @@ function Builder({
           <div className="space-y-3">
             {save.isSuccess ? <Alert tone="success">{t("automations.saved")}</Alert> : null}
             {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
-            <Button onClick={() => save.mutate()} loading={save.isPending}>
-              {automation ? t("automations.saveVersion") : t("automations.create")}
-            </Button>
+            {wasReset ? <Alert tone="success">{t("automations.resetDone")}</Alert> : null}
+            {reset.error ? <Alert tone="danger">{reset.error.message}</Alert> : null}
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => save.mutate()} loading={save.isPending}>
+                {automation ? t("automations.saveVersion") : t("automations.create")}
+              </Button>
+              {builtIn && (automation?.edited || automation?.builtin?.update_available) ? (
+                <Button
+                  variant="secondary"
+                  loading={reset.isPending}
+                  onClick={() => {
+                    if (window.confirm(t("automations.confirmReset", { name: automation.name })))
+                      reset.mutate();
+                  }}
+                >
+                  {t("automations.resetToDefault")}
+                </Button>
+              ) : null}
+            </div>
           </div>
         ) : null}
         {automation ? (

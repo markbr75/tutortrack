@@ -97,7 +97,7 @@ ROLES: dict[str, RoleDef] = {
                "subscription.view", "growth.affiliate.*", "growth.commission.manage",
                "growth.referral.view", "growth.tutor_referral.*", "learning.library.view",
                "learning.library.charge", "ai.use", "ai.copilot", "ai.usage.view",
-               "success.support.chat:own"),
+               "success.support.chat:own", "automation.view", "automation.builtin.manage"),
         ),
         RoleDef(
             "tutor", "Tutor",
