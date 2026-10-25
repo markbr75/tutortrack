@@ -172,6 +172,10 @@ class InvoiceRun(BranchScopedModel):
     stats = models.JSONField(default=dict, blank=True)
     review_until = models.DateTimeField(null=True, blank=True)
     approved_at = models.DateTimeField(null=True, blank=True)
+    # Set by the workflow that started the run (E33 Invoicing cycle); blank: the settings.
+    review_days = models.PositiveSmallIntegerField(null=True, blank=True)
+    auto_issue = models.BooleanField(null=True, blank=True)
+    send_invoices = models.BooleanField(null=True, blank=True)
     requested_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )

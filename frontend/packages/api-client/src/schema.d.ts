@@ -42000,6 +42000,8 @@ export interface components {
       schema?: {
         [key: string]: unknown;
       };
+      /** @description The built-in workflow that now decides this; the setting is read-only and has no effect. */
+      replaced_by?: string;
     };
     /**
      * @description * `organisation` - organisation

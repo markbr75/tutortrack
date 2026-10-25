@@ -2,7 +2,13 @@
 
 * ``InvoiceRunWorkflow`` ``invoice-run:{org}:{run}``: collect charges → draft invoices →
   review window (timer, or wait for ``approve`` when auto-issue is off) → issue. Started
-  by ``POST /invoice-runs`` or by ``ScheduledInvoiceRunWorkflow``.
+  by ``POST /invoice-runs`` or by the Invoicing cycle built-in workflow (E33 T04).
+
+Replaced by built-in workflows in E33 T04 and no longer started (kept for one release so
+runs under way finish, and for history replay): ``ScheduledInvoiceRunWorkflow`` (Invoicing
+cycle), ``InvoiceDunningWorkflow`` (Payment chasing), ``PaymentRequestWorkflow`` (Payment
+request reminders) and ``StatementRunWorkflow`` (Monthly statements).
+
 * ``ScheduledInvoiceRunWorkflow``: started by a per-branch **Temporal Schedule** (weekly
   or monthly, ``billing.invoice_schedule``); opens the run for the period just ended and
   runs ``InvoiceRunWorkflow`` as a child.

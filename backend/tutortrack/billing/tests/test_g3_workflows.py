@@ -23,7 +23,6 @@ from tutortrack.billing.processes import (
 from tutortrack.billing.tests.test_workflows import local_today, settings_for, wait_for
 from tutortrack.core.context import tenant_context
 from tutortrack.core.events.dispatcher import dispatch_batch
-from tutortrack.core.models import ScheduleLink
 from tutortrack.core.money import Money
 from tutortrack.people.tests.factories import (
     ClientFactory,
@@ -31,7 +30,6 @@ from tutortrack.people.tests.factories import (
     StudentFactory,
     TutorProfileFactory,
 )
-from tutortrack.tenancy import settings_service
 
 pytestmark = pytest.mark.django_db(transaction=True)
 HISTORIES = Path(__file__).resolve().parents[3] / "tests" / "workflow_histories"
@@ -130,20 +128,6 @@ def test_statement_run_emails_last_months_statements(org, temporal_env):
     assert mail.outbox[0].attachments
     if os.environ.get("RECORD_WORKFLOW_HISTORIES"):
         (HISTORIES / "StatementRunWorkflow-sent.json").write_text(temporal_env.history_json(wid))
-
-
-def test_statement_schedule_follows_settings(org, temporal_local_env):
-    from tutortrack.billing.statements import sync_schedule
-
-    with tenant_context(org):
-        settings_service.update_settings(
-            "billing", {"billing.statement_schedule": "monthly", "billing.statement_day": 3}
-        )
-        sid = sync_schedule()
-        assert ScheduleLink.objects.filter(schedule_id=sid).exists()
-        settings_service.update_settings("billing", {"billing.statement_schedule": "none"})
-        assert sync_schedule() == ""
-        assert not ScheduleLink.objects.filter(schedule_id=sid).exists()
 
 
 def test_record_tutor_review_history_if_requested(org, temporal_env):

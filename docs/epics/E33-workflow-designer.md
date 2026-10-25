@@ -1,6 +1,6 @@
 # E33 — Workflow Designer
 
-- **Status:** In progress (T01 to T03 done 2026-10-25)
+- **Status:** In progress (T01 to T04 done 2026-10-25)
 - **Depends on:** E14 Automation (the engine it grows from), E32 Temporal, E10 Billing, E13
   Communications, E09 Delivery, E17 Leads, E18 Recruitment, E24 Growth
 - **ADR:** [0047](../adr/0047-workflow-designer-on-the-automation-engine.md)
@@ -214,7 +214,7 @@ Each ticket is one pull request, merged when CI is green.
 - [x] **T03 — Built-in workflow framework.** `@builtin_workflow`, install for new and
   existing organisations, reset to default, default upgrades, `edited` tracking, switching
   off safely, and built-ins on every plan.
-- [ ] **T04 — Built-ins: invoicing and payment chasing.** Invoicing cycle, payment
+- [x] **T04 — Built-ins: invoicing and payment chasing.** Invoicing cycle, payment
   chasing, payment request reminders, statements. Each organisation's settings convert to
   its first version. Retire the replaced schedules, workflows and settings.
 - [ ] **T05 — Built-ins: lesson communications.** Lesson reminders (retire the beat task),
@@ -363,3 +363,65 @@ against the API.
   Automations pages show **Built-in**, keep a built-in's name read-only, disable the switch
   for ones that can't be switched off, and offer **Reset to default**; the full editor is
   T07.
+
+**T04 (2026-10-25).**
+- **Four built-ins** in `billing/workflows_builtin.py` (group `invoicing`):
+  - **Invoicing cycle** (branch, a named schedule `invoice_run.due`): one step, **Start an
+    invoice run** for the schedule's period, which now carries the review window, what
+    happens after it (`issue: after_review | when_approved`) and whether to email
+    (`review_days`, `issue`, `email`). They are stored on the run
+    (`InvoiceRun.review_days/auto_issue/send_invoices`) and `InvoiceRunWorkflow` uses them
+    instead of the settings. Approvals, the tutor pre-review (G3) and the run's internal
+    steps stay in code, so the sequence is one card a tutoring owner can read. Deviation:
+    one card instead of separate "review" and "issue" steps, because steps act on the
+    sequence's own record (the branch), not on the run it started.
+  - **Payment chasing** (invoice, on `invoice.issued`, Stop when paid, voided or written
+    off): a wait until N days from the due date at 09:00 and a step, for each reminder
+    (**Send a payment reminder**, new), late fee (**Apply a late fee** with no amount now
+    applies the organisation's late fee rule, `dunning.apply_next_late_fee`) and
+    collections (**Open a collections case**). Reminders after the due date still mark
+    the invoice overdue.
+  - **Payment request reminders** (payment request, on `payment_request.created`, Stop
+    when paid or cancelled): wait 3 days, remind, wait 4 days, remind.
+  - **Monthly statements** (client, a named schedule `statement.due`): **Send a
+    statement**. A named schedule start can pick its records (`SCHEDULE_RECORDS`):
+    statements go only to families with activity or a balance, without the 2,000-record
+    cap; `statements.due` takes the clients so each run reads one family's ledger.
+- **First versions from the settings:** `invoice_schedule` (manual: switched off),
+  `invoice_day`, `review_days`, `auto_issue`, `auto_send`; `reminders_enabled`,
+  `reminder_offsets`, the late fee rule's `days_overdue`/`recurrence`/`max_applications`
+  (the organisation-wide rule, else the first active one), `collections_after_days`;
+  `statement_schedule` (none: off) and `statement_day`. A first version may say whether it
+  starts on (`"enabled"`); one that differs from the default counts as edited. Monthly late
+  fees past the 30-step limit are left out (only with many monthly applications).
+  Deviations for multi-branch organisations: branch overrides of `invoice_day` aren't
+  carried over and schedules run in the organisation's time zone; the chasing timing comes
+  from one rule, while each invoice's branch rule still sets the amount.
+- **Retired:** the per-branch invoicing schedules and the statement schedule are deleted
+  when the built-in is installed (`BuiltinWorkflow.retire`, run after commit on every sync,
+  so a failed delete is tried again); `invoice.issued` and `payment_request.created` no
+  longer start `InvoiceDunningWorkflow` and `PaymentRequestWorkflow`, and settings changes
+  no longer sync schedules. The four old workflow classes stay registered for one release
+  so runs under way finish (the closing signals still reach running ones) and the recorded
+  histories replay; they are removed with T09. Deviation from FR-33-6: runs under way
+  aren't cancelled, as cancelling them would drop their remaining reminders.
+- **Replaced settings** (`replaced_by` on the setting definition, shown by
+  `/settings/{area}`): `invoice_schedule`, `invoice_day`, `reminders_enabled`,
+  `reminder_offsets`, `collections_after_days`, `statement_schedule`, `statement_day`.
+  They stay readable for one release; changing them is refused ("This is now set in
+  Workflows"). `review_days`, `auto_issue` and `auto_send` stay live for runs started by
+  hand and invoices issued one at a time. Billing › Options points to the workflow
+  instead of the statement settings.
+- **Home** only mentions a switched-off built-in whose default is on (payment chasing,
+  payment request reminders), so organisations that invoice by hand or don't send
+  statements aren't nagged.
+- **Schedules and the hourly limit:** runs a schedule starts don't count towards, and
+  aren't stopped by, `automations.max_runs_per_hour` (it guards against workflows
+  triggering each other; schedules pick a bounded set once a slot).
+- **Fixed (T02):** the catalogue's and G4's triggers weren't subscribed when the event
+  registry loaded `automations.handlers` before `AutomationsConfig.ready`, so starts and
+  Stop when on events such as `payment_request.created` or `invoice_run.drafted` never
+  reached the engine. `handlers.py` now imports them first, and a test checks every
+  trigger is subscribed.
+- The "days from due" a reminder is worded with is worked out when it is sent; tests on
+  the time-skipping server check how many reminders are sent, not their wording.

@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import functools
 import secrets
 import uuid
 from datetime import date, datetime, timedelta
@@ -24,6 +25,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 
 from tutortrack.core import audit, entitlements
+from tutortrack.core.context import current_organisation_id
 from tutortrack.core.events import EventEnvelope, publish
 from tutortrack.core.exceptions import BusinessRuleViolation, PermissionDenied
 from tutortrack.core.time import now
@@ -461,13 +463,13 @@ def install_builtins() -> dict[str, int]:
         try:
             if found is None:
                 with transaction.atomic():
-                    definition = builtin.definition(first=True)
+                    definition, enabled = builtin.first()
                     create_automation(
                         name=str(_(builtin.name)), description=str(_(builtin.description)),
                         trigger_type=definition["trigger_type"],
                         trigger_config=definition["trigger_config"],
                         conditions_=definition["conditions"], steps=definition["steps"],
-                        stop_when=definition["stop_when"], enabled=builtin.enabled,
+                        stop_when=definition["stop_when"], enabled=enabled,
                         max_runs_per_record=builtin.max_runs_per_record, builtin=builtin,
                     )  # fmt: skip
                 counts["installed"] += 1
@@ -477,7 +479,25 @@ def install_builtins() -> dict[str, int]:
                 counts["upgraded"] += 1
         except (BusinessRuleViolation, IntegrityError) as exc:  # a broken default, or a race
             logger.error("automation.builtin_install_failed", key=builtin.key, error=str(exc))
+            continue
+        if builtin.retire is not None:  # idempotent, so a failed retirement is tried again
+            org_id = current_organisation_id()
+            transaction.on_commit(functools.partial(_retire, org_id, builtin))
     return counts
+
+
+def _retire(organisation_id: Any, builtin: builtin_workflows.BuiltinWorkflow) -> None:
+    """Remove what an installed built-in replaced (after the commit, so in the
+    organisation's context again)."""
+    from tutortrack.core.context import tenant_context
+
+    if builtin.retire is None:
+        return
+    with tenant_context(organisation_id):
+        try:
+            builtin.retire()
+        except Exception as exc:  # Temporal unreachable: the next sync tries again
+            logger.warning("automation.builtin_retire_failed", key=builtin.key, error=str(exc))
 
 
 def reset_to_default(automation: Automation, *, user: Any = None) -> Automation:
@@ -498,15 +518,15 @@ def reset_to_default(automation: Automation, *, user: Any = None) -> Automation:
 
 
 def builtin_notices() -> list[dict[str, Any]]:
-    """Built-ins Home mentions: switched off (and what happens instead), or with a newer
-    default than the organisation's edited version (FR-33-5)."""
+    """Built-ins Home mentions: switched off when they're on by default (and what happens
+    instead), or with a newer default than the organisation's edited version (FR-33-5)."""
     out = []
     for automation in Automation.objects.filter(kind=Automation.Kind.BUILTIN).order_by("name"):
         builtin = _builtin_of(automation)
         if builtin is None:
             continue
         row = {"id": automation.pk, "name": automation.name, "message": ""}
-        if not automation.enabled:
+        if not automation.enabled and builtin.enabled:
             off_means = str(_(builtin.off_means)) if builtin.off_means else ""
             out.append({**row, "notice": "off", "message": off_means})
         elif update_available(automation):
@@ -585,8 +605,13 @@ def prepare_run(
         ).exclude(status=AutomationRun.Status.SKIPPED).count()  # fmt: skip
         if recent >= automation.max_runs_per_record:
             return None
-        hourly = AutomationRun.objects.filter(started_at__gte=current - timedelta(hours=1))
-        if hourly.count() >= int(_setting("automations.max_runs_per_hour")):
+        # Schedules pick a bounded set of records once a slot and can't loop, so the hourly
+        # limit (a guard against workflows triggering each other) leaves them out.
+        hourly = AutomationRun.objects.filter(started_at__gte=current - timedelta(hours=1)).exclude(
+            run_key__startswith="schedule:"
+        )
+        scheduled = run_key.startswith("schedule:")
+        if not scheduled and hourly.count() >= int(_setting("automations.max_runs_per_hour")):
             logger.warning("automation.rate_limited", automation_id=str(automation.pk))
             return None
     version = automation.versions.get(version=automation.version)
@@ -989,11 +1014,16 @@ def due_records(automation: Automation, on: date) -> list[str]:
     subject = registry.subject(automation.subject_type)
     if subject is None:
         return []
+    from .catalogue import SCHEDULE_RECORDS
+
+    config = automation.trigger_config or {}
+    picker = SCHEDULE_RECORDS.get(str(config.get("start") or ""))
+    if automation.trigger_type == Automation.Trigger.SCHEDULE and picker is not None:
+        return picker(on)
     model = subject.model_class()
     qs = model.objects.all()
     if hasattr(model, "archived_at"):
         qs = qs.filter(archived_at__isnull=True)
-    config = automation.trigger_config or {}
     if automation.trigger_type == Automation.Trigger.DATE:
         name = str(config["field"])
         target = on - timedelta(days=int(config.get("offset_days") or 0))

@@ -43,9 +43,7 @@ def autopay_invoice(org, method_ref: str) -> Invoice:
     """An auto-pay client whose invoice is issued; the bridge starts collection."""
     kind = "bacs_debit" if "debit" in method_ref else "card"
     with tenant_context(org):
-        settings_service.update_settings(
-            "billing", {"billing.auto_send": False, "billing.reminders_enabled": False}
-        )
+        settings_service.update_settings("billing", {"billing.auto_send": False})
         account, _ = ProviderAccount.objects.get_or_create(
             provider="stripe", account_ref="acct_wf", defaults={"status": "active"}
         )

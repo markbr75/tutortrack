@@ -13,6 +13,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_noop as N_
 
 from tutortrack.core.exceptions import BusinessRuleViolation
 from tutortrack.core.time import now
@@ -309,10 +310,14 @@ def create_charge(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
 
 
 def late_fee(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    """A fee of ``percent`` of the balance (at least ``minimum``), or with neither given the
+    organisation's late fee rule (amount, minimum balance and cap; E33 T04)."""
     from tutortrack.billing import services as billing
     from tutortrack.core.money import Money
 
     invoice = ctx.obj
+    if config.get("percent") in (None, "") and config.get("minimum") in (None, ""):
+        return _rule_fee(ctx)
     percent = Decimal(str(config.get("percent") or 0))
     minimum = Decimal(str(config.get("minimum") or 0))
     fee = max(invoice.balance_due.amount * percent / 100, minimum)
@@ -330,6 +335,26 @@ def late_fee(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
     )
     audit_money(ctx, invoice, "late_fee")
     return {"charge": str(charge.pk), "fee": str(fee)}
+
+
+RULE_SKIPS = {
+    "closed": N_("invoice already paid"),
+    "only_fees": N_("the invoice is only for late fees"),
+    "no_rule": N_("there is no late fee rule"),
+    "below_minimum": N_("the balance is below the late fee rule's minimum"),
+    "capped": N_("the late fee cap is reached"),
+}
+
+
+def _rule_fee(ctx: RunContext) -> dict[str, Any]:
+    from tutortrack.billing import dunning
+
+    outcome = dunning.apply_next_late_fee(ctx.obj.pk)
+    if outcome in RULE_SKIPS:
+        return skipped(_(RULE_SKIPS[outcome]))
+    if outcome != "exists":
+        audit_money(ctx, ctx.obj, "late_fee")
+    return {"late_fee": outcome}
 
 
 def audit_money(ctx: RunContext, obj: Any, action: str) -> None:
@@ -413,7 +438,8 @@ for _action in (
     ), subjects=("client", "student", "job", "invoice", "enquiry"),
         permission="billing.charge.create"),
     Action("late_fee", "Apply a late fee", late_fee, _describe("Apply a late fee"), (
-        A("percent", "Percent of the balance", "number"), A("minimum", "Minimum fee", "number"),
+        A("percent", "Percent of the balance (blank: your late fee rule)", "number"),
+        A("minimum", "Minimum fee", "number"),
     ), subjects=("invoice",), permission="billing.charge.create"),
     Action("payment_request", "Request a payment", payment_request,
            _describe("Request a payment"), (

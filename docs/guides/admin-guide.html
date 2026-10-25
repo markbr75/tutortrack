@@ -452,7 +452,7 @@
                 <tr><td>General</td><td>Business hours (Mon–Fri 09:00–20:00, Sat 09:00–17:00, Sun closed)</td></tr>
                 <tr><td>Security</td><td>Require 2FA for all staff roles, including tutors (off); staff idle sign-out (8 hours, 1–72); portal "remember me" (30 days, 1–90); support access only with a grant (off)</td></tr>
                 <tr><td>Tutor access</td><td>Client contact details tutors see (phone; none, phone or full); tutors may message clients directly (off), create lessons (off), reschedule lessons (on), cancel lessons (off), edit rates (off), view other calendars (off), add students (off)</td></tr>
-                <tr><td>Billing</td><td>Invoice prefix (<code>INV-</code>), credit note prefix (<code>CN-</code>), payment request prefix (<code>PR-</code>); invoice schedule (manual; or weekly, monthly) and day (1); review days (2); auto-issue, auto-send, auto-apply credit (on); minimum invoice amount (0); skip zero invoices (on); show tutor names (on); payment instructions and invoice footer (empty); reminders (on, at −3, 0, 3, 7, 14 and 30 days); prevent negative balance (on); prepaid top-ups (threshold 0, amount 200); package and plan invoicing; collections (after 0 days, soft block)</td></tr>
+                <tr><td>Billing</td><td>Invoice prefix (<code>INV-</code>), credit note prefix (<code>CN-</code>), payment request prefix (<code>PR-</code>); review days (2), auto-issue and auto-send (on) for invoice runs started by hand; auto-apply credit (on); minimum invoice amount (0); skip zero invoices (on); show tutor names (on); payment instructions and invoice footer (empty); prevent negative balance (on); prepaid top-ups (threshold 0, amount 200); package and plan invoicing; collections block (soft). The invoice schedule, payment reminders, collections timing and monthly statements are <a href="#automations-builtin">built-in workflows</a> now; their old settings are read-only.</td></tr>
                 <tr><td>Payments</td><td>Manual methods (bank transfer, cash, cheque, other); allow partial payments (off); send receipts (on); card retries after 3 and 5 days; direct-debit retry after 3 days; pause auto-pay after failure (off); bank auto-match (off)</td></tr>
                 <tr><td>Payroll</td><td>Pay period (monthly) and cut-off day (28); pay only when the client paid (off); hold pay for overdue reports (on); include paid cancellations (on); minimum payout (0); dual approval threshold (never); bank file format (CSV); expense markup (0%); mileage from home (off); self-billing VAT (20%)</td></tr>
                 <tr><td>Communications</td><td>Sender name (organisation name); reply-to; quiet hours 21:00–08:00 (no texts); broadcast batches of 200 every 60 seconds; inbox reply target (24 hours); block contact sharing (off); digest times; student direct messaging (off)</td></tr>
@@ -764,9 +764,10 @@
           guide</a>. These are the options an administrator sets once.</p>
         <h3 id="billing-options-billing">Billing options</h3>
         <ul>
-          <li><span class="path">Billing › Options</span>: <span class="ui">Tutors check draft invoices</span> (off; 2 days to review), <span class="ui">Monthly statements</span> (don't send, or every month on a chosen day) and <span class="ui">Discounts on invoices</span> (netted into the lesson price, or shown as separate negative lines). Needs <code>billing.settings.manage</code> to see and <code>org.settings.manage</code> to save.</li>
-          <li><span class="path">Billing › Late fees</span>: a fixed amount or a percentage after a number of days overdue, once or monthly up to a maximum, billed on the next invoice or on its own invoice. Needs <code>billing.late_fee.manage</code>.</li>
-          <li>Through the API only: invoice, credit note and payment request prefixes (<code>INV-</code>, <code>CN-</code>, <code>PR-</code>), the automatic invoice schedule (manual by default; weekly or monthly), auto-issue and auto-send, payment instructions, invoice footer, payment reminders (3 days before, on the day, and 3, 7, 14 and 30 days after the due date, at 09:00 local time) and collections.</li>
+          <li><span class="path">Billing › Options</span>: <span class="ui">Tutors check draft invoices</span> (off; 2 days to review) and <span class="ui">Discounts on invoices</span> (netted into the lesson price, or shown as separate negative lines). Needs <code>billing.settings.manage</code> to see and <code>org.settings.manage</code> to save.</li>
+          <li><span class="path">Billing › Late fees</span>: a fixed amount or a percentage, a minimum balance and a cap, billed on the next invoice or on its own invoice. Needs <code>billing.late_fee.manage</code>. <em>When</em> fees are applied is set in the <span class="ui">Payment chasing</span> built-in workflow; the rule's days overdue and monthly repeat were used once, to build its first version.</li>
+          <li>Through the API only: invoice, credit note and payment request prefixes (<code>INV-</code>, <code>CN-</code>, <code>PR-</code>), the review days, auto-issue and auto-send used for invoice runs started by hand and invoices issued one at a time, payment instructions and invoice footer.</li>
+          <li>When invoices go out, payment reminders, late fees and collections, payment request reminders and monthly statements are <a href="#automations-builtin">built-in workflows</a> (see below).</li>
         </ul>
         <div class="callout warn">
           <strong>Financial records are permanent</strong>
@@ -1237,6 +1238,21 @@
             example, invoices are made by hand), and Home says so until you switch it back on.
             A few can't be switched off; pause them or change their steps instead.</li>
         </ul>
+        <p>The built-ins so far (each started from your settings on the day it arrived; the old
+          settings are read-only and no longer have any effect):</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th scope="col">Built-in</th><th scope="col">What it does by default</th><th scope="col">Replaced</th></tr></thead>
+          <tbody>
+            <tr><td>Invoicing cycle</td><td>Off (invoices made by hand). When on: every month on the 1st at 06:00 (or weekly), start each branch's invoice run for the last period, review the drafts for 2 days, then issue and email them. "Then" can instead wait for someone to approve the drafts.</td><td>Invoice schedule and day; for scheduled runs, review days, auto-issue and auto-send</td></tr>
+            <tr><td>Payment chasing</td><td>From the moment an invoice is issued: payment reminders 3 days before, on the day, and 3, 7, 14 and 30 days after the due date at 09:00; your late fee rule 14 days after; stops when the invoice is paid, voided or written off. Add "Open a collections case" for collections.</td><td>Payment reminders, reminder days, collections days and the late fee rule's timing</td></tr>
+            <tr><td>Payment request reminders</td><td>Remind the family 3 and 7 days after a payment request, until it is paid or cancelled.</td><td>The fixed 3- and 7-day reminders</td></tr>
+            <tr><td>Monthly statements</td><td>Off. When on: on the 1st at 07:00, email last month's statement to every family with account activity or a balance.</td><td>Monthly statements setting and day</td></tr>
+          </tbody>
+        </table></div>
+        <p>Multi-branch organisations: the invoicing day comes from the organisation's setting
+          (branch overrides weren't carried over) and schedules use the organisation's time
+          zone. The payment chasing timing comes from the organisation-wide late fee rule; each
+          invoice's own branch rule still sets the amount.</p>
 
         <h3 id="automations-catalogue">Triggers, actions and recipes</h3>
         <details class="ref">

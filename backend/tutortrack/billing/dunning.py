@@ -1,7 +1,9 @@
 """Late fees and collections (E10-T14, FR-10-10).
 
-``InvoiceDunningWorkflow`` asks ``dunning_plan`` for the late-fee and collections days of
-an invoice (relative to its due date) and runs them on the same timeline as reminders:
+The **Payment chasing** built-in workflow (E33 T04) decides when: its "Apply a late fee"
+steps call ``apply_next_late_fee`` and "Open a collections case" calls ``open_collections``.
+Before it, ``InvoiceDunningWorkflow`` asked ``dunning_plan`` for the late-fee and collections
+days of an invoice (relative to its due date; kept for runs under way):
 
 * **Late fees:** the branch's (or organisation's) ``LateFeeRule``: a fixed amount or a
   percentage of what is owed, once or monthly, capped; a ``late_fee`` charge added to the
@@ -161,6 +163,20 @@ def apply_late_fee(invoice_id: Any, number: int) -> str:
         for draft in services.build_drafts(Charge.objects.filter(pk=charge.pk), skip_small=False):
             services.issue_invoice(draft)
     return "applied"
+
+
+@transaction.atomic
+def apply_next_late_fee(invoice_id: Any) -> str:
+    """The Payment chasing workflow's "Apply a late fee" (E33 T04): the next application of
+    the rule on this invoice, or why not (``only_fees``, or what ``apply_late_fee`` says).
+    The workflow decides when; the rule decides how much."""
+    invoice = Invoice.objects.filter(pk=invoice_id).first()
+    if invoice is None or not invoice.is_open:
+        return "closed"
+    if _only_fees(invoice):
+        return "only_fees"
+    applied = Charge.objects.filter(source_key__startswith=f"late_fee:{invoice.pk}:").count()
+    return apply_late_fee(invoice.pk, applied + 1)
 
 
 @transaction.atomic

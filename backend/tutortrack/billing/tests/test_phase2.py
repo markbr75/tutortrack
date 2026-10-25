@@ -550,13 +550,8 @@ def test_a_new_rule_replaces_the_previous_one(org):
 
 def test_collections_open_a_task_and_block_until_paid(org, family):
     invoice = overdue_invoice(org, family)
-    set_settings(
-        org,
-        "billing",
-        {"billing.collections_after_days": 30, "billing.collections_block": "hard"},
-    )
+    set_settings(org, "billing", {"billing.collections_block": "hard"})
     with tenant_context(org), transaction.atomic():
-        assert dunning.dunning_plan(invoice.pk)["collections"] == 30
         assert dunning.open_collections(invoice.pk)
         assert not dunning.open_collections(invoice.pk)
         case = CollectionsCase.objects.get()
