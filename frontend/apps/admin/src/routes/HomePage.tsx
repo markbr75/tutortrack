@@ -9,6 +9,7 @@ import { NeedsMarking, OverdueInvoices } from "../home/AttentionLists";
 import { MoneyStrip } from "../home/MoneyStrip";
 import { useTodaysLessons } from "../home/data";
 import { TodaysRegister } from "../home/TodaysRegister";
+import { WorkflowNotices } from "../home/WorkflowNotices";
 import { Dashboard } from "../reporting/ReportingPages";
 import { SetupChecklist } from "../success/SetupChecklist";
 
@@ -76,6 +77,7 @@ export function HomePage() {
         </div>
       </header>
       <SetupChecklist />
+      <WorkflowNotices />
       <MoneyStrip />
       {seeLessons || markLessons || seeInvoices ? (
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">

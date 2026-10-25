@@ -27,3 +27,11 @@ def follow_schedule(event: EventEnvelope) -> None:
     from . import services
 
     services.sync_schedule(event.subject["id"])  # removes it when no longer timed
+
+
+@subscribe("organisation.created")
+def install_builtin_workflows(event: EventEnvelope) -> None:
+    """Every organisation starts with the built-in workflows (E33 FR-33-2)."""
+    from . import services
+
+    services.install_builtins()

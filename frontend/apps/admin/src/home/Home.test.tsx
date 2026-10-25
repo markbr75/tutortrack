@@ -263,6 +263,28 @@ describe("home", () => {
     expect(within(dashboard).queryByText("Nothing to compare with")).not.toBeInTheDocument();
   });
 
+  it("says when a built-in workflow is switched off and what happens instead", async () => {
+    mockApi({
+      ...routes({ ...PERMISSIONS, "automation.view": "all" }),
+      "GET /api/v1/automations/notices": {
+        body: [
+          { id: "w1", name: "Invoicing cycle", notice: "off",
+            message: "Invoices are made by hand." },
+          { id: "w2", name: "Payment chasing", notice: "update", message: "" },
+        ],
+      }, // prettier-ignore
+    });
+    render(<App />);
+    const alert = await screen.findByRole("alert");
+    expect(within(alert).getByText(/Invoicing cycle is switched off\. Invoices are made by hand\./))
+      .toBeInTheDocument(); // prettier-ignore
+    expect(within(alert).getByText(/Payment chasing has a newer default/)).toBeInTheDocument();
+    expect(within(alert).getByRole("link", { name: "Open Invoicing cycle" })).toHaveAttribute(
+      "href",
+      "/automations/w1",
+    );
+  });
+
   it("shows only what the role may see", async () => {
     mockApi(routes({ "scheduling.lesson.view": "all" }));
     render(<App />);

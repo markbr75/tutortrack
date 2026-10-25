@@ -7,5 +7,7 @@ class AutomationsConfig(AppConfig):
     verbose_name = "Automations"
 
     def ready(self) -> None:
-        from . import builtins, catalogue, g4, handlers, org_settings  # noqa: F401
+        from . import builtin_workflows, builtins, catalogue, g4, handlers, org_settings  # noqa: F401
+
         # (the catalogue and g4 register before handlers)
+        builtin_workflows.discover()

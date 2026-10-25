@@ -222,7 +222,12 @@
       "empty": "No invoices are overdue.",
       "open": "Open billing",
       "due": "{{number}} · due {{date}}"
-    }
+    },
+    "workflows": "Workflows",
+    "workflowOff": "{{name}} is switched off.",
+    "workflowUpdate": "{{name}} has a newer default.",
+    "openWorkflow": "Open {{name}}",
+    "openWorkflowShort": "Open"
   },
   "audit": {
     "title": "Audit log",
@@ -2559,7 +2564,15 @@
     "recordId": "Record ID",
     "test": "Test",
     "wouldRun": "This record matches. The automation would:",
-    "wouldNotRun": "This record doesn't match the conditions."
+    "wouldNotRun": "This record doesn't match the conditions.",
+    "builtIn": "Built-in",
+    "edited": "Changed from the default",
+    "cantSwitchOff": "This built-in workflow can't be switched off.",
+    "resetToDefault": "Reset to default",
+    "confirmReset": "Put “{{name}}” back to TutorTrack's default? Runs already under way finish on the current steps.",
+    "resetDone": "Reset to the default.",
+    "updateAvailable": "TutorTrack has improved this workflow since you changed it. Reset to default to use the new version.",
+    "builtInName": "A built-in workflow keeps its name."
   },
   "reporting": {
     "title": "Reports",

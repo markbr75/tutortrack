@@ -120,6 +120,45 @@ describe("automations", () => {
     expect(calls.find((c) => c.path.endsWith("/test"))?.body).toEqual({ subject_id: "s1" });
   });
 
+  it("marks built-ins, keeps their name and resets them to the default", async () => {
+    window.history.pushState(null, "", "/automations");
+    const builtin = {
+      ...AUTOMATION, id: "b1", name: "Welcome a new family", kind: "builtin",
+      builtin_key: "welcome", builtin_version: 1, edited: true, enabled: true,
+      runs_under_way: 0,
+      builtin: { group: "sales", group_label: "Sales and onboarding", latest_version: 2,
+                 update_available: true, can_switch_off: false, off_means: "" },
+    }; // prettier-ignore
+    const calls = mockApi({
+      ...BASE,
+      "GET /api/v1/me": {
+        body: { ...ME, permissions: { ...ME.permissions, "automation.view": "all",
+                                      "automation.builtin.manage": "all" } },
+      }, // prettier-ignore
+      "GET /api/v1/automation-schema": { body: SCHEMA },
+      "GET /api/v1/automations": { body: [builtin] },
+      "GET /api/v1/automations/b1": { body: builtin },
+      "GET /api/v1/automations/b1/runs": { body: [] },
+      "POST /api/v1/automations/b1/reset-to-default": {
+        body: { ...builtin, edited: false, version: 3, builtin_version: 2,
+                builtin: { ...builtin.builtin, update_available: false } },
+      }, // prettier-ignore
+    });
+    vi.stubGlobal("confirm", () => true);
+    render(<App />);
+    expect(await screen.findByText(/^Built-in · /)).toBeInTheDocument();
+    const toggle = screen.getByLabelText("Welcome a new family switched on");
+    expect(toggle).toBeDisabled(); // this one can't be switched off
+
+    window.history.pushState(null, "", "/automations/b1");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    expect(await screen.findByText(/TutorTrack has improved this workflow/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Name")).toHaveAttribute("readonly");
+    fireEvent.click(screen.getByRole("button", { name: "Reset to default" }));
+    expect(await screen.findByText("Reset to the default.")).toBeInTheDocument();
+    expect(calls.some((c) => c.path.endsWith("/b1/reset-to-default"))).toBe(true);
+  });
+
   it("installs a recipe and retries a failed run", async () => {
     window.history.pushState(null, "", "/automations");
     const calls = mockApi({

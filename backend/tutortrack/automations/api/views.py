@@ -9,7 +9,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
 from tutortrack.core.permissions import HasMethodPermission, HasOrganisation, has_perm
 
-from .. import catalogue, conditions, recipes, registry, services
+from .. import builtin_workflows, catalogue, conditions, recipes, registry, services
 from ..models import Automation, AutomationRun
 from . import serializers as s
 
@@ -28,16 +28,50 @@ PERMS: list[Any] = [
 ]
 
 
+class CanManageWorkflow(BasePermission):
+    """Reads need ``automation.view``. Changing a built-in needs ``automation.builtin.manage``
+    and anything else ``automation.manage`` (E33 §5); creating is always a custom one."""
+
+    def has_permission(self, request: Request, view: Any) -> bool:
+        if request.method in SAFE_METHODS:
+            return has_perm(request.user, "automation.view")
+        if view.action == "create":
+            return has_perm(request.user, "automation.manage")
+        return has_perm(request.user, "automation.manage") or has_perm(
+            request.user, "automation.builtin.manage"
+        )
+
+    def has_object_permission(self, request: Request, view: Any, obj: Automation) -> bool:
+        if request.method in SAFE_METHODS:
+            return True
+        if obj.kind == Automation.Kind.BUILTIN:
+            return has_perm(request.user, "automation.builtin.manage")
+        return has_perm(request.user, "automation.manage")
+
+
 class AutomationViewSet(TenantScopedViewMixin, viewsets.ModelViewSet):
     """Automations: When → If → Then."""
 
     model = Automation
     serializer_class = s.AutomationSerializer
-    permission_classes = PERMS
+    permission_classes = [*AUTH, CanManageWorkflow]
     pagination_class = None
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("kind", str, enum=["custom", "builtin"], description="Built-in or not")
+        ]
+    )
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
     def get_tenant_queryset(self) -> Any:
-        return Automation.objects.all()
+        from django.db.models import Count, Q
+
+        under_way = Q(runs__status__in=services.UNDER_WAY)
+        qs = Automation.objects.annotate(runs_under_way=Count("runs", filter=under_way))
+        kind = self.request.query_params.get("kind")
+        return qs.filter(kind=kind) if kind else qs
 
     @extend_schema(request=s.AutomationWriteSerializer, responses={201: s.AutomationSerializer})
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -95,6 +129,30 @@ class AutomationViewSet(TenantScopedViewMixin, viewsets.ModelViewSet):
         """Resume a paused workflow: held runs carry on."""
         automation = services.resume(self.get_object(), user=request.user)
         return Response(s.AutomationSerializer(automation).data)
+
+    @extend_schema(request=None, responses=s.AutomationSerializer)
+    @action(detail=True, methods=["post"], url_path="reset-to-default")
+    def reset_to_default(self, request: Request, pk: Any = None) -> Response:
+        """Put a built-in workflow back to TutorTrack's current default (a new version; runs
+        under way finish on theirs)."""
+        automation = services.reset_to_default(self.get_object(), user=request.user)
+        return Response(s.AutomationSerializer(automation).data)
+
+    @extend_schema(responses=s.BuiltinDefaultSerializer)
+    @action(detail=True, methods=["get"])
+    def default(self, request: Request, pk: Any = None) -> Response:
+        """A built-in's current default, to compare with the organisation's version."""
+        automation = self.get_object()
+        builtin = builtin_workflows.builtin(automation.builtin_key)
+        if builtin is None:
+            raise NotFound("This workflow has no default.")
+        return Response(s.BuiltinDefaultSerializer(s.builtin_default(builtin)).data)
+
+    @extend_schema(responses=s.BuiltinNoticeSerializer(many=True))
+    @action(detail=False, methods=["get"])
+    def notices(self, request: Request) -> Response:
+        """Built-in workflows Home mentions: switched off, or with a newer default."""
+        return Response(s.BuiltinNoticeSerializer(services.builtin_notices(), many=True).data)
 
     @extend_schema(request=s.DryRunRequestSerializer, responses=s.DryRunSerializer)
     @action(detail=True, methods=["post"])

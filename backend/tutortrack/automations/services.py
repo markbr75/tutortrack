@@ -2,6 +2,8 @@
 
 * Definitions: validated against the registry; editing the trigger, conditions or steps
   makes a new ``AutomationVersion`` (runs keep the version they started on).
+* Built-ins (E33 FR-33-2): ``install_builtins`` installs and upgrades the shipped defaults,
+  ``reset_to_default`` puts one back; saving marks it ``edited`` so upgrades leave it alone.
 * Runs: ``prepare_run`` applies the guardrails (kill switch, per-record daily limit,
   per-organisation hourly limit, loop depth) and the conditions, then ``launch`` starts
   ``AutomationRunWorkflow``. The workflow calls ``execute_step`` / ``evaluate_branch`` /
@@ -21,12 +23,12 @@ from django.db import IntegrityError, transaction
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 
-from tutortrack.core import audit
+from tutortrack.core import audit, entitlements
 from tutortrack.core.events import EventEnvelope, publish
 from tutortrack.core.exceptions import BusinessRuleViolation, PermissionDenied
 from tutortrack.core.time import now
 
-from . import conditions, events, registry
+from . import builtin_workflows, conditions, events, registry
 from .actions import RunContext
 from .models import Automation, AutomationRun, AutomationRunStep, AutomationVersion
 
@@ -40,6 +42,9 @@ FAN_OUT_LIMIT = 2000
 DEFINITION = ("trigger_type", "trigger_config", "conditions", "steps", "stop_when")
 MAX_STOP_EVENTS = 3
 FREQUENCIES = ("daily", "weekly", "monthly")
+UNDER_WAY = (
+    AutomationRun.Status.RUNNING, AutomationRun.Status.WAITING, AutomationRun.Status.PAUSED,
+)  # fmt: skip
 
 
 def _invalid(field: str, messages: list[str] | str) -> BusinessRuleViolation:
@@ -273,11 +278,17 @@ def create_automation(
     recipe_key: str = "",
     stop_when: list[str] | None = None,
     user: Any = None,
+    builtin: builtin_workflows.BuiltinWorkflow | None = None,
 ) -> Automation:
+    """A custom workflow (counted against the plan's ``automation_rules``), or with
+    ``builtin`` the organisation's copy of a built-in one (on every plan)."""
     subject_type, trigger_key = validate_definition(
         trigger_type=trigger_type, trigger_config=trigger_config,
         conditions_=conditions_ or {}, steps=steps, user=user, stop_when=stop_when,
     )  # fmt: skip
+    if builtin is None:
+        used = Automation.objects.filter(kind=Automation.Kind.CUSTOM).count()
+        entitlements.require_capacity("automation_rules", used=used)
     automation = Automation.objects.create(
         name=name,
         description=description,
@@ -292,19 +303,47 @@ def create_automation(
         max_runs_per_record=max_runs_per_record,
         recipe_key=recipe_key,
         webhook_secret=secrets.token_urlsafe(32),
+        kind=Automation.Kind.BUILTIN if builtin else Automation.Kind.CUSTOM,
+        builtin_key=builtin.key if builtin else "",
+        builtin_version=builtin.version if builtin else None,
     )
+    if builtin is not None:
+        automation.edited = _differs_from_default(automation, builtin)
+        automation.save(update_fields=["edited"])
     _snapshot(automation)
     audit.record_create(automation)
     _saved(automation)
     return automation
 
 
-@transaction.atomic
 def update_automation(automation: Automation, *, user: Any = None, **changes: Any) -> Automation:
-    """Edit; a changed trigger, conditions or steps make a new version."""
+    """Edit; a changed trigger, conditions or steps make a new version. A built-in keeps
+    its name, description and kind of record, and is marked edited when its definition no
+    longer matches the default."""
+    return _update(automation, user=user, changes=changes)
+
+
+@transaction.atomic
+def _update(
+    automation: Automation, *, user: Any, changes: dict[str, Any],
+    default: builtin_workflows.BuiltinWorkflow | None = None, action: str = "update",
+) -> Automation:  # fmt: skip
+    """``default``: the built-in's default is being applied (reset or upgrade)."""
     automation = Automation.objects.select_for_update().get(pk=automation.pk)
     if "conditions_" in changes:
         changes["conditions"] = changes.pop("conditions_")
+    builtin = _builtin_of(automation) if automation.kind == Automation.Kind.BUILTIN else None
+    if automation.kind == Automation.Kind.BUILTIN:
+        changes.pop("name", None)
+        changes.pop("description", None)
+        if (
+            "enabled" in changes and not changes["enabled"] and automation.enabled
+            and builtin is not None and not builtin.can_switch_off
+        ):  # fmt: skip
+            raise BusinessRuleViolation(
+                _("“%(name)s” can't be switched off. Change its steps or pause it instead.")
+                % {"name": automation.name}
+            )
     definition_changed = any(
         k in changes and changes[k] != getattr(automation, k) for k in DEFINITION
     )
@@ -317,15 +356,25 @@ def update_automation(automation: Automation, *, user: Any = None, **changes: An
             user=user,
             stop_when=changes.get("stop_when", automation.stop_when),
         )
+        if automation.kind == Automation.Kind.BUILTIN and subject_type != automation.subject_type:
+            raise _invalid(
+                "trigger_config", _("A built-in workflow keeps the kind of record it is about.")
+            )
         changes |= {"subject_type": subject_type, "trigger_key": trigger_key}
     allowed = {"name", "description", "enabled", "max_runs_per_record", *DEFINITION,
                "subject_type", "trigger_key"}  # fmt: skip
-    with audit.track(automation):
+    with audit.track(automation, action=action):
         for key, value in changes.items():
             if key in allowed:
                 setattr(automation, key, value)
         if definition_changed:
             automation.version += 1
+        if default is not None:
+            automation.builtin_version = default.version
+            automation.name = str(_(default.name))
+            automation.description = str(_(default.description))
+        if builtin is not None:
+            automation.edited = _differs_from_default(automation, builtin)
         automation.save()
     if definition_changed:
         _snapshot(automation)
@@ -366,11 +415,103 @@ def resume(automation: Automation, *, user: Any = None) -> Automation:
 
 @transaction.atomic
 def delete_automation(automation: Automation) -> None:
+    if automation.kind == Automation.Kind.BUILTIN:
+        raise BusinessRuleViolation(
+            _("Built-in workflows can't be deleted. Switch it off or reset it to the default.")
+        )
     audit.record(automation, "delete")
     publish(events.AutomationDeleted(subject_id=automation.pk))
     automation.enabled = False
     automation.save(update_fields=["enabled", "updated_at"])
     automation.delete()
+
+
+# --- built-in workflows (E33 T03) ---------------------------------------------------------------
+
+
+def _builtin_of(automation: Automation) -> builtin_workflows.BuiltinWorkflow | None:
+    return builtin_workflows.builtin(automation.builtin_key) if automation.builtin_key else None
+
+
+def _differs_from_default(
+    automation: Automation, builtin: builtin_workflows.BuiltinWorkflow
+) -> bool:
+    default = builtin.definition()
+    return any(
+        getattr(automation, key) != default[key] for key in builtin_workflows.DEFINITION_KEYS
+    )
+
+
+def update_available(automation: Automation) -> bool:
+    """An edited built-in whose default TutorTrack has improved since (offer compare and reset)."""
+    builtin = _builtin_of(automation)
+    return bool(
+        builtin and automation.edited and (automation.builtin_version or 0) < builtin.version
+    )
+
+
+def install_builtins() -> dict[str, int]:
+    """Install the built-ins the organisation doesn't have yet, from its current settings,
+    and move unedited ones to a newer default. Edited ones are left as they are
+    (``update_available``). Idempotent: runs at sign-up and on every deploy."""
+    existing = {a.builtin_key: a for a in Automation.objects.filter(kind=Automation.Kind.BUILTIN)}
+    counts = {"installed": 0, "upgraded": 0}
+    for builtin in builtin_workflows.all_builtins():
+        found = existing.get(builtin.key)
+        try:
+            if found is None:
+                with transaction.atomic():
+                    definition = builtin.definition(first=True)
+                    create_automation(
+                        name=str(_(builtin.name)), description=str(_(builtin.description)),
+                        trigger_type=definition["trigger_type"],
+                        trigger_config=definition["trigger_config"],
+                        conditions_=definition["conditions"], steps=definition["steps"],
+                        stop_when=definition["stop_when"], enabled=builtin.enabled,
+                        max_runs_per_record=builtin.max_runs_per_record, builtin=builtin,
+                    )  # fmt: skip
+                counts["installed"] += 1
+            elif not found.edited and (found.builtin_version or 0) < builtin.version:
+                _update(found, user=None, changes=builtin.definition(), default=builtin,
+                        action="upgrade")  # fmt: skip
+                counts["upgraded"] += 1
+        except (BusinessRuleViolation, IntegrityError) as exc:  # a broken default, or a race
+            logger.error("automation.builtin_install_failed", key=builtin.key, error=str(exc))
+    return counts
+
+
+def reset_to_default(automation: Automation, *, user: Any = None) -> Automation:
+    """Put a built-in back to TutorTrack's current default. Runs under way finish on their
+    version; saving still needs the permission of every action in it (ADR 0014 §6)."""
+    builtin = _builtin_of(automation)
+    if automation.kind != Automation.Kind.BUILTIN:
+        raise BusinessRuleViolation(_("Only built-in workflows have a default to reset to."))
+    if builtin is None:
+        raise BusinessRuleViolation(_("TutorTrack no longer ships this built-in workflow."))
+    definition = builtin.definition()
+    validate_definition(
+        trigger_type=definition["trigger_type"], trigger_config=definition["trigger_config"],
+        conditions_=definition["conditions"], steps=definition["steps"], user=user,
+        stop_when=definition["stop_when"],
+    )  # fmt: skip
+    return _update(automation, user=user, changes=definition, default=builtin, action="reset")
+
+
+def builtin_notices() -> list[dict[str, Any]]:
+    """Built-ins Home mentions: switched off (and what happens instead), or with a newer
+    default than the organisation's edited version (FR-33-5)."""
+    out = []
+    for automation in Automation.objects.filter(kind=Automation.Kind.BUILTIN).order_by("name"):
+        builtin = _builtin_of(automation)
+        if builtin is None:
+            continue
+        row = {"id": automation.pk, "name": automation.name, "message": ""}
+        if not automation.enabled:
+            off_means = str(_(builtin.off_means)) if builtin.off_means else ""
+            out.append({**row, "notice": "off", "message": off_means})
+        elif update_available(automation):
+            out.append({**row, "notice": "update"})
+    return out
 
 
 # --- context ------------------------------------------------------------------------------------
@@ -590,6 +731,14 @@ def _author(automation: Automation) -> Any:
     return User.objects.filter(pk=user_id).first() if user_id else None
 
 
+def _authorised(automation: Automation, author: Any, codename: str) -> bool:
+    """Whose permission a step runs with: an unedited built-in is TutorTrack's own default,
+    so it runs with the platform's authority; anything else with its author's."""
+    if automation.kind == Automation.Kind.BUILTIN and not automation.edited:
+        return True
+    return author is not None and _may(author, codename)
+
+
 def load_plan(run_id: str) -> list[dict[str, Any]]:
     run = AutomationRun.objects.select_related("version").get(pk=run_id)
     steps: list[dict[str, Any]] = run.version.steps
@@ -628,7 +777,7 @@ def execute_step(run_id: str, key: str, step: dict[str, Any]) -> dict[str, Any]:
                         result={"skipped": "only_if"}, error="")  # fmt: skip
                 return {"status": "skipped"}
             author = _author(run.automation)
-            if action.permission and not (author is not None and _may(author, action.permission)):
+            if action.permission and not _authorised(run.automation, author, action.permission):
                 raise BusinessRuleViolation(
                     _("The automation's author no longer has permission for “%(a)s”.")
                     % {"a": action.label}
