@@ -120,3 +120,76 @@ def test_the_dry_run_describes_the_new_waits_and_skips(org):
         "Wait until 3 days before student.date_of_birth, at 09:00, on a business day"
     )
     assert steps[1]["skipped"] is True
+
+
+# --- E33 T02: pause and resume, start another workflow, skipped with a reason ------------------
+
+
+def wait_for(org, run, status, seconds=20):
+    import time
+
+    deadline = time.monotonic() + seconds
+    while time.monotonic() < deadline:
+        with tenant_context(org):
+            run.refresh_from_db()
+        if run.status == status:
+            return
+        time.sleep(0.1)
+    raise AssertionError(f"run is {run.status}, not {status}")
+
+
+def test_a_paused_workflow_holds_its_runs_until_resumed(org, temporal_env):
+    from datetime import timedelta
+
+    student = student_in(org)
+    rule = automation(org, [{"type": "wait", "days": 1}, TAG])
+    change_status(org, student, "paused")
+    dispatch_batch()
+    [run] = runs(org)
+    with tenant_context(org):
+        services.pause(rule)
+    # New events start nothing while paused.
+    change_status(org, student, "active")
+    dispatch_batch()
+    assert len(runs(org)) == 1
+    temporal_env.skip(timedelta(days=2))  # the wait ends; the next action holds
+    wait_for(org, run, "paused")
+    with tenant_context(org):
+        assert not run.steps.filter(step_key="1").exists()
+        services.resume(rule)
+    assert temporal_env.result(run.workflow_id) == "completed"
+    with tenant_context(org):
+        run.refresh_from_db()
+        assert run.status == "completed"
+        assert [t.name for t in tags_for("people.student", [str(student.pk)])[str(student.pk)]] == [
+            "Active"
+        ]
+    record(temporal_env, run.workflow_id, "AutomationRunWorkflow-paused")
+
+
+def test_start_another_workflow_runs_it_one_level_deeper(org, temporal_env):
+    student = student_in(org)
+    target = automation(org, [TAG], trigger_type="manual", trigger_config={"subject": "student"})
+    automation(org, [{"type": "action", "action": "start_workflow",
+                      "config": {"workflow": str(target.pk)}}])  # fmt: skip
+    change_status(org, student, "paused")
+    dispatch_batch()
+    [parent] = runs(org)
+    assert temporal_env.result(parent.workflow_id) == "completed"
+    child = runs(org)[1]
+    assert temporal_env.result(child.workflow_id) == "completed"
+    assert (child.automation_id, child.causation_depth) == (target.pk, 1)
+
+
+def test_a_step_the_record_has_moved_past_is_skipped_with_its_reason(org):
+    student = student_in(org)
+    target = automation(org, [TAG], trigger_type="manual", trigger_config={"subject": "student"})
+    step = {"type": "action", "action": "start_workflow", "config": {"workflow": str(target.pk)}}
+    rule = automation(org, [step])
+    with tenant_context(org), transaction.atomic():
+        services.set_enabled(target, False)
+        run = services.prepare_run(rule, subject_id=str(student.pk), run_key="test")
+    with tenant_context(org):
+        assert services.execute_step(str(run.pk), "0", step)["status"] == "skipped"
+        logged = run.steps.get(step_key="0")
+    assert (logged.status, logged.result) == ("skipped", {"skipped": "the other workflow is off"})

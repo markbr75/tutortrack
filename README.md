@@ -7,7 +7,8 @@ PostgreSQL backend, React and TypeScript frontends.
 
 **Status:** all 32 epics (E01–E32) are built, plus every gap batch (G1–G6). The items that
 need real provider credentials or infrastructure are listed at the end of
-[docs/05-gap-backlog.md](docs/05-gap-backlog.md). Build order and progress:
+[docs/05-gap-backlog.md](docs/05-gap-backlog.md). E33 (the workflow designer) is in
+progress: the sequence engine and its catalogue are done. Build order and progress:
 [docs/04-roadmap.md](docs/04-roadmap.md).
 
 ## Guides
@@ -99,7 +100,7 @@ Each app in `backend/tutortrack/` owns its models, `services.py` (writes), `sele
 | `payments` | Stripe, GoCardless, PayPal, auto-pay, refunds, reconciliation | E11 |
 | `payroll` | Pay items, pay runs, expenses, payouts, tax forms | E12 |
 | `comms` | Email, SMS and push, templates, inbox, broadcasts, notification preferences | E13 |
-| `automations` | Trigger/condition/action automations on Temporal | E14 |
+| `automations` | Trigger/condition/action automations and workflow sequences on Temporal: plain questions, timed waits, Stop when, pause | E14, E33 |
 | `portal` | Client, student and tutor portal APIs | E15, E16 |
 | `leads` | Enquiries, pipeline, forms (with file uploads), waitlist with tutor-capacity suggestions, proposals | E17 |
 | `recruitment` | Job openings, tutor applications (CV and video uploads), interview booking, onboarding, compliance checks, probation reviews, offboarding, subject tests | E18 |

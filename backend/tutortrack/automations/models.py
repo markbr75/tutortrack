@@ -29,6 +29,8 @@ class Automation(TenantModel):
     stop_when = models.JSONField(default=list, blank=True)
     version = models.PositiveIntegerField(default=1)
     enabled = models.BooleanField(default=False)
+    # Paused (E33): no new runs start, and runs under way hold before their next action.
+    paused = models.BooleanField(default=False)
     max_runs_per_record = models.PositiveSmallIntegerField(default=1)  # per 24 hours
     recipe_key = models.CharField(max_length=60, blank=True, default="")
     webhook_secret = EncryptedField(blank=True, default="")
@@ -70,6 +72,7 @@ class AutomationRun(TenantModel):
         FAILED = "failed", _("Failed")
         SKIPPED = "skipped", _("Skipped")
         STOPPED = "stopped", _("Stopped")
+        PAUSED = "paused", _("Paused")
 
     automation = models.ForeignKey(Automation, on_delete=models.CASCADE, related_name="runs")
     version = models.ForeignKey(AutomationVersion, on_delete=models.PROTECT, related_name="+")

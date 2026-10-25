@@ -67,7 +67,7 @@
     <header>
       <h1>TutorTrack API guide</h1>
       <p class="lead">Connect your own systems to TutorTrack with the REST API and webhooks.</p>
-      <p class="meta">Last updated: 2026-10-21 · API version v1</p>
+      <p class="meta">Last updated: 2026-10-25 · API version v1</p>
     </header>
 
     <section id="overview">
@@ -460,7 +460,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <h3 id="webhook-events">Event catalogue</h3>
       <p>Subscribe to individual types or to <code>&lt;aggregate&gt;.*</code>.</p>
       <!-- BEGIN GENERATED: webhook-events -->
-<p class="meta">258 event types on 72 aggregates, generated from the webhook event catalogue.</p>
+<p class="meta">260 event types on 72 aggregates, generated from the webhook event catalogue.</p>
 <details class="ref" id="events-affiliate_statement">
   <summary><code>affiliate_statement.*</code> <span class="badge">1</span></summary>
   <div class="table-wrap"><table>
@@ -592,7 +592,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
   </table></div>
 </details>
 <details class="ref" id="events-client">
-  <summary><code>client.*</code> <span class="badge">8</span></summary>
+  <summary><code>client.*</code> <span class="badge">9</span></summary>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
     <tbody>
@@ -601,6 +601,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <tr><td><code>client.collections_closed</code></td><td>Client collections closed.</td><td><code>invoice_id</code>, <code>case_id</code></td></tr>
       <tr><td><code>client.collections_opened</code></td><td>Client collections opened.</td><td><code>invoice_id</code>, <code>case_id</code>, <code>block</code>, <code>balance_due</code></td></tr>
       <tr><td><code>client.created</code></td><td>Client created.</td><td><code>display_name</code></td></tr>
+      <tr><td><code>client.first_lesson_completed</code></td><td>A family&#x27;s first lesson took place.</td><td><code>lesson_id</code></td></tr>
       <tr><td><code>client.merged</code></td><td>Client merged.</td><td><code>merged_id</code>, <code>moved</code></td></tr>
       <tr><td><code>client.statement_sent</code></td><td>A scheduled monthly statement was emailed to a client.</td><td><code>currency</code>, <code>period_start</code>, <code>period_end</code></td></tr>
       <tr><td><code>client.updated</code></td><td>Client updated.</td><td><code>fields</code></td></tr>
@@ -1259,12 +1260,13 @@ export function verify(secret, header, rawBody, tolerance = 300) {
   </table></div>
 </details>
 <details class="ref" id="events-trial_lesson">
-  <summary><code>trial_lesson.*</code> <span class="badge">2</span></summary>
+  <summary><code>trial_lesson.*</code> <span class="badge">3</span></summary>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
     <tbody>
       <tr><td><code>trial_lesson.booked</code></td><td>Trial lesson booked.</td><td><code>lesson_id</code></td></tr>
       <tr><td><code>trial_lesson.completed</code></td><td>Trial lesson completed.</td><td><code>outcome</code></td></tr>
+      <tr><td><code>trial_lesson.no_show</code></td><td>The enquiry&#x27;s trial lesson was marked missed.</td><td><code>lesson_id</code></td></tr>
     </tbody>
   </table></div>
 </details>

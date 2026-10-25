@@ -1201,6 +1201,16 @@
           <code>stop_when</code>, up to three events about the same record (for example
           <code>invoice.paid</code>), shown as <span class="ui">Stopped</span> with the event
           that stopped it.</p>
+        <p>Instead of conditions on fields, a step or a branch can ask a plain question about
+          the record, such as "The invoice is still unpaid", "The family pays automatically",
+          "This is the student's first lesson" or "The report still isn't written". When a step
+          can't apply any more (for example a late fee on an invoice that is now paid, or
+          emailing a lesson reminder for a cancelled lesson), it is shown as
+          <span class="ui">Skipped</span> with the reason; nothing is charged or sent.</p>
+        <p><strong>Pause</strong> (through the API for now) stops new runs, and runs already
+          under way wait before their next action, shown as <span class="ui">Paused</span>.
+          Resume and they carry on from that action. Switching an automation off stops new
+          runs only.</p>
 
         <h3 id="automations-catalogue">Triggers, actions and recipes</h3>
         <details class="ref">
@@ -1209,17 +1219,19 @@
             <table>
               <thead><tr><th scope="col">Record</th><th scope="col">Events</th></tr></thead>
               <tbody>
-                <tr><td>Client</td><td>Client added; prepaid balance low</td></tr>
+                <tr><td>Client</td><td>Client added; prepaid balance low; a family's first lesson</td></tr>
                 <tr><td>Student</td><td>Student added; status changed</td></tr>
                 <tr><td>Tutor</td><td>Tutor added; status changed; restricted (compliance)</td></tr>
-                <tr><td>Lesson</td><td>Scheduled, rescheduled, cancelled, completed, missed; absence notified</td></tr>
-                <tr><td>Lesson report</td><td>Overdue, submitted, approved</td></tr>
-                <tr><td>Enquiry</td><td>Received, moved stage, waiting too long, won, lost; trial lesson booked, trial lesson completed</td></tr>
-                <tr><td>Invoice</td><td>Issued, overdue, paid; payment failed</td></tr>
+                <tr><td>Lesson</td><td>Scheduled, rescheduled, cancelled, completed, missed, not confirmed; absence notified</td></tr>
+                <tr><td>Lesson report</td><td>Due, overdue, escalated, submitted, approved</td></tr>
+                <tr><td>Enquiry</td><td>Received, moved stage, waiting too long, won, lost; trial lesson booked, trial lesson completed, trial lesson missed</td></tr>
+                <tr><td>Invoice</td><td>Issued, emailed, part paid, overdue, paid, voided, written off; payment failed</td></tr>
+                <tr><td>Invoice run</td><td>Drafted (ready for review), issued</td></tr>
+                <tr><td>Payment request</td><td>Created, sent, paid, cancelled</td></tr>
                 <tr><td>Job</td><td>Created, status changed, tutor assigned, hours cap reached</td></tr>
                 <tr><td>Tutor application</td><td>Received, approved</td></tr>
                 <tr><td>Compliance record</td><td>Check expiring, check expired</td></tr>
-                <tr><td>Package</td><td>Running low, used up, about to expire, expired</td></tr>
+                <tr><td>Package</td><td>Activated, running low, used up, about to expire, expired</td></tr>
               </tbody>
             </table>
           </div>
@@ -1232,7 +1244,10 @@
             <li>Change a field; add or remove a tag; move to a pipeline stage (enquiries and applications)</li>
             <li>Add to a mailing list (broadcasts, Mailchimp or Brevo)</li>
             <li>Call a webhook (HTTPS, signed)</li>
+            <li>Send a lesson reminder (each contact's reminder preferences still apply); mark a lesson report overdue and tell the tutor; escalate an overdue report to the coordinators</li>
+            <li>Assign an enquiry to a person; start another automation for the same record (the loop limit applies)</li>
             <li>Add a one-off charge, apply a late fee, request a payment, offer the job to the best tutors. These need the author to hold the matching billing or matching permission, both when saving and when the automation runs.</li>
+            <li>Billing steps, with the same permission rule: start an invoice run for a branch (last or this week, last, this or next month, this term, or the schedule's period), issue an invoice run that is in review, email the invoice, send last month's statement, collect payment now (saved card or mandate), open a collections case, and remind a family about a payment request. Issuing, collecting, late fees and collections note the automation and its version in the audit log.</li>
           </ul>
         </details>
         <details class="ref">

@@ -2394,6 +2394,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/automations/{id}/pause": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Pause: no new runs start, and runs under way hold before their next action. */
+    post: operations["automations_pause_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automations/{id}/resume": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Resume a paused workflow: held runs carry on. */
+    post: operations["automations_resume_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/automations/{id}/run": {
     parameters: {
       query?: never;
@@ -22308,6 +22342,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/workflow-schema": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description What the sequence editor offers (E33): record types with their dates and
+     *     stop-when events, starts, plain questions and actions.
+     */
+    get: operations["workflow_schema_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -23925,6 +23979,7 @@ export interface components {
       stop_when?: unknown;
       readonly version: number;
       enabled?: boolean;
+      readonly paused: boolean;
       max_runs_per_record?: number;
       readonly recipe_key: string;
       /** Format: date-time */
@@ -23980,9 +24035,11 @@ export interface components {
      *     * `failed` - Failed
      *     * `skipped` - Skipped
      *     * `stopped` - Stopped
+     *     * `paused` - Paused
      * @enum {string}
      */
-    AutomationRunStatusEnum: "running" | "waiting" | "completed" | "failed" | "skipped" | "stopped";
+    AutomationRunStatusEnum:
+      "running" | "waiting" | "completed" | "failed" | "skipped" | "stopped" | "paused";
     AutomationSchema: {
       subjects: components["schemas"]["SchemaSubject"][];
       triggers: components["schemas"]["SchemaTrigger"][];
@@ -45049,6 +45106,55 @@ export interface components {
       action: components["schemas"]["WorkflowActionActionEnum"];
       reason: string;
     };
+    WorkflowDateField: {
+      path: string;
+      label: string;
+      type: string;
+    };
+    WorkflowDateStart: {
+      key: string;
+      label: string;
+      subject: string;
+      /** @description The event the run starts on. */
+      event: string;
+      /** @description The date its first wait counts from. */
+      date: string;
+    };
+    WorkflowQuestion: {
+      key: string;
+      label: string;
+      subject: string;
+    };
+    WorkflowRecordType: {
+      key: string;
+      label: string;
+      recipients: string[];
+      taggable: boolean;
+      date_fields: components["schemas"]["WorkflowDateField"][];
+      /** @description Events that can end a run for this record type. */
+      stop_when: string[];
+    };
+    WorkflowScheduleStart: {
+      key: string;
+      label: string;
+      subject: string;
+      /** @description The schedule's trigger_config. */
+      config: {
+        [key: string]: unknown;
+      };
+    };
+    WorkflowSchema: {
+      record_types: components["schemas"]["WorkflowRecordType"][];
+      starts: components["schemas"]["WorkflowStarts"];
+      questions: components["schemas"]["WorkflowQuestion"][];
+      actions: components["schemas"]["SchemaAction"][];
+    };
+    WorkflowStarts: {
+      events: components["schemas"]["SchemaTrigger"][];
+      dates: components["schemas"]["WorkflowDateStart"][];
+      schedules: components["schemas"]["WorkflowScheduleStart"][];
+      frequencies: string[];
+    };
     XeroEarningsRate: {
       id: string;
       name: string;
@@ -48907,6 +49013,56 @@ export interface operations {
     };
   };
   automations_enable_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  automations_pause_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  automations_resume_create: {
     parameters: {
       query?: never;
       header?: {
@@ -85072,6 +85228,25 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["WidgetKind"][];
+        };
+      };
+    };
+  };
+  workflow_schema_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorkflowSchema"];
         };
       };
     };

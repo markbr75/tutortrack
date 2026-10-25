@@ -8029,6 +8029,100 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/automations/{id}/pause": {
+            "post": {
+                "operationId": "automations_pause_create",
+                "description": "Pause: no new runs start, and runs under way hold before their next action.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Automation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/automations/{id}/resume": {
+            "post": {
+                "operationId": "automations_resume_create",
+                "description": "Resume a paused workflow: held runs carry on.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Automation"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/automations/{id}/run": {
             "post": {
                 "operationId": "automations_run_create",
@@ -84259,6 +84353,33 @@
                 },
                 "x-visibility": "internal"
             }
+        },
+        "/api/v1/workflow-schema": {
+            "get": {
+                "operationId": "workflow_schema_retrieve",
+                "description": "What the sequence editor offers (E33): record types with their dates and\nstop-when events, starts, plain questions and actions.",
+                "tags": [
+                    "workflow-schema"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowSchema"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
         }
     },
     "components": {
@@ -89331,6 +89452,10 @@
                     "enabled": {
                         "type": "boolean"
                     },
+                    "paused": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
                     "max_runs_per_record": {
                         "type": "integer",
                         "maximum": 32767,
@@ -89355,6 +89480,7 @@
                     "created_at",
                     "id",
                     "name",
+                    "paused",
                     "recipe_key",
                     "subject_type",
                     "trigger_type",
@@ -89521,10 +89647,11 @@
                     "completed",
                     "failed",
                     "skipped",
-                    "stopped"
+                    "stopped",
+                    "paused"
                 ],
                 "type": "string",
-                "description": "* `running` - Running\n* `waiting` - Waiting\n* `completed` - Completed\n* `failed` - Failed\n* `skipped` - Skipped\n* `stopped` - Stopped"
+                "description": "* `running` - Running\n* `waiting` - Waiting\n* `completed` - Completed\n* `failed` - Failed\n* `skipped` - Skipped\n* `stopped` - Stopped\n* `paused` - Paused"
             },
             "AutomationSchema": {
                 "type": "object",
@@ -153830,6 +153957,206 @@
                 "required": [
                     "action",
                     "reason"
+                ]
+            },
+            "WorkflowDateField": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "label",
+                    "path",
+                    "type"
+                ]
+            },
+            "WorkflowDateStart": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string"
+                    },
+                    "event": {
+                        "type": "string",
+                        "description": "The event the run starts on."
+                    },
+                    "date": {
+                        "type": "string",
+                        "description": "The date its first wait counts from."
+                    }
+                },
+                "required": [
+                    "date",
+                    "event",
+                    "key",
+                    "label",
+                    "subject"
+                ]
+            },
+            "WorkflowQuestion": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "label",
+                    "subject"
+                ]
+            },
+            "WorkflowRecordType": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "recipients": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "taggable": {
+                        "type": "boolean"
+                    },
+                    "date_fields": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowDateField"
+                        }
+                    },
+                    "stop_when": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Events that can end a run for this record type."
+                    }
+                },
+                "required": [
+                    "date_fields",
+                    "key",
+                    "label",
+                    "recipients",
+                    "stop_when",
+                    "taggable"
+                ]
+            },
+            "WorkflowScheduleStart": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "subject": {
+                        "type": "string"
+                    },
+                    "config": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "description": "The schedule's trigger_config."
+                    }
+                },
+                "required": [
+                    "config",
+                    "key",
+                    "label",
+                    "subject"
+                ]
+            },
+            "WorkflowSchema": {
+                "type": "object",
+                "properties": {
+                    "record_types": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowRecordType"
+                        }
+                    },
+                    "starts": {
+                        "$ref": "#/components/schemas/WorkflowStarts"
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowQuestion"
+                        }
+                    },
+                    "actions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SchemaAction"
+                        }
+                    }
+                },
+                "required": [
+                    "actions",
+                    "questions",
+                    "record_types",
+                    "starts"
+                ]
+            },
+            "WorkflowStarts": {
+                "type": "object",
+                "properties": {
+                    "events": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SchemaTrigger"
+                        }
+                    },
+                    "dates": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowDateStart"
+                        }
+                    },
+                    "schedules": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowScheduleStart"
+                        }
+                    },
+                    "frequencies": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "dates",
+                    "events",
+                    "frequencies",
+                    "schedules"
                 ]
             },
             "XeroEarningsRate": {

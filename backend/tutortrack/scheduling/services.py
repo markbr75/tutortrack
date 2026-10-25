@@ -878,6 +878,34 @@ def sync_group_roster(
     return True
 
 
+@transaction.atomic
+def note_first_lessons(lesson: Lesson) -> int:
+    """E33: ``client.first_lesson_completed`` for each family on a completed lesson that had
+    no completed lesson before it (once per family)."""
+    if lesson.status != Lesson.Status.COMPLETED:
+        return 0
+    published = 0
+    for client_id in set(lesson.attendees.values_list("client_id", flat=True)):
+        earlier = (
+            Lesson.objects.filter(
+                attendees__client_id=client_id,
+                status=Lesson.Status.COMPLETED,
+                start__lt=lesson.start,
+            )
+            .exclude(pk=lesson.pk)
+            .exists()
+        )
+        if earlier:
+            continue
+        publish(
+            events.ClientFirstLessonCompleted(subject_id=client_id, lesson_id=str(lesson.pk)),
+            branch_id=lesson.branch_id,
+            dedupe_key=f"first-lesson:{client_id}",
+        )
+        published += 1
+    return published
+
+
 # --- series -------------------------------------------------------------------------------------
 
 

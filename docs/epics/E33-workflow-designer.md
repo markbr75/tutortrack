@@ -1,6 +1,6 @@
 # E33 — Workflow Designer
 
-- **Status:** In progress (T01 done 2026-10-25)
+- **Status:** In progress (T01, T02 done 2026-10-25)
 - **Depends on:** E14 Automation (the engine it grows from), E32 Temporal, E10 Billing, E13
   Communications, E09 Delivery, E17 Leads, E18 Recruitment, E24 Growth
 - **ADR:** [0047](../adr/0047-workflow-designer-on-the-automation-engine.md)
@@ -207,7 +207,7 @@ Each ticket is one pull request, merged when CI is green.
   before its next step), Yes / No splits that rejoin, and "only if" per step. Interpreter
   changes are versioned with `workflow.patched`, with replay histories (02-architecture
   §9). Hypothesis tests for date-relative waits across time zones and DST.
-- [ ] **T02 — Plain questions and the catalogue.** The per-record-type list of plain
+- [x] **T02 — Plain questions and the catalogue.** The per-record-type list of plain
   questions (each a named predicate with tests), the new starts, stop-when events, record
   types and actions in FR-33-4 (with permissions and idempotency keys), silent versions,
   pause and resume. `/workflow-schema`.
@@ -267,3 +267,53 @@ against the API.
   its unfinished wait is marked `skipped`.
 - New histories: `AutomationRunWorkflow-only-if`, `-stopped`, `-timed`; the existing ones
   still replay.
+
+**T02 (2026-10-25).**
+- **Plain questions** (`automations/catalogue.py`) are predicates registered with a record
+  type: `{"predicate": "invoice.unpaid"}` in `only_if` or a split's `if`. They read the
+  record's whitelisted context, so a dry run answers them as a run would. Saving refuses a
+  question about another kind of record. 29 questions across 13 record types; every one has
+  a yes and a no test. Contexts gained `lesson.trial`, `lesson_report.overdue`/`escalated`
+  and `enquiry.trial_booked`/`trial_outcome`.
+- **Record types:** `branch` (so a schedule runs once per branch, for invoicing),
+  `invoice_run` and `payment_request`. Package came with G4. The "statement (period)" record
+  type isn't needed: statements are a monthly schedule on clients with **Send a statement**
+  (last month).
+- **Starts:** new events `invoice_run.drafted` and `invoice_run.issued` (billing),
+  `trial_lesson.no_show` (leads, when a trial lesson is marked missed) and
+  `client.first_lesson_completed` (scheduling, once per family); existing events now
+  registered as starts: `payment_request.created`/`sent`/`paid`/`cancelled`,
+  `lesson.unconfirmed`, `lesson_report.due`/`escalated`, `package.activated`, and
+  `invoice.sent`/`partially_paid`/`voided`/`written_off` (mainly for **Stop when**).
+  The relative-date starts in FR-33-4 (`invoice.due_soon`, `lesson.reminder_due`,
+  `package.expiring`) are not new events: a sequence starts on the record's event and its
+  first wait counts from the date (`DATE_STARTS` in the schema, for the editor). This is
+  more exact than a daily date trigger and needs no sweeper. `statement.due` and "invoicing
+  due" are named schedules (`SCHEDULE_STARTS`).
+- **Actions** (each through the owning service, keyed by run and step, with a permission):
+  Start an invoice run (branch; schedule's period, last or this week, last, this or next
+  month, this term; arrears or advance; `create_run` is idempotent per period), Issue the
+  invoice run (approves it, as staff would; the run's own workflow issues), Email the
+  invoice (new `billing.services.email_invoice`), Send a statement, Collect payment now,
+  Open a collections case, Send payment request reminder (moved into
+  `billing.services.remind_payment_request`), Send lesson reminder, Mark report overdue and
+  notify, Escalate to the tutor's manager, Assign to a person (enquiries), Ask for a review,
+  Start another workflow (same record type; `prepare_run(depth=…)` so the loop limit
+  applies). "Ask for lesson feedback" is G4's `send_feedback_survey`.
+- **Skipped with a reason** (FR-33-5): an action whose record has moved on returns
+  `{"skipped": "invoice already paid"}` and the step is logged as skipped with that result.
+  The late fee now skips a paid invoice instead of noting "nothing owed".
+- **Audit:** issue run, collect, late fee and collections write a `workflow.<action>` audit
+  entry with the workflow, its version and the run.
+- **Pause and resume:** `Automation.paused`. Paused: no new runs (manual ones included), and
+  `execute_step` answers `paused` before the next action, so the run is held (status
+  `paused`) on `wait_condition` until the `resume` signal, re-checking every 6 hours in
+  case a signal was missed. Waits and Stop when go on as normal while paused. Only runs that
+  meet a pause take the new path, so no `workflow.patched` was needed; new history
+  `AutomationRunWorkflow-paused`. `POST /automations/{id}/pause` and `/resume`.
+- **Silent versions:** already the case (E14); pausing, enabling and renaming don't make a
+  version.
+- `/workflow-schema` returns record types (date fields, stop-when events), starts (events,
+  date starts, named schedules, frequencies), plain questions and actions (with `allowed`
+  for the caller). `/automation-schema` stays for the current Automations pages. The
+  `/workflows` aliases come with the editor (T07).

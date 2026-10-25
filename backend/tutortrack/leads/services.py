@@ -705,6 +705,20 @@ def record_trial_outcome(
     return enquiry
 
 
+@transaction.atomic
+def note_trial_no_show(lesson_id: Any) -> bool:
+    """A missed lesson that is an enquiry's trial: ``trial_lesson.no_show`` (once)."""
+    enquiry = Enquiry.objects.filter(trial_lesson_id=lesson_id).first()
+    if enquiry is None:
+        return False
+    publish(
+        events.TrialLessonNoShow(subject_id=enquiry.pk, lesson_id=str(lesson_id)),
+        branch_id=enquiry.branch_id,
+        dedupe_key=f"trial-no-show:{enquiry.pk}:{lesson_id}",
+    )
+    return True
+
+
 # --- conversion (T06) -----------------------------------------------------------------------
 
 

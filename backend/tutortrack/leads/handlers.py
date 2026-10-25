@@ -24,6 +24,14 @@ def _running(workflow_id: str) -> bool:
     return WorkflowLink.objects.filter(workflow_id=workflow_id, status="running").exists()
 
 
+@subscribe("lesson.missed")
+def trial_lesson_missed(event: EventEnvelope) -> None:
+    """E33: the trial lesson was missed: ``trial_lesson.no_show`` for the enquiry."""
+    from . import services
+
+    services.note_trial_no_show(event.subject["id"])
+
+
 @subscribe("lesson.completed")
 def trial_lesson_done(event: EventEnvelope) -> None:
     """A trial lesson happened: the follow-up workflow reminds the owner for the outcome."""

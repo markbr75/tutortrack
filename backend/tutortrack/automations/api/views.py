@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
 from tutortrack.core.permissions import HasMethodPermission, HasOrganisation, has_perm
 
-from .. import conditions, recipes, registry, services
+from .. import catalogue, conditions, recipes, registry, services
 from ..models import Automation, AutomationRun
 from . import serializers as s
 
@@ -80,6 +80,20 @@ class AutomationViewSet(TenantScopedViewMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def disable(self, request: Request, pk: Any = None) -> Response:
         automation = services.set_enabled(self.get_object(), False, user=request.user)
+        return Response(s.AutomationSerializer(automation).data)
+
+    @extend_schema(request=None, responses=s.AutomationSerializer)
+    @action(detail=True, methods=["post"])
+    def pause(self, request: Request, pk: Any = None) -> Response:
+        """Pause: no new runs start, and runs under way hold before their next action."""
+        automation = services.pause(self.get_object(), user=request.user)
+        return Response(s.AutomationSerializer(automation).data)
+
+    @extend_schema(request=None, responses=s.AutomationSerializer)
+    @action(detail=True, methods=["post"])
+    def resume(self, request: Request, pk: Any = None) -> Response:
+        """Resume a paused workflow: held runs carry on."""
+        automation = services.resume(self.get_object(), user=request.user)
         return Response(s.AutomationSerializer(automation).data)
 
     @extend_schema(request=s.DryRunRequestSerializer, responses=s.DryRunSerializer)
@@ -163,6 +177,58 @@ class RecipeInstallView(APIView):
         return Response(s.AutomationSerializer(automation).data, status=status.HTTP_201_CREATED)
 
 
+def _actions(user: Any) -> list[dict[str, Any]]:
+    return [
+        {
+            "key": a.key,
+            "label": a.label,
+            "fields": [
+                {"name": f.name, "label": f.label, "type": f.type,
+                 "required": f.required, "choices": list(f.choices)} for f in a.fields
+            ],
+            "subjects": list(a.subjects),
+            "permission": a.permission,
+            "allowed": not a.permission or has_perm(user, a.permission),
+        }
+        for a in registry.actions()
+    ]  # fmt: skip
+
+
+class WorkflowSchemaView(APIView):
+    permission_classes = [*AUTH, HasMethodPermission.for_({"GET": "automation.view"})]
+
+    @extend_schema(responses=s.WorkflowSchemaSerializer)
+    def get(self, request: Request) -> Response:
+        """What the sequence editor offers (E33): record types with their dates and
+        stop-when events, starts, plain questions and actions."""
+        triggers = registry.triggers()
+        body = {
+            "record_types": [
+                {
+                    "key": sub.key,
+                    "label": sub.label,
+                    "recipients": [*sub.recipients, *(["owner"] if sub.owner else [])],
+                    "taggable": bool(sub.target),
+                    "date_fields": [
+                        {"path": f.path, "label": f.label, "type": f.type}
+                        for f in sub.fields if f.type in ("date", "datetime")
+                    ],
+                    "stop_when": [t.event for t in triggers if t.subject == sub.key],
+                }
+                for sub in registry.subjects()
+            ],
+            "starts": {
+                "events": [asdict(t) for t in triggers],
+                "dates": list(catalogue.DATE_STARTS),
+                "schedules": list(catalogue.SCHEDULE_STARTS),
+                "frequencies": list(services.FREQUENCIES),
+            },
+            "questions": conditions.questions(),
+            "actions": _actions(request.user),
+        }  # fmt: skip
+        return Response(s.WorkflowSchemaSerializer(body).data)
+
+
 class AutomationSchemaView(APIView):
     permission_classes = [*AUTH, HasMethodPermission.for_({"GET": "automation.view"})]
 
@@ -186,20 +252,7 @@ class AutomationSchemaView(APIView):
                 for sub in registry.subjects()
             ],
             "triggers": [asdict(t) for t in registry.triggers()],
-            "actions": [
-                {
-                    "key": a.key,
-                    "label": a.label,
-                    "fields": [
-                        {"name": f.name, "label": f.label, "type": f.type,
-                         "required": f.required, "choices": list(f.choices)} for f in a.fields
-                    ],
-                    "subjects": list(a.subjects),
-                    "permission": a.permission,
-                    "allowed": not a.permission or has_perm(request.user, a.permission),
-                }
-                for a in registry.actions()
-            ],
+            "actions": _actions(request.user),
             "operators": list(conditions.OPERATORS),
             "predicates": conditions.predicates(),
         }  # fmt: skip

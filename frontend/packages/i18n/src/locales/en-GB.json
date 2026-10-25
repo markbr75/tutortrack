@@ -2460,7 +2460,8 @@
       "completed": "Completed",
       "failed": "Failed",
       "skipped": "Skipped",
-      "stopped": "Stopped"
+      "stopped": "Stopped",
+      "paused": "Paused"
     },
     "triggers": {
       "event": "When something happens",

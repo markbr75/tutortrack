@@ -78,7 +78,7 @@ def calendar_for(obj: Any, around: date) -> BusinessCalendar:
     from tutortrack.tenancy.models import Branch, Organisation
     from tutortrack.tenancy.settings_service import get_setting
 
-    branch_id = getattr(obj, "branch_id", None)
+    branch_id = obj.pk if isinstance(obj, Branch) else getattr(obj, "branch_id", None)
     branch = Branch.objects.filter(pk=branch_id).first() if branch_id else None
     org = Organisation.objects.get(pk=require_organisation_id())
     tz = str(branch.timezone if branch else org.timezone)

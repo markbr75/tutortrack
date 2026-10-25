@@ -33,6 +33,14 @@ class RunContext:
     key: str  # unique per run and step: notifications and webhooks dedupe on it
     author: Any = None  # whose permissions finance actions use
     extra: dict[str, Any] = field(default_factory=dict)
+    run: Any = None  # the AutomationRun (None in a dry run)
+
+
+def skipped(reason: str) -> dict[str, Any]:
+    """An action's result when the owning service refused because the record isn't in a
+    state for it ("invoice already paid"): the step is recorded as skipped (FR-33-5). The
+    reason is text; a count under ``skipped`` (WhatsApp opt-outs) is an ordinary result."""
+    return {"skipped": reason}
 
 
 def _fail(message: str) -> BusinessRuleViolation:
@@ -309,7 +317,9 @@ def late_fee(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
     minimum = Decimal(str(config.get("minimum") or 0))
     fee = max(invoice.balance_due.amount * percent / 100, minimum)
     fee = fee.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    if fee <= 0 or invoice.balance_due.amount <= 0:
+    if not invoice.is_open or invoice.balance_due.amount <= 0:
+        return skipped(_("invoice already paid"))
+    if fee <= 0:
         return {"fee": "0", "note": "nothing owed"}
     charge = billing.create_ad_hoc_charge(
         client=invoice.client,
@@ -318,7 +328,21 @@ def late_fee(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
         category="late_fee",
         user=ctx.author,
     )
+    audit_money(ctx, invoice, "late_fee")
     return {"charge": str(charge.pk), "fee": str(fee)}
+
+
+def audit_money(ctx: RunContext, obj: Any, action: str) -> None:
+    """Money-moving steps note which workflow and version did it (FR-33-4)."""
+    from tutortrack.core import audit
+
+    run = ctx.run
+    audit.record(obj, f"workflow.{action}", {
+        "workflow": [None, ctx.automation.name],
+        "workflow_id": [None, str(ctx.automation.pk)],
+        "version": [None, run.version.version if run is not None else ctx.automation.version],
+        "run": [None, str(run.pk) if run is not None else ""],
+    })  # fmt: skip
 
 
 def payment_request(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
