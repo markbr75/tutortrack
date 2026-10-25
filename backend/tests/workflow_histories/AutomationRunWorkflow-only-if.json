@@ -1,0 +1,615 @@
+{
+  "events": [
+    {
+      "eventId": "1",
+      "eventTime": "2026-10-25T11:54:53.920Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_EXECUTION_STARTED",
+      "workflowExecutionStartedEventAttributes": {
+        "workflowType": {
+          "name": "AutomationRunWorkflow"
+        },
+        "taskQueue": {
+          "name": "default"
+        },
+        "input": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "uRilodQW+TvV+2iL+bvuq1HWqPVcaLqTZFwcHODV7N+kUw8Vjc6dvMMXoKGnsBTZUP7te4tewbO8vlq5RtVWu0iCd0ZWK2EdZQ0Dutt3fdirCScELz4k1z8rGVygX6hIiPF0ti97q/apID1GgfJ7MRySTPTxF8A51952mx04nGFvalIK/EG1bZyH88eKXIvr7uW8gJ8c25Q66IMNjzJx0Qrch2SOmm3viTJcRnk="
+            }
+          ]
+        },
+        "workflowExecutionTimeout": "315360000s",
+        "workflowRunTimeout": "315360000s",
+        "workflowTaskTimeout": "10s",
+        "originalExecutionRunId": "88d1611d-775a-4f43-9ff4-b5d3a18a194a",
+        "identity": "1182497@MBLAPTOP",
+        "firstExecutionRunId": "88d1611d-775a-4f43-9ff4-b5d3a18a194a",
+        "attempt": 1,
+        "firstWorkflowTaskBackoff": "0s",
+        "priority": {}
+      }
+    },
+    {
+      "eventId": "2",
+      "eventTime": "2026-10-25T11:54:53.920Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "default"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "3",
+      "eventTime": "2026-10-25T11:54:53.920Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "2",
+        "identity": "1182497@MBLAPTOP",
+        "historySizeBytes": "457"
+      }
+    },
+    {
+      "eventId": "4",
+      "eventTime": "2026-10-25T11:54:53.944Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "2",
+        "identity": "1182497@MBLAPTOP",
+        "binaryChecksum": "c166bd68a9a32eaceb39630f21e42137",
+        "sdkMetadata": {
+          "coreUsedFlags": [
+            1,
+            3,
+            2
+          ],
+          "sdkName": "temporal-python",
+          "sdkVersion": "1.34.0"
+        },
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "5",
+      "eventTime": "2026-10-25T11:54:53.944Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_SCHEDULED",
+      "activityTaskScheduledEventAttributes": {
+        "activityId": "1",
+        "activityType": {
+          "name": "load_plan"
+        },
+        "taskQueue": {
+          "name": "default",
+          "kind": "TASK_QUEUE_KIND_NORMAL"
+        },
+        "header": {},
+        "input": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "WluLhyxUH5mA7O2yE8c+AC4yVavTxojSFniI1r3bhIZzaXafXX8xaomqAYeF/MGFW5Bvrs+NigDHGr19v2Zwl0eCV2Z9RhNx1eu1569XMclKqJW5iGtDZ5DIlo60b9nx27ZN0drLmlxbjdZLTmoqYnvp3kxKrXKzhPT1VaPOTSF2LdOFefP4onkHaQ1MyXS8mvBz52IBvLwNX//lWRbCAR1oCxLKqIWl+HganUI="
+            }
+          ]
+        },
+        "scheduleToCloseTimeout": "315360000s",
+        "scheduleToStartTimeout": "315360000s",
+        "startToCloseTimeout": "300s",
+        "heartbeatTimeout": "0s",
+        "workflowTaskCompletedEventId": "3",
+        "retryPolicy": {
+          "initialInterval": "1s",
+          "backoffCoefficient": 2.0,
+          "maximumInterval": "100s"
+        },
+        "priority": {}
+      }
+    },
+    {
+      "eventId": "6",
+      "eventTime": "2026-10-25T11:54:53.944Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_STARTED",
+      "activityTaskStartedEventAttributes": {
+        "scheduledEventId": "5",
+        "identity": "1182497@MBLAPTOP",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "7",
+      "eventTime": "2026-10-25T11:54:53.960Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_COMPLETED",
+      "activityTaskCompletedEventAttributes": {
+        "result": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "orqqZuhUqi3yGeACxd1LVxTt50/1KRjGtN3ww4jv7lzHtj2AFVvaCj2Iwh4zlfwOn4VIbKVBrW6QTv3+8YM/C3dTGEbF2SlyjCbi8BdjoAi30q4eEWcFbiWSmitACbkl7g6wYr6B1mYVyg4VlL/OyjGYb55OUBHeUXkuicEgH+n+VT5jpaREeGvWMRNIXQBSwzyHQ+HieDt1TD3dIkNFaGOcUe15Bwagri2Orl4zKw6fNi5njC6an0lqGZeCrO/qElVNUIt2jbk1PzR3532IhMVZFh1QaSnq3mul/GT5OpzgnP2S3MsyWSaFUsUNc6jJ1SrpttSrY4k4X/hF/DuqkNEiZrQlxDPEEA=="
+            }
+          ]
+        },
+        "scheduledEventId": "5",
+        "startedEventId": "6",
+        "identity": "1182497@MBLAPTOP"
+      }
+    },
+    {
+      "eventId": "8",
+      "eventTime": "2026-10-25T11:54:53.960Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "default"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "9",
+      "eventTime": "2026-10-25T11:54:53.960Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "8",
+        "identity": "1182497@MBLAPTOP",
+        "historySizeBytes": "1400"
+      }
+    },
+    {
+      "eventId": "10",
+      "eventTime": "2026-10-25T11:54:53.964Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "8",
+        "identity": "1182497@MBLAPTOP",
+        "binaryChecksum": "c166bd68a9a32eaceb39630f21e42137",
+        "sdkMetadata": {},
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "11",
+      "eventTime": "2026-10-25T11:54:53.964Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_SCHEDULED",
+      "activityTaskScheduledEventAttributes": {
+        "activityId": "2",
+        "activityType": {
+          "name": "execute_step"
+        },
+        "taskQueue": {
+          "name": "default",
+          "kind": "TASK_QUEUE_KIND_NORMAL"
+        },
+        "header": {},
+        "input": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "310Tjmum/4T/6M+7awox94Ai/RPLQsHz5yAX8wfV6bHyrpScFFKWDfLIJ0rdIZczXmh2iLwNPe430ZwJVM2PKcrnwGE1OFH1lgjmgjT8vi7lrDeCOzQLDjqYiGWCWqx8ltzqCnh5M3weunYgzO8S33tfx8UuMudKQzxLkr+dSA0EDMMIJdwSp5WBx9nP0ogI/4Gc8N6qrtAhZY7ugN3WHr1VqfROn5pJQyya+6aUYHge49eKxBkWQjYUZVwVuJHOS/7GRjzhd75FffUI1wBjtY6QctG2m0txzn8tTck7hBuWxYJxNl9IkdTPNTVJjlAZOIJIJ3+YR9k6PyXO2l96lb7G4RXFhOLIGlqq4D3Gv5SO/+7pRfha97NYPSuPurW/3Sw4lWw8QYbOBW7cHWYwNND9me0CEX9fHF1vfYl2OuNYwtDuTajurSus/tFI6lqPv3SVhDpeOKE8xsJd3f0="
+            }
+          ]
+        },
+        "scheduleToCloseTimeout": "315360000s",
+        "scheduleToStartTimeout": "315360000s",
+        "startToCloseTimeout": "300s",
+        "heartbeatTimeout": "0s",
+        "workflowTaskCompletedEventId": "9",
+        "retryPolicy": {
+          "initialInterval": "1s",
+          "backoffCoefficient": 2.0,
+          "maximumInterval": "100s",
+          "maximumAttempts": 5
+        },
+        "priority": {}
+      }
+    },
+    {
+      "eventId": "12",
+      "eventTime": "2026-10-25T11:54:53.964Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_STARTED",
+      "activityTaskStartedEventAttributes": {
+        "scheduledEventId": "11",
+        "identity": "1182497@MBLAPTOP",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "13",
+      "eventTime": "2026-10-25T11:54:54.025Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_COMPLETED",
+      "activityTaskCompletedEventAttributes": {
+        "result": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "qjuytr3eAqVQU/R36bdiiVPsYXG0UsSsLouEiumMLV6X1QlnRpF+JWeb2wV+sMxomnP8n1M+7+/JSs4NEnD3a9xXiyi39ts4gxs="
+            }
+          ]
+        },
+        "scheduledEventId": "11",
+        "startedEventId": "12",
+        "identity": "1182497@MBLAPTOP"
+      }
+    },
+    {
+      "eventId": "14",
+      "eventTime": "2026-10-25T11:54:54.025Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "default"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "15",
+      "eventTime": "2026-10-25T11:54:54.025Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "14",
+        "identity": "1182497@MBLAPTOP",
+        "historySizeBytes": "2301"
+      }
+    },
+    {
+      "eventId": "16",
+      "eventTime": "2026-10-25T11:54:54.029Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "14",
+        "identity": "1182497@MBLAPTOP",
+        "binaryChecksum": "c166bd68a9a32eaceb39630f21e42137",
+        "sdkMetadata": {},
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "17",
+      "eventTime": "2026-10-25T11:54:54.029Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_SCHEDULED",
+      "activityTaskScheduledEventAttributes": {
+        "activityId": "3",
+        "activityType": {
+          "name": "execute_step"
+        },
+        "taskQueue": {
+          "name": "default",
+          "kind": "TASK_QUEUE_KIND_NORMAL"
+        },
+        "header": {},
+        "input": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "RPzAqRV926Ax85Da152VrU660CFzigg1e4aI4Jin2pHIE4r2yxFafdwFuLp+tLlZkg6AS4z2h5+JYPkFbD6OMLZ0iDN23mPvD4zHx6gfZZqvasqIiR9Qw0DiNF6AWhoiemykO/bZPoAuqRVLYnlTUfbER0HbcF785Je0Qzb+isw4fFVx3BBumJQM+yVgCETMHrMoVdUnT0Q1HeDfGcHrsh1Sf/JbBPCDeTnYoTHPpwGRfrhQqtuAig7eKdbZbkLVe0hhLXWIFOz06coAdaiy5bt67qhLRUi9sti1wRXwFNZkmG9nNO5fim63DuzgkQ3zhi2NiiqDhF4dR+NQRXr6uNgQ8Gpw/pfAIIBsXQ5NZfgAve7jF6ftv4Dz9wlsBlVvUFkU9SEPYMl2"
+            }
+          ]
+        },
+        "scheduleToCloseTimeout": "315360000s",
+        "scheduleToStartTimeout": "315360000s",
+        "startToCloseTimeout": "300s",
+        "heartbeatTimeout": "0s",
+        "workflowTaskCompletedEventId": "15",
+        "retryPolicy": {
+          "initialInterval": "1s",
+          "backoffCoefficient": 2.0,
+          "maximumInterval": "100s",
+          "maximumAttempts": 5
+        },
+        "priority": {}
+      }
+    },
+    {
+      "eventId": "18",
+      "eventTime": "2026-10-25T11:54:54.029Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_STARTED",
+      "activityTaskStartedEventAttributes": {
+        "scheduledEventId": "17",
+        "identity": "1182497@MBLAPTOP",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "19",
+      "eventTime": "2026-10-25T11:54:54.082Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_COMPLETED",
+      "activityTaskCompletedEventAttributes": {
+        "result": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "Y9o4vb+5fTHGb0A2lxkBAJkUywHzIwUUT9RJabeshodbpupW0G3/mO59GpYbNUHOQ8rRrRMvCoQGcmO/roRLANbnpV8uhsKgOwesChXsy10cHjSavD7oBwRiV+9kV7aqBN9BMrEQZHEupxM56Es3Kl7l0JzcxnyNlwnKniz1WtLy9QvCYQ=="
+            }
+          ]
+        },
+        "scheduledEventId": "17",
+        "startedEventId": "18",
+        "identity": "1182497@MBLAPTOP"
+      }
+    },
+    {
+      "eventId": "20",
+      "eventTime": "2026-10-25T11:54:54.082Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "default"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "21",
+      "eventTime": "2026-10-25T11:54:54.082Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "20",
+        "identity": "1182497@MBLAPTOP",
+        "historySizeBytes": "3205"
+      }
+    },
+    {
+      "eventId": "22",
+      "eventTime": "2026-10-25T11:54:54.085Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "20",
+        "identity": "1182497@MBLAPTOP",
+        "binaryChecksum": "c166bd68a9a32eaceb39630f21e42137",
+        "sdkMetadata": {},
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "23",
+      "eventTime": "2026-10-25T11:54:54.085Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_SCHEDULED",
+      "activityTaskScheduledEventAttributes": {
+        "activityId": "4",
+        "activityType": {
+          "name": "finish_run"
+        },
+        "taskQueue": {
+          "name": "default",
+          "kind": "TASK_QUEUE_KIND_NORMAL"
+        },
+        "header": {},
+        "input": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "empOp4YRIQwOxOAKcAgqGH07/0oC7li/PjOGy5jWPfI7q230eXomR51aEG6rXqq+vR3PdGPSmpy6IKqq2CxA2KzgkblcPkX69/ibUlEuhJklC7sSBGQJULdh88Y5Syy8V/kG9464vPBxIwSmy8eYYHg0Utz5rGzmsKFrtFYLwwaPsifvJ9riQkwOb2i3JqAWRs6lmEulyKW29KYqUFtaCfOvgERy+muCHqbhHDQ5dViO/9bec43bDX0nB0JWqe775InQ1/Wz69YYkvgcvQ=="
+            }
+          ]
+        },
+        "scheduleToCloseTimeout": "315360000s",
+        "scheduleToStartTimeout": "315360000s",
+        "startToCloseTimeout": "300s",
+        "heartbeatTimeout": "0s",
+        "workflowTaskCompletedEventId": "21",
+        "retryPolicy": {
+          "initialInterval": "1s",
+          "backoffCoefficient": 2.0,
+          "maximumInterval": "100s"
+        },
+        "priority": {}
+      }
+    },
+    {
+      "eventId": "24",
+      "eventTime": "2026-10-25T11:54:54.085Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_STARTED",
+      "activityTaskStartedEventAttributes": {
+        "scheduledEventId": "23",
+        "identity": "1182497@MBLAPTOP",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "25",
+      "eventTime": "2026-10-25T11:54:54.097Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_COMPLETED",
+      "activityTaskCompletedEventAttributes": {
+        "result": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "lc81YBN0VzH+HnkLm3BorDA0ER3A73FPnIPaHplHxiczNT5h1jejJQdHE5Iw+AaSJ6Qrbrk="
+            }
+          ]
+        },
+        "scheduledEventId": "23",
+        "startedEventId": "24",
+        "identity": "1182497@MBLAPTOP"
+      }
+    },
+    {
+      "eventId": "26",
+      "eventTime": "2026-10-25T11:54:54.097Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "default"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "27",
+      "eventTime": "2026-10-25T11:54:54.097Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "26",
+        "identity": "1182497@MBLAPTOP",
+        "historySizeBytes": "3930"
+      }
+    },
+    {
+      "eventId": "28",
+      "eventTime": "2026-10-25T11:54:54.100Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "26",
+        "identity": "1182497@MBLAPTOP",
+        "binaryChecksum": "c166bd68a9a32eaceb39630f21e42137",
+        "sdkMetadata": {},
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "29",
+      "eventTime": "2026-10-25T11:54:54.100Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_SCHEDULED",
+      "activityTaskScheduledEventAttributes": {
+        "activityId": "5",
+        "activityType": {
+          "name": "update_link"
+        },
+        "taskQueue": {
+          "name": "default",
+          "kind": "TASK_QUEUE_KIND_NORMAL"
+        },
+        "header": {},
+        "input": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "t/TFb1QMW5KakCMoF5iP1iMc5EMtaEY2w31knRqK8sJ1egvdBQ5xy3KaYDXj/pPKXLJLCsmOJswZoN3b0Md80duldnT5oTbK59Fa8y52JTlu6VbLcUXAQtzpJlZCl3fGLH/gy5ptKztqzVVMDpn2Scd3ghK1uwAhb3VeE/TcJ8lr7HpyUQOaZ+qPcns8uVgByssccveBoSYhJxGo3SyBvTMQmyjclbZEvvP1sHHdFTGW+QeCj5Y4E6vvbM1dQLreaw/UVY4WjNtPDA5YyejV95ByMOAkB38AC0L31zWXVS+HbM1xfe8lg2cNKIUSFt62GRQWulGsln4EQ1trhsT5xEFsYmMDc6dZlDaT/CFEAYByqiO4LEwJhAkAeNMjpQBi+HQtUQsg7k5XqaACqdjWRMdgnx+nkEdb2ihqUphGQGhThxo44tHnt0slw6xd/PSyaboR"
+            }
+          ]
+        },
+        "scheduleToCloseTimeout": "315360000s",
+        "scheduleToStartTimeout": "315360000s",
+        "startToCloseTimeout": "30s",
+        "heartbeatTimeout": "0s",
+        "workflowTaskCompletedEventId": "27",
+        "retryPolicy": {
+          "initialInterval": "1s",
+          "backoffCoefficient": 2.0,
+          "maximumInterval": "100s"
+        },
+        "priority": {}
+      }
+    },
+    {
+      "eventId": "30",
+      "eventTime": "2026-10-25T11:54:54.100Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_STARTED",
+      "activityTaskStartedEventAttributes": {
+        "scheduledEventId": "29",
+        "identity": "1182497@MBLAPTOP",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "31",
+      "eventTime": "2026-10-25T11:54:54.111Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_COMPLETED",
+      "activityTaskCompletedEventAttributes": {
+        "result": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "OJdo0HVXYvbCN9rlo+4ccePLFk2eBuHaOX7p2lpTrFtICZhtFfSwb/0AQD8/DD3bD8FAD+o="
+            }
+          ]
+        },
+        "scheduledEventId": "29",
+        "startedEventId": "30",
+        "identity": "1182497@MBLAPTOP"
+      }
+    },
+    {
+      "eventId": "32",
+      "eventTime": "2026-10-25T11:54:54.111Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "default"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "33",
+      "eventTime": "2026-10-25T11:54:54.111Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "32",
+        "identity": "1182497@MBLAPTOP",
+        "historySizeBytes": "4789"
+      }
+    },
+    {
+      "eventId": "34",
+      "eventTime": "2026-10-25T11:54:54.113Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "32",
+        "identity": "1182497@MBLAPTOP",
+        "binaryChecksum": "c166bd68a9a32eaceb39630f21e42137",
+        "sdkMetadata": {},
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "35",
+      "eventTime": "2026-10-25T11:54:54.113Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_EXECUTION_COMPLETED",
+      "workflowExecutionCompletedEventAttributes": {
+        "result": {
+          "payloads": [
+            {
+              "metadata": {
+                "encryption-key-id": "ZGV2MQ==",
+                "encoding": "YmluYXJ5L2VuY3J5cHRlZA=="
+              },
+              "data": "DrUS1fsXnMG8GVJk1A1Q0PkYD0CbggqwCKkVcSSKuzJh+wFBTvUlcIC+t4BuUu4LePRfCBRcrnTyMuJxeKRkbTg="
+            }
+          ]
+        },
+        "workflowTaskCompletedEventId": "33"
+      }
+    }
+  ]
+}

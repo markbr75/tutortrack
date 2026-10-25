@@ -1,6 +1,6 @@
 # E33 — Workflow Designer
 
-- **Status:** Planned (2026-10-25)
+- **Status:** In progress (T01 done 2026-10-25)
 - **Depends on:** E14 Automation (the engine it grows from), E32 Temporal, E10 Billing, E13
   Communications, E09 Delivery, E17 Leads, E18 Recruitment, E24 Growth
 - **ADR:** [0047](../adr/0047-workflow-designer-on-the-automation-engine.md)
@@ -202,7 +202,7 @@ The models keep their `automations` names in code; only the product says "Workfl
 ## 6. Delivery plan
 Each ticket is one pull request, merged when CI is green.
 
-- [ ] **T01 — Engine: sequences.** "N days before or after a date, at a time" waits,
+- [x] **T01 — Engine: sequences.** "N days before or after a date, at a time" waits,
   business-day and quiet-hours timing, **Stop when** (the bridge signals the run; it ends
   before its next step), Yes / No splits that rejoin, and "only if" per step. Interpreter
   changes are versioned with `workflow.patched`, with replay histories (02-architecture
@@ -244,4 +244,26 @@ against the API.
 - The replaced per-process workflows (FR-33-2 table) are removed after T05 to T07.
 
 ## Implementation notes
-(Fill in as built: deviations from this plan, and why.)
+
+**T01 (2026-10-25).**
+- Yes / No splits are the existing E14 `branch` steps (`if`, `then`, `else`). The steps after
+  a branch already run for both paths, so splits rejoin with no engine change. The one-level
+  limit is the editor's (T07); the engine keeps E14's nesting limit so existing
+  automations still validate.
+- "Only if" is `only_if` on action steps, checked by `execute_step` at the moment the step
+  runs. A skipped step is recorded as `skipped` with `{"skipped": "only_if"}`; a card with
+  several actions puts the same `only_if` on each. No workflow change was needed.
+- Waits (`automations/timing.py`, pure and Hypothesis-tested): `until` with
+  `offset_days`/`offset_hours` (negative for before), `days`/`hours` from now, `at`
+  ("HH:MM"), `business_day` (closed weekdays from `general.business_hours` plus holidays and
+  closures from `scheduling.services.holiday_dates`) and `quiet_hours` (`comms.quiet_hours_*`),
+  in the record's branch time zone. Plain dates count from local midnight, not the
+  server's time zone. `BusinessCalendar` gained `is_quiet`/`is_closed`.
+- **Stop when** is `stop_when` on `Automation` and `AutomationVersion` (part of the
+  definition, so it is versioned). `on_event` signals `stop` to runs under way for the
+  record before it starts new runs, so a run never stops on its own trigger. The run wakes
+  from a wait (`wait_condition` with the wait as timeout, behind `workflow.patched("stop-when")`;
+  older histories keep `workflow.sleep`), finishes `stopped`, records `stop_reason`, and
+  its unfinished wait is marked `skipped`.
+- New histories: `AutomationRunWorkflow-only-if`, `-stopped`, `-timed`; the existing ones
+  still replay.

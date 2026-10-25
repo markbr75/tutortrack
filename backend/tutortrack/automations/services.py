@@ -19,6 +19,7 @@ from zoneinfo import ZoneInfo
 import structlog
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 
 from tutortrack.core import audit
 from tutortrack.core.events import EventEnvelope, publish
@@ -36,7 +37,8 @@ MAX_NESTING = 3
 MAX_CAUSATION_DEPTH = 3
 MAX_WAIT_DAYS = 365
 FAN_OUT_LIMIT = 2000
-DEFINITION = ("trigger_type", "trigger_config", "conditions", "steps")
+DEFINITION = ("trigger_type", "trigger_config", "conditions", "steps", "stop_when")
+MAX_STOP_EVENTS = 3
 FREQUENCIES = ("daily", "weekly", "monthly")
 
 
@@ -117,13 +119,10 @@ def _check_steps(
             for f in action.fields:
                 if f.required and config.get(f.name) in (None, "", []):
                     errors.append(_("Step %(n)s: fill in %(f)s.") % {"n": label, "f": f.label})
+            if step.get("only_if"):
+                errors += [f"{label}: {e}" for e in conditions.validate(step["only_if"], paths)]
         elif kind == "wait":
-            hours = float(step.get("hours") or 0) + 24 * float(step.get("days") or 0)
-            until = step.get("until")
-            if until and until not in paths:
-                errors.append(_("Step %(n)s: unknown date field.") % {"n": label})
-            if not until and not 0 < hours <= 24 * MAX_WAIT_DAYS:
-                errors.append(_("Step %(n)s: wait between an hour and a year.") % {"n": label})
+            errors += _check_wait(step, label, paths)
         elif kind == "branch":
             errors += [f"{label}: {e}" for e in conditions.validate(step.get("if"), paths)]
             for arm in ("then", "else"):
@@ -135,6 +134,58 @@ def _check_steps(
     return errors, count
 
 
+def _number(value: Any) -> float | None:
+    try:
+        return float(value or 0)
+    except (TypeError, ValueError):
+        return None
+
+
+def _check_wait(step: dict[str, Any], label: str, paths: Any) -> list[str]:
+    """A wait counts from now (``days``/``hours``) or from a date on the record (``until``
+    with ``offset_days``/``offset_hours``, negative for before), optionally ``at`` a time of
+    day, on a ``business_day`` and outside ``quiet_hours`` (E33 FR-33-1)."""
+    from .timing import AT
+
+    errors: list[str] = []
+    until = step.get("until")
+    if until:
+        if until not in paths:
+            errors.append(_("Step %(n)s: unknown date field.") % {"n": label})
+        days, hours = _number(step.get("offset_days")), _number(step.get("offset_hours"))
+        if days is None or hours is None or abs(days + hours / 24) > MAX_WAIT_DAYS:
+            errors.append(
+                _("Step %(n)s: count up to a year before or after the date.") % {"n": label}
+            )
+    else:
+        days, hours = _number(step.get("days")), _number(step.get("hours"))
+        total = None if days is None or hours is None else hours + 24 * days
+        # With a time of day, "0 days at 18:00" (today) is fine; otherwise it must wait.
+        too_short = total is not None and (total < 0 if step.get("at") else total <= 0)
+        if total is None or too_short or total > 24 * MAX_WAIT_DAYS:
+            errors.append(_("Step %(n)s: wait between an hour and a year.") % {"n": label})
+    if step.get("at") and not AT.match(str(step["at"])):
+        errors.append(_("Step %(n)s: give the time as HH:MM, like 09:00.") % {"n": label})
+    for flag in ("business_day", "quiet_hours"):
+        if flag in step and not isinstance(step[flag], bool):
+            errors.append(_("Step %(n)s is not valid.") % {"n": label})
+    return errors
+
+
+def _check_stop_when(stop_when: Any, subject_type: str) -> list[str]:
+    """Stop-when events must be about the same kind of record as the run."""
+    if not isinstance(stop_when, list) or not all(isinstance(e, str) for e in stop_when):
+        return [_("Choose events to stop on.")]
+    if len(stop_when) > MAX_STOP_EVENTS:
+        return [_("Stop on at most %(n)s events.") % {"n": MAX_STOP_EVENTS}]
+    errors = []
+    for event in stop_when:
+        trigger = registry.trigger(event)
+        if trigger is None or trigger.subject != subject_type:
+            errors.append(_("“%(e)s” can't stop this workflow.") % {"e": event})
+    return errors
+
+
 def _may(user: Any, codename: str) -> bool:
     from tutortrack.core.permissions import has_perm
 
@@ -143,7 +194,7 @@ def _may(user: Any, codename: str) -> bool:
 
 def validate_definition(
     *, trigger_type: str, trigger_config: dict[str, Any], conditions_: dict[str, Any],
-    steps: list[dict[str, Any]], user: Any = None,
+    steps: list[dict[str, Any]], user: Any = None, stop_when: list[str] | None = None,
 ) -> tuple[str, str]:  # fmt: skip
     subject_type, trigger_key = _subject_for(trigger_type, trigger_config or {})
     subject = registry.subject(subject_type)
@@ -152,6 +203,9 @@ def validate_definition(
     problems = conditions.validate(conditions_, subject.field_paths())
     if problems:
         raise _invalid("conditions", problems)
+    stopping = _check_stop_when(stop_when or [], subject_type)
+    if stopping:
+        raise _invalid("stop_when", stopping)
     step_errors, count = _check_steps(steps, subject, user)
     if step_errors:
         raise _invalid("steps", step_errors)
@@ -170,6 +224,7 @@ def _snapshot(automation: Automation) -> AutomationVersion:
         trigger_config=automation.trigger_config,
         conditions=automation.conditions,
         steps=automation.steps,
+        stop_when=automation.stop_when,
     )
 
 
@@ -196,11 +251,12 @@ def create_automation(
     enabled: bool = False,
     max_runs_per_record: int = 1,
     recipe_key: str = "",
+    stop_when: list[str] | None = None,
     user: Any = None,
 ) -> Automation:
     subject_type, trigger_key = validate_definition(
         trigger_type=trigger_type, trigger_config=trigger_config,
-        conditions_=conditions_ or {}, steps=steps, user=user,
+        conditions_=conditions_ or {}, steps=steps, user=user, stop_when=stop_when,
     )  # fmt: skip
     automation = Automation.objects.create(
         name=name,
@@ -211,6 +267,7 @@ def create_automation(
         subject_type=subject_type,
         conditions=conditions_ or {},
         steps=steps,
+        stop_when=stop_when or [],
         enabled=enabled,
         max_runs_per_record=max_runs_per_record,
         recipe_key=recipe_key,
@@ -238,6 +295,7 @@ def update_automation(automation: Automation, *, user: Any = None, **changes: An
             conditions_=changes.get("conditions", automation.conditions),
             steps=changes.get("steps", automation.steps),
             user=user,
+            stop_when=changes.get("stop_when", automation.stop_when),
         )
         changes |= {"subject_type": subject_type, "trigger_key": trigger_key}
     allowed = {"name", "description", "enabled", "max_runs_per_record", *DEFINITION,
@@ -394,6 +452,7 @@ def on_event(event: EventEnvelope) -> list[AutomationRun]:
     trigger = registry.trigger(event.type)
     if trigger is None or event.subject.get("type") != trigger.subject:
         return []
+    stop_runs(event)  # before starting new runs, so a run never stops on its own trigger
     started = []
     for automation in Automation.objects.filter(
         enabled=True, trigger_type=Automation.Trigger.EVENT, trigger_key=event.type
@@ -405,6 +464,26 @@ def on_event(event: EventEnvelope) -> list[AutomationRun]:
             launch(run)
             started.append(run)
     return started
+
+
+def stop_runs(event: EventEnvelope) -> int:
+    """Signal the runs under way for this record whose version stops on this event."""
+    from tutortrack.core.workflows import signal
+
+    trigger = registry.trigger(event.type)
+    if trigger is None:
+        return 0
+    runs = AutomationRun.objects.filter(
+        status__in=[AutomationRun.Status.RUNNING, AutomationRun.Status.WAITING],
+        subject_type=trigger.subject,
+        subject_id=str(event.subject["id"]),
+        version__stop_when__contains=[event.type],
+    ).exclude(workflow_id="")
+    count = 0
+    for run in runs:
+        signal(run.workflow_id, "stop", event.type)
+        count += 1
+    return count
 
 
 def run_manually(automation: Automation, subject_ids: list[str]) -> list[AutomationRun]:
@@ -488,6 +567,12 @@ def execute_step(run_id: str, key: str, step: dict[str, Any]) -> dict[str, Any]:
             action = registry.action(str(step.get("action") or ""))
             if action is None:
                 raise BusinessRuleViolation(_("Unknown action."))
+            if step.get("only_if") and not conditions.evaluate(
+                step["only_if"], build_context(subject, obj)
+            ):
+                _record(run, key, "action", AutomationRunStep.Status.SKIPPED,
+                        result={"skipped": "only_if"}, error="")  # fmt: skip
+                return {"status": "skipped"}
             author = _author(run.automation)
             if action.permission and not (author is not None and _may(author, action.permission)):
                 raise BusinessRuleViolation(
@@ -518,20 +603,33 @@ def evaluate_branch(run_id: str, key: str, cond: dict[str, Any]) -> bool:
 def start_wait(run_id: str, key: str, step: dict[str, Any], from_iso: str) -> str:
     """When the wait ends (ISO), recorded on the run log. ``until`` waits read a date on the
     record (plus ``offset_hours``); a missing date ends the wait at once."""
+    from . import timing
+
     run, subject, obj = _run_parts(run_id)
     start = datetime.fromisoformat(from_iso)
+    anchor = None
     if step.get("until"):
         value = conditions.resolve(build_context(subject, obj), str(step["until"]))
-        moment = conditions._when(value)
-        resume = (
-            (moment + timedelta(hours=float(step.get("offset_hours") or 0))) if moment else start
-        )
-    else:
-        hours = float(step.get("hours") or 0) + 24 * float(step.get("days") or 0)
-        resume = start + timedelta(hours=hours)
+        anchor = _anchor(value)
+    calendar = timing.calendar_for(obj, start.date())
+    resume = timing.resume_at(start=start, step=step, calendar=calendar, anchor=anchor)
     _record(run, key, "wait", AutomationRunStep.Status.WAITING, resume_at=resume)
     AutomationRun.objects.filter(pk=run.pk).update(status=AutomationRun.Status.WAITING)
     return resume.isoformat()
+
+
+def _anchor(value: Any) -> datetime | date | None:
+    """A record's date or time; plain dates stay dates (their local midnight)."""
+    if isinstance(value, datetime | date):
+        return value
+    if isinstance(value, str):
+        from django.utils.dateparse import parse_date, parse_datetime
+
+        moment = parse_datetime(value)
+        if moment is not None:
+            return moment
+        return parse_date(value)
+    return None
 
 
 def end_wait(run_id: str, key: str) -> None:
@@ -541,17 +639,23 @@ def end_wait(run_id: str, key: str) -> None:
 
 
 @transaction.atomic
-def finish(run_id: str, status: str, error: str = "") -> None:
+def finish(run_id: str, status: str, error: str = "", reason: str = "") -> None:
     run = AutomationRun.objects.select_for_update().get(pk=run_id)
     if run.finished_at is not None and run.status == status:
         return
+    if status == AutomationRun.Status.STOPPED:
+        # The wait it was in never finished: it ended early.
+        run.steps.filter(status=AutomationRunStep.Status.WAITING).update(
+            status=AutomationRunStep.Status.SKIPPED
+        )
+        run.stop_reason = reason[:80]
     if status == AutomationRun.Status.FAILED and not error:
         failed = run.steps.filter(status=AutomationRunStep.Status.FAILED).first()
         error = failed.error if failed else ""
     run.status = status
     run.error = error[:2000]
     run.finished_at = now()
-    run.save(update_fields=["status", "error", "finished_at", "updated_at"])
+    run.save(update_fields=["status", "error", "finished_at", "stop_reason", "updated_at"])
     if status == AutomationRun.Status.FAILED:
         publish(
             events.AutomationRunFailed(
@@ -572,6 +676,10 @@ def _describe_steps(
         kind = step.get("type")
         if kind == "action":
             action = registry.action(str(step.get("action") or ""))
+            if step.get("only_if") and not conditions.evaluate(step["only_if"], ctx.context):
+                out.append({"key": key, "type": "action", "ok": True, "skipped": True,
+                            "description": _("Skipped: its “only if” isn't met")})  # fmt: skip
+                continue
             try:
                 text = action.describe(ctx, step.get("config") or {}) if action else _("Unknown")
                 out.append({"key": key, "type": "action", "description": text, "ok": True})
@@ -585,12 +693,8 @@ def _describe_steps(
                     }
                 )
         elif kind == "wait":
-            if step.get("until"):
-                text = _("Wait until %(f)s") % {"f": step["until"]}
-            else:
-                hours = float(step.get("hours") or 0) + 24 * float(step.get("days") or 0)
-                text = _("Wait %(h)s hours") % {"h": f"{hours:g}"}
-            out.append({"key": key, "type": "wait", "description": text, "ok": True})
+            out.append({"key": key, "type": "wait", "description": describe_wait(step),
+                        "ok": True})  # fmt: skip
         elif kind == "branch":
             matched = conditions.evaluate(step.get("if"), ctx.context)
             arm = "then" if matched else "else"
@@ -598,6 +702,34 @@ def _describe_steps(
                         "description": _("Condition is %(v)s") % {"v": matched}})  # fmt: skip
             out += _describe_steps(step.get(arm) or [], ctx, f"{key}.{arm}.")
     return out
+
+
+def describe_wait(step: dict[str, Any]) -> str:
+    """A wait in words: "Wait 2 days, at 09:00, on a business day"."""
+    if step.get("until"):
+        days = float(step.get("offset_days") or 0) + float(step.get("offset_hours") or 0) / 24
+        if days == 0:
+            text = _("Wait until %(f)s") % {"f": step["until"]}
+        elif days < 0:
+            text = _("Wait until %(n)s days before %(f)s") % {"n": f"{-days:g}", "f": step["until"]}
+        else:
+            text = _("Wait until %(n)s days after %(f)s") % {"n": f"{days:g}", "f": step["until"]}
+    else:
+        hours = float(step.get("hours") or 0) + 24 * float(step.get("days") or 0)
+        days = int(hours // 24)
+        text = (
+            ngettext("Wait %(n)s day", "Wait %(n)s days", days) % {"n": days}
+            if hours and hours % 24 == 0
+            else _("Wait %(h)s hours") % {"h": f"{hours:g}"}
+        )
+    parts = [text]
+    if step.get("at"):
+        parts.append(_("at %(t)s") % {"t": step["at"]})
+    if step.get("business_day"):
+        parts.append(_("on a business day"))
+    if step.get("quiet_hours"):
+        parts.append(_("outside quiet hours"))
+    return ", ".join(parts)
 
 
 def dry_run(automation: Automation, subject_id: str) -> dict[str, Any]:

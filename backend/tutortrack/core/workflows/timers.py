@@ -40,6 +40,14 @@ class BusinessCalendar:
     def _closed_day(self, day: date) -> bool:
         return day.weekday() in self.closed_weekdays or day.isoformat() in self.holidays
 
+    def is_quiet(self, local: datetime) -> bool:
+        """Whether the local wall-clock time falls in quiet hours."""
+        return self._quiet(local)
+
+    def is_closed(self, day: date) -> bool:
+        """Whether the local date is a closed weekday or a holiday."""
+        return self._closed_day(day)
+
     def next_allowed(self, local: datetime) -> datetime:
         """The first moment at or after ``local`` outside quiet hours and closed days."""
         candidate = local

@@ -374,7 +374,7 @@ def test_dry_run_describes_without_doing(org, family):
     assert body["matched"] is True
     assert [s["key"] for s in body["steps"]] == ["0", "1", "2", "2.then.0"]
     assert "Hello Arjun" in body["steps"][0]["description"]
-    assert body["steps"][1]["description"] == "Wait 24 hours"
+    assert body["steps"][1]["description"] == "Wait 1 day"
     with tenant_context(org):
         assert not Message.objects.exists()
         assert not AutomationRun.objects.exists()

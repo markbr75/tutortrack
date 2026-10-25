@@ -23922,6 +23922,7 @@ export interface components {
       readonly subject_type: string;
       conditions?: unknown;
       steps?: unknown;
+      stop_when?: unknown;
       readonly version: number;
       enabled?: boolean;
       max_runs_per_record?: number;
@@ -23949,6 +23950,7 @@ export interface components {
       causation_depth?: number;
       attempts?: number;
       error?: string;
+      stop_reason?: string;
     };
     AutomationRunDetail: {
       /** Format: uuid */
@@ -23968,6 +23970,7 @@ export interface components {
       causation_depth?: number;
       attempts?: number;
       error?: string;
+      stop_reason?: string;
       readonly steps: components["schemas"]["RunStep"][];
     };
     /**
@@ -23976,9 +23979,10 @@ export interface components {
      *     * `completed` - Completed
      *     * `failed` - Failed
      *     * `skipped` - Skipped
+     *     * `stopped` - Stopped
      * @enum {string}
      */
-    AutomationRunStatusEnum: "running" | "waiting" | "completed" | "failed" | "skipped";
+    AutomationRunStatusEnum: "running" | "waiting" | "completed" | "failed" | "skipped" | "stopped";
     AutomationSchema: {
       subjects: components["schemas"]["SchemaSubject"][];
       triggers: components["schemas"]["SchemaTrigger"][];
@@ -24018,6 +24022,8 @@ export interface components {
       steps: {
         [key: string]: unknown;
       }[];
+      /** @description Events about the record that end a run early, e.g. invoice.paid. */
+      stop_when?: string[];
       /** @default false */
       enabled: boolean;
       /** @default 1 */
@@ -35191,6 +35197,7 @@ export interface components {
       steps?: {
         [key: string]: unknown;
       }[];
+      stop_when?: string[];
       max_runs_per_record?: number;
     };
     PatchedBillingPlanUpdateRequest: {

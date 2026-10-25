@@ -25,6 +25,8 @@ class Automation(TenantModel):
     subject_type = models.CharField(max_length=40)
     conditions = models.JSONField(default=dict, blank=True)
     steps = models.JSONField(default=list, blank=True)
+    # Events about the record that end a run early ("invoice.paid"), E33 FR-33-1.
+    stop_when = models.JSONField(default=list, blank=True)
     version = models.PositiveIntegerField(default=1)
     enabled = models.BooleanField(default=False)
     max_runs_per_record = models.PositiveSmallIntegerField(default=1)  # per 24 hours
@@ -49,6 +51,7 @@ class AutomationVersion(TenantModel):
     trigger_config = models.JSONField(default=dict, blank=True)
     conditions = models.JSONField(default=dict, blank=True)
     steps = models.JSONField(default=list, blank=True)
+    stop_when = models.JSONField(default=list, blank=True)
 
     class Meta(TenantModel.Meta):
         ordering = ["-version"]
@@ -66,6 +69,7 @@ class AutomationRun(TenantModel):
         COMPLETED = "completed", _("Completed")
         FAILED = "failed", _("Failed")
         SKIPPED = "skipped", _("Skipped")
+        STOPPED = "stopped", _("Stopped")
 
     automation = models.ForeignKey(Automation, on_delete=models.CASCADE, related_name="runs")
     version = models.ForeignKey(AutomationVersion, on_delete=models.PROTECT, related_name="+")
@@ -81,6 +85,7 @@ class AutomationRun(TenantModel):
     workflow_id = models.CharField(max_length=300, blank=True, default="", db_index=True)
     attempts = models.PositiveSmallIntegerField(default=1)
     error = models.TextField(blank=True, default="")
+    stop_reason = models.CharField(max_length=80, blank=True, default="")  # the stop-when event
 
     class Meta(TenantModel.Meta):
         ordering = ["-started_at"]
