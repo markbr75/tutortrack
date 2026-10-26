@@ -15,6 +15,7 @@ interface Definition {
   min_value?: number | null;
   max_value?: number | null;
   schema?: { items?: { enum?: string[] } };
+  replaced_by?: string;
 }
 
 /** A few registered settings of one area (gap G3), optionally for one branch (branch-level
@@ -70,7 +71,10 @@ export function KeyedSettings({
     const spinner = <Spinner label={t("grid.loading")} />;
     return inPanel ? <div className="px-5 py-4">{spinner}</div> : spinner;
   }
-  const schema = (query.data.schema as Definition[]).filter((d) => keys.includes(d.key));
+  // Settings a built-in workflow replaced (E33) are read-only: they aren't shown here.
+  const schema = (query.data.schema as Definition[]).filter(
+    (d) => keys.includes(d.key) && !d.replaced_by,
+  );
   const set = (key: string, value: unknown) => setValues((v) => ({ ...v, [key]: value }));
   return (
     <form

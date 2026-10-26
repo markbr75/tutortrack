@@ -115558,7 +115558,12 @@
                         }
                     },
                     "has_timing": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Always false: see timing_in_workflow."
+                    },
+                    "timing_in_workflow": {
+                        "type": "boolean",
+                        "description": "When it is sent is set in a built-in workflow (Lesson reminders); timing is the value it started from and is read-only."
                     },
                     "transactional": {
                         "type": "boolean"
@@ -115583,6 +115588,7 @@
                     "label",
                     "locked",
                     "timing",
+                    "timing_in_workflow",
                     "transactional"
                 ]
             },

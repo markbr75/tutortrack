@@ -93,14 +93,12 @@ def update_setting(
     if timing is not None:
         if not t.default_timing:
             raise _invalid("timing", _("This notification has no timing."))
-        if not 1 <= len(timing) <= 3 or any(not 5 <= m <= 14 * 24 * 60 for m in timing):
-            raise _invalid("timing", _("Choose up to 3 times between 5 minutes and 14 days."))
+        # E33 T05: when reminders go out is the "Lesson reminders" built-in workflow's.
+        raise _invalid("timing", _("This is now set in Workflows, in a built-in workflow."))
     row, _created = OrgNotificationSetting.objects.get_or_create(type_key=type_key)
     with audit.track(row, action="update"):
         row.enabled = enabled
         row.channels = sorted(set(channels))
-        if timing is not None:
-            row.timing = sorted(set(timing), reverse=True)
         row.save()
     return effective(type_key)
 

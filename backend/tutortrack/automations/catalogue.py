@@ -119,6 +119,7 @@ for _event, _label, _subject in (
     ("payment_request.paid", "Payment request paid", "payment_request"),
     ("payment_request.cancelled", "Payment request cancelled", "payment_request"),
     ("lesson.unconfirmed", "Lesson not confirmed", "lesson"),
+    ("lesson_report.requested", "Lesson report requested", "lesson_report"),
     ("lesson_report.due", "Lesson report due", "lesson_report"),
     ("lesson_report.escalated", "Lesson report escalated", "lesson_report"),
     ("trial_lesson.no_show", "Trial lesson missed", "enquiry"),
@@ -432,6 +433,36 @@ def send_lesson_reminder(ctx: RunContext, config: dict[str, Any]) -> dict[str, A
     return {"sent": len(comms.notify("lesson_reminder", lesson, key=ctx.key))}
 
 
+def remind_report_due(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    from tutortrack.delivery import services as delivery
+
+    if not delivery.report_due_reminder(ctx.obj.pk, dedupe_key=ctx.key):
+        return skipped(_("the report is written"))
+    return {"reminded": str(ctx.obj.pk)}
+
+
+def handle_unconfirmed(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    """Still planned after the lesson: complete it automatically or flag it and nudge the
+    tutor (``delivery.unconfirmed_action``)."""
+    from tutortrack.core.models import WorkflowLink
+    from tutortrack.delivery import services as delivery
+    from tutortrack.delivery.processes import unconfirmed_workflow_id
+
+    if ctx.obj.status != "planned":
+        return skipped(_("the lesson has been marked"))
+    earlier = unconfirmed_workflow_id(ctx.obj.organisation_id, ctx.obj.pk)
+    if WorkflowLink.objects.filter(workflow_id=earlier, status="running").exists():
+        return skipped(_("an earlier check is already handling it"))  # from before E33 T05
+    return {"outcome": delivery.handle_unconfirmed(ctx.obj.pk, dedupe_key=ctx.key)}
+
+
+def expire_feedback(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    from tutortrack.delivery import feedback
+
+    expired = feedback.expire_for_lesson(ctx.obj.pk)
+    return {"expired": expired} if expired else skipped(_("every request was answered"))
+
+
 def report_overdue(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
     from tutortrack.delivery import services as delivery
 
@@ -549,6 +580,15 @@ for _action in (
            subjects=("payment_request",), permission="billing.payment_request.manage"),
     Action("send_lesson_reminder", "Send lesson reminder", send_lesson_reminder,
            _describe(N_("Send the lesson reminder")), (), subjects=("lesson",)),
+    Action("remind_report_due", "Remind the tutor the report is due", remind_report_due,
+           _describe(N_("Remind the tutor to write the report")), (),
+           subjects=("lesson_report",)),
+    Action("handle_unconfirmed", "Complete or flag the unconfirmed lesson", handle_unconfirmed,
+           _describe(N_("Complete the lesson or flag it and nudge the tutor (your setting)")),
+           (), subjects=("lesson",), permission="scheduling.lesson.complete"),
+    Action("expire_feedback", "Close unanswered feedback requests", expire_feedback,
+           _describe(N_("Close the feedback links nobody answered")), (),
+           subjects=("lesson",)),
     Action("report_overdue", "Mark report overdue and notify", report_overdue,
            _describe(N_("Mark the report overdue and tell the tutor")), (),
            subjects=("lesson_report",), permission="delivery.report.approve"),

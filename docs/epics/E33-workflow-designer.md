@@ -1,6 +1,6 @@
 # E33 — Workflow Designer
 
-- **Status:** In progress (T01 to T04 done 2026-10-25)
+- **Status:** In progress (T01 to T05 done 2026-10-25)
 - **Depends on:** E14 Automation (the engine it grows from), E32 Temporal, E10 Billing, E13
   Communications, E09 Delivery, E17 Leads, E18 Recruitment, E24 Growth
 - **ADR:** [0047](../adr/0047-workflow-designer-on-the-automation-engine.md)
@@ -217,7 +217,7 @@ Each ticket is one pull request, merged when CI is green.
 - [x] **T04 — Built-ins: invoicing and payment chasing.** Invoicing cycle, payment
   chasing, payment request reminders, statements. Each organisation's settings convert to
   its first version. Retire the replaced schedules, workflows and settings.
-- [ ] **T05 — Built-ins: lesson communications.** Lesson reminders (retire the beat task),
+- [x] **T05 — Built-ins: lesson communications.** Lesson reminders (retire the beat task),
   report chasing, feedback request, unconfirmed lesson chaser.
 - [ ] **T06 — Built-ins: sales and onboarding, and expiry reminders.** Enquiry follow-up,
   trial follow-up, welcome a new family, review request, package expiry, compliance expiry.
@@ -425,3 +425,49 @@ against the API.
   trigger is subscribed.
 - The "days from due" a reminder is worded with is worked out when it is sent; tests on
   the time-skipping server check how many reminders are sent, not their wording.
+
+**T05 (2026-10-25).**
+- **"Near a date" starts** (engine): a date start can give `minutes` (negative before,
+  positive after a date and time on the record) and `catch_up_minutes` (60 by default).
+  A Temporal Schedule every 15 minutes (`*/15`) starts a run for each record whose moment
+  fell in the catch-up window, with the moment in the run key, so each runs once and a
+  moved record is picked at its new time. Deviation from T02's note: lesson reminders don't
+  start on `lesson.scheduled` and wait. Series occurrences are bulk-created without that
+  event, and a long wait wouldn't follow a moved lesson. The sweep reads the record's own
+  date (no `next_*` column), as the retired beat task did.
+- **Four built-ins** in `delivery/workflows_builtin.py` (group `lessons`):
+  - **Lesson reminders** (lesson, 24 h and 2 h before the start, only if the lesson is
+    still going ahead): **Send lesson reminder**. Channels, the message and who gets it
+    stay in Notifications; each contact's preferences still apply.
+  - **Lesson report chasing** (on `lesson_report.requested`, newly registered; Stop when
+    submitted): remind the tutor (new **Remind the tutor the report is due**) 4 h before
+    the deadline, **Mark report overdue** at it, **Escalate** 24 h after it.
+  - **Lesson feedback request** (on `lesson.completed`; off by default): wait 2 h,
+    **Send the lesson feedback survey** (G4), wait 7 days, **Close unanswered feedback
+    requests** (new). Answers no longer end it early; closing is a no-op when all are in.
+  - **Unconfirmed lesson chaser** (lesson, 24 h after the end, still planned, 6 h catch-up
+    like the old beat task): new **Complete or flag the unconfirmed lesson**, which follows
+    `delivery.unconfirmed_action` and skips lessons an old `UnconfirmedLessonWorkflow` is
+    still handling.
+- **First versions from the settings:** the lesson reminder notification's timing and
+  on/off; `delivery.report_reminder_hours` (0: no reminder) and `report_escalate_hours`;
+  `feedback_enabled` (off: switched off), `feedback_delay_hours` and
+  `feedback_expiry_days`; `unconfirmed_after_hours`.
+- **Kept as settings** (deviation): `delivery.report_due_hours` sets the deadline tutors
+  see, and the chasing counts from it. `unconfirmed_action`, the feedback frequency, the
+  alert and review settings, and the pay hold also stay settings.
+- **Retired:**
+  - The Celery beat tasks `send_all_lesson_reminders` and `start_all_unconfirmed_checks`
+    and their code.
+  - The bridges that started `LessonReportSlaWorkflow` and `LessonFeedbackWorkflow`; their
+    signals still reach runs under way.
+  - The `feedback_enabled` check in `feedback.send_for_lesson`: the workflow being on is
+    the switch now.
+  - The replaced `delivery` settings are read-only (`replaced_by`).
+  - The notification setting's timing: `has_timing` is false, the new
+    `timing_in_workflow` is true, and changing the timing is refused. The Notifications and
+    Lesson feedback pages point to Automations instead, and `KeyedSettings` hides replaced
+    settings.
+- **Around the deploy:** for up to an hour, a reminder the old beat task sent may be sent
+  again by the new workflow (different dedupe keys). Lessons that ended just before the
+  deploy are still handled by their old unconfirmed workflow.

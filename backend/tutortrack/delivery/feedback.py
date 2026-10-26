@@ -128,8 +128,7 @@ def send_for_lesson(lesson_id: Any) -> list[str]:
     from tutortrack.comms import services as comms
     from tutortrack.scheduling.models import Lesson
 
-    if not get_setting("delivery.feedback_enabled"):
-        return []
+    # Whether to ask at all is the "Lesson feedback request" built-in workflow's (E33 T05).
     lesson = (
         Lesson.objects.prefetch_related(
             "attendees__student__contact", "attendees__client__contacts", "tutors__tutor"

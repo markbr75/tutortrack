@@ -912,10 +912,14 @@
           homework, next steps, attachments), choose who sees each answer (staff, client or
           student) and select <span class="ui">Save template</span>. Assign templates to jobs,
           services or subjects; a job's template beats a service's, which beats a subject's.</p>
-        <p>Report deadlines, reminders and escalation (due 24 hours after the lesson; edits
-          allowed for 48 hours), approval before sharing (off), unconfirmed-lesson handling and
-          billing by actual duration are API-only delivery settings. Lesson feedback surveys are
-          set up on the <span class="ui">Lesson feedback</span> page (see the user guide).</p>
+        <p>The report deadline (24 hours after the lesson), the edit window (48 hours), approval
+          before sharing (off), what happens to an unconfirmed lesson (flag it, or complete it
+          automatically) and billing by actual duration are API-only delivery settings. When
+          tutors are reminded and reports escalated, when unconfirmed lessons are dealt with and
+          whether (and when) families are asked for lesson feedback are
+          <a href="#automations-builtin">built-in workflows</a>. How often families are asked and
+          the low-rating alert are on the <span class="ui">Lesson feedback</span> page (see the
+          user guide).</p>
       </section>
 
       <section id="booking" data-route="admin:/settings/booking" aria-labelledby="booking-h">
@@ -1046,9 +1050,10 @@
           <span class="ui">Messages</span> and <span class="ui">Staff alerts</span>. For each one,
           tick it on or off, tick the channels (<span class="ui">Email</span>,
           <span class="ui">Text</span>, <span class="ui">In the app</span>,
-          <span class="ui">Push</span>, <span class="ui">WhatsApp</span>) and, for reminders, enter
-          up to three <span class="ui">Hours before</span> values (for example <code>24, 2</code>,
-          the default for lesson reminders). Select <span class="ui">Save</span>.</p>
+          <span class="ui">Push</span>, <span class="ui">WhatsApp</span>). Select
+          <span class="ui">Save</span>. When lesson reminders go out (24 and 2 hours before by
+          default) is set in the <span class="ui">Lesson reminders</span>
+          <a href="#automations-builtin">built-in workflow</a>.</p>
         <ul>
           <li>Account emails (invitations, password resets, sign-in alerts) can be reworded but not switched off.</li>
           <li>Transactional messages fall back to email rather than going silent. Monthly statements and the digest emails are off until you switch them on.</li>
@@ -1247,6 +1252,10 @@
             <tr><td>Payment chasing</td><td>From the moment an invoice is issued: payment reminders 3 days before, on the day, and 3, 7, 14 and 30 days after the due date at 09:00; your late fee rule 14 days after; stops when the invoice is paid, voided or written off. Add "Open a collections case" for collections.</td><td>Payment reminders, reminder days, collections days and the late fee rule's timing</td></tr>
             <tr><td>Payment request reminders</td><td>Remind the family 3 and 7 days after a payment request, until it is paid or cancelled.</td><td>The fixed 3- and 7-day reminders</td></tr>
             <tr><td>Monthly statements</td><td>Off. When on: on the 1st at 07:00, email last month's statement to every family with account activity or a balance.</td><td>Monthly statements setting and day</td></tr>
+            <tr><td>Lesson reminders</td><td>24 hours and 2 hours before each lesson that is still going ahead. A moved lesson is reminded at its new time. Who gets it and by which channels is in Notifications.</td><td>The <span class="ui">Hours before</span> timing on the lesson reminder notification</td></tr>
+            <tr><td>Lesson report chasing</td><td>From when a report is requested: remind the tutor 4 hours before the deadline, mark it overdue at the deadline (holding pay if you chose that), and escalate to the office 24 hours later; stops when the report is written.</td><td>Report reminder and escalation hours</td></tr>
+            <tr><td>Lesson feedback request</td><td>Off. When on: 2 hours after a lesson is completed, ask the family to rate it; close unanswered links after 7 days.</td><td>Feedback on/off, delay and expiry</td></tr>
+            <tr><td>Unconfirmed lesson chaser</td><td>24 hours after a lesson that is still unmarked, flag it and nudge the tutor, or complete it automatically (your delivery setting).</td><td>Unconfirmed-after hours</td></tr>
           </tbody>
         </table></div>
         <p>Multi-branch organisations: the invoicing day comes from the organisation's setting
@@ -1936,7 +1945,7 @@
             <tbody>
               <tr><td>Web API</td><td>ECS Fargate service <code>web</code> (gunicorn, Django 5 + DRF)</td><td>Serves <code>/api/v1/</code>, provider webhooks (<code>/webhooks/…</code>), <code>/healthz</code> and <code>/readyz</code> (checks the database and Redis).</td></tr>
               <tr><td>Background jobs</td><td>ECS service <code>worker</code> (Celery) on the queues <code>default</code>, <code>outbox</code>, <code>notifications</code>, <code>billing</code>, <code>integrations</code>, <code>imports</code>, <code>reports</code></td><td>Short, stateless tasks: dispatching the event outbox, sending messages, webhook deliveries, syncs.</td></tr>
-              <tr><td>Scheduler</td><td>ECS service <code>beat</code> (Celery Beat)</td><td>Global housekeeping crons (fan out one task per organisation). It also writes the application metrics that the alarms read.</td></tr>
+              <tr><td>Scheduler</td><td>ECS service <code>beat</code> (Celery Beat)</td><td>Global housekeeping crons (fan out one task per organisation). It also writes the application metrics that the alarms read. Lesson reminders and the unconfirmed-lesson checks are workflows now, not beat tasks.</td></tr>
               <tr><td>Workflow workers</td><td>ECS service <code>temporal-worker</code></td><td>Runs every Temporal task queue: dunning, invoice runs, reminders, automations, imports, erasure and other long-running processes. Runs <code>ensure_platform_schedules</code> and <code>sync_builtin_workflows</code> (installs the built-in workflows each organisation is missing and moves unedited ones to newer defaults) at start.</td></tr>
               <tr><td>Migrations</td><td>One-off ECS task <code>migrate</code></td><td>Runs <code>ensure_db_roles</code> then <code>migrate</code> as the table owner.</td></tr>
               <tr><td>Database</td><td>RDS PostgreSQL 16 (encrypted, 35-day point-in-time recovery)</td><td>Shared schema; every tenant row carries <code>organisation_id</code> and row-level security (RLS) policies enforce isolation.</td></tr>

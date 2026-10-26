@@ -14,6 +14,7 @@ import {
   TextField,
 } from "@tutortrack/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -51,7 +52,8 @@ function Stars({ rating }: { rating: number | null }) {
   );
 }
 
-/** Feedback settings: the ``delivery.feedback_*`` org settings. */
+/** Feedback settings: the ``delivery.feedback_*`` org settings. Whether and when families
+ * are asked is the "Lesson feedback request" built-in workflow's (E33 T05). */
 function FeedbackSettings() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -65,7 +67,9 @@ function FeedbackSettings() {
   useEffect(() => {
     if (area.data) setValues(area.data.values);
   }, [area.data]);
-  const schema = (area.data?.schema ?? []).filter((d) => d.key.startsWith("delivery.feedback_"));
+  const schema = (area.data?.schema ?? []).filter(
+    (d) => d.key.startsWith("delivery.feedback_") && !d.replaced_by,
+  );
   const save = useMutation({
     mutationFn: async () =>
       unwrap(
@@ -114,6 +118,12 @@ function FeedbackSettings() {
               />
             ),
           )}
+          <p className="text-sm">
+            {t("lessonFeedback.inWorkflow")}{" "}
+            <Link to="/automations" className="font-medium underline underline-offset-2">
+              {t("lessonFeedback.openWorkflows")}
+            </Link>
+          </p>
           <p className="text-xs text-muted-foreground">{t("lessonFeedback.consentNote")}</p>
           {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
         </div>

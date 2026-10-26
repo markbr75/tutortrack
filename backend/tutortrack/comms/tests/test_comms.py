@@ -14,7 +14,6 @@ from django.core import mail
 from tutortrack.catalogue.tests.factories import ServiceFactory
 from tutortrack.comms import channels, handlers, services
 from tutortrack.comms.models import InAppNotification, Message, SmsOptOut, Suppression
-from tutortrack.comms.tasks import send_lesson_reminders
 from tutortrack.core.context import tenant_context
 from tutortrack.core.events import EventEnvelope
 from tutortrack.core.models import OutboxEvent
@@ -114,15 +113,17 @@ def messages(org, **filters):
 # --- settings and templates (T01/T02) -----------------------------------------------------------
 
 
-def test_disable_sms_reminders_and_set_timing(org, admin):
-    """AC: email reminders stay on, SMS off, at 24h and 2h."""
+def test_disable_sms_reminders(org, admin):
+    """AC: email reminders stay on, SMS off. When they go out (24h and 2h before) is the
+    Lesson reminders built-in workflow's since E33 T05."""
     api, _user = admin
     rows = {r["key"]: r for r in api.get("/api/v1/notification-settings").json()}
     assert rows["lesson_reminder"]["channels"] == ["email", "sms"]
     assert rows["lesson_reminder"]["timing"] == [1440, 120]
+    assert rows["lesson_reminder"]["timing_in_workflow"] is True
     updated = api.put(
         "/api/v1/notification-settings/lesson_reminder",
-        {"enabled": True, "channels": ["email"], "timing": [1440, 120]},
+        {"enabled": True, "channels": ["email"]},
         format="json",
     ).json()
     assert (updated["channels"], updated["customised"]) == (["email"], True)
@@ -336,12 +337,24 @@ def test_twilio_status_callback(org, family):
 # --- reminders (T06) ----------------------------------------------------------------------------
 
 
-def test_reminders_at_each_offset_once(org, family):
+def test_reminders_at_each_offset_once(org, family, monkeypatch):
+    """The Lesson reminders built-in (E33 T05): each time its schedule fires, the lessons
+    whose 24-hour or 2-hour reminder just came round get one."""
+    from tutortrack.automations import services as automations
+    from tutortrack.automations.models import Automation
+
+    def run_now(run, **kwargs):  # the run's one step, as its workflow would
+        automations.execute_step(str(run.pk), "0", run.version.steps[0])
+
+    monkeypatch.setattr(automations, "launch", run_now)
     tomorrow = lesson_at(org, family, now() + timedelta(hours=23, minutes=40))
     soon = lesson_at(org, family, now() + timedelta(hours=1, minutes=50))
     later = lesson_at(org, family, now() + timedelta(days=3))
-    send_lesson_reminders(organisation_id=str(org.pk))
-    send_lesson_reminders(organisation_id=str(org.pk))  # the next beat: nothing new
+    with tenant_context(org):
+        automations.install_builtins()
+        reminders = Automation.objects.get(builtin_key="lesson_reminders")
+        assert automations.fan_out(str(reminders.pk)) == 2
+        assert automations.fan_out(str(reminders.pk)) == 0  # the next time: nothing new
     reminders = messages(org, type_key="lesson_reminder", channel="email")
     lessons = {(m.related_id, m.recipient_type) for m in reminders}
     assert lessons == {

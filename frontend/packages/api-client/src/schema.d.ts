@@ -32397,7 +32397,10 @@ export interface components {
       available_channels: components["schemas"]["MessageChannelEnum"][];
       enabled: boolean;
       timing: number[];
+      /** @description Always false: see timing_in_workflow. */
       has_timing: boolean;
+      /** @description When it is sent is set in a built-in workflow (Lesson reminders); timing is the value it started from and is read-only. */
+      timing_in_workflow: boolean;
       transactional: boolean;
       /** @description Account emails: can be edited, not switched off. */
       locked: boolean;
