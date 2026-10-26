@@ -183,6 +183,8 @@ def report_ctx(report: Any) -> dict[str, Any]:
 
 
 def enquiry_ctx(enquiry: Any) -> dict[str, Any]:
+    from tutortrack.leads.services import stage_deadline
+
     return {
         "id": str(enquiry.pk),
         "title": enquiry.title,
@@ -193,6 +195,7 @@ def enquiry_ctx(enquiry: Any) -> dict[str, Any]:
         "owner": _user_name(enquiry.owner),
         "expected_start": _d(enquiry.expected_start),
         "stage_entered_at": _d(enquiry.stage_entered_at),
+        "stage_deadline": _d(stage_deadline(enquiry)),
         "created_at": _d(enquiry.created_at),
         "trial_booked": enquiry.trial_lesson_id is not None,
         "trial_outcome": enquiry.trial_outcome,
@@ -396,6 +399,7 @@ register_subject(
             F("stage", "Stage"), F("source", "Source"), F("priority", "Priority"),
             F("owner", "Owner"), F("expected_start", "Expected start", "date"),
             F("stage_entered_at", "In stage since", "datetime"),
+            F("stage_deadline", "Stage time limit", "datetime"),
             F("created_at", "Received", "datetime"), F("tags", "Tags", "list"),
         ), ("client", CLIENT_FIELDS)),
         context=enquiry_ctx,

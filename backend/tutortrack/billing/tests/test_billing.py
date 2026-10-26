@@ -81,7 +81,7 @@ def finance(org):
 
 def set_settings(org, area, values):
     with tenant_context(org):
-        settings_service.update_settings(area, values)
+        settings_service.update_settings(area, values, allow_replaced=True)
 
 
 def lesson(org, family, *, student=0, hours_ago=3, minutes=60, job=None, **kwargs):

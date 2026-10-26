@@ -793,8 +793,7 @@ def sla_status(enquiry_id: Any) -> dict[str, Any]:
     enquiry = Enquiry.objects.select_related("stage").filter(pk=enquiry_id).first()
     if enquiry is None or enquiry.status != Enquiry.Status.OPEN:
         return {"open": False}
-    hours = enquiry.stage.sla_hours
-    deadline = enquiry.stage_entered_at + timedelta(hours=hours) if hours else None
+    deadline = stage_deadline(enquiry)
     return {
         "open": True,
         "stage": str(enquiry.stage_id),
@@ -835,17 +834,57 @@ def breach_sla(enquiry_id: Any, stage_id: str) -> bool:
     return True
 
 
-def acknowledge(enquiry_id: Any) -> bool:
-    """The automatic reply to the family and the owner's notification."""
+def stage_deadline(enquiry: Enquiry) -> Any:
+    """When the enquiry has been in its stage too long (``None``: the stage has no limit)."""
+    hours = enquiry.stage.sla_hours
+    return enquiry.stage_entered_at + timedelta(hours=hours) if hours else None
+
+
+def flag_waiting(enquiry_id: Any) -> str:
+    """The Enquiry follow-up workflows (E33 T06): flag the enquiry as waiting too long in
+    its current stage. Returns why it didn't, or ''."""
+    enquiry = Enquiry.objects.select_related("stage").filter(pk=enquiry_id).first()
+    if enquiry is None or enquiry.status != Enquiry.Status.OPEN:
+        return _("the enquiry is closed")
+    deadline = stage_deadline(enquiry)
+    if deadline is None:
+        return _("the stage has no time limit")
+    if deadline > now():
+        return _("the enquiry moved on in time")
+    if not breach_sla(enquiry.pk, str(enquiry.stage_id)):
+        return _("it was already flagged")
+    return ""
+
+
+def thank_for_enquiry(enquiry_id: Any) -> bool:
+    """The automatic reply to the family."""
     from tutortrack.comms import services as comms
 
-    enquiry = Enquiry.objects.select_related("contact", "owner").filter(pk=enquiry_id).first()
-    if enquiry is None:
+    enquiry = Enquiry.objects.select_related("contact").filter(pk=enquiry_id).first()
+    if enquiry is None or enquiry.contact is None:
         return False
-    if get_setting("leads.acknowledge") and enquiry.contact is not None:
-        comms.notify("enquiry_acknowledgement", enquiry, key=f"ack:{enquiry.pk}")
-    if enquiry.owner_id:
-        comms.notify("enquiry_assigned", enquiry, key=f"assigned:{enquiry.pk}:{enquiry.owner_id}")
+    return bool(comms.notify("enquiry_acknowledgement", enquiry, key=f"ack:{enquiry.pk}"))
+
+
+def tell_owner(enquiry_id: Any) -> bool:
+    """Tell the enquiry's owner about it."""
+    from tutortrack.comms import services as comms
+
+    enquiry = Enquiry.objects.select_related("owner").filter(pk=enquiry_id).first()
+    if enquiry is None or not enquiry.owner_id:
+        return False
+    key = f"assigned:{enquiry.pk}:{enquiry.owner_id}"
+    return bool(comms.notify("enquiry_assigned", enquiry, key=key))
+
+
+def acknowledge(enquiry_id: Any) -> bool:
+    """The automatic reply to the family and the owner's notification (the
+    ``EnquiryFollowUpWorkflow`` runs from before E33 T06)."""
+    if not Enquiry.objects.filter(pk=enquiry_id).exists():
+        return False
+    if get_setting("leads.acknowledge"):
+        thank_for_enquiry(enquiry_id)
+    tell_owner(enquiry_id)
     return True
 
 

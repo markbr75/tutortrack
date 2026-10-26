@@ -26,6 +26,7 @@ register(
     min_value=1,
     max_value=60,
     label=_("Days before reminding a family who hasn't reviewed"),
+    replaced_by="review_request",
 )
 register(
     "growth.review_expiry_days",

@@ -19,17 +19,16 @@ from tutortrack.core.events.dispatcher import dispatch_batch
 from tutortrack.core.money import Money
 from tutortrack.core.workflows import start_now
 from tutortrack.growth import services
-from tutortrack.growth.models import CommissionItem, Referral, ReviewRequest
+from tutortrack.growth.models import CommissionItem, Referral
 from tutortrack.growth.processes import (
     AffiliateStatementRunWorkflow,
     ReferralRewardWorkflow,
     ReviewRequestWorkflow,
     StatementRunInput,
     referral_workflow_id,
-    review_workflow_id,
 )
 from tutortrack.payments import services as payments
-from tutortrack.people.tests.factories import ClientFactory, ContactFactory, TutorProfileFactory
+from tutortrack.people.tests.factories import ClientFactory, ContactFactory
 
 from .factories import AffiliateFactory, ReferralProgramFactory
 
@@ -69,52 +68,8 @@ def family(org, name: str, email: str):
 
 
 # --- ReviewRequestWorkflow ----------------------------------------------------------------------
-
-
-def _requested(org):
-    client = family(org, "The Patels", "priya@example.com")
-    tutor = TutorProfileFactory(organisation=org, first_name="Nia")
-    with tenant_context(org), transaction.atomic():
-        request = services.request_review(client=client, tutor=tutor)
-    dispatch_batch()  # review.requested → ReviewRequestWorkflow
-    return request
-
-
-def test_a_review_request_is_reminded_then_expires(org, temporal_env):
-    request = _requested(org)
-    wid = review_workflow_id(org.pk, request.pk)
-    assert temporal_env.result(wid) == "expired"
-    with tenant_context(org):
-        request.refresh_from_db()
-        assert request.status == "expired"
-        assert request.sent_at is not None
-        assert request.reminded_at is not None
-        from tutortrack.comms.models import Message
-
-        assert Message.objects.filter(type_key="review_request").count() == 2
-    record(temporal_env, wid, "ReviewRequestWorkflow-expired")
-
-
-def test_submitting_the_review_ends_the_workflow(org, temporal_env):
-    request = _requested(org)
-    wid = review_workflow_id(org.pk, request.pk)
-    wait_for(org, lambda: ReviewRequest.objects.get(pk=request.pk).sent_at is not None)
-    with tenant_context(org), transaction.atomic():
-        services.submit_review(ReviewRequest.objects.get(pk=request.pk), rating=5, text="Great")
-    dispatch_batch()  # review.submitted → signal "submitted"
-    assert temporal_env.result(wid) == "submitted"
-    with tenant_context(org):
-        assert ReviewRequest.objects.get(pk=request.pk).reminded_at is None
-    record(temporal_env, wid, "ReviewRequestWorkflow-submitted")
-
-
-def test_staff_can_cancel_a_review_request(org, temporal_env):
-    request = _requested(org)
-    wid = review_workflow_id(org.pk, request.pk)
-    wait_for(org, running(org, wid))
-    with tenant_context(org), transaction.atomic():
-        services.cancel_request(ReviewRequest.objects.get(pk=request.pk))
-    assert temporal_env.result(wid) == "cancelled"
+# The Review request built-in workflow sends, reminds and closes requests now (E33 T06): see
+# test_workflows_builtin_runs.py. Its recorded histories still replay below.
 
 
 # --- ReferralRewardWorkflow ---------------------------------------------------------------------

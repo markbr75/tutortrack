@@ -105,6 +105,37 @@ register_subject(
     )
 )  # fmt: skip
 
+
+def review_request_ctx(request: Any) -> dict[str, Any]:
+    return {
+        "id": str(request.pk),
+        "status": request.status,
+        "trigger": request.trigger,
+        "tutor": request.tutor.full_name if request.tutor else "",
+        "sent_at": _d(request.sent_at),
+        "expires_at": _d(request.expires_at),
+        "created_at": _d(request.created_at),
+        "client": client_ctx(request.client),
+    }
+
+
+register_subject(
+    Subject(
+        key="review_request", label="Review request", model="growth.ReviewRequest",
+        fields=_subject_fields("review_request", (
+            F("status", "Status", "choice",
+              ("pending", "reminded", "submitted", "expired", "cancelled")),
+            F("trigger", "Asked", "choice", ("lessons", "trial", "automation", "manual")),
+            F("tutor", "Tutor"), F("sent_at", "Sent", "datetime"),
+            F("expires_at", "Link closes", "datetime"), F("created_at", "Made", "datetime"),
+        ), ("client", CLIENT_FIELDS)),
+        context=review_request_ctx,
+        recipients={"client": lambda r: _contacts(r.client)},
+        owner=lambda r: r.client.account_manager.user if r.client.account_manager else None,
+        date_fields=("expires_at", "created_at"),
+    )
+)  # fmt: skip
+
 # --- starts and stop-when events -----------------------------------------------------------------
 
 for _event, _label, _subject in (
@@ -124,6 +155,7 @@ for _event, _label, _subject in (
     ("lesson_report.escalated", "Lesson report escalated", "lesson_report"),
     ("trial_lesson.no_show", "Trial lesson missed", "enquiry"),
     ("client.first_lesson_completed", "A family's first lesson", "client"),
+    ("review.requested", "Review requested", "review_request"),
 ):
     register_trigger(_event, _label, _subject)
 
@@ -236,6 +268,10 @@ QUESTIONS: tuple[tuple[str, str, str, Any], ...] = (
      lambda c: bool(_root(c, "enquiry").get("trial_booked"))),
     ("enquiry", "enquiry.continuing", "The family wants to continue after the trial",
      lambda c: _root(c, "enquiry").get("trial_outcome") == "continuing"),
+    ("enquiry", "enquiry.stage_has_time_limit", "The enquiry's stage has a time limit",
+     lambda c: bool(_root(c, "enquiry").get("stage_deadline"))),
+    ("package", "package.active", "The package is in use",
+     lambda c: _root(c, "package").get("status") == "active"),
     ("package", "package.has_units_left", "The package has some left",
      lambda c: _number(_root(c, "package").get("units_remaining")) > 0),
     ("package", "package.auto_renew", "The package renews automatically",
@@ -248,6 +284,8 @@ QUESTIONS: tuple[tuple[str, str, str, Any], ...] = (
      lambda c: _root(c, "compliance_record").get("status") == "verified"),
     ("tutor_application", "tutor_application.open", "The application is still open",
      lambda c: _root(c, "tutor_application").get("status") == "open"),
+    ("review_request", "review_request.open", "The family hasn't reviewed yet",
+     lambda c: _root(c, "review_request").get("status") in ("pending", "reminded")),
 )  # fmt: skip
 
 for _subject, _key, _label, _fn in QUESTIONS:
@@ -522,6 +560,100 @@ def _review_parties(ctx: RunContext) -> tuple[Any, Any, Any]:
     return getattr(ctx.obj, "client", None), None, None
 
 
+def thank_for_enquiry(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    from tutortrack.leads import services as leads
+
+    if not leads.thank_for_enquiry(ctx.obj.pk):
+        return skipped(_("the enquiry has no contact to thank"))
+    return {"thanked": str(ctx.obj.pk)}
+
+
+def tell_enquiry_owner(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    from tutortrack.leads import services as leads
+
+    if not leads.tell_owner(ctx.obj.pk):
+        return skipped(_("nobody is looking after the enquiry"))
+    return {"told": str(ctx.obj.owner_id)}
+
+
+def flag_enquiry_waiting(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    """Flag the enquiry and tell staff it has been in its stage longer than the stage's
+    time limit (Leads > Pipeline)."""
+    from tutortrack.leads import services as leads
+
+    reason = leads.flag_waiting(ctx.obj.pk)
+    return skipped(reason) if reason else {"flagged": str(ctx.obj.pk)}
+
+
+def ask_trial_outcome(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    """After a trial lesson, remind staff to record how it went (and whether the family
+    wants to continue)."""
+    from tutortrack.leads import services as leads
+    from tutortrack.leads.models import Enquiry
+
+    enquiry = Enquiry.objects.filter(trial_lesson_id=ctx.obj.pk).first()
+    if enquiry is None:
+        return skipped(_("this isn't an enquiry's trial lesson"))
+    if not leads.trial_follow_up(enquiry.pk):
+        return skipped(_("the outcome is recorded or the enquiry is closed"))
+    return {"asked": str(enquiry.pk)}
+
+
+# --- reviews and expiry --------------------------------------------------------------------------
+
+
+def send_review_link(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    from tutortrack.growth import services as growth
+
+    if not growth.send_review_request(ctx.obj.pk):
+        return skipped(_("the family has reviewed or the request was closed"))
+    return {"sent": str(ctx.obj.pk)}
+
+
+def remind_review(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    from tutortrack.core.time import now
+    from tutortrack.growth import services as growth
+
+    if ctx.obj.expires_at <= now():
+        return skipped(_("the link has closed"))
+    if not growth.send_review_request(ctx.obj.pk, reminder=True):
+        return skipped(_("the family has reviewed, or was already reminded"))
+    return {"reminded": str(ctx.obj.pk)}
+
+
+def close_review_request(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    from tutortrack.growth import services as growth
+
+    status = ctx.obj.status
+    if status not in ("pending", "reminded"):
+        return skipped(_("the family has reviewed or the request was closed"))
+    return {"status": growth.expire_request(ctx.obj.pk)}
+
+
+def remind_package_expiry(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    """Once per package and expiry date (an extended package is reminded again)."""
+    from tutortrack.billing import packages
+
+    if not packages.remind_expiry(ctx.obj.pk):
+        return skipped(_("the package is used up, closed or doesn't expire"))
+    return {"reminded": str(ctx.obj.pk)}
+
+
+def remind_compliance_expiry(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
+    """Remind the tutor and compliance staff that the check expires in N days."""
+    from tutortrack.recruitment import compliance
+
+    record = ctx.obj
+    if record.expiry_date is None:
+        return skipped(_("the check doesn't expire"))
+    days = (record.expiry_date - compliance.today()).days
+    if days < 0:
+        return skipped(_("the check has already expired"))
+    if not compliance.remind(record.pk, days, record.expiry_date.isoformat()):
+        return skipped(_("the check isn't verified any more"))
+    return {"reminded": str(record.pk), "days": days}
+
+
 # --- general -------------------------------------------------------------------------------------
 
 
@@ -603,6 +735,36 @@ for _action in (
            _describe(N_("Ask the family for a review")), (),
            subjects=("client", "lesson", "enquiry", "invoice"),
            permission="growth.review.manage"),
+    Action("thank_for_enquiry", "Thank the family for the enquiry", thank_for_enquiry,
+           _describe(N_("Send the family the enquiry thank-you message")), (),
+           subjects=("enquiry",)),
+    Action("tell_enquiry_owner", "Tell the enquiry's owner", tell_enquiry_owner,
+           _describe(N_("Tell the person looking after the enquiry")), (),
+           subjects=("enquiry",)),
+    Action("flag_enquiry_waiting", "Flag the enquiry as waiting too long",
+           flag_enquiry_waiting,
+           _describe(N_("Flag the enquiry and tell staff it has waited too long")), (),
+           subjects=("enquiry",), permission="leads.enquiry.edit"),
+    Action("ask_trial_outcome", "Ask how the trial went", ask_trial_outcome,
+           _describe(N_("Remind staff to record the trial lesson's outcome")), (),
+           subjects=("lesson",)),
+    Action("send_review_link", "Send the review link", send_review_link,
+           _describe(N_("Send the family the link to review")), (),
+           subjects=("review_request",), permission="growth.review.manage"),
+    Action("remind_review", "Remind the family to review", remind_review,
+           _describe(N_("Remind the family once about the review")), (),
+           subjects=("review_request",), permission="growth.review.manage"),
+    Action("close_review_request", "Close the review request", close_review_request,
+           _describe(N_("Close the review link if nobody used it")), (),
+           subjects=("review_request",), permission="growth.review.manage"),
+    Action("remind_package_expiry", "Remind the family the package is expiring",
+           remind_package_expiry,
+           _describe(N_("Tell the family their unused package expires soon")), (),
+           subjects=("package",)),
+    Action("remind_compliance_expiry", "Remind about the expiring check",
+           remind_compliance_expiry,
+           _describe(N_("Remind the tutor and compliance staff the check expires soon")), (),
+           subjects=("compliance_record",)),
     Action("start_workflow", "Start another workflow", start_workflow,
            _describe(N_("Start another workflow for this record")),
            (A("workflow", "Workflow", "workflow", True),)),

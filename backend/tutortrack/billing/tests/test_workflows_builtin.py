@@ -7,12 +7,19 @@ from datetime import timedelta
 from decimal import Decimal
 
 import pytest
+from rest_framework.exceptions import ValidationError
 
 from tutortrack.automations import services as automations
 from tutortrack.automations.models import Automation, AutomationRun
 from tutortrack.automations.tests.test_catalogue import act
-from tutortrack.billing import dunning, services
-from tutortrack.billing.models import Charge, ClientLedgerEntry, InvoiceRun, LateFeeRule
+from tutortrack.billing import dunning, packages, services
+from tutortrack.billing.models import (
+    Charge,
+    ClientLedgerEntry,
+    InvoiceRun,
+    LateFeeRule,
+    PackagePurchase,
+)
 from tutortrack.billing.processes import (
     SCHEDULE_PROCESS,
     STATEMENT_PROCESS,
@@ -26,6 +33,7 @@ from tutortrack.billing.tests.test_billing import (
     lesson,
     local_today,
 )
+from tutortrack.billing.tests.test_phase2_workflows import active_package, client_  # noqa: F401
 from tutortrack.core.context import tenant_context
 from tutortrack.core.events.dispatcher import dispatch_batch
 from tutortrack.core.models import ScheduleLink, WorkflowLink
@@ -298,3 +306,57 @@ def OrgFactory():
     from tutortrack.tenancy.tests.factories import OrganisationFactory
 
     return OrganisationFactory()
+
+
+# --- package expiry reminder (E33 T06) -----------------------------------------------------
+
+
+def package_reminder(org, **settings) -> Automation:
+    with tenant_context(org):
+        if settings:
+            settings_service.update_settings("billing", settings, allow_replaced=True)
+        automations.install_builtins()
+        return Automation.objects.get(builtin_key="package_expiry")
+
+
+def expiring_in(org, purchase, days: int):
+    with tenant_context(org):
+        moment = now().replace(hour=12, minute=0, second=0, microsecond=0)
+        PackagePurchase.objects.filter(pk=purchase.pk).update(
+            expires_at=moment + timedelta(days=days)
+        )
+        return PackagePurchase.objects.get(pk=purchase.pk)
+
+
+def test_the_package_reminder_takes_its_days_and_zero_switches_it_off(org):
+    default = package_reminder(org)
+    assert (default.enabled, default.edited) == (True, False)
+    assert default.trigger_config["offset_days"] == [-14]
+    with tenant_context(org):
+        default.delete()
+    assert package_reminder(org, **{"billing.package_expiry_reminder_days": 30}).edited
+    with tenant_context(org):
+        Automation.objects.filter(builtin_key="package_expiry").delete()
+    off = package_reminder(org, **{"billing.package_expiry_reminder_days": 0})
+    assert not off.enabled
+    assert off.trigger_config["offset_days"] == [-14]
+    with tenant_context(org), pytest.raises(ValidationError):
+        settings_service.update_settings("billing", {"billing.package_expiry_reminder_days": 7})
+
+
+def test_packages_are_reminded_once_per_expiry_date(org, client_, monkeypatch):  # noqa: F811
+    reminder = package_reminder(org)
+    due = expiring_in(org, active_package(org, client_, validity_days=60), 14)
+    expiring_in(org, active_package(org, client_, validity_days=60), 20)
+    started: list[AutomationRun] = []
+    monkeypatch.setattr(automations, "launch", lambda run, **kw: started.append(run))
+    with tenant_context(org):
+        assert automations.fan_out(str(reminder.pk), on=now().date()) == 1
+    assert [r.subject_id for r in started] == [str(due.pk)]
+    assert act(org, "remind_package_expiry", "package", due) == {"reminded": str(due.pk)}
+    act(org, "remind_package_expiry", "package", due, step="b")  # e.g. an old run as well
+    assert len(events_of(org, "package.expiring")) == 1
+    with tenant_context(org):
+        packages.extend_package(due, until=due.expires_at + timedelta(days=30))
+    assert act(org, "remind_package_expiry", "package", due, step="c") == {"reminded": str(due.pk)}
+    assert len(events_of(org, "package.expiring")) == 2

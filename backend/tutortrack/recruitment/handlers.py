@@ -42,7 +42,6 @@ def follow_expiry(event: EventEnvelope) -> None:
     from tutortrack.core.models import WorkflowLink
     from tutortrack.core.workflows import signal_now, start_now
     from tutortrack.tenancy.models import Organisation
-    from tutortrack.tenancy.settings_service import get_setting
 
     expiry = event.data.get("expiry_date")
     record_id = event.subject["id"]
@@ -61,7 +60,7 @@ def follow_expiry(event: EventEnvelope) -> None:
             record_id=record_id,
             expiry=expiry,
             timezone=org.timezone,
-            reminder_days=[int(d) for d in get_setting("compliance.reminder_days") or []],
+            reminder_days=[],  # the Compliance expiry built-in workflow reminds (E33 T06)
         ),
         id=new_id,
         subject=("compliance_record", record_id),

@@ -1,4 +1,8 @@
-"""Leads reactions to domain events and the Temporal bridge (E17-TW1)."""
+"""Leads reactions to domain events and the Temporal bridge (E17-TW1).
+
+Enquiries no longer start ``EnquiryFollowUpWorkflow``: the Enquiry follow-up built-in
+workflows acknowledge them and watch the stage time limits (E33 T06). Runs started before
+still get their ``trial_done`` signal."""
 
 from __future__ import annotations
 
@@ -6,8 +10,6 @@ from tutortrack.core.events import EventEnvelope, subscribe
 from tutortrack.core.workflows import bridge
 
 from .processes import (
-    EnquiryFollowUpWorkflow,
-    EnquiryInput,
     OfferInput,
     ProposalInput,
     ProposalWorkflow,
@@ -34,7 +36,8 @@ def trial_lesson_missed(event: EventEnvelope) -> None:
 
 @subscribe("lesson.completed")
 def trial_lesson_done(event: EventEnvelope) -> None:
-    """A trial lesson happened: the follow-up workflow reminds the owner for the outcome."""
+    """A trial lesson happened: an ``EnquiryFollowUpWorkflow`` from before E33 T06 reminds
+    the owner for the outcome (the Trial lesson follow-up built-in does it now)."""
     from .models import Enquiry
 
     enquiry = Enquiry.objects.filter(trial_lesson_id=event.subject["id"]).first()
@@ -93,15 +96,6 @@ def suggest_on_capacity(event: EventEnvelope) -> None:
     capacity_appeared(event)
 
 
-bridge.on(
-    "enquiry.received",
-    start=EnquiryFollowUpWorkflow,
-    when=lambda e: e.data.get("source") != "import",  # imported leads: no ack or SLA (E28)
-    id=lambda e: enquiry_workflow_id(e.organisation_id, e.subject["id"]),
-    input=lambda e: EnquiryInput(
-        organisation_id=str(e.organisation_id), enquiry_id=e.subject["id"]
-    ),
-)
 bridge.on(
     "waitlist.place_offered",
     start=WaitlistOfferWorkflow,

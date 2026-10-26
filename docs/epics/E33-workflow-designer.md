@@ -1,6 +1,6 @@
 # E33 — Workflow Designer
 
-- **Status:** In progress (T01 to T05 done 2026-10-25)
+- **Status:** In progress (T01 to T06 done 2026-10-26)
 - **Depends on:** E14 Automation (the engine it grows from), E32 Temporal, E10 Billing, E13
   Communications, E09 Delivery, E17 Leads, E18 Recruitment, E24 Growth
 - **ADR:** [0047](../adr/0047-workflow-designer-on-the-automation-engine.md)
@@ -219,7 +219,7 @@ Each ticket is one pull request, merged when CI is green.
   its first version. Retire the replaced schedules, workflows and settings.
 - [x] **T05 — Built-ins: lesson communications.** Lesson reminders (retire the beat task),
   report chasing, feedback request, unconfirmed lesson chaser.
-- [ ] **T06 — Built-ins: sales and onboarding, and expiry reminders.** Enquiry follow-up,
+- [x] **T06 — Built-ins: sales and onboarding, and expiry reminders.** Enquiry follow-up,
   trial follow-up, welcome a new family, review request, package expiry, compliance expiry.
 - [ ] **T07 — Sequence editor.** The Workflows area, the timeline with in-place cards,
   splits, Stop when, + Add a step, Move up and down, problems in words, Save and switch on,
@@ -471,3 +471,65 @@ against the API.
 - **Around the deploy:** for up to an hour, a reminder the old beat task sent may be sent
   again by the new workflow (different dedupe keys). Lessons that ended just before the
   deploy are still handled by their old unconfirmed workflow.
+
+**T06 (2026-10-26).**
+- **Engine:** a date start's `offset_days` can be a list of up to six days (one run per
+  record on each), so "60, 30 and 7 days before a check expires" is one daily start. The
+  day is the record's own date, so a renewed check or extended package is picked at its new
+  date.
+- **Seven built-ins** (groups `sales` and `expiry`; one more than the table, see below):
+  - **Enquiry follow-up** (`leads/workflows_builtin.py`; on `enquiry.received`, not
+    imported ones; Stop when it moves stage, is won or lost): new **Thank the family for
+    the enquiry** and **Tell the enquiry's owner**, then a wait until the stage's time
+    limit (new `enquiry.stage_deadline`: stage entered plus the stage's SLA hours) and new
+    **Flag the enquiry as waiting too long**, only if the stage has a limit.
+  - **Enquiry stage time limits** (on `enquiry.stage_changed`, only if the new stage has a
+    limit; same Stop when; up to 50 runs a day per enquiry): the same wait and flag.
+    Deviation: two built-ins instead of one. A sequence has one start and no loops, so the
+    follow-up can't follow an enquiry through later stages; a move stops the run for the
+    stage it left (Stop when runs before new runs start) and starts one for the new stage.
+    The limits themselves stay on the pipeline stages.
+  - **Trial lesson follow-up** (on `lesson.completed`, only if it is a trial lesson): wait
+    24 hours, new **Ask how the trial went** (staff reminder; skipped once the outcome is
+    recorded). Subject is the lesson, as `trial_lesson.completed` is the outcome being
+    recorded.
+  - **Welcome a new family** (on `enquiry.won`; off by default, as it is a new message to
+    families): a welcome email, then 14 days later a check-in task for the owner. Families
+    added without an enquiry aren't covered.
+  - **Review request** (`growth/workflows_builtin.py`; new record type `review_request` and
+    start `review.requested`): new **Send the review link**, wait 4 days, **Remind the
+    family to review** (skipped once the link has closed), wait until the link closes,
+    **Close the review request**. It can't be switched off, as requests staff make would
+    otherwise never be sent; it can be paused. No Stop when: `review.submitted` is about the
+    review, not the request; the steps skip once the family has reviewed. Deviation:
+    `growth.review_after_lessons` and `review_after_trial` stay settings. Whether to ask is
+    decided per tutor across every student in a lesson and once per family and tutor, which
+    a sequence on one record can't express; any workflow can also **Ask for a review**.
+  - **Package expiry reminder** (`billing/workflows_builtin.py`; package, 14 days before
+    `expires_at` at 09:00, only if in use with some left): new **Remind the family the
+    package is expiring**. Writing off at the expiry stays in `PackageExpiryWorkflow`.
+  - **Compliance expiry reminders** (`recruitment/workflows_builtin.py`; verified check, 60,
+    30 and 7 days before `expiry_date` at 09:00): new **Remind about the expiring check**
+    (the days left come from the date). Expiring the check and restricting the tutor stay in
+    `ComplianceRecordWorkflow`.
+- **First versions from the settings:** `leads.acknowledge` (off: no thank-you step),
+  `leads.trial_follow_up_hours`, `growth.review_reminder_days`,
+  `billing.package_expiry_reminder_days` (0: switched off) and `compliance.reminder_days`
+  (none: switched off). They are read-only now (`replaced_by`); the Reviews & referrals
+  settings form leaves the replaced one out and points to Automations.
+- **Retired:**
+  - `enquiry.received` and `review.requested` no longer start `EnquiryFollowUpWorkflow` and
+    `ReviewRequestWorkflow`; their signals still reach runs under way, and new review
+    requests have no `workflow_id`.
+  - New `PackageExpiryWorkflow` runs don't remind (`workflow.patched
+    ("package-reminder-in-workflows")`; new history `PackageExpiryWorkflow-no-reminder`).
+    Both send the reminder with the same dedupe key (package and expiry), so an old run and
+    the built-in don't both remind.
+  - New `ComplianceRecordWorkflow` runs start with no reminder days; runs under way keep
+    theirs, and share the reminder's dedupe keys with the built-in.
+  - The old runs under way finish as they are; the old workflow classes stay registered for
+    one release and are removed with T09.
+- **Around the deploy:** enquiries received before it keep their old run, which still
+  flags them; after their next move the stage time limits built-in watches them too, and an
+  enquiry is only flagged once per stage. Package and compliance reminders due around the
+  deploy come from either the old run or the built-in, once.

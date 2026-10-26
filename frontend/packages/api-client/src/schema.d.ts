@@ -18767,13 +18767,13 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * @description Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``
+     * @description Review requests (FR-25-1). ``POST`` asks a family now (the Review request workflow
      *     sends it and a reminder).
      */
     get: operations["review_requests_list"];
     put?: never;
     /**
-     * @description Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``
+     * @description Review requests (FR-25-1). ``POST`` asks a family now (the Review request workflow
      *     sends it and a reminder).
      */
     post: operations["review_requests_create"];
@@ -18791,7 +18791,7 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * @description Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``
+     * @description Review requests (FR-25-1). ``POST`` asks a family now (the Review request workflow
      *     sends it and a reminder).
      */
     get: operations["review_requests_retrieve"];
@@ -18813,7 +18813,7 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * @description Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``
+     * @description Review requests (FR-25-1). ``POST`` asks a family now (the Review request workflow
      *     sends it and a reminder).
      */
     post: operations["review_requests_cancel_create"];

@@ -22,6 +22,7 @@ register(
     type="bool",
     default=True,
     label=_("Send an automatic reply to new enquiries"),
+    replaced_by="enquiry_follow_up",
 )
 register(
     "leads.waitlist_offer_hours",
@@ -44,6 +45,7 @@ register(
     min_value=1,
     max_value=168,
     label=_("Remind the owner to record the trial outcome after (hours)"),
+    replaced_by="trial_follow_up",
 )
 
 register(
