@@ -268,6 +268,8 @@ QUESTIONS: tuple[tuple[str, str, str, Any], ...] = (
      lambda c: bool(_root(c, "enquiry").get("trial_booked"))),
     ("enquiry", "enquiry.continuing", "The family wants to continue after the trial",
      lambda c: _root(c, "enquiry").get("trial_outcome") == "continuing"),
+    ("enquiry", "enquiry.not_imported", "The enquiry wasn't imported",
+     lambda c: bool(_root(c, "enquiry")) and _root(c, "enquiry").get("source") != "import"),
     ("enquiry", "enquiry.stage_has_time_limit", "The enquiry's stage has a time limit",
      lambda c: bool(_root(c, "enquiry").get("stage_deadline"))),
     ("package", "package.active", "The package is in use",
@@ -678,6 +680,21 @@ def start_workflow(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
 def _describe(text: str) -> Any:
     return lambda ctx, config: _(text)
 
+
+# The notification an action sends, so the editor can open its wording (Settings >
+# Notifications).
+ACTION_MESSAGES = {
+    "send_invoice_reminder": "invoice_reminder", "email_invoice": "invoice_issued",
+    "send_statement": "client_statement", "remind_payment_request": "payment_request",
+    "send_lesson_reminder": "lesson_reminder", "remind_report_due": "report_due",
+    "report_overdue": "report_overdue", "escalate_report": "staff_report_escalated",
+    "send_feedback_survey": "lesson_feedback_request",
+    "thank_for_enquiry": "enquiry_acknowledgement", "tell_enquiry_owner": "enquiry_assigned",
+    "flag_enquiry_waiting": "staff_enquiry_sla", "ask_trial_outcome": "staff_enquiry_sla",
+    "send_review_link": "review_request", "remind_review": "review_request",
+    "remind_package_expiry": "package_expiring",
+    "remind_compliance_expiry": "compliance_reminder",
+}  # fmt: skip
 
 BILLING = ("invoice",)
 for _action in (

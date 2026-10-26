@@ -1,6 +1,6 @@
 # E33 — Workflow Designer
 
-- **Status:** In progress (T01 to T06 done 2026-10-26)
+- **Status:** In progress (T01 to T07 done 2026-10-26)
 - **Depends on:** E14 Automation (the engine it grows from), E32 Temporal, E10 Billing, E13
   Communications, E09 Delivery, E17 Leads, E18 Recruitment, E24 Growth
 - **ADR:** [0047](../adr/0047-workflow-designer-on-the-automation-engine.md)
@@ -221,7 +221,7 @@ Each ticket is one pull request, merged when CI is green.
   report chasing, feedback request, unconfirmed lesson chaser.
 - [x] **T06 — Built-ins: sales and onboarding, and expiry reminders.** Enquiry follow-up,
   trial follow-up, welcome a new family, review request, package expiry, compliance expiry.
-- [ ] **T07 — Sequence editor.** The Workflows area, the timeline with in-place cards,
+- [x] **T07 — Sequence editor.** The Workflows area, the timeline with in-place cards,
   splits, Stop when, + Add a step, Move up and down, problems in words, Save and switch on,
   Reset to default. Replaces the Automations pages. WCAG 2.2 AA; usability check with the
   built-ins (a first-time owner can change "when invoices go out" in under a minute).
@@ -533,3 +533,54 @@ against the API.
   flags them; after their next move the stage time limits built-in watches them too, and an
   enquiry is only flagged once per stage. Package and compliance reminders due around the
   deploy come from either the old run or the built-in, once.
+
+**T07 (2026-10-26).**
+- **Workflows area** (`frontend/apps/admin/src/workflows/`): `/workflows` with the tabs
+  **Built-in** (grouped by area, with the on/off switch, "Changed from the default" and
+  "Newer default available"), **Your workflows**, **Templates** (the recipes) and **Runs**
+  (the E14 list with Retry; T08 adds where each run is). The menu item is **Workflows**;
+  `/automations` and `/automations/{id}` redirect, and links in the app point to
+  `/workflows`. The old Automations pages and their tests were removed.
+- **The editor** is one timeline: the **Start** card (what starts it, **Only if**
+  questions, up to three **Stop when** events) and a card per step reading as a sentence
+  ("3 days before “Due”, at 09:00 · Send a payment reminder"). **Edit** opens a card in
+  place for When (straight away, after minutes, hours or days, or before or after a date
+  on the record; at a time of day, next business day, after quiet hours), Only if (one
+  plain question) and Do (one or more actions). **Add a step** sits between cards; **Move
+  up**, **Move down** and **Delete** are on each card. A **Yes / No split** shows its
+  paths side by side from 768px and one under the other on phones; no split inside a
+  split, up to five. **Problems in words** on each card; **Save** waits until there are
+  none. **Save** says how many runs are under way and that they finish on the old steps;
+  **Save and switch on** for a workflow that is off; **Reset to default** for edited
+  built-ins; **Pause** and **Resume**. **Test with a record** (the E14 dry run) stays
+  until Preview (T08).
+- **Cards and steps:** the engine keeps a flat list of steps. The editor groups them
+  into cards (`workflows/sequence.ts`): a wait starts a card, the actions after it with the
+  same `only_if` join it, and a wait just before a branch belongs to the split. Writing
+  back gives the same steps for anything not edited, so saving an untouched built-in
+  doesn't mark it changed (checked against all 15 built-ins).
+- **Starts:** a built-in keeps its kind of start and record type (the API refuses changing
+  the record type); the editor offers that record's events, the schedule, or the times
+  before or after the date. Lesson reminders count in minutes and are shown in hours.
+- **Messages:** an action that sends one of TutorTrack's notifications has **Edit
+  wording**, which opens it in Settings › Notifications (`?edit=<type>` opens its template
+  editor). Deviation: actions don't pick a message template; the wording is the
+  notification's own, and **Send a message** keeps its own text.
+- **Older conditions:** a condition on fields (E14 automations and some templates) is
+  shown in words and can be replaced with a plain question. A workflow with a split inside
+  a split opens read-only with "contact support" (the E14 nesting stays valid in the
+  engine; T09 migrates what it can). The enquiry follow-up's "not imported" check became
+  a plain question (`enquiry.not_imported`; its default is now version 2).
+- **API:** `/api/v1/workflows` and `/api/v1/workflow-runs` are aliases of `/automations`
+  and `/automation-runs`. `/workflow-schema` record types gain `start_dates` (the record's
+  own dates a date start counts from) and actions gain `message` (the notification they
+  send).
+- **Accessibility and the usability check:** cards are labelled regions ("Step 2", "Yes:
+  step 1"), Edit buttons carry `aria-expanded`, Move and Delete name their step, and
+  problems are text, not just colour. The usability check ("change when invoices go out
+  in under a minute") is a scripted journey: three actions (Edit the start, choose the
+  day, Save), in the component tests and in `e2e/workflows.spec.ts`, which also runs the
+  axe WCAG 2.2 AA scan with a card open; `/workflows` joined the accessibility screens.
+  Deviation: it hasn't been tried with a real first-time owner, and the Playwright specs
+  couldn't run locally (the browser's system libraries are missing in WSL); they run with
+  the e2e suite.

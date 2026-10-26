@@ -247,8 +247,24 @@ def _actions(user: Any) -> list[dict[str, Any]]:
             "subjects": list(a.subjects),
             "permission": a.permission,
             "allowed": not a.permission or has_perm(user, a.permission),
+            "message": catalogue.ACTION_MESSAGES.get(a.key, ""),
         }
         for a in registry.actions()
+    ]  # fmt: skip
+
+
+def _start_dates(sub: registry.Subject) -> list[dict[str, str]]:
+    """The record's own dates a date start can count from (model fields)."""
+    labels = {f.path: f.label for f in sub.fields}
+    model = sub.model_class()
+    return [
+        {
+            "field": name,
+            "label": labels.get(f"{sub.key}.{name}", name.replace("_", " ").capitalize()),
+            "type": "datetime" if model._meta.get_field(name).get_internal_type()
+            == "DateTimeField" else "date",
+        }
+        for name in sub.date_fields
     ]  # fmt: skip
 
 
@@ -272,6 +288,7 @@ class WorkflowSchemaView(APIView):
                         for f in sub.fields if f.type in ("date", "datetime")
                     ],
                     "stop_when": [t.event for t in triggers if t.subject == sub.key],
+                    "start_dates": _start_dates(sub),
                 }
                 for sub in registry.subjects()
             ],

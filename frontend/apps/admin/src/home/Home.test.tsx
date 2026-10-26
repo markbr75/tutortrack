@@ -266,7 +266,7 @@ describe("home", () => {
   it("says when a built-in workflow is switched off and what happens instead", async () => {
     mockApi({
       ...routes({ ...PERMISSIONS, "automation.view": "all" }),
-      "GET /api/v1/automations/notices": {
+      "GET /api/v1/workflows/notices": {
         body: [
           { id: "w1", name: "Invoicing cycle", notice: "off",
             message: "Invoices are made by hand." },
@@ -281,7 +281,7 @@ describe("home", () => {
     expect(within(alert).getByText(/Payment chasing has a newer default/)).toBeInTheDocument();
     expect(within(alert).getByRole("link", { name: "Open Invoicing cycle" })).toHaveAttribute(
       "href",
-      "/automations/w1",
+      "/workflows/w1",
     );
   });
 

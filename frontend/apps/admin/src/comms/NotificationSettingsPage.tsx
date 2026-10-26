@@ -97,7 +97,7 @@ function SettingRow({ setting, onEdit }: { setting: Setting; onEdit: () => void 
           {setting.timing_in_workflow ? (
             <p className="text-sm text-muted-foreground lg:pt-1">
               {t("comms.timingInWorkflow")}{" "}
-              <Link to="/automations" className="font-medium text-foreground underline">
+              <Link to="/workflows" className="font-medium text-foreground underline">
                 {t("comms.openWorkflows")}
               </Link>
             </p>
@@ -422,9 +422,9 @@ function TemplateEditor({ setting, onClose }: { setting: Setting; onClose: () =>
 const CATEGORIES = ["scheduling", "reports", "billing", "account", "messages", "staff"] as const;
 
 /** Which notifications go out, how and when, and their templates (FR-13-2/3). */
-export function NotificationSettingsPage() {
+export function NotificationSettingsPage({ edit }: { edit?: string } = {}) {
   const { t } = useTranslation();
-  const [editing, setEditing] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(edit ?? null);
   const settings = useQuery({
     queryKey: ["notification-settings"],
     queryFn: async () => unwrap(await api.GET("/api/v1/notification-settings")),

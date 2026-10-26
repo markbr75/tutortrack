@@ -27,6 +27,7 @@ const SCREENS: { name: string; role: Role; path: string; ready: string | RegExp 
   { name: "catalogue", role: "admin", path: "/catalogue", ready: "Catalogue and pricing" },
   { name: "enquiries board", role: "coordinator", path: "/leads", ready: /Enquiries|Pipeline/ },
   { name: "inbox", role: "coordinator", path: "/inbox", ready: "Inbox" },
+  { name: "workflows", role: "owner", path: "/workflows", ready: "Workflows" },
   { name: "parent portal home", role: "parent", path: PORTAL, ready: /./ },
   { name: "tutor portal today", role: "tutor", path: `${PORTAL}tutor`, ready: /./ },
 ];

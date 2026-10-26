@@ -4,6 +4,7 @@ import {
   createRoute,
   createRouter,
   Outlet,
+  redirect,
   type RouterHistory,
 } from "@tanstack/react-router";
 
@@ -41,7 +42,10 @@ import { DeliverySettingsPage } from "./delivery/DeliverySettingsPage";
 import { ReportPage } from "./delivery/ReportPage";
 import { ReportsPage } from "./delivery/ReportsPage";
 import { UnconfirmedPage } from "./delivery/UnconfirmedPage";
-import { AutomationBuilderPage, AutomationsPage } from "./automations/AutomationPages";
+import {
+  WorkflowEditorPage,
+  WorkflowsPage as TenantWorkflowsPage,
+} from "./workflows/WorkflowPages";
 import { JobPage } from "./jobs/JobPage";
 import { JobMatchPage, MatchingPage } from "./matching/MatchingPages";
 import { JobsPage } from "./jobs/JobsPage";
@@ -486,7 +490,16 @@ const invoiceTemplateRoute = createRoute({
   },
 });
 const paymentsSettingsRoute = appPage("/settings/payments", PaymentsSettingsPage);
-const notificationSettingsRoute = appPage("/settings/notifications", NotificationSettingsPage);
+const notificationSettingsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/settings/notifications",
+  // ``edit``: the notification to open, e.g. from a workflow step's "Edit wording" (E33).
+  validateSearch: (search: Record<string, unknown>): { edit?: string } =>
+    typeof search.edit === "string" ? { edit: search.edit } : {},
+  component: function NotificationSettingsRoute() {
+    return <NotificationSettingsPage edit={notificationSettingsRoute.useSearch().edit} />;
+  },
+});
 const planRoute = appPage("/settings/plan", PlanPage);
 const integrationsRoute = appPage("/settings/integrations", IntegrationsPage);
 const developerRoute = appPage("/developer", DeveloperPage);
@@ -526,12 +539,27 @@ const complianceRoute = appPage("/compliance", ComplianceDashboardPage);
 // G5a: the job-opening editor.
 const openingsRoute = appPage("/recruitment/openings", OpeningsPage);
 const matchingRoute = appPage("/matching", MatchingPage);
-const automationsRoute = appPage("/automations", AutomationsPage);
+// E33: Automations became Workflows; the old addresses still work.
+const workflowsRoute = appPage("/workflows", TenantWorkflowsPage);
+const workflowRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/workflows/$id",
+  component: function WorkflowRoute() {
+    return <WorkflowEditorPage id={workflowRoute.useParams().id} />;
+  },
+});
+const automationsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/automations",
+  beforeLoad: () => {
+    throw redirect({ to: "/workflows", replace: true });
+  },
+});
 const automationRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/automations/$id",
-  component: function AutomationRoute() {
-    return <AutomationBuilderPage id={automationRoute.useParams().id} />;
+  beforeLoad: ({ params }) => {
+    throw redirect({ to: "/workflows/$id", params: { id: params.id }, replace: true });
   },
 });
 const jobMatchRoute = createRoute({
@@ -640,6 +668,8 @@ const routeTree = rootRoute.addChildren([
     jobRoute,
     jobMatchRoute,
     matchingRoute,
+    workflowsRoute,
+    workflowRoute,
     automationsRoute,
     automationRoute,
     calendarRoute,

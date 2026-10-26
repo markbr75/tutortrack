@@ -16,7 +16,7 @@ from django.utils.translation import gettext_noop as N_
 from tutortrack.automations.builtin_workflows import builtin_workflow
 
 ENQUIRY_STOPS = ["enquiry.stage_changed", "enquiry.won", "enquiry.lost"]
-NOT_IMPORTED = {"field": "event.data.source", "op": "not_equals", "value": "import"}
+NOT_IMPORTED = {"predicate": "enquiry.not_imported"}
 HAS_TIME_LIMIT = {"predicate": "enquiry.stage_has_time_limit"}
 
 
@@ -55,7 +55,7 @@ def follow_up_from_settings() -> dict[str, Any]:
 
 
 @builtin_workflow(
-    "enquiry_follow_up", "sales",
+    "enquiry_follow_up", "sales", version=2,  # 2: "not imported" as a plain question (T07)
     name=N_("Enquiry follow-up"),
     description=N_("When an enquiry arrives, thank the family and tell whoever looks after "
                    "it; if it is still in its first stage when the stage's time limit is "

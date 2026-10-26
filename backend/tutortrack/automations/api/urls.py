@@ -6,6 +6,9 @@ from . import views as v
 router = SimpleRouter(trailing_slash=False)
 router.register("automations", v.AutomationViewSet, basename="automations")
 router.register("automation-runs", v.AutomationRunViewSet, basename="automation-runs")
+# E33: the product calls them workflows; /automations stays for one release.
+router.register("workflows", v.AutomationViewSet, basename="workflows")
+router.register("workflow-runs", v.AutomationRunViewSet, basename="workflow-runs")
 
 urlpatterns = [
     path("automation-schema", v.AutomationSchemaView.as_view(), name="automation-schema"),
