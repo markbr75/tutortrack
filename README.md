@@ -11,8 +11,8 @@ need real provider credentials or infrastructure are listed at the end of
 progress: the sequence engine, its catalogue, the built-in workflow framework and all the
 first-release built-ins (invoicing, payment chasing, statements, lesson reminders, report
 chasing, feedback requests, unconfirmed lessons, enquiry follow-up, trial follow-up,
-welcome, review requests, package and compliance expiry) are done; the editor, preview and
-migration are next. Build order and progress:
+welcome, review requests, package and compliance expiry) and the Workflows sequence
+editor are done; preview, runs and migration are next. Build order and progress:
 [docs/04-roadmap.md](docs/04-roadmap.md).
 
 ## Guides

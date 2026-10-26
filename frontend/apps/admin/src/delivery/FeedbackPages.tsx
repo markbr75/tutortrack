@@ -120,7 +120,7 @@ function FeedbackSettings() {
           )}
           <p className="text-sm">
             {t("lessonFeedback.inWorkflow")}{" "}
-            <Link to="/automations" className="font-medium underline underline-offset-2">
+            <Link to="/workflows" className="font-medium underline underline-offset-2">
               {t("lessonFeedback.openWorkflows")}
             </Link>
           </p>

@@ -13,7 +13,7 @@ export function WorkflowNotices() {
   const canView = usePermission("automation.view");
   const query = useQuery({
     queryKey: ["workflow-notices"],
-    queryFn: async () => unwrap(await api.GET("/api/v1/automations/notices")),
+    queryFn: async () => unwrap(await api.GET("/api/v1/workflows/notices")),
     enabled: canView,
   });
   const notices = query.data ?? [];
@@ -28,7 +28,7 @@ export function WorkflowNotices() {
               : t("home.workflowUpdate", { name: n.name })}{" "}
             {n.message}{" "}
             <Link
-              to="/automations/$id"
+              to="/workflows/$id"
               params={{ id: n.id }}
               className="font-medium underline underline-offset-2"
               aria-label={t("home.openWorkflow", { name: n.name })}

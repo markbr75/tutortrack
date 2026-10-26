@@ -62,7 +62,7 @@ export function BillingOptions() {
       <RuledPanel titleId="g3-billing-statements" title={t("g3.billingOptions.statements")}>
         <p className="px-5 py-4 text-sm">
           {t("g3.billingOptions.statementsMoved")}{" "}
-          <Link to="/automations" className="font-medium underline underline-offset-2">
+          <Link to="/workflows" className="font-medium underline underline-offset-2">
             {t("g3.billingOptions.openWorkflows")}
           </Link>
         </p>

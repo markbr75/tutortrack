@@ -22396,6 +22396,57 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/workflow-runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Automation runs and their step log (``?status=``). */
+    get: operations["workflow_runs_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflow-runs/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Automation runs and their step log (``?status=``). */
+    get: operations["workflow_runs_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflow-runs/{id}/retry": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Re-run a failed run from its failed step. */
+    post: operations["workflow_runs_retry_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/workflow-schema": {
     parameters: {
       query?: never;
@@ -22408,6 +22459,217 @@ export interface paths {
      *     stop-when events, starts, plain questions and actions.
      */
     get: operations["workflow_schema_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Automations: When → If → Then. */
+    get: operations["workflows_list"];
+    put?: never;
+    /** @description Automations: When → If → Then. */
+    post: operations["workflows_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Automations: When → If → Then. */
+    get: operations["workflows_retrieve"];
+    /** @description Automations: When → If → Then. */
+    put: operations["workflows_update"];
+    post?: never;
+    /** @description Automations: When → If → Then. */
+    delete: operations["workflows_destroy"];
+    options?: never;
+    head?: never;
+    /** @description Automations: When → If → Then. */
+    patch: operations["workflows_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}/default": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description A built-in's current default, to compare with the organisation's version. */
+    get: operations["workflows_default_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}/disable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Automations: When → If → Then. */
+    post: operations["workflows_disable_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}/enable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Automations: When → If → Then. */
+    post: operations["workflows_enable_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}/pause": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Pause: no new runs start, and runs under way hold before their next action. */
+    post: operations["workflows_pause_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}/reset-to-default": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Put a built-in workflow back to TutorTrack's current default (a new version; runs
+     *     under way finish on theirs).
+     */
+    post: operations["workflows_reset_to_default_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}/resume": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Resume a paused workflow: held runs carry on. */
+    post: operations["workflows_resume_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}/run": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Run now for the chosen records (manual trigger or bulk action). */
+    post: operations["workflows_run_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}/runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Automations: When → If → Then. */
+    get: operations["workflows_runs_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}/test": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Dry run against a record: whether it matches and what each step would do. */
+    post: operations["workflows_test_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/notices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Built-in workflows Home mentions: switched off, or with a newer default. */
+    get: operations["workflows_notices_list"];
     put?: never;
     post?: never;
     delete?: never;
@@ -41537,6 +41799,8 @@ export interface components {
       subjects: string[];
       permission: string;
       allowed: boolean;
+      /** @description The notification it sends, whose wording is in Settings > Notifications. */
+      message?: string;
     };
     SchemaActionField: {
       name: string;
@@ -45248,6 +45512,8 @@ export interface components {
       date_fields: components["schemas"]["WorkflowDateField"][];
       /** @description Events that can end a run for this record type. */
       stop_when: string[];
+      /** @description The record's dates a date start counts from. */
+      start_dates: components["schemas"]["WorkflowStartDate"][];
     };
     WorkflowScheduleStart: {
       key: string;
@@ -45263,6 +45529,11 @@ export interface components {
       starts: components["schemas"]["WorkflowStarts"];
       questions: components["schemas"]["WorkflowQuestion"][];
       actions: components["schemas"]["SchemaAction"][];
+    };
+    WorkflowStartDate: {
+      field: string;
+      label: string;
+      type: string;
     };
     WorkflowStarts: {
       events: components["schemas"]["SchemaTrigger"][];
@@ -85418,6 +85689,80 @@ export interface operations {
       };
     };
   };
+  workflow_runs_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        status?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedAutomationRunList"];
+        };
+      };
+    };
+  };
+  workflow_runs_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AutomationRunDetail"];
+        };
+      };
+    };
+  };
+  workflow_runs_retry_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AutomationRunDetail"];
+        };
+      };
+    };
+  };
   workflow_schema_retrieve: {
     parameters: {
       query?: never;
@@ -85433,6 +85778,413 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["WorkflowSchema"];
+        };
+      };
+    };
+  };
+  workflows_list: {
+    parameters: {
+      query?: {
+        /** @description Built-in or not */
+        kind?: "builtin" | "custom";
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"][];
+        };
+      };
+    };
+  };
+  workflows_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AutomationWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AutomationWriteRequest"];
+        "multipart/form-data": components["schemas"]["AutomationWriteRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  workflows_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  workflows_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AutomationWriteRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["AutomationWriteRequest"];
+        "multipart/form-data": components["schemas"]["AutomationWriteRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  workflows_destroy: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description No response body */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  workflows_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedAutomationPatchRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedAutomationPatchRequest"];
+        "multipart/form-data": components["schemas"]["PatchedAutomationPatchRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  workflows_default_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BuiltinDefault"];
+        };
+      };
+    };
+  };
+  workflows_disable_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  workflows_enable_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  workflows_pause_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  workflows_reset_to_default_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  workflows_resume_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Automation"];
+        };
+      };
+    };
+  };
+  workflows_run_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ManualRunRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["ManualRunRequest"];
+        "multipart/form-data": components["schemas"]["ManualRunRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Started"];
+        };
+      };
+    };
+  };
+  workflows_runs_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AutomationRun"][];
+        };
+      };
+    };
+  };
+  workflows_test_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DryRunRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["DryRunRequestRequest"];
+        "multipart/form-data": components["schemas"]["DryRunRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DryRun"];
+        };
+      };
+    };
+  };
+  workflows_notices_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BuiltinNotice"][];
         };
       };
     };

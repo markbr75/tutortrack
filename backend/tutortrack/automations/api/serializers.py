@@ -247,6 +247,10 @@ class SchemaActionSerializer(serializers.Serializer):
     subjects = serializers.ListField(child=serializers.CharField())
     permission = serializers.CharField(allow_blank=True)
     allowed = serializers.BooleanField()
+    message = serializers.CharField(
+        required=False, allow_blank=True,
+        help_text="The notification it sends, whose wording is in Settings > Notifications.",
+    )  # fmt: skip
 
 
 class AutomationSchemaSerializer(serializers.Serializer):
@@ -272,6 +276,12 @@ class WorkflowDateFieldSerializer(serializers.Serializer):
     type = serializers.CharField()
 
 
+class WorkflowStartDateSerializer(serializers.Serializer):
+    field = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+    type = serializers.CharField()
+
+
 class WorkflowRecordTypeSerializer(serializers.Serializer):
     key = serializers.CharField()
     label = serializers.CharField()  # type: ignore[assignment]
@@ -280,6 +290,9 @@ class WorkflowRecordTypeSerializer(serializers.Serializer):
     date_fields = WorkflowDateFieldSerializer(many=True)
     stop_when = serializers.ListField(
         child=serializers.CharField(), help_text="Events that can end a run for this record type."
+    )
+    start_dates = WorkflowStartDateSerializer(
+        many=True, help_text="The record's dates a date start counts from."
     )
 
 

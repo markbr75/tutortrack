@@ -74,6 +74,7 @@ CASES = {
                              {"enquiry": {"trial_booked": False}}),
     "enquiry.continuing": ({"enquiry": {"trial_outcome": "continuing"}},
                            {"enquiry": {"trial_outcome": "undecided"}}),
+    "enquiry.not_imported": ({"enquiry": {"source": "form"}}, {"enquiry": {"source": "import"}}),
     "enquiry.stage_has_time_limit": ({"enquiry": {"stage_deadline": "2026-11-01T09:00:00+00:00"}},
                                      {"enquiry": {"stage_deadline": None}}),
     "package.active": ({"package": {"status": "active"}}, {"package": {"status": "expired"}}),

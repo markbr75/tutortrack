@@ -140,9 +140,9 @@
             </ol>
           </li>
           <li><a href="#ai-h">AI assistant</a></li>
-          <li><a href="#automations-h">Automations</a>
+          <li><a href="#automations-h">Workflows</a>
             <ol>
-              <li><a href="#automations-build">Build an automation</a></li>
+              <li><a href="#automations-build">Change or make a workflow</a></li>
               <li><a href="#automations-builtin">Built-in workflows</a></li>
               <li><a href="#automations-catalogue">Triggers, actions and recipes</a></li>
               <li><a href="#automations-safety">Safety limits</a></li>
@@ -1180,46 +1180,73 @@
         </ul>
       </section>
 
-      <section id="automations" data-route="admin:/automations" aria-labelledby="automations-h">
-        <h2 id="automations-h">Automations</h2>
-        <p><span class="path">Automations</span> runs steps for you when something happens: send
-          a message, create a task, tag a record, add a charge, and more. Viewing needs
-          <code>automation.view</code>; building, switching on and testing need
-          <code>automation.manage</code> (owner, admin, branch manager). Automations run on the
-          durable workflow engine, so waits of days or weeks survive restarts.</p>
-        <p><span class="badge">Plan</span> Your own automations are a Team, Agency and Enterprise
-          feature (10, 50 and unlimited rules); adding one more than the plan allows asks you to
+      <section id="automations" data-route="admin:/workflows" aria-labelledby="automations-h">
+        <h2 id="automations-h">Workflows</h2>
+        <p><span class="path">Workflows</span> (it used to be called Automations; old links
+          still work) decides when things happen: when invoices go out, when reminders and
+          follow-ups are sent, and anything else you set up. The tabs are
+          <span class="ui">Built-in</span> (grouped by area), <span class="ui">Your workflows</span>,
+          <span class="ui">Templates</span> and <span class="ui">Runs</span>. Viewing needs
+          <code>automation.view</code>; making and changing your own needs
+          <code>automation.manage</code> (owner, admin, branch manager); changing built-ins needs
+          <code>automation.builtin.manage</code>. Workflows run on the durable workflow engine, so
+          waits of days or weeks survive restarts.</p>
+        <p><span class="badge">Plan</span> Your own workflows are a Team, Agency and Enterprise
+          feature (10, 50 and unlimited); adding one more than the plan allows asks you to
           upgrade. <a href="#automations-builtin">Built-in workflows</a> are on every plan,
           Solo included, and don't count towards the limit.</p>
 
-        <h3 id="automations-build">Build an automation</h3>
+        <h3 id="automations-build">Change or make a workflow</h3>
+        <p>A workflow is a sequence on one timeline, read top to bottom. The
+          <span class="ui">Start</span> card says what starts it, with any
+          <span class="ui">Only if</span> questions and the events it <span class="ui">Stops
+          when</span>. Each step card below reads as a sentence: <em>When</em> ("3 days before
+          “Due”, at 09:00"), <em>Only if</em> ("The invoice is still unpaid") and <em>Do</em>
+          ("Send a payment reminder").</p>
         <ol class="steps">
-          <li>Start from the <span class="ui">Recipes</span> tab and select <span class="ui">Install</span>, or select <span class="ui">New automation</span>.</li>
-          <li><strong>When:</strong> choose the <span class="ui">Trigger</span>: <span class="ui">When something happens</span> (an event), <span class="ui">On a schedule</span>, <span class="ui">Relative to a date</span> (for example 7 days before a check expires, or every year on a birthday) or <span class="ui">Run by hand</span>.</li>
-          <li><strong>If:</strong> add conditions on the record's fields and choose whether all or any must match.</li>
-          <li><strong>Then:</strong> add actions, waits (hours, days, or until a date) and if/else branches. Use <span class="ui">Insert a variable</span> in messages.</li>
-          <li>Select <span class="ui">Create</span>. New automations are off.</li>
-          <li>Use <span class="ui">Test with a record</span> with a record ID to see whether it matches and what it would do. Nothing is sent.</li>
-          <li>Switch it <span class="ui">On</span> in the list. Watch the <span class="ui">Runs</span> tab; a failed run can be retried from the failed step.</li>
+          <li>Open a built-in, or select <span class="ui">New workflow</span> (or a template's
+            <span class="ui">Use template</span>).</li>
+          <li><strong>Start:</strong> select <span class="ui">Edit</span> on the Start card and
+            choose <span class="ui">When something happens</span> (an event),
+            <span class="ui">On a schedule</span> (every day, week or month at a time),
+            <span class="ui">Before or after a date</span> (up to six times, for example 60, 30
+            and 7 days before a check expires) or <span class="ui">By hand</span>. Add
+            <span class="ui">Only if</span> questions and up to three reasons to
+            <span class="ui">Stop when</span> (for example "Invoice paid"). A built-in keeps its
+            kind of start and record.</li>
+          <li><strong>Steps:</strong> <span class="ui">Add a step</span> sits between the
+            cards. Select <span class="ui">Edit</span> on a card to choose
+            <span class="ui">When</span> (straight away, after a number of minutes, hours or
+            days, or before or after a date on the record; optionally at a time of day, on the
+            next business day or after quiet hours), <span class="ui">Only if</span> (one plain
+            question) and <span class="ui">Do</span> (one or more actions, done in order).
+            <span class="ui">Move up</span>, <span class="ui">Move down</span> and
+            <span class="ui">Delete</span> are on each card. Every choice is a list or a
+            number.</li>
+          <li><strong>Yes / No split:</strong> <span class="ui">Add a Yes / No split</span>
+            asks one question; each answer has its own steps (no split inside a split), and
+            both paths carry on with the steps below. Up to five splits.</li>
+          <li><strong>Messages:</strong> a step that sends one of TutorTrack's messages has
+            <span class="ui">Edit wording</span>, which opens that message in
+            <span class="path">Settings › Notifications</span>. <span class="ui">Send a
+            message</span> takes your own wording, with <span class="ui">Insert a
+            variable</span>.</li>
+          <li>A card that can't run says why in red ("Choose what to do", "Choose which message
+            to send"); <span class="ui">Save</span> waits until every card is complete.</li>
+          <li><span class="ui">Save</span> applies to new runs; runs already under way finish on
+            the steps they started with, and the page says how many there are.
+            <span class="ui">Save and switch on</span> does both for a workflow that is off.</li>
+          <li><span class="ui">Test with a record</span> takes a record ID and shows whether it
+            matches and what each step would do. Nothing is sent.</li>
+          <li><span class="ui">Pause</span> holds runs under way before their next step and
+            starts no new ones until you <span class="ui">Resume</span>. Switching a workflow
+            off (the switch in the list) stops new runs only.</li>
         </ol>
-        <p>Through the API, automations can also (the editor for these comes with the Workflows
-          area): wait until a number of days before or after a date on the record, at a time of
-          day, on the next business day (your business hours and holidays) or outside quiet
-          hours; skip a step with an <code>only_if</code> condition, shown as
-          <span class="ui">Skipped</span> in the run; and stop early with
-          <code>stop_when</code>, up to three events about the same record (for example
-          <code>invoice.paid</code>), shown as <span class="ui">Stopped</span> with the event
-          that stopped it.</p>
-        <p>Instead of conditions on fields, a step or a branch can ask a plain question about
-          the record, such as "The invoice is still unpaid", "The family pays automatically",
-          "This is the student's first lesson" or "The report still isn't written". When a step
-          can't apply any more (for example a late fee on an invoice that is now paid, or
-          emailing a lesson reminder for a cancelled lesson), it is shown as
+        <p>Older automations with conditions on fields show them in words; you can replace them
+          with a plain question. One with a split inside a split opens read-only and keeps
+          running; contact support to change it. When a step can't apply any more (for example
+          a late fee on an invoice that is now paid), the run shows it as
           <span class="ui">Skipped</span> with the reason; nothing is charged or sent.</p>
-        <p><strong>Pause</strong> (through the API for now) stops new runs, and runs already
-          under way wait before their next action, shown as <span class="ui">Paused</span>.
-          Resume and they carry on from that action. Switching an automation off stops new
-          runs only.</p>
 
         <h3 id="automations-builtin">Built-in workflows</h3>
         <p>TutorTrack installs a set of <strong>built-in workflows</strong> for every

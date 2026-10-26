@@ -339,7 +339,7 @@ const NAV: NavItem[] = [
     permission: "ai.settings.manage",
     group: "messages",
   },
-  { to: "/automations", key: "nav.automations", permission: "automation.view", group: "messages" },
+  { to: "/workflows", key: "nav.automations", permission: "automation.view", group: "messages" },
   { to: "/data", key: "nav.data", permission: "migration.import.view", group: "data" },
   { to: "/website", key: "nav.website", permission: "sites.view", group: "data" },
   { to: "/developer", key: "nav.developer", permission: "developer.webhook.view", group: "data" },
