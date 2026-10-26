@@ -10,8 +10,6 @@ from tutortrack.core.workflows import bridge
 from .processes import (
     ReferralInput,
     ReferralRewardWorkflow,
-    ReviewRequestInput,
-    ReviewRequestWorkflow,
     referral_workflow_id,
     review_workflow_id,
 )
@@ -150,15 +148,8 @@ def follow_statement_schedule(event: EventEnvelope) -> None:
 # --- Temporal bridge (E25-TW1) ------------------------------------------------------------------
 
 
-bridge.on(
-    "review.requested",
-    start=ReviewRequestWorkflow,
-    id=lambda e: review_workflow_id(e.organisation_id, e.subject["id"]),
-    input=lambda e: ReviewRequestInput(
-        organisation_id=str(e.organisation_id), request_id=e.subject["id"]
-    ),
-    subject=lambda e: ("review_request", e.subject["id"]),
-)
+# Review requests are sent, reminded and closed by the Review request built-in workflow
+# (E33 T06); runs of ReviewRequestWorkflow started before still hear about reviews.
 bridge.on(
     "review.submitted",
     signal="submitted",

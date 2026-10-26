@@ -83,14 +83,28 @@ def _subject_for(trigger_type: str, config: dict[str, Any]) -> tuple[str, str]:
         if "minutes" in config:
             _check_near(config, subject)
             return subject.key, ""
-        try:
-            int(config.get("offset_days") or 0)
-        except (TypeError, ValueError) as exc:
-            raise _invalid("trigger_config", _("Days before or after is a number.")) from exc
+        _offsets(config)
         _cron({**config, "frequency": "daily"})
     elif trigger_type != Automation.Trigger.MANUAL:
         raise _invalid("trigger_type", _("Unknown trigger."))
     return subject.key, ""
+
+
+MAX_OFFSETS = 6
+
+
+def _offsets(config: dict[str, Any]) -> list[int]:
+    """A date start's days before (negative) or after the date: one number, or a list of up
+    to six for a reminder on each (E33 T06: 60, 30 and 7 days before a check expires)."""
+    raw = config.get("offset_days")
+    values = raw if isinstance(raw, list) else [raw or 0]
+    try:
+        days = [int(d) for d in values]
+    except (TypeError, ValueError) as exc:
+        raise _invalid("trigger_config", _("Days before or after is a number.")) from exc
+    if not 0 < len(days) <= MAX_OFFSETS or any(abs(d) > 366 for d in days):
+        raise _invalid("trigger_config", _("Give up to six days, up to a year before or after."))
+    return days
 
 
 # "Near a date" starts (E33 T05): a run per record when its date plus each of ``minutes``
@@ -1077,13 +1091,14 @@ def due_records(automation: Automation, on: date) -> list[str]:
         qs = qs.filter(archived_at__isnull=True)
     if automation.trigger_type == Automation.Trigger.DATE:
         name = str(config["field"])
-        target = on - timedelta(days=int(config.get("offset_days") or 0))
+        targets = [on - timedelta(days=days) for days in _offsets(config)]
         is_datetime = model._meta.get_field(name).get_internal_type() == "DateTimeField"
         lookup = f"{name}__date" if is_datetime else name
         if config.get("anniversary"):
+            target = targets[0]
             qs = qs.filter(**{f"{lookup}__month": target.month, f"{lookup}__day": target.day})
         else:
-            qs = qs.filter(**{lookup: target})
+            qs = qs.filter(**{f"{lookup}__in": targets})
     return [str(pk) for pk in qs.values_list("pk", flat=True)[:FAN_OUT_LIMIT]]
 
 

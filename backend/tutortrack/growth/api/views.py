@@ -207,7 +207,7 @@ class ReviewRequestViewSet(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``
+    """Review requests (FR-25-1). ``POST`` asks a family now (the Review request workflow
     sends it and a reminder)."""
 
     model = ReviewRequest

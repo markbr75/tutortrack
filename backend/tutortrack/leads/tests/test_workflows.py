@@ -1,25 +1,21 @@
-"""E17-TW1: enquiry follow-up (acknowledgement, SLA) and waitlist offers on Temporal."""
+"""E17-TW1: waitlist offers on Temporal, and the enquiry follow-up's recorded history."""
 
 from __future__ import annotations
 
 import json
 import os
-import time
-from datetime import timedelta
 from pathlib import Path
 
 import pytest
 from django.db import transaction
 
-from tutortrack.comms.models import Message
 from tutortrack.core.context import tenant_context
 from tutortrack.core.events.dispatcher import dispatch_batch
 from tutortrack.leads import services
-from tutortrack.leads.models import Enquiry, WaitlistEntry
+from tutortrack.leads.models import WaitlistEntry
 from tutortrack.leads.processes import (
     EnquiryFollowUpWorkflow,
     WaitlistOfferWorkflow,
-    enquiry_workflow_id,
     offer_workflow_id,
 )
 from tutortrack.people.tests.factories import ClientFactory, StudentFactory
@@ -29,34 +25,9 @@ pytestmark = pytest.mark.django_db(transaction=True)
 HISTORIES = Path(__file__).resolve().parents[3] / "tests" / "workflow_histories"
 
 
-def new_enquiry(org, temporal_env) -> Enquiry:
-    server_now = temporal_env.run(temporal_env.env.get_current_time())
-    with tenant_context(org), transaction.atomic():
-        enquiry = services.create_enquiry(
-            contact={"first_name": "Priya", "email": "priya@example.com"},
-            students=[{"first_name": "Arjun"}],
-        )
-        # The "New" stage has a 24h SLA: it has already run out on the test server's clock.
-        Enquiry.objects.filter(pk=enquiry.pk).update(
-            stage_entered_at=server_now - timedelta(hours=25)
-        )
-    return enquiry
-
-
-def test_enquiry_is_acknowledged_breaches_its_sla_and_ends_when_lost(org, temporal_env):
-    enquiry = new_enquiry(org, temporal_env)
-    dispatch_batch()  # enquiry.received → EnquiryFollowUpWorkflow
-    for _ in range(100):  # the breach happens straight away (the deadline has passed)
-        with tenant_context(org):
-            enquiry.refresh_from_db()
-        if enquiry.sla_breached_at:
-            break
-        time.sleep(0.1)
-    assert enquiry.sla_breached_at is not None
-    with tenant_context(org):
-        assert Message.objects.filter(type_key="enquiry_acknowledgement").exists()
-        services.lose(enquiry, reason="no_response")  # signal "closed"
-    assert temporal_env.result(enquiry_workflow_id(org.pk, enquiry.pk)) == "breaches:1"
+# EnquiryFollowUpWorkflow: the Enquiry follow-up built-in workflows acknowledge enquiries and
+# flag them when a stage's time limit is up now (E33 T06): see test_workflows_builtin_runs.py.
+# Its recorded history still replays below.
 
 
 def test_unanswered_offer_expires(org, temporal_env):
@@ -101,11 +72,7 @@ def test_histories_replay(prefix):
 def test_record_histories_if_requested(org, temporal_env):
     if not os.environ.get("RECORD_WORKFLOW_HISTORIES"):
         pytest.skip("set RECORD_WORKFLOW_HISTORIES=1 to (re)record")
-    test_enquiry_is_acknowledged_breaches_its_sla_and_ends_when_lost(org, temporal_env)
-    with tenant_context(org):
-        enquiry = Enquiry.objects.get()
-    wid = enquiry_workflow_id(org.pk, enquiry.pk)
-    (HISTORIES / "EnquiryFollowUpWorkflow-breached.json").write_text(temporal_env.history_json(wid))
+    # EnquiryFollowUpWorkflow-breached.json stays as recorded: nothing starts it any more.
     test_unanswered_offer_expires(org, temporal_env)
     with tenant_context(org):
         entry = WaitlistEntry.objects.get()

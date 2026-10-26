@@ -201,3 +201,38 @@ def _retire_statement_schedule() -> None:
 )  # fmt: skip
 def monthly_statements() -> dict[str, Any]:
     return _statements()
+
+
+# --- package expiry (E33 T06) ----------------------------------------------------------------
+
+DEFAULT_PACKAGE_DAYS = 14  # billing.package_expiry_reminder_days' default
+
+
+def _package_expiry(days: int = DEFAULT_PACKAGE_DAYS) -> dict[str, Any]:
+    trigger = {"subject": "package", "field": "expires_at", "offset_days": [-days],
+               "time": "09:00"}  # fmt: skip
+    in_use = [{"predicate": "package.active"}, {"predicate": "package.has_units_left"}]
+    return {
+        "trigger_type": "date",
+        "trigger_config": trigger,
+        "conditions": {"all": in_use},
+        "steps": [{"type": "action", "action": "remind_package_expiry", "config": {}}],
+    }
+
+
+def package_expiry_from_settings() -> dict[str, Any]:
+    """``billing.package_expiry_reminder_days`` (0: switched off)."""
+    days = int(_setting("billing.package_expiry_reminder_days") or 0)
+    return _package_expiry(days or DEFAULT_PACKAGE_DAYS) | {"enabled": days > 0}
+
+
+@builtin_workflow(
+    "package_expiry", "expiry",
+    name=N_("Package expiry reminder"),
+    description=N_("14 days before a package expires with some still unused, remind the "
+                   "family. Writing off what's left at the expiry stays automatic."),
+    first_version=package_expiry_from_settings,
+    off_means=N_("Families aren't reminded before their packages expire."),
+)  # fmt: skip
+def package_expiry() -> dict[str, Any]:
+    return _package_expiry()

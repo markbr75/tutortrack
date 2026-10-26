@@ -165,6 +165,7 @@ register(
     min_value=0,
     max_value=180,
     label=_("Remind clients this many days before unused package units expire (0: off)"),
+    replaced_by="package_expiry",
 )
 register(
     "billing.plan_invoice_immediately",

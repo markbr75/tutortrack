@@ -19,6 +19,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 
 import { api, fieldErrors, useOrganisation, usePermission } from "../api";
 import { useIsPhone } from "../billing/useIsPhone";
@@ -1511,12 +1512,14 @@ function SettingsSection() {
   useEffect(() => {
     if (area.data) setValues(area.data.values);
   }, [area.data]);
+  // Settings a built-in workflow now owns (E33 T06) are left out: saving them is refused.
+  const schema = (area.data?.schema ?? []).filter((d) => !d.replaced_by);
   const save = useMutation({
     mutationFn: async () =>
       unwrap(
         await api.PATCH("/api/v1/settings/{area}", {
           params: { path: { area: "growth" } },
-          body: { values },
+          body: { values: Object.fromEntries(schema.map((d) => [d.key, values[d.key]])) },
         }),
       ),
     onSuccess: (data) => queryClient.setQueryData(["settings", "growth"], data),
@@ -1533,7 +1536,7 @@ function SettingsSection() {
         }}
       >
         <div className="space-y-4 px-5 py-4">
-          {area.data.schema.map((d) => {
+          {schema.map((d) => {
             const value = values[d.key];
             if (d.type === "bool") {
               return (
@@ -1584,6 +1587,12 @@ function SettingsSection() {
               />
             );
           })}
+          <p className="text-sm">
+            {t("referrals.reviewsInWorkflow")}{" "}
+            <Link to="/automations" className="font-medium underline underline-offset-2">
+              {t("lessonFeedback.openWorkflows")}
+            </Link>
+          </p>
           {save.error ? <Alert tone="danger">{save.error.message}</Alert> : null}
         </div>
         {canManage ? (

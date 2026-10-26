@@ -46,7 +46,7 @@ from .models import (
     ReviewRequest,
     TutorReferral,
 )
-from .processes import referral_workflow_id, review_workflow_id
+from .processes import referral_workflow_id
 
 CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
 OPEN_REQUESTS = (ReviewRequest.Status.PENDING, ReviewRequest.Status.REMINDED)
@@ -211,9 +211,7 @@ def request_review(
         lesson_count=lesson_count,
         expires_at=now() + timedelta(days=int(_setting("review_expiry_days"))),
     )
-    request.workflow_id = review_workflow_id(request.organisation_id, request.pk)
-    request.save(update_fields=["workflow_id", "updated_at"])
-    audit.record_create(request)
+    audit.record_create(request)  # the Review request built-in workflow sends it (E33 T06)
     publish(
         events.ReviewRequested(
             subject_id=request.pk,
@@ -227,7 +225,8 @@ def request_review(
 
 
 def review_request_state(request_id: Any) -> dict[str, Any]:
-    """What ``ReviewRequestWorkflow`` needs: status and when to remind/expire."""
+    """What ``ReviewRequestWorkflow`` (runs from before E33 T06) needs: status and when to
+    remind/expire."""
     request = ReviewRequest.objects.get(pk=request_id)
     reminder_at = request.created_at + timedelta(days=int(_setting("review_reminder_days")))
     return {
@@ -283,7 +282,8 @@ def cancel_request(request: ReviewRequest) -> ReviewRequest:
     with audit.track(request, action="cancel"):
         request.status = ReviewRequest.Status.CANCELLED
         request.save(update_fields=["status", "updated_at"])
-    signal(review_workflow_id(request.organisation_id, request.pk), "cancelled")
+    if request.workflow_id:  # a ReviewRequestWorkflow from before E33 T06
+        signal(request.workflow_id, "cancelled")
     return request
 
 

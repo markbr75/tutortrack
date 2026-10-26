@@ -4415,6 +4415,7 @@
     "bonus": "Bonus",
     "payBonus": "Pay bonus",
     "settings": "Review and referral settings",
+    "reviewsInWorkflow": "Sending the review link, the reminder and closing the link are set in the “Review request” built-in workflow.",
     "saveSettings": "Save settings",
     "saved": "Saved.",
     "portal": {

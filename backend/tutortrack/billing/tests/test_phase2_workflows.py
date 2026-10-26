@@ -60,14 +60,17 @@ def active_package(org, client, *, validity_days=5, quantity="4"):
     return purchase
 
 
-def test_package_is_reminded_then_expires(org, client_, temporal_env):
+def test_package_expires_and_leaves_the_reminder_to_the_workflow(org, client_, temporal_env):
+    # The Package expiry built-in workflow reminds the family now (E33 T06), so new runs
+    # don't, whatever the old setting says; runs started before still did (the replayed
+    # PackageExpiryWorkflow-expired history).
     set_settings(org, "billing", {"billing.package_expiry_reminder_days": 2})
     purchase = active_package(org, client_)
     assert temporal_env.result(purchase.workflow_id) == "expired"
     with tenant_context(org):
         purchase.refresh_from_db()
     assert (purchase.status, purchase.units_expired) == ("expired", 4)
-    assert len(events_of(org, "package.expiring")) == 1
+    assert events_of(org, "package.expiring") == []
     assert len(events_of(org, "package.expired")) == 1
 
 
@@ -161,10 +164,11 @@ def test_phase2_histories_replay(prefix):
 def test_record_phase2_histories_if_requested(org, client_, temporal_env):
     if not os.environ.get("RECORD_WORKFLOW_HISTORIES"):
         pytest.skip("set RECORD_WORKFLOW_HISTORIES=1 to (re)record")
-    set_settings(org, "billing", {"billing.package_expiry_reminder_days": 2})
+    # PackageExpiryWorkflow-expired.json (with the reminder) stays as recorded; this one is
+    # the shape since E33 T06.
     purchase = active_package(org, client_)
     temporal_env.result(purchase.workflow_id)
-    (HISTORIES / "PackageExpiryWorkflow-expired.json").write_text(
+    (HISTORIES / "PackageExpiryWorkflow-no-reminder.json").write_text(
         temporal_env.history_json(purchase.workflow_id)
     )
     start = server_today(temporal_env) - timedelta(days=35)

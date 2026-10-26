@@ -95,6 +95,48 @@ describe("reviews, referrals and affiliates", () => {
       expect(calls.some((c) => c.path === "/api/v1/referrals/f1/approve")).toBe(true),
     );
   });
+
+  it("leaves out the settings a built-in workflow owns", async () => {
+    window.history.pushState(null, "", "/growth");
+    const settings = {
+      values: { "growth.review_after_lessons": 5, "growth.review_reminder_days": 4 },
+      schema: [
+        { key: "growth.review_after_lessons", type: "int", label: "Ask after this many lessons" },
+        {
+          key: "growth.review_reminder_days", type: "int", label: "Days before reminding",
+          replaced_by: "review_request",
+        },
+      ],
+    }; // prettier-ignore
+    const calls = mockApi(
+      routes({
+        "GET /api/v1/me": {
+          body: {
+            ...STAFF,
+            permissions: {
+              ...STAFF.permissions,
+              "org.settings.view": "all",
+              "org.settings.manage": "all",
+            },
+          },
+        },
+        "GET /api/v1/reviews/summary": { body: { average: null, count: 0, stars: {} } },
+        "GET /api/v1/reviews": page([]),
+        "GET /api/v1/settings/growth": { body: settings },
+        "PATCH /api/v1/settings/growth": { body: settings },
+      }),
+    );
+    render(<App />);
+    fireEvent.click(await screen.findByRole("tab", { name: "Settings" }));
+    expect(await screen.findByLabelText("Ask after this many lessons")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Days before reminding")).not.toBeInTheDocument();
+    expect(screen.getByText(/“Review request” built-in workflow/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Save settings" }));
+    await vi.waitFor(() => {
+      const saved = calls.find((c) => c.method === "PATCH");
+      expect(saved?.body).toEqual({ values: { "growth.review_after_lessons": 5 } });
+    });
+  });
 });
 
 describe("the public review page", () => {

@@ -143,7 +143,6 @@ def test_a_review_is_requested_after_n_completed_lessons(org, world):
         assert len(made) == 1
         request = made[0]
         assert (request.trigger, request.lesson_count) == ("lessons", 2)
-        assert request.workflow_id.startswith("review-request:")
         assert services.lesson_completed(rows, tutors) == []  # asked once per tutor
     assert events_of(org, "review.requested")[0]["tutor_id"] == str(world["tutor"].pk)
 

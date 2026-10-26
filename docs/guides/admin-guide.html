@@ -224,7 +224,7 @@
         <h1>TutorTrack admin guide</h1>
         <p class="lead">How to set up and configure a tutoring business on TutorTrack, and how
           the TutorTrack service itself is operated.</p>
-        <p class="meta">Last updated: 2026-10-25</p>
+        <p class="meta">Last updated: 2026-10-26</p>
       </header>
 
       <section id="overview" aria-labelledby="overview-h">
@@ -1256,6 +1256,13 @@
             <tr><td>Lesson report chasing</td><td>From when a report is requested: remind the tutor 4 hours before the deadline, mark it overdue at the deadline (holding pay if you chose that), and escalate to the office 24 hours later; stops when the report is written.</td><td>Report reminder and escalation hours</td></tr>
             <tr><td>Lesson feedback request</td><td>Off. When on: 2 hours after a lesson is completed, ask the family to rate it; close unanswered links after 7 days.</td><td>Feedback on/off, delay and expiry</td></tr>
             <tr><td>Unconfirmed lesson chaser</td><td>24 hours after a lesson that is still unmarked, flag it and nudge the tutor, or complete it automatically (your delivery setting).</td><td>Unconfirmed-after hours</td></tr>
+            <tr><td>Enquiry follow-up</td><td>When an enquiry arrives (not imported ones): thank the family, tell whoever looks after it, and if it is still in its first stage when that stage's time limit is up, flag it and tell staff. Stops when the enquiry moves stage, is won or is lost.</td><td>The automatic reply setting (off: no thank-you step)</td></tr>
+            <tr><td>Enquiry stage time limits</td><td>Each time an enquiry moves to a stage with a time limit, flag it and tell staff if it is still there when the time is up. Each stage keeps its own target time, as shown on <span class="path">Enquiries › Pipeline</span>.</td><td>(with the follow-up) the fixed enquiry watch</td></tr>
+            <tr><td>Trial lesson follow-up</td><td>24 hours after a trial lesson is completed, remind staff to record how it went, unless they already have.</td><td>Trial outcome reminder hours</td></tr>
+            <tr><td>Welcome a new family</td><td>Off. When on: when an enquiry is won, email the family a welcome message, and two weeks later give whoever looks after it a task to check in.</td><td>(new)</td></tr>
+            <tr><td>Review request</td><td>When a family is asked for a review: send the link, remind them once after 4 days, and close the link when it runs out. Can't be switched off (pause it instead). <em>When</em> families are asked (after a number of lessons, after a trial) stays in <span class="path">Reviews &amp; referrals › Settings</span>.</td><td>Days before the review reminder</td></tr>
+            <tr><td>Package expiry reminder</td><td>At 09:00, 14 days before a package in use expires with some left, remind the family. Unused units are still written off at the expiry.</td><td>Package expiry reminder days (0: switched off)</td></tr>
+            <tr><td>Compliance expiry reminders</td><td>At 09:00, 60, 30 and 7 days before a verified check expires, remind the tutor and compliance staff. The check still expires, and restricts the tutor, on its expiry date.</td><td>Compliance reminder days</td></tr>
           </tbody>
         </table></div>
         <p>Multi-branch organisations: the invoicing day comes from the organisation's setting
@@ -2209,7 +2216,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>TutorTrack admin guide · Last updated: 2026-10-25 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
+    <p>TutorTrack admin guide · Last updated: 2026-10-26 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
   </footer>
 </body>
 </html>

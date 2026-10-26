@@ -548,16 +548,20 @@ def expiry_of(purchase_id: Any) -> str:
 
 
 @transaction.atomic
-def remind_expiry(purchase_id: Any, *, dedupe_key: str | None = None) -> bool:
+def remind_expiry(purchase_id: Any) -> bool:
+    """``package.expiring`` (the family's reminder), once per package and expiry date:
+    the Package expiry workflow sends it (E33 T06), as did runs of
+    ``PackageExpiryWorkflow`` started before it."""
     purchase = PackagePurchase.objects.filter(pk=purchase_id).first()
     if purchase is None or purchase.status != PackagePurchase.Status.ACTIVE:
         return False
     if purchase.units_remaining <= 0 or purchase.expires_at is None:
         return False
+    expires = purchase.expires_at.isoformat()
     publish(
-        events.PackageExpiring(**_payload(purchase, expires_at=purchase.expires_at.isoformat())),
+        events.PackageExpiring(**_payload(purchase, expires_at=expires)),
         branch_id=purchase.branch_id,
-        dedupe_key=dedupe_key,
+        dedupe_key=f"package-expiring:{purchase.pk}:{expires}",
     )
     return True
 

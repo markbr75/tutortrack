@@ -15,6 +15,7 @@ register(
     type="object",
     default=[60, 30, 7],
     label=_("Remind before a check expires (days)"),
+    replaced_by="compliance_expiry",
 )
 register(
     "compliance.checks_auto_verify",

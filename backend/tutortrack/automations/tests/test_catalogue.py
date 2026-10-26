@@ -74,6 +74,9 @@ CASES = {
                              {"enquiry": {"trial_booked": False}}),
     "enquiry.continuing": ({"enquiry": {"trial_outcome": "continuing"}},
                            {"enquiry": {"trial_outcome": "undecided"}}),
+    "enquiry.stage_has_time_limit": ({"enquiry": {"stage_deadline": "2026-11-01T09:00:00+00:00"}},
+                                     {"enquiry": {"stage_deadline": None}}),
+    "package.active": ({"package": {"status": "active"}}, {"package": {"status": "expired"}}),
     "package.has_units_left": ({"package": {"units_remaining": "1.5"}},
                                {"package": {"units_remaining": "0"}}),
     "package.auto_renew": ({"package": {"auto_renew": True}}, {"package": {"auto_renew": False}}),
@@ -83,6 +86,8 @@ CASES = {
                                    {"compliance_record": {"status": "expired"}}),
     "tutor_application.open": ({"tutor_application": {"status": "open"}},
                                {"tutor_application": {"status": "hired"}}),
+    "review_request.open": ({"review_request": {"status": "reminded"}},
+                            {"review_request": {"status": "submitted"}}),
 }  # fmt: skip
 
 

@@ -236,7 +236,7 @@ def package_expiry(input: PackageInput) -> str:
 def remind_package_expiry(input: PackageInput) -> bool:
     from . import packages
 
-    return packages.remind_expiry(input.purchase_id, dedupe_key=idempotency_key())
+    return packages.remind_expiry(input.purchase_id)
 
 
 @tenant_activity
@@ -518,7 +518,8 @@ class PaymentRequestWorkflow:
 )
 @workflow.defn
 class PackageExpiryWorkflow:
-    """Replaces an expiry sweeper (E10-TW1): remind before, then expire unused units."""
+    """Replaces an expiry sweeper (E10-TW1): expire unused units. Runs started before E33
+    T06 also remind before; the Package expiry built-in workflow does that now."""
 
     def __init__(self) -> None:
         self.depleted = False
@@ -553,15 +554,17 @@ class PackageExpiryWorkflow:
 
     @workflow.run
     async def run(self, input: PackageInput) -> str:
-        settings = await workflow.execute_activity(
-            snapshot_settings,
-            SettingsSnapshotInput(
-                organisation_id=input.organisation_id,
-                keys=["billing.package_expiry_reminder_days"],
-            ),
-            start_to_close_timeout=TIMEOUT,
-        )
-        days = int(settings.get("billing.package_expiry_reminder_days") or 0)
+        days = 0  # the Package expiry built-in workflow sends the reminder (E33 T06)
+        if not workflow.patched("package-reminder-in-workflows"):
+            settings = await workflow.execute_activity(
+                snapshot_settings,
+                SettingsSnapshotInput(
+                    organisation_id=input.organisation_id,
+                    keys=["billing.package_expiry_reminder_days"],
+                ),
+                start_to_close_timeout=TIMEOUT,
+            )
+            days = int(settings.get("billing.package_expiry_reminder_days") or 0)
         deadline = datetime.fromisoformat(input.expires_at)
         while True:
             remind_at = deadline - timedelta(days=days)

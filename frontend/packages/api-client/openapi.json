@@ -70177,7 +70177,7 @@
         "/api/v1/review-requests": {
             "get": {
                 "operationId": "review_requests_list",
-                "description": "Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``\nsends it and a reminder).",
+                "description": "Review requests (FR-25-1). ``POST`` asks a family now (the Review request workflow\nsends it and a reminder).",
                 "parameters": [
                     {
                         "in": "query",
@@ -70270,7 +70270,7 @@
             },
             "post": {
                 "operationId": "review_requests_create",
-                "description": "Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``\nsends it and a reminder).",
+                "description": "Review requests (FR-25-1). ``POST`` asks a family now (the Review request workflow\nsends it and a reminder).",
                 "parameters": [
                     {
                         "in": "header",
@@ -70327,7 +70327,7 @@
         "/api/v1/review-requests/{id}": {
             "get": {
                 "operationId": "review_requests_retrieve",
-                "description": "Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``\nsends it and a reminder).",
+                "description": "Review requests (FR-25-1). ``POST`` asks a family now (the Review request workflow\nsends it and a reminder).",
                 "parameters": [
                     {
                         "in": "query",
@@ -70374,7 +70374,7 @@
         "/api/v1/review-requests/{id}/cancel": {
             "post": {
                 "operationId": "review_requests_cancel_create",
-                "description": "Review requests (FR-25-1). ``POST`` asks a family now (``ReviewRequestWorkflow``\nsends it and a reminder).",
+                "description": "Review requests (FR-25-1). ``POST`` asks a family now (the Review request workflow\nsends it and a reminder).",
                 "parameters": [
                     {
                         "in": "header",
