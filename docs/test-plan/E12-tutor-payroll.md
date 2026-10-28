@@ -86,7 +86,7 @@ Wise uses the in-memory `FakeWise` while `INTEGRATIONS_CREDENTIAL_PROVIDERS_LIVE
 |---|---|---|---|---|---|---|---|---|
 | TP-E12-037 | Finance runs payroll | Finance | — | 1. Open `/payroll`, create and approve a run. | Allowed. | P1 | No | |
 | TP-E12-038 | Coordinator has no payroll | Coordinator | — | 1. Look at the nav; open `/payroll`. | No Payroll nav item; no access; tutor financial fields hidden on the tutor record. | P1 | e2e: `e2e/roles.spec.ts` | |
-| TP-E12-039 | Tutor has own scope only | Tutor | — | 1. Try `/api/v1/pay-runs`. | 403. Own earnings and expenses only. | P1 | No | |
+| TP-E12-039 | Tutor has own scope only | Tutor | — | 1. Try `/api/v1/pay-runs` and a pay run's detail URL. | The list is empty (200: a tutor holds `payroll.view` with own scope, and pay runs have no own rows) and a run's detail is 404. Own earnings and expenses only. | P1 | No | |
 
 ## Tenant isolation
 
