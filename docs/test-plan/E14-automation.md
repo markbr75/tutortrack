@@ -68,7 +68,7 @@
 
 | ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
 |---|---|---|---|---|---|---|---|---|
-| TP-E14-027 | Coordinator can't see workflows; Finance only the built-ins | Coordinator, Finance | — | 1. As each, check the menu; open `/workflows`. | Coordinator: no **Workflows** item and 403 from the API. Finance (since E33): **Workflows** is there, with no **New workflow**; see TP-E33-062. | P1 | e2e: `e2e/roles.spec.ts` | |
+| TP-E14-027 | Coordinator can't see workflows; Finance only the built-ins | Coordinator, Finance | — | 1. As each, check the sidebar and the Settings menu; open `/workflows`. | Coordinator: no **Workflows** item and 403 from the API. Finance (since E33): **Workflows** is in the Settings menu, with no **New workflow**; see TP-E33-062. | P1 | e2e: `e2e/roles.spec.ts` | |
 | TP-E14-028 | Admin manages automations | Admin (office@) | — | 1. Create, edit and switch on a custom workflow. | Allowed. | P2 | No | |
 
 ## Tenant isolation
