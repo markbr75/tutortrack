@@ -1,9 +1,7 @@
 """Late fees and collections (E10-T14, FR-10-10).
 
 The **Payment chasing** built-in workflow (E33 T04) decides when: its "Apply a late fee"
-steps call ``apply_next_late_fee`` and "Open a collections case" calls ``open_collections``.
-Before it, ``InvoiceDunningWorkflow`` asked ``dunning_plan`` for the late-fee and collections
-days of an invoice (relative to its due date; kept for runs under way):
+steps call ``apply_next_late_fee`` and "Open a collections case" calls ``open_collections``:
 
 * **Late fees:** the branch's (or organisation's) ``LateFeeRule``: a fixed amount or a
   percentage of what is owed, once or monthly, capped; a ``late_fee`` charge added to the
@@ -86,17 +84,6 @@ def fee_offsets(rule: LateFeeRule) -> list[int]:
     count = 1 if rule.recurrence == LateFeeRule.Recurrence.ONCE else rule.max_applications
     count = max(1, min(count, MAX_MONTHLY))
     return [rule.days_overdue + MONTH * i for i in range(count)]
-
-
-def dunning_plan(invoice_id: Any) -> dict[str, Any]:
-    """Late-fee and collections days (after the due date) for the dunning workflow."""
-    invoice = Invoice.objects.filter(pk=invoice_id).first()
-    if invoice is None or not invoice.is_open:
-        return {"fees": [], "collections": None}
-    rule = rule_for(invoice.branch_id)
-    fees = [] if rule is None or _only_fees(invoice) else fee_offsets(rule)
-    after = int(get_setting("billing.collections_after_days"))
-    return {"fees": fees, "collections": after or None}
 
 
 def _applied(invoice: Invoice) -> Money:

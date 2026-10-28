@@ -16,7 +16,7 @@ class _EnquiryEvent(DomainEvent):
 
 @dataclass(frozen=True, kw_only=True)
 class EnquiryReceived(_EnquiryEvent):
-    """Starts ``EnquiryFollowUpWorkflow`` (auto-acknowledgement, SLA timers)."""
+    """Starts the Enquiry follow-up built-in workflow (acknowledgement, stage time limit)."""
 
     event_type: ClassVar[str] = "enquiry.received"
     source: str

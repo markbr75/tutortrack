@@ -4,24 +4,14 @@
   review window (timer, or wait for ``approve`` when auto-issue is off) → issue. Started
   by ``POST /invoice-runs`` or by the Invoicing cycle built-in workflow (E33 T04).
 
-Replaced by built-in workflows in E33 T04 and no longer started (kept for one release so
-runs under way finish, and for history replay): ``ScheduledInvoiceRunWorkflow`` (Invoicing
-cycle), ``InvoiceDunningWorkflow`` (Payment chasing), ``PaymentRequestWorkflow`` (Payment
-request reminders) and ``StatementRunWorkflow`` (Monthly statements).
-
-* ``ScheduledInvoiceRunWorkflow``: started by a per-branch **Temporal Schedule** (weekly
-  or monthly, ``billing.invoice_schedule``); opens the run for the period just ended and
-  runs ``InvoiceRunWorkflow`` as a child.
-* ``InvoiceDunningWorkflow`` ``invoice-dunning:{org}:{invoice}``: started by
-  ``invoice.issued``; one reminder per offset in ``billing.reminder_offsets`` at 09:00
-  local time; ``closed`` (paid, voided, written off) ends it.
-* ``PaymentRequestWorkflow`` ``payment-request:{org}:{request}``: reminders 3 and 7 days
-  after a request is created until it is paid or cancelled.
+The Invoicing cycle, Payment chasing, Payment request reminders and Monthly statements
+built-in workflows (E33 T04, ``workflows_builtin.py``) replaced ``ScheduledInvoiceRunWorkflow``,
+``InvoiceDunningWorkflow``, ``PaymentRequestWorkflow`` and ``StatementRunWorkflow`` (removed in
+E33 T09). ``SCHEDULE_PROCESS`` and ``STATEMENT_PROCESS`` name their old Temporal Schedules,
+which are deleted when the built-ins are installed.
 
 Phase 2:
 
-* ``InvoiceDunningWorkflow`` (patched ``late-fees-collections``) also applies late fees
-  and opens collections on the same timeline (FR-10-10, E10-T14).
 * ``PackageExpiryWorkflow`` ``package:{org}:{purchase}:{n}``: started when a package with
   an expiry activates; reminder N days before → expiry (write off unused units). Signals
   ``depleted`` (stop) and ``extended(until)`` (new deadline).
@@ -34,35 +24,28 @@ from __future__ import annotations
 
 import contextlib
 from dataclasses import dataclass
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from temporalio import workflow
 
 from tutortrack.core.workflows import (
     WorkflowInput,
-    idempotency_key,
     register_workflow,
     tenant_activity,
     workflow_id,
 )
 from tutortrack.core.workflows.links import report_step
 from tutortrack.core.workflows.timers import (
-    BusinessCalendar,
     SettingsSnapshotInput,
     snapshot_settings,
-    wait_until_local,
 )
 
 TIMEOUT = timedelta(minutes=10)
 RUN_PROCESS = "invoice-run"
 SCHEDULE_PROCESS = "invoice-schedule"
-DUNNING_PROCESS = "invoice-dunning"
-REQUEST_PROCESS = "payment-request"
 PACKAGE_PROCESS = "package"
 PLAN_PROCESS = "billing-plan"
-REMINDER_TIME = time(9, 0)
-LATE_FEES_PATCH = "late-fees-collections"
 TUTOR_REVIEW_PATCH = "tutor-review"
 STATEMENT_PROCESS = "client-statements"
 PLAN_PERIODS_PER_RUN = 24
@@ -80,43 +63,12 @@ def run_workflow_id(organisation_id: object, run_id: object) -> str:
     return workflow_id(RUN_PROCESS, organisation_id, run_id)
 
 
-def dunning_workflow_id(organisation_id: object, invoice_id: object) -> str:
-    return workflow_id(DUNNING_PROCESS, organisation_id, invoice_id)
-
-
-def request_workflow_id(organisation_id: object, request_id: object) -> str:
-    return workflow_id(REQUEST_PROCESS, organisation_id, request_id)
-
-
 # --- activities -----------------------------------------------------------------------------
 
 
 @dataclass(frozen=True, kw_only=True)
 class InvoiceRunInput(WorkflowInput):
     run_id: str
-
-
-@dataclass(frozen=True, kw_only=True)
-class ScheduledRunInput(WorkflowInput):
-    branch_id: str
-    cadence: str  # weekly | monthly
-
-
-@dataclass(frozen=True, kw_only=True)
-class DunningInput(WorkflowInput):
-    invoice_id: str
-    due_date: str  # ISO date
-
-
-@dataclass(frozen=True, kw_only=True)
-class ReminderInput(WorkflowInput):
-    invoice_id: str
-    offset: int
-
-
-@dataclass(frozen=True, kw_only=True)
-class RequestInput(WorkflowInput):
-    request_id: str
 
 
 @tenant_activity
@@ -133,57 +85,7 @@ def issue_invoice_run(input: InvoiceRunInput) -> dict[str, Any]:
     return services.issue_run(input.run_id)
 
 
-@tenant_activity
-def open_scheduled_run(input: ScheduledRunInput) -> str:
-    """Create (once) the run for the period that just ended; '' if it already existed."""
-    from tutortrack.tenancy.models import Branch
-
-    from . import services
-
-    period = services.scheduled_period(input.cadence, services.org_today())
-    branch = Branch.objects.get(pk=input.branch_id)
-    run, created = services.create_run(
-        period_start=period[0], period_end=period[1], branch=branch, start_workflow=False
-    )
-    if not created:
-        return ""
-    from .models import InvoiceRun
-
-    InvoiceRun.objects.filter(pk=run.pk).update(
-        workflow_id=run_workflow_id(input.organisation_id, run.pk)
-    )
-    return str(run.pk)
-
-
-@tenant_activity
-def send_invoice_reminder(input: ReminderInput) -> bool:
-    from . import services
-
-    return services.send_reminder(input.invoice_id, input.offset, dedupe_key=idempotency_key())
-
-
-@tenant_activity
-def invoice_is_open(input: DunningInput) -> bool:
-    from .models import Invoice
-
-    invoice = Invoice.objects.filter(pk=input.invoice_id).first()
-    return bool(invoice and invoice.is_open)
-
-
-@tenant_activity
-def remind_payment_request(input: RequestInput) -> bool:
-    from . import services
-
-    return services.remind_payment_request(input.request_id, dedupe_key=idempotency_key())
-
-
 # --- Phase 2 activities -----------------------------------------------------------------------
-
-
-@dataclass(frozen=True, kw_only=True)
-class FeeInput(WorkflowInput):
-    invoice_id: str
-    number: int
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -202,27 +104,6 @@ class PlanInput(WorkflowInput):
 class PlanPeriodInput(WorkflowInput):
     plan_id: str
     start: str
-
-
-@tenant_activity
-def invoice_dunning_plan(input: DunningInput) -> dict[str, Any]:
-    from . import dunning
-
-    return dunning.dunning_plan(input.invoice_id)
-
-
-@tenant_activity
-def apply_invoice_late_fee(input: FeeInput) -> str:
-    from . import dunning
-
-    return dunning.apply_late_fee(input.invoice_id, input.number)
-
-
-@tenant_activity
-def open_invoice_collections(input: DunningInput) -> bool:
-    from . import dunning
-
-    return dunning.open_collections(input.invoice_id, dedupe_key=idempotency_key())
 
 
 @tenant_activity
@@ -331,186 +212,6 @@ class InvoiceRunWorkflow:
         self.step = "completed"
         await report_step(input, self.step, status="completed")
         return self.step
-
-
-@register_workflow(process=SCHEDULE_PROCESS, task_queue="billing", cancel_permission=None)
-@workflow.defn
-class ScheduledInvoiceRunWorkflow:
-    @workflow.run
-    async def run(self, input: ScheduledRunInput) -> str:
-        run_id = await workflow.execute_activity(
-            open_scheduled_run, input, start_to_close_timeout=TIMEOUT
-        )
-        if not run_id:
-            await report_step(input, "already_run", status="completed")
-            return "already_run"
-        result = await workflow.execute_child_workflow(
-            InvoiceRunWorkflow.run,
-            InvoiceRunInput(organisation_id=input.organisation_id, run_id=run_id),
-            id=run_workflow_id(input.organisation_id, run_id),
-        )
-        await report_step(input, str(result), status="completed")
-        return str(result)
-
-
-@register_workflow(
-    process=DUNNING_PROCESS, task_queue="billing", cancel_permission="billing.invoice.void"
-)
-@workflow.defn
-class InvoiceDunningWorkflow:
-    def __init__(self) -> None:
-        self.closed = False
-        self.sent: list[int] = []
-        self.fees: list[str] = []
-        self.collections = False
-
-    @workflow.signal(name="closed")
-    def close(self) -> None:
-        self.closed = True
-
-    @workflow.query
-    def state(self) -> dict[str, Any]:
-        return {
-            "sent": self.sent,
-            "closed": self.closed,
-            "fees": self.fees,
-            "collections": self.collections,
-        }
-
-    async def _with_fees(self, input: DunningInput) -> str:
-        """Reminders, late fees and collections on one timeline (E10-T14)."""
-        settings = await workflow.execute_activity(
-            snapshot_settings,
-            SettingsSnapshotInput(
-                organisation_id=input.organisation_id,
-                keys=["billing.reminders_enabled", "billing.reminder_offsets"],
-            ),
-            start_to_close_timeout=TIMEOUT,
-        )
-        plan = await workflow.execute_activity(
-            invoice_dunning_plan, input, start_to_close_timeout=TIMEOUT
-        )
-        offsets: list[int] = []
-        if settings.get("billing.reminders_enabled", True):
-            offsets = sorted({int(o) for o in settings.get("billing.reminder_offsets") or []})
-        steps = [(o, 0, 0) for o in offsets]
-        steps += [(int(o), 1, n) for n, o in enumerate(plan.get("fees") or [], start=1)]
-        if plan.get("collections"):
-            steps.append((int(plan["collections"]), 2, 0))
-        steps.sort()
-        if not steps:
-            await report_step(input, "disabled", status="completed")
-            return "disabled"
-        calendar = BusinessCalendar(timezone=str(settings["timezone"]))
-        due = date.fromisoformat(input.due_date)
-        for offset, kind, number in steps:
-            moment = datetime.combine(due + timedelta(days=offset), REMINDER_TIME)
-            if await wait_until_local(moment, calendar, until=lambda: self.closed):
-                break
-            if not await workflow.execute_activity(
-                invoice_is_open, input, start_to_close_timeout=TIMEOUT
-            ):
-                break
-            if kind == 0:
-                await workflow.execute_activity(
-                    send_invoice_reminder,
-                    ReminderInput(
-                        organisation_id=input.organisation_id,
-                        invoice_id=input.invoice_id,
-                        offset=offset,
-                    ),
-                    start_to_close_timeout=TIMEOUT,
-                )
-                self.sent.append(offset)
-            elif kind == 1:
-                outcome = await workflow.execute_activity(
-                    apply_invoice_late_fee,
-                    FeeInput(
-                        organisation_id=input.organisation_id,
-                        invoice_id=input.invoice_id,
-                        number=number,
-                    ),
-                    start_to_close_timeout=TIMEOUT,
-                )
-                self.fees.append(str(outcome))
-            else:
-                self.collections = bool(
-                    await workflow.execute_activity(
-                        open_invoice_collections, input, start_to_close_timeout=TIMEOUT
-                    )
-                )
-        await report_step(input, "finished", status="completed")
-        return f"sent:{len(self.sent)}"
-
-    @workflow.run
-    async def run(self, input: DunningInput) -> str:
-        if workflow.patched(LATE_FEES_PATCH):
-            return await self._with_fees(input)
-        settings = await workflow.execute_activity(
-            snapshot_settings,
-            SettingsSnapshotInput(
-                organisation_id=input.organisation_id,
-                keys=["billing.reminders_enabled", "billing.reminder_offsets"],
-            ),
-            start_to_close_timeout=TIMEOUT,
-        )
-        if not settings.get("billing.reminders_enabled", True):
-            await report_step(input, "disabled", status="completed")
-            return "disabled"
-        calendar = BusinessCalendar(timezone=str(settings["timezone"]))
-        due = date.fromisoformat(input.due_date)
-        offsets = sorted({int(o) for o in settings.get("billing.reminder_offsets") or []})
-        for offset in offsets:
-            moment = datetime.combine(due + timedelta(days=offset), REMINDER_TIME)
-            if await wait_until_local(moment, calendar, until=lambda: self.closed):
-                break
-            still_open = await workflow.execute_activity(
-                invoice_is_open, input, start_to_close_timeout=TIMEOUT
-            )
-            if not still_open:
-                break
-            await workflow.execute_activity(
-                send_invoice_reminder,
-                ReminderInput(
-                    organisation_id=input.organisation_id,
-                    invoice_id=input.invoice_id,
-                    offset=offset,
-                ),
-                start_to_close_timeout=TIMEOUT,
-            )
-            self.sent.append(offset)
-        await report_step(input, "finished", status="completed")
-        return f"sent:{len(self.sent)}"
-
-
-@register_workflow(process=REQUEST_PROCESS, task_queue="billing", cancel_permission=None)
-@workflow.defn
-class PaymentRequestWorkflow:
-    def __init__(self) -> None:
-        self.closed = False
-
-    @workflow.signal(name="closed")
-    def close(self) -> None:
-        self.closed = True
-
-    @workflow.run
-    async def run(self, input: RequestInput) -> str:
-        reminded = 0
-        for days in (3, 7):
-            with contextlib.suppress(TimeoutError):
-                await workflow.wait_condition(
-                    lambda: self.closed,
-                    timeout=timedelta(days=days if not reminded else days - 3),
-                )
-            if self.closed:
-                break
-            if not await workflow.execute_activity(
-                remind_payment_request, input, start_to_close_timeout=TIMEOUT
-            ):
-                break
-            reminded += 1
-        await report_step(input, "finished", status="completed")
-        return f"reminded:{reminded}"
 
 
 @register_workflow(
@@ -681,67 +382,3 @@ class BillingPlanWorkflow:
                 )
         await report_step(input, "ended", status="completed")
         return f"charged:{len(self.charged)}"
-
-
-# --- gap G3: scheduled client statements (FR-10-9) ------------------------------------------
-
-STATEMENT_BATCH = 50
-
-
-@dataclass(frozen=True, kw_only=True)
-class StatementRunInput(WorkflowInput):
-    pass
-
-
-@dataclass(frozen=True, kw_only=True)
-class StatementBatchInput(WorkflowInput):
-    client_ids: list[str]
-    start: str  # ISO date
-    end: str
-
-
-@tenant_activity
-def plan_statements(input: StatementRunInput) -> dict[str, Any]:
-    """Last month's period and the clients to send statements to."""
-    from . import services, statements
-
-    start, end = statements.last_month(services.org_today())
-    clients = sorted({client for client, _currency in statements.due(start, end)})
-    return {"start": start.isoformat(), "end": end.isoformat(), "clients": clients}
-
-
-@tenant_activity
-def send_statement_batch(input: StatementBatchInput) -> int:
-    from . import statements
-
-    return statements.send(
-        input.client_ids, date.fromisoformat(input.start), date.fromisoformat(input.end)
-    )
-
-
-@register_workflow(process=STATEMENT_PROCESS, task_queue="billing", cancel_permission=None)
-@workflow.defn
-class StatementRunWorkflow:
-    """Started monthly by the organisation's statement **Temporal Schedule**
-    (``billing.statements.sync_schedule``): emails last month's statements in batches."""
-
-    @workflow.run
-    async def run(self, input: StatementRunInput) -> str:
-        plan = await workflow.execute_activity(
-            plan_statements, input, start_to_close_timeout=TIMEOUT
-        )
-        clients = list(plan["clients"])
-        sent = 0
-        for index in range(0, len(clients), STATEMENT_BATCH):
-            sent += await workflow.execute_activity(
-                send_statement_batch,
-                StatementBatchInput(
-                    organisation_id=input.organisation_id,
-                    client_ids=clients[index : index + STATEMENT_BATCH],
-                    start=str(plan["start"]),
-                    end=str(plan["end"]),
-                ),
-                start_to_close_timeout=timedelta(minutes=30),
-            )
-        await report_step(input, "sent", status="completed")
-        return f"sent:{sent}"

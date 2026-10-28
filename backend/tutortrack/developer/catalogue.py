@@ -43,6 +43,8 @@ PUBLIC_AGGREGATES = frozenset(
         "topic_mastery",
         # G5a: tutor probation reviews and offboarding (E18 FR-18-9).
         "offboarding", "probation",
+        # E33: failed workflow runs (``workflow.run_failed``); automation.* stays internal.
+        "workflow",
     }
 )  # fmt: skip
 

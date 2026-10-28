@@ -504,21 +504,6 @@ def enquiry_from_email(*, from_email: str, from_name: str, subject: str, body: s
 # --- working enquiries (T02, T04) -----------------------------------------------------------
 
 
-def _signal(enquiry: Enquiry, name: str) -> None:
-    from tutortrack.core.models import WorkflowLink
-    from tutortrack.core.workflows import signal_now
-
-    from .processes import enquiry_workflow_id
-
-    wid = enquiry_workflow_id(enquiry.organisation_id, enquiry.pk)
-
-    def send() -> None:
-        if WorkflowLink.objects.filter(workflow_id=wid, status="running").exists():
-            signal_now(wid, name)
-
-    transaction.on_commit(send)
-
-
 def _enter(enquiry: Enquiry, stage: PipelineStage, user: Any) -> None:
     previous = enquiry.stage
     seconds = max(0, int((now() - enquiry.stage_entered_at).total_seconds()))
@@ -565,7 +550,6 @@ def move(enquiry: Enquiry, stage: PipelineStage, *, user: Any = None) -> Enquiry
     with audit.track(enquiry, action="move"):
         _enter(enquiry, stage, user)
         enquiry.save()
-    _signal(enquiry, "stage_changed")
     return enquiry
 
 
@@ -623,7 +607,6 @@ def lose(
         events.EnquiryLost(subject_id=enquiry.pk, client_id=str(enquiry.client_id), reason=reason),
         branch_id=enquiry.branch_id,
     )
-    _signal(enquiry, "closed")
     return enquiry
 
 
@@ -675,7 +658,6 @@ def book_trial(
         events.TrialLessonBooked(subject_id=enquiry.pk, lesson_id=str(result.lesson.pk)),
         branch_id=enquiry.branch_id,
     )
-    _signal(enquiry, "stage_changed")
     return enquiry
 
 
@@ -701,7 +683,6 @@ def record_trial_outcome(
         events.TrialLessonCompleted(subject_id=enquiry.pk, outcome=outcome),
         branch_id=enquiry.branch_id,
     )
-    _signal(enquiry, "stage_changed")
     return enquiry
 
 
@@ -782,24 +763,10 @@ def convert(
         ),
         branch_id=enquiry.branch_id,
     )
-    _signal(enquiry, "closed")
     return out
 
 
 # --- SLA and acknowledgements (TW1) ---------------------------------------------------------
-
-
-def sla_status(enquiry_id: Any) -> dict[str, Any]:
-    enquiry = Enquiry.objects.select_related("stage").filter(pk=enquiry_id).first()
-    if enquiry is None or enquiry.status != Enquiry.Status.OPEN:
-        return {"open": False}
-    deadline = stage_deadline(enquiry)
-    return {
-        "open": True,
-        "stage": str(enquiry.stage_id),
-        "deadline": deadline.isoformat() if deadline else "",
-        "breached": enquiry.sla_breached_at is not None,
-    }
 
 
 @transaction.atomic
@@ -875,17 +842,6 @@ def tell_owner(enquiry_id: Any) -> bool:
         return False
     key = f"assigned:{enquiry.pk}:{enquiry.owner_id}"
     return bool(comms.notify("enquiry_assigned", enquiry, key=key))
-
-
-def acknowledge(enquiry_id: Any) -> bool:
-    """The automatic reply to the family and the owner's notification (the
-    ``EnquiryFollowUpWorkflow`` runs from before E33 T06)."""
-    if not Enquiry.objects.filter(pk=enquiry_id).exists():
-        return False
-    if get_setting("leads.acknowledge"):
-        thank_for_enquiry(enquiry_id)
-    tell_owner(enquiry_id)
-    return True
 
 
 def trial_follow_up(enquiry_id: Any) -> bool:

@@ -479,9 +479,9 @@ def rule(org, **values):
 
 def test_fixed_late_fee_is_charged_once_per_application(org, family):
     invoice = overdue_invoice(org, family)
-    rule(org, kind="fixed", amount=Decimal("15"), days_overdue=7)
+    fixed = rule(org, kind="fixed", amount=Decimal("15"), days_overdue=7)
     with tenant_context(org), transaction.atomic():
-        assert dunning.dunning_plan(invoice.pk)["fees"] == [7]
+        assert dunning.fee_offsets(fixed) == [7]
         assert dunning.apply_late_fee(invoice.pk, 1) == "applied"
         assert dunning.apply_late_fee(invoice.pk, 1) == "exists"
         fee = Charge.objects.get(kind="late_fee")
@@ -492,12 +492,12 @@ def test_fixed_late_fee_is_charged_once_per_application(org, family):
 
 def test_percentage_fees_recur_monthly_up_to_the_cap(org, family):
     invoice = overdue_invoice(org, family, "200.00")
-    rule(
+    monthly = rule(
         org, kind="percent", percent=Decimal("5"), recurrence="monthly", max_applications=3,
         cap=Decimal("25"), days_overdue=14,
     )  # fmt: skip
     with tenant_context(org), transaction.atomic():
-        assert dunning.dunning_plan(invoice.pk)["fees"] == [14, 44, 74]
+        assert dunning.fee_offsets(monthly) == [14, 44, 74]
         outcomes = [dunning.apply_late_fee(invoice.pk, n) for n in (1, 2, 3)]
         fees = [c.gross for c in Charge.objects.filter(kind="late_fee").order_by("source_key")]
         assert dunning.apply_late_fee(invoice.pk, 4) == "capped"
@@ -511,7 +511,7 @@ def test_immediate_late_fees_get_their_own_invoice_without_fees_on_fees(org, fam
     with tenant_context(org), transaction.atomic():
         dunning.apply_late_fee(invoice.pk, 1)
         fee_invoice = Invoice.objects.exclude(pk=invoice.pk).get()
-        assert dunning.dunning_plan(fee_invoice.pk)["fees"] == []
+        assert dunning.apply_next_late_fee(fee_invoice.pk) == "only_fees"
     assert (fee_invoice.status, fee_invoice.total) == ("issued", gbp("10.00"))
 
 

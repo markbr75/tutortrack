@@ -2,9 +2,8 @@
 
 The **Monthly statements** built-in workflow (E33 T04, ``workflows_builtin.py``) runs once
 a month for each client with something to show (``due``) and sends it with ``send``; it
-replaced the statement Temporal Schedule (``StatementRunWorkflow``, kept for runs under
-way, and ``billing.statement_schedule``/``statement_day``). It emails last month's
-statement (opening
+replaced the statement Temporal Schedule (``StatementRunWorkflow``, removed in E33 T09) and
+``billing.statement_schedule``/``statement_day``. It emails last month's statement (opening
 balance, movements, closing balance, ageing; PDF attached) to the invoice contacts of every
 client who had account activity in the month or still has a balance, per currency. Each
 statement is sent once: the comms dedupe key is the client, currency and period.

@@ -404,11 +404,9 @@ def test_waitlist_offer_accept_and_cascade(org):
 
 def test_sla_breach_is_recorded_once_and_alerts_staff(org, enquiry):
     with tenant_context(org):
-        status = services.sla_status(enquiry.pk)
-        assert status["open"]
-        assert status["deadline"]
-        assert services.breach_sla(enquiry.pk, status["stage"])
-        assert not services.breach_sla(enquiry.pk, status["stage"])
+        assert services.stage_deadline(enquiry)
+        assert services.breach_sla(enquiry.pk, str(enquiry.stage_id))
+        assert not services.breach_sla(enquiry.pk, str(enquiry.stage_id))
         assert OutboxEvent.objects.filter(event_type="enquiry.sla_breached").count() == 1
 
 
@@ -420,7 +418,8 @@ def test_acknowledgement_and_owner_notice(org):
         enquiry = services.create_enquiry(
             contact={"first_name": "Priya", "email": "p@example.com"}, owner=owner
         )
-        services.acknowledge(enquiry.pk)
+        services.thank_for_enquiry(enquiry.pk)
+        services.tell_owner(enquiry.pk)
         kinds = set(Message.objects.values_list("type_key", "channel"))
     assert ("enquiry_acknowledgement", "email") in kinds
     assert ("enquiry_assigned", "in_app") in kinds

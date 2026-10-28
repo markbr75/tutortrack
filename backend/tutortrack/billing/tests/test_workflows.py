@@ -1,4 +1,4 @@
-"""E10-TW1: invoice runs, dunning, payment request reminders and invoicing schedules."""
+"""E10-TW1: invoice runs."""
 
 from __future__ import annotations
 
@@ -16,7 +16,6 @@ from django.db import connection, transaction
 from tutortrack.billing import services
 from tutortrack.billing.models import Charge, Invoice, InvoiceRun
 from tutortrack.billing.processes import (
-    InvoiceDunningWorkflow,
     InvoiceRunWorkflow,
     run_workflow_id,
 )
@@ -135,8 +134,7 @@ def test_concurrent_runs_never_invoice_a_charge_twice(org):
     assert on_invoices == lines == 3
 
 
-@pytest.mark.parametrize("prefix", ["InvoiceRunWorkflow", "InvoiceDunningWorkflow"])
-def test_histories_replay(prefix):
+def test_histories_replay():
     from temporalio.client import WorkflowHistory
     from temporalio.worker import Replayer
 
@@ -144,10 +142,10 @@ def test_histories_replay(prefix):
     from tutortrack.core.workflows.client import data_converter
     from tutortrack.core.workflows.worker import sandbox_runner
 
-    files = sorted(HISTORIES.glob(f"{prefix}-*.json"))
+    files = sorted(HISTORIES.glob("InvoiceRunWorkflow-*.json"))
     assert files, "record with RECORD_WORKFLOW_HISTORIES=1 (see the README there)"
     replayer = Replayer(
-        workflows=[InvoiceRunWorkflow, InvoiceDunningWorkflow],
+        workflows=[InvoiceRunWorkflow],
         data_converter=data_converter(),
         workflow_runner=sandbox_runner(),
     )
@@ -168,5 +166,3 @@ def test_record_histories_if_requested(org, temporal_env):
     rid = run_workflow_id(org.pk, run.pk)
     temporal_env.result(rid)
     (HISTORIES / "InvoiceRunWorkflow-issued.json").write_text(temporal_env.history_json(rid))
-    # InvoiceDunningWorkflow-reminded.json stays as recorded: the Payment chasing built-in
-    # workflow replaced it (E33 T04), so nothing starts it any more.

@@ -484,15 +484,10 @@ def remind_report_due(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]
 def handle_unconfirmed(ctx: RunContext, config: dict[str, Any]) -> dict[str, Any]:
     """Still planned after the lesson: complete it automatically or flag it and nudge the
     tutor (``delivery.unconfirmed_action``)."""
-    from tutortrack.core.models import WorkflowLink
     from tutortrack.delivery import services as delivery
-    from tutortrack.delivery.processes import unconfirmed_workflow_id
 
     if ctx.obj.status != "planned":
         return skipped(_("the lesson has been marked"))
-    earlier = unconfirmed_workflow_id(ctx.obj.organisation_id, ctx.obj.pk)
-    if WorkflowLink.objects.filter(workflow_id=earlier, status="running").exists():
-        return skipped(_("an earlier check is already handling it"))  # from before E33 T05
     return {"outcome": delivery.handle_unconfirmed(ctx.obj.pk, dedupe_key=ctx.key)}
 
 

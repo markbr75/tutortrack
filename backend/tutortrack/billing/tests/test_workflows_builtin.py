@@ -20,12 +20,7 @@ from tutortrack.billing.models import (
     LateFeeRule,
     PackagePurchase,
 )
-from tutortrack.billing.processes import (
-    SCHEDULE_PROCESS,
-    STATEMENT_PROCESS,
-    dunning_workflow_id,
-    request_workflow_id,
-)
+from tutortrack.billing.processes import SCHEDULE_PROCESS, STATEMENT_PROCESS
 from tutortrack.billing.tests.test_billing import (
     complete,
     events_of,
@@ -38,6 +33,7 @@ from tutortrack.core.context import tenant_context
 from tutortrack.core.events.dispatcher import dispatch_batch
 from tutortrack.core.models import ScheduleLink, WorkflowLink
 from tutortrack.core.time import now
+from tutortrack.core.workflows import workflow_id
 from tutortrack.core.workflows.schedules import schedule_id
 from tutortrack.tenancy import settings_service
 from tutortrack.tenancy.models import Branch
@@ -188,7 +184,10 @@ def test_issued_invoices_and_payment_requests_no_longer_start_the_old_workflows(
         )
     dispatch_batch()
     with tenant_context(org):
-        ids = [dunning_workflow_id(org.pk, invoice.pk), request_workflow_id(org.pk, request.pk)]
+        ids = [
+            workflow_id("invoice-dunning", org.pk, invoice.pk),
+            workflow_id("payment-request", org.pk, request.pk),
+        ]
         assert not WorkflowLink.objects.filter(workflow_id__in=ids).exists()
 
 

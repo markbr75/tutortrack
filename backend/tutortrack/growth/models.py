@@ -1,9 +1,9 @@
 """Reviews, referrals and affiliates (E25).
 
 * **Reviews** (FR-25-1): a ``ReviewRequest`` asks a family to rate a tutor (or the business)
-  after N completed lessons or a trial (``ReviewRequestWorkflow`` sends it and a reminder);
-  the ``Review`` they submit goes to a moderation queue, can be published as an E24
-  ``sites.Testimonial`` and feeds tutor ratings (matching E19, directory E24).
+  after N completed lessons or a trial (the Review request built-in workflow sends it and a
+  reminder); the ``Review`` they submit goes to a moderation queue, can be published as an
+  E24 ``sites.Testimonial`` and feeds tutor ratings (matching E19, directory E24).
 * **Client referrals** (FR-25-2): every client (and tutor, FR-25-4) has a ``ReferralCode``;
   an enquiry made with it creates a ``Referral``. ``ReferralRewardWorkflow`` waits for the
   referee's first payment (or N lessons), runs fraud checks and gives the referrer account

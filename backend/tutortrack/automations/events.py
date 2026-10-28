@@ -1,4 +1,5 @@
-"""Domain events published by automations (E14). They never trigger automations."""
+"""Domain events published by automations (E14) and workflows (E33). They never trigger
+automations; ``workflow.run_failed`` is offered to webhooks."""
 
 from __future__ import annotations
 
@@ -30,4 +31,18 @@ class AutomationRunFailed(DomainEvent):
     event_type: ClassVar[str] = "automation.run_failed"
     subject_type: ClassVar[str] = "automation_run"
     automation_id: str
+    error: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class WorkflowRunFailed(DomainEvent):
+    """A workflow run failed after its retries; it can be retried from the failed step."""
+
+    event_type: ClassVar[str] = "workflow.run_failed"
+    subject_type: ClassVar[str] = "workflow_run"
+    workflow_id: str
+    workflow_name: str
+    builtin_key: str  # "" for your own workflows
+    record_type: str
+    record_id: str
     error: str

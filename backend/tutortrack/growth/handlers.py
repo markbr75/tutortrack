@@ -11,7 +11,6 @@ from .processes import (
     ReferralInput,
     ReferralRewardWorkflow,
     referral_workflow_id,
-    review_workflow_id,
 )
 
 
@@ -148,17 +147,6 @@ def follow_statement_schedule(event: EventEnvelope) -> None:
 # --- Temporal bridge (E25-TW1) ------------------------------------------------------------------
 
 
-# Review requests are sent, reminded and closed by the Review request built-in workflow
-# (E33 T06); runs of ReviewRequestWorkflow started before still hear about reviews.
-bridge.on(
-    "review.submitted",
-    signal="submitted",
-    id=lambda e: review_workflow_id(e.organisation_id, e.data.get("request_id")),
-    when=lambda e: (
-        bool(e.data.get("request_id"))
-        and _running(review_workflow_id(e.organisation_id, e.data.get("request_id")))
-    ),
-)
 bridge.on(
     "referral.created",
     start=ReferralRewardWorkflow,

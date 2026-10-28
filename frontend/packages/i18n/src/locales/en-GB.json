@@ -8086,7 +8086,7 @@
     "workflow": "Workflow",
     "builtIn": "Built-in",
     "updateAvailable": "TutorTrack has improved this workflow since you changed it. Reset to default to use the new version.",
-    "tooComplex": "This workflow has a split inside a split, which the editor can't show. It still runs as it is; contact support to change it.",
+    "tooComplex": "This workflow has a split inside a split, which the editor can't show. It still runs as it is; contact support from Help to change it.",
     "name": "Name",
     "timeline": "Steps",
     "addAt": "Add a step at position {{n}}",

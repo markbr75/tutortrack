@@ -1,7 +1,7 @@
 """Client feedback micro-surveys (FR-09-9, E09-T09): the write side.
 
-``LessonFeedbackWorkflow`` (see ``processes.py``) waits ``delivery.feedback_delay_hours``
-after a lesson is completed, then calls ``send_for_lesson``: for each student who attended
+The **Lesson feedback request** built-in workflow (E33 T05) waits after a lesson is
+completed, then calls ``send_for_lesson``: for each student who attended
 it decides whether to ask (every Nth lesson with that tutor, starting with the first),
 picks one contact who receives lesson updates and has not opted out, creates the
 ``LessonFeedback`` and sends the E13 ``lesson_feedback_request`` (category ``reports``, so
