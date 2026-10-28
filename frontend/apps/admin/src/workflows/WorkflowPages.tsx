@@ -1,5 +1,5 @@
 import { unwrap, type components } from "@tutortrack/api-client";
-import { formatDateTime, useTranslation } from "@tutortrack/i18n";
+import { useTranslation } from "@tutortrack/i18n";
 import {
   Alert,
   Button,
@@ -10,7 +10,6 @@ import {
   Panel,
   PanelRow,
   PanelRows,
-  RuledTable,
   SelectField,
   Spinner,
   Tabs,
@@ -22,8 +21,10 @@ import { AlertCircle, ArrowDown, ArrowUp, Plus, Split, Trash2 } from "lucide-rea
 import { useId, useState, type ReactNode } from "react";
 
 import { api, usePermission } from "../api";
-import { useIsPhone } from "../billing/useIsPhone";
 import { RecordHeader } from "../components/RecordHeader";
+import { eventLabel, useSchemas, type FieldSchema, type Schema } from "./common";
+import { ComingUp, PreviewPanel } from "./Preview";
+import { RunList, RunRows } from "./Runs";
 import {
   allProblems,
   cardProblems,
@@ -55,10 +56,7 @@ import {
   type WaitMode,
 } from "./sequence";
 
-type Schema = components["schemas"]["WorkflowSchema"];
-type FieldSchema = components["schemas"]["AutomationSchema"];
 type Workflow = components["schemas"]["Automation"];
-type Run = components["schemas"]["AutomationRun"];
 type ActionDef = Schema["actions"][number];
 type RecordType = Schema["record_types"][number];
 type Translate = (key: string, options?: Record<string, unknown>) => string;
@@ -66,21 +64,6 @@ type Translate = (key: string, options?: Record<string, unknown>) => string;
 const linkClass = "underline-offset-2 hover:underline";
 const GROUPS = ["invoicing", "lessons", "sales", "expiry"] as const;
 const WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
-
-function useSchemas() {
-  const schema = useQuery({
-    queryKey: ["workflow-schema"],
-    queryFn: async () => unwrap(await api.GET("/api/v1/workflow-schema")),
-    staleTime: 5 * 60_000,
-  });
-  // Field names and operators, to describe older field checks and offer message variables.
-  const fields = useQuery({
-    queryKey: ["automation-schema"],
-    queryFn: async () => unwrap(await api.GET("/api/v1/automation-schema")),
-    staleTime: 5 * 60_000,
-  });
-  return { schema: schema.data, fields: fields.data };
-}
 
 /** Built-ins are changed with ``automation.builtin.manage``, custom ones with ``.manage``. */
 function useCanChange(): (w?: Workflow) => boolean {
@@ -90,10 +73,6 @@ function useCanChange(): (w?: Workflow) => boolean {
 }
 
 // --- sentences ---------------------------------------------------------------------------------
-
-function eventLabel(schema: Schema, event: string) {
-  return schema.starts.events.find((e) => e.event === event)?.label ?? event;
-}
 
 function questionLabel(schema: Schema, key: string) {
   return schema.questions.find((q) => q.key === key)?.label ?? key;
@@ -412,83 +391,6 @@ function TemplateList({ onInstalled }: { onInstalled: () => void }) {
   );
 }
 
-export function RunRows({ runs, bare = false }: { runs: Run[]; bare?: boolean }) {
-  const { t, i18n } = useTranslation();
-  const queryClient = useQueryClient();
-  const { schema } = useSchemas();
-  const phone = useIsPhone();
-  const retry = useMutation({
-    mutationFn: async (id: string) =>
-      unwrap(await api.POST("/api/v1/workflow-runs/{id}/retry", { params: { path: { id } } })),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["workflow-runs"] }),
-  });
-  const record = (r: Run) =>
-    [
-      schema?.record_types.find((x) => x.key === r.subject_type)?.label ?? r.subject_type,
-      (r.subject_id ?? "").slice(0, 8),
-    ]
-      .filter(Boolean)
-      .join(" ");
-  const started = (r: Run) => formatDateTime(r.started_at, i18n.language);
-  return (
-    <RuledTable
-      framed={!bare}
-      caption={t("workflows.tabs.runs")}
-      empty={runs.length === 0 ? t("automations.noRuns") : undefined}
-      columns={[
-        { header: t("workflows.workflow") },
-        ...(phone
-          ? []
-          : [{ header: t("automations.record") }, { header: t("automations.started") }]),
-        { header: t("automations.status") },
-        { header: t("automations.actions"), hidden: true },
-      ]}
-    >
-      {runs.map((r) => (
-        <tr key={r.id}>
-          <td>
-            <span className="font-medium">{r.automation_name}</span>
-            <span className="block text-xs text-muted-foreground tabular-nums">
-              {phone
-                ? [record(r), started(r)].join(" · ")
-                : t("automations.version", { n: r.version })}
-            </span>
-          </td>
-          {phone ? null : (
-            <>
-              <td className="tabular-nums">{record(r)}</td>
-              <td className="whitespace-nowrap tabular-nums">{started(r)}</td>
-            </>
-          )}
-          <td>
-            <span className={r.status === "failed" ? "font-medium text-danger" : undefined}>
-              {t(`automations.runStatus.${r.status}`)}
-            </span>
-            {r.error ? <span className="block text-xs text-danger">{r.error}</span> : null}
-          </td>
-          <td className="text-right whitespace-nowrap">
-            {r.status === "failed" ? (
-              <Button size="sm" variant="secondary" onClick={() => retry.mutate(r.id)}>
-                {t("automations.retry")}
-              </Button>
-            ) : null}
-          </td>
-        </tr>
-      ))}
-    </RuledTable>
-  );
-}
-
-function RunList() {
-  const { t } = useTranslation();
-  const runs = useQuery({
-    queryKey: ["workflow-runs"],
-    queryFn: async () => unwrap(await api.GET("/api/v1/workflow-runs")),
-  });
-  if (!runs.data) return <Spinner label={t("grid.loading")} />;
-  return <RunRows runs={runs.data.results} />;
-}
-
 // --- editor ------------------------------------------------------------------------------------
 
 type Draft = {
@@ -592,14 +494,18 @@ function Editor({
     ...allProblems(draft.cards, schema.actions).map((p) => problemText(p, t)),
   ];
 
-  const body = (enabled: boolean) => ({
-    name: draft.name,
-    description: workflow?.description ?? "",
+  // The sequence itself: what Save stores and Preview can try unsaved.
+  const sequence = () => ({
     trigger_type: draft.trigger_type,
     trigger_config: draft.trigger_config,
     conditions: draft.conditions,
     steps: toSteps(draft.cards) as unknown as Record<string, unknown>[],
     stop_when: draft.stop_when,
+  });
+  const body = (enabled: boolean) => ({
+    name: draft.name,
+    description: workflow?.description ?? "",
+    ...sequence(),
     enabled,
     max_runs_per_record: workflow?.max_runs_per_record ?? 1,
   });
@@ -818,62 +724,28 @@ function Editor({
             </div>
           </div>
         ) : null}
-        {workflow ? <TestPanel id={workflow.id} /> : null}
+        {workflow && (workflow.trigger_type === "schedule" || workflow.trigger_type === "date") ? (
+          <ComingUp
+            id={workflow.id}
+            version={workflow.version}
+            recordType={workflow.subject_type}
+            changed={
+              JSON.stringify([draft.trigger_type, draft.trigger_config]) !==
+              JSON.stringify([workflow.trigger_type, workflow.trigger_config])
+            }
+          />
+        ) : null}
+        {workflow ? (
+          <PreviewPanel
+            id={workflow.id}
+            recordLabel={(record?.label ?? t("automations.record")).toLowerCase()}
+            draft={dirty ? sequence() : null}
+            blocked={dirty && problems.length > 0}
+          />
+        ) : null}
         {workflow ? <WorkflowRuns id={workflow.id} /> : null}
       </div>
     </article>
-  );
-}
-
-/** A dry run for one record: nothing is sent or changed (Preview replaces it in T08). */
-function TestPanel({ id }: { id: string }) {
-  const { t } = useTranslation();
-  const [record, setRecord] = useState("");
-  const test = useMutation({
-    mutationFn: async () =>
-      unwrap(
-        await api.POST("/api/v1/workflows/{id}/test", {
-          params: { path: { id } },
-          body: { subject_id: record },
-        }),
-      ),
-  });
-  return (
-    <Panel title={t("automations.dryRun")} bodyClassName="space-y-4">
-      <form
-        className="flex flex-wrap items-end gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          test.mutate();
-        }}
-      >
-        <div className="min-w-56 flex-1 sm:max-w-sm">
-          <TextField
-            label={t("automations.recordId")}
-            value={record}
-            onChange={(e) => setRecord(e.target.value)}
-          />
-        </div>
-        <Button type="submit" variant="secondary" disabled={!record} loading={test.isPending}>
-          {t("automations.test")}
-        </Button>
-      </form>
-      {test.error ? <Alert tone="danger">{test.error.message}</Alert> : null}
-      {test.data ? (
-        <div className="space-y-1 text-sm" aria-live="polite">
-          <p className="font-semibold">
-            {test.data.matched ? t("workflows.wouldRun") : t("automations.wouldNotRun")}
-          </p>
-          <ol className="list-decimal space-y-0.5 pl-5">
-            {test.data.steps.map((step) => (
-              <li key={step.key} className={step.ok ? "" : "font-medium text-danger"}>
-                {step.description}
-              </li>
-            ))}
-          </ol>
-        </div>
-      ) : null}
-    </Panel>
   );
 }
 

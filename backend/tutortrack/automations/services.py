@@ -779,6 +779,33 @@ def run_manually(automation: Automation, subject_ids: list[str]) -> list[Automat
     return runs
 
 
+CANCELLED = "cancelled"  # the stop reason of a run staff cancelled (E33 T08)
+
+
+@transaction.atomic
+def cancel(run: AutomationRun, *, user: Any = None) -> AutomationRun:
+    """Cancel a run under way: it ends before its next step (a wait ends now), as a stop
+    when event would, and is recorded as stopped with the reason "cancelled". A run whose
+    Temporal workflow is gone is closed here."""
+    from tutortrack.core.context import tenant_context
+    from tutortrack.core.workflows import signal_now
+
+    run = AutomationRun.objects.select_for_update().get(pk=run.pk)
+    if run.status not in UNDER_WAY:
+        raise BusinessRuleViolation(_("Only runs under way can be cancelled."))
+    audit.record(run, "cancel", {"status": [run.status, AutomationRun.Status.STOPPED]})
+    workflow_id, pk, org_id = run.workflow_id, run.pk, run.organisation_id
+
+    def stop() -> None:
+        if workflow_id and signal_now(workflow_id, "stop", CANCELLED):
+            return
+        with tenant_context(org_id):
+            finish(str(pk), AutomationRun.Status.STOPPED, reason=CANCELLED)
+
+    transaction.on_commit(stop)
+    return run
+
+
 @transaction.atomic
 def retry(run: AutomationRun) -> AutomationRun:
     """Re-run from the failed step (completed steps aren't repeated)."""

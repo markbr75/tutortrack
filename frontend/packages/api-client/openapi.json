@@ -7484,8 +7484,16 @@
         "/api/v1/automation-runs": {
             "get": {
                 "operationId": "automation_runs_list",
-                "description": "Automation runs and their step log (``?status=``).",
+                "description": "Workflow runs, where each one is, and their step log (``?status=``,\n``?automation=``).",
                 "parameters": [
+                    {
+                        "in": "query",
+                        "name": "automation",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "One workflow's runs"
+                    },
                     {
                         "name": "cursor",
                         "required": false,
@@ -7518,7 +7526,8 @@
                         "name": "status",
                         "schema": {
                             "type": "string"
-                        }
+                        },
+                        "description": "A status, or under_way (running, waiting or paused)"
                     }
                 ],
                 "tags": [
@@ -7547,8 +7556,55 @@
         "/api/v1/automation-runs/{id}": {
             "get": {
                 "operationId": "automation_runs_retrieve",
-                "description": "Automation runs and their step log (``?status=``).",
+                "description": "Workflow runs, where each one is, and their step log (``?status=``,\n``?automation=``).",
                 "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation run.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automation-runs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AutomationRunDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/automation-runs/{id}/cancel": {
+            "post": {
+                "operationId": "automation_runs_cancel_create",
+                "description": "Cancel a run under way: it ends before its next step and is recorded as stopped\n(\"cancelled\"). Nothing it already did is undone.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
                     {
                         "in": "path",
                         "name": "id",
@@ -8127,6 +8183,132 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/automations/{id}/preview": {
+            "post": {
+                "operationId": "automations_preview_create",
+                "description": "Preview for a record: the timeline with real dates, the path each split would take\nand what each step would send. Nothing is sent or changed. ``draft`` previews the\neditor's unsaved sequence.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkflowPreviewRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkflowPreviewRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkflowPreviewRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowPreview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/automations/{id}/records": {
+            "get": {
+                "operationId": "automations_records_list",
+                "description": "Records of the workflow's kind to preview with (up to 20, newest first).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search by name"
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RecordOption"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/automations/{id}/reset-to-default": {
             "post": {
                 "operationId": "automations_reset_to_default_create",
@@ -8397,6 +8579,45 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/DryRun"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/automations/{id}/upcoming": {
+            "get": {
+                "operationId": "automations_upcoming_retrieve",
+                "description": "Coming up: a scheduled or date start's next 5 dates and how many records each\nwould pick (empty for event and manual starts).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "automations"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowUpcoming"
                                 }
                             }
                         },
@@ -84496,8 +84717,16 @@
         "/api/v1/workflow-runs": {
             "get": {
                 "operationId": "workflow_runs_list",
-                "description": "Automation runs and their step log (``?status=``).",
+                "description": "Workflow runs, where each one is, and their step log (``?status=``,\n``?automation=``).",
                 "parameters": [
+                    {
+                        "in": "query",
+                        "name": "automation",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "One workflow's runs"
+                    },
                     {
                         "name": "cursor",
                         "required": false,
@@ -84530,7 +84759,8 @@
                         "name": "status",
                         "schema": {
                             "type": "string"
-                        }
+                        },
+                        "description": "A status, or under_way (running, waiting or paused)"
                     }
                 ],
                 "tags": [
@@ -84559,8 +84789,55 @@
         "/api/v1/workflow-runs/{id}": {
             "get": {
                 "operationId": "workflow_runs_retrieve",
-                "description": "Automation runs and their step log (``?status=``).",
+                "description": "Workflow runs, where each one is, and their step log (``?status=``,\n``?automation=``).",
                 "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation run.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "workflow-runs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AutomationRunDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/workflow-runs/{id}/cancel": {
+            "post": {
+                "operationId": "workflow_runs_cancel_create",
+                "description": "Cancel a run under way: it ends before its next step and is recorded as stopped\n(\"cancelled\"). Nothing it already did is undone.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
                     {
                         "in": "path",
                         "name": "id",
@@ -85139,6 +85416,132 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/workflows/{id}/preview": {
+            "post": {
+                "operationId": "workflows_preview_create",
+                "description": "Preview for a record: the timeline with real dates, the path each split would take\nand what each step would send. Nothing is sent or changed. ``draft`` previews the\neditor's unsaved sequence.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkflowPreviewRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkflowPreviewRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkflowPreviewRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowPreview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/workflows/{id}/records": {
+            "get": {
+                "operationId": "workflows_records_list",
+                "description": "Records of the workflow's kind to preview with (up to 20, newest first).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search by name"
+                    }
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RecordOption"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/workflows/{id}/reset-to-default": {
             "post": {
                 "operationId": "workflows_reset_to_default_create",
@@ -85409,6 +85812,45 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/DryRun"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/workflows/{id}/upcoming": {
+            "get": {
+                "operationId": "workflows_upcoming_retrieve",
+                "description": "Coming up: a scheduled or date start's next 5 dates and how many records each\nwould pick (empty for event and manual starts).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this automation.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "workflows"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkflowUpcoming"
                                 }
                             }
                         },
@@ -88726,6 +89168,14 @@
                     "value"
                 ]
             },
+            "AnswerEnum": {
+                "enum": [
+                    "yes",
+                    "no"
+                ],
+                "type": "string",
+                "description": "* `yes` - yes\n* `no` - no"
+            },
             "ApiKey": {
                 "type": "object",
                 "properties": {
@@ -90630,6 +91080,10 @@
                         "type": "string",
                         "readOnly": true
                     },
+                    "automation_kind": {
+                        "type": "string",
+                        "readOnly": true
+                    },
                     "version": {
                         "type": "integer",
                         "readOnly": true
@@ -90675,15 +91129,42 @@
                     "stop_reason": {
                         "type": "string",
                         "maxLength": 80
+                    },
+                    "record_label": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "The record as staff know it (a family's name, an invoice number)."
+                    },
+                    "waiting_until": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true,
+                        "readOnly": true,
+                        "description": "Where the run is: the end of the wait it's in (display only)."
+                    },
+                    "waiting_step": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "The step key of that wait."
+                    },
+                    "steps_done": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "description": "Steps done or skipped so far."
                     }
                 },
                 "required": [
                     "automation",
+                    "automation_kind",
                     "automation_name",
                     "id",
+                    "record_label",
                     "started_at",
+                    "steps_done",
                     "subject_type",
-                    "version"
+                    "version",
+                    "waiting_step",
+                    "waiting_until"
                 ]
             },
             "AutomationRunDetail": {
@@ -90702,6 +91183,10 @@
                         "type": "string",
                         "readOnly": true
                     },
+                    "automation_kind": {
+                        "type": "string",
+                        "readOnly": true
+                    },
                     "version": {
                         "type": "integer",
                         "readOnly": true
@@ -90748,6 +91233,28 @@
                         "type": "string",
                         "maxLength": 80
                     },
+                    "record_label": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "The record as staff know it (a family's name, an invoice number)."
+                    },
+                    "waiting_until": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true,
+                        "readOnly": true,
+                        "description": "Where the run is: the end of the wait it's in (display only)."
+                    },
+                    "waiting_step": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "The step key of that wait."
+                    },
+                    "steps_done": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "description": "Steps done or skipped so far."
+                    },
                     "steps": {
                         "type": "array",
                         "items": {
@@ -90758,12 +91265,17 @@
                 },
                 "required": [
                     "automation",
+                    "automation_kind",
                     "automation_name",
                     "id",
+                    "record_label",
                     "started_at",
                     "steps",
+                    "steps_done",
                     "subject_type",
-                    "version"
+                    "version",
+                    "waiting_step",
+                    "waiting_until"
                 ]
             },
             "AutomationRunStatusEnum": {
@@ -138622,6 +139134,21 @@
                     "subject_type"
                 ]
             },
+            "RecordOption": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "label"
+                ]
+            },
             "RecordPaymentMethodEnum": {
                 "enum": [
                     "direct_debit",
@@ -155271,6 +155798,213 @@
                     "subject"
                 ]
             },
+            "WorkflowPreview": {
+                "type": "object",
+                "properties": {
+                    "record": {
+                        "$ref": "#/components/schemas/WorkflowPreviewRecord"
+                    },
+                    "matched": {
+                        "type": "boolean",
+                        "description": "Whether the start's checks pass for it now."
+                    },
+                    "failed_checks": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true,
+                        "description": "When a run would start for it (null: never, no date)."
+                    },
+                    "starts": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    },
+                    "start_passed": {
+                        "type": "boolean",
+                        "description": "Its last start date has passed."
+                    },
+                    "stop_when": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowPreviewStep"
+                        }
+                    }
+                },
+                "required": [
+                    "failed_checks",
+                    "matched",
+                    "record",
+                    "start",
+                    "start_passed",
+                    "starts",
+                    "steps",
+                    "stop_when"
+                ]
+            },
+            "WorkflowPreviewDraftRequest": {
+                "type": "object",
+                "properties": {
+                    "trigger_type": {
+                        "$ref": "#/components/schemas/AutomationTriggerEnum"
+                    },
+                    "trigger_config": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "conditions": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "stop_when": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    }
+                },
+                "required": [
+                    "steps",
+                    "trigger_config",
+                    "trigger_type"
+                ]
+            },
+            "WorkflowPreviewMessage": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "The notification it sends (Settings > Notifications)."
+                    },
+                    "label": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "label",
+                    "type"
+                ]
+            },
+            "WorkflowPreviewRecord": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "label"
+                ]
+            },
+            "WorkflowPreviewRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "subject_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                    },
+                    "draft": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/WorkflowPreviewDraftRequest"
+                            }
+                        ],
+                        "description": "The editor's unsaved sequence; the saved one without it."
+                    }
+                },
+                "required": [
+                    "subject_id"
+                ]
+            },
+            "WorkflowPreviewStep": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "description": "The step's place: \"2\", or \"2.then.0\" on a path."
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "\"yes\" or \"no\" on a split's path, else empty."
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When it would happen."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "What it would do or send, in words."
+                    },
+                    "ok": {
+                        "type": "boolean",
+                        "description": "False when it couldn't run as things are."
+                    },
+                    "skipped": {
+                        "type": "boolean"
+                    },
+                    "note": {
+                        "type": "string"
+                    },
+                    "answer": {
+                        "$ref": "#/components/schemas/AnswerEnum"
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "message": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/WorkflowPreviewMessage"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "at",
+                    "description",
+                    "key",
+                    "message",
+                    "ok",
+                    "path",
+                    "questions",
+                    "skipped",
+                    "type"
+                ]
+            },
             "WorkflowQuestion": {
                 "type": "object",
                 "properties": {
@@ -155448,6 +156182,51 @@
                     "events",
                     "frequencies",
                     "schedules"
+                ]
+            },
+            "WorkflowUpcoming": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "type": "string",
+                        "description": "The start: event, schedule, date or manual."
+                    },
+                    "dates": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/WorkflowUpcomingDate"
+                        }
+                    },
+                    "before_checks": {
+                        "type": "boolean",
+                        "description": "Counts are before the start's own checks, asked of each record on the day."
+                    },
+                    "looked_ahead_days": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "before_checks",
+                    "dates",
+                    "kind",
+                    "looked_ahead_days"
+                ]
+            },
+            "WorkflowUpcomingDate": {
+                "type": "object",
+                "properties": {
+                    "at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "description": "Records the start would pick then."
+                    }
+                },
+                "required": [
+                    "at",
+                    "count"
                 ]
             },
             "XeroEarningsRate": {

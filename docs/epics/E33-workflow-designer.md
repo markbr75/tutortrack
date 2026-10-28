@@ -1,6 +1,6 @@
 # E33 — Workflow Designer
 
-- **Status:** In progress (T01 to T07 done 2026-10-26)
+- **Status:** In progress (T01 to T08 done 2026-10-27)
 - **Depends on:** E14 Automation (the engine it grows from), E32 Temporal, E10 Billing, E13
   Communications, E09 Delivery, E17 Leads, E18 Recruitment, E24 Growth
 - **ADR:** [0047](../adr/0047-workflow-designer-on-the-automation-engine.md)
@@ -225,7 +225,7 @@ Each ticket is one pull request, merged when CI is green.
   splits, Stop when, + Add a step, Move up and down, problems in words, Save and switch on,
   Reset to default. Replaces the Automations pages. WCAG 2.2 AA; usability check with the
   built-ins (a first-time owner can change "when invoices go out" in under a minute).
-- [ ] **T08 — Preview, coming up and runs.** Preview for a family, coming-up dates with
+- [x] **T08 — Preview, coming up and runs.** Preview for a family, coming-up dates with
   counts, the runs list with where each run is, cancel and retry.
 - [ ] **T09 — Migration and docs.** Automations → custom workflows (their branches map to
   splits; any that don't fit stay as they are and open read-only with "Contact support"),
@@ -584,3 +584,40 @@ against the API.
   Deviation: it hasn't been tried with a real first-time owner, and the Playwright specs
   couldn't run locally (the browser's system libraries are missing in WSL); they run with
   the e2e suite.
+
+**T08 (2026-10-27).**
+- **Preview for a record** (`POST /workflows/{id}/preview`, `automations/selectors.py`): pick
+  a real record (`GET /workflows/{id}/records?q=`, up to 20 of the workflow's kind, newest
+  first, searched by name, number or title) and see when a run would start and when each
+  step would happen, with real dates from the same timing code a run uses (`timing.resume_at`
+  in the record's branch calendar). A split shows its question, the answer and only the path
+  it would take; a step whose "only if" isn't met shows as skipped with the question; a step
+  that sends one of TutorTrack's notifications names it, with **Edit wording**. The start:
+  now for an event or by hand, the next time for a schedule, and for a date start each of
+  its days (or times) for the record's own date, this year's for a birthday. `draft` previews
+  the editor's unsaved start, checks and steps, checked as a save would be (without the
+  author's action permissions, as nothing runs). Nothing is sent or changed: actions only
+  `describe`. Questions are answered as the record is now, and the page says a run asks
+  them again at each step. **Test with a record** (the E14 dry run) is gone from the editor;
+  `POST /automations/{id}/test` stays for one release.
+- **Coming up** (`GET /workflows/{id}/upcoming`): a schedule's next 5 times with how many
+  records each would pick (the same `due_records` the schedule uses); for a daily date start,
+  the next 5 days with records in the next 92 days; for a "near a date" start (lesson
+  reminders), the next 5 quarter-hour sweeps with records due. Deviation: counts are before
+  the start's own "only if" questions (`before_checks` says so), as asking every record's
+  questions for five dates would be slow for large organisations. The panel shows the saved
+  start and says to save to see changed dates.
+- **Where each run is:** the run list and detail gain `record_label` (the record as staff
+  know it), `waiting_until` and `waiting_step` (the wait it's in, from the step log's
+  `resume_at`), `steps_done` and `automation_kind`; `?status=under_way` and `?automation=`
+  filter the list. Deviation from §3: no `waiting_for`/`next_wake_at` columns on the run;
+  the step log already holds the wake time (display only), so nothing new is stored and
+  nothing sweeps it. The Runs tab says "Waiting until 12 Nov 2026, 09:00", "Held: the
+  workflow is paused", "Stopped: Invoice paid", "Cancelled" and so on, filters by all, under
+  way or failed, and **Steps** shows the step log in words.
+- **Cancel** (`POST /workflow-runs/{id}/cancel`, audited `cancel`): the run's `stop` signal
+  with the reason `cancelled`, so it ends before its next step and a wait ends at once,
+  exactly as for **Stop when** (no workflow change and no new history). It finishes
+  `stopped` with `stop_reason` `cancelled`; a run whose Temporal workflow is gone is closed
+  directly. Cancelling and retrying now need the permission that changes the run's workflow
+  (`automation.builtin.manage` for a built-in), as finance can change billing built-ins.
