@@ -224,7 +224,7 @@
         <h1>TutorTrack admin guide</h1>
         <p class="lead">How to set up and configure a tutoring business on TutorTrack, and how
           the TutorTrack service itself is operated.</p>
-        <p class="meta">Last updated: 2026-10-26</p>
+        <p class="meta">Last updated: 2026-10-27</p>
       </header>
 
       <section id="overview" aria-labelledby="overview-h">
@@ -1236,8 +1236,19 @@
           <li><span class="ui">Save</span> applies to new runs; runs already under way finish on
             the steps they started with, and the page says how many there are.
             <span class="ui">Save and switch on</span> does both for a workflow that is off.</li>
-          <li><span class="ui">Test with a record</span> takes a record ID and shows whether it
-            matches and what each step would do. Nothing is sent.</li>
+          <li><strong>Preview for a record:</strong> under the timeline, find a real family,
+            lesson, invoice or enquiry (whichever the workflow is about) and select
+            <span class="ui">Preview</span>. You see when it would start and when each step
+            would happen, with real dates, which way each split would go, which steps would be
+            skipped and why, and what each step would send (with <span class="ui">Edit
+            wording</span>). With unsaved changes it previews them. Nothing is sent or changed.
+            Questions are answered as the record is now; a real run asks them again at each
+            step.</li>
+          <li><strong>Coming up:</strong> a workflow on a schedule or before or after a date
+            lists its next five dates and how many records each would pick ("1 Dec 2026, 06:00:
+            3 branches"). For a date start it looks three months ahead. The counts are before
+            the start's own <span class="ui">Only if</span> questions, which each record is
+            asked on the day.</li>
           <li><span class="ui">Pause</span> holds runs under way before their next step and
             starts no new ones until you <span class="ui">Resume</span>. Switching a workflow
             off (the switch in the list) stops new runs only.</li>
@@ -1247,6 +1258,25 @@
           running; contact support to change it. When a step can't apply any more (for example
           a late fee on an invoice that is now paid), the run shows it as
           <span class="ui">Skipped</span> with the reason; nothing is charged or sent.</p>
+
+        <h3 id="automations-runs">Runs</h3>
+        <p>The <span class="ui">Runs</span> tab lists every run, newest first (and a workflow's
+          page lists its own). <span class="ui">Show</span> picks all runs, those
+          <span class="ui">Under way</span> or those that <span class="ui">Failed</span>. Each
+          row says whose record it is and where it is: "Waiting until 12 Nov 2026, 09:00",
+          "Running, 2 steps done", "Held: the workflow is paused", "Stopped: Invoice paid",
+          "Cancelled" or "Finished". <span class="ui">Steps</span> shows the steps so far, with
+          waits, answers to splits and anything skipped and why.</p>
+        <ul>
+          <li><span class="ui">Cancel</span> (runs under way) stops the run before its next
+            step; a wait it is in ends at once. Nothing it already did is undone, and the run
+            shows <span class="ui">Cancelled</span>.</li>
+          <li><span class="ui">Retry from the failed step</span> (failed runs) carries on from
+            the step that failed; steps already done aren't repeated.</li>
+          <li>Cancelling and retrying need the permission that changes the workflow:
+            <code>automation.builtin.manage</code> for a built-in, <code>automation.manage</code>
+            for your own.</li>
+        </ul>
 
         <h3 id="automations-builtin">Built-in workflows</h3>
         <p>TutorTrack installs a set of <strong>built-in workflows</strong> for every
@@ -2243,7 +2273,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>TutorTrack admin guide · Last updated: 2026-10-26 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
+    <p>TutorTrack admin guide · Last updated: 2026-10-27 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
   </footer>
 </body>
 </html>

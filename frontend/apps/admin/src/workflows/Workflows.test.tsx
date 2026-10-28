@@ -120,6 +120,18 @@ const REMINDERS = {
              update_available: false, can_switch_off: true, off_means: "" },
 }; // prettier-ignore
 
+const RUN = {
+  id: "r1", automation: "w2", automation_name: "Payment chasing", automation_kind: "builtin",
+  version: 2, subject_type: "invoice", subject_id: "i1234567890", record_label: "INV-0042",
+  event_type: "", status: "failed", started_at: "2026-10-10T09:00:00Z", finished_at: null,
+  causation_depth: 0, attempts: 1, error: "The card was declined", stop_reason: "",
+  waiting_until: null, waiting_step: "", steps_done: 1,
+}; // prettier-ignore
+const WAITING = {
+  ...RUN, id: "r2", record_label: "INV-0043", status: "waiting", error: "",
+  waiting_until: "2026-11-12T09:00:00Z", waiting_step: "2",
+}; // prettier-ignore
+
 function editor(workflow: Record<string, unknown>, extra: Record<string, unknown> = {}) {
   const id = String(workflow.id);
   window.history.pushState(null, "", `/workflows/${id}`);
@@ -129,6 +141,7 @@ function editor(workflow: Record<string, unknown>, extra: Record<string, unknown
     "GET /api/v1/automation-schema": { body: FIELDS },
     [`GET /api/v1/workflows/${id}`]: { body: workflow },
     [`GET /api/v1/workflows/${id}/runs`]: { body: [] },
+    [`GET /api/v1/workflows/${id}/records`]: { body: [] },
     [`PUT /api/v1/workflows/${id}`]: (body: unknown) => ({
       body: { ...workflow, ...(body as object), version: Number(workflow.version) + 1 },
     }),
@@ -154,12 +167,8 @@ describe("the workflows list", () => {
       }, // prettier-ignore
       "POST /api/v1/automation-recipes/birthdays/install": { status: 201, body: INVOICING },
       "GET /api/v1/workflow-runs": {
-        body: { results: [{ id: "r1", automation: "w2", automation_name: "Payment chasing",
-                            version: 2, subject_type: "invoice", subject_id: "i1234567890",
-                            event_type: "", status: "failed", started_at: "2026-10-10T09:00:00Z",
-                            finished_at: null, causation_depth: 0, attempts: 1,
-                            error: "The card was declined" }], next: null, previous: null },
-      }, // prettier-ignore
+        body: { results: [RUN, WAITING], next: null, previous: null },
+      },
       "POST /api/v1/workflow-runs/r1/retry": { body: {} },
     });
     render(<App />);
@@ -181,6 +190,57 @@ describe("the workflows list", () => {
     const row = (await screen.findByText("The card was declined")).closest("tr") as HTMLElement;
     fireEvent.click(within(row).getByRole("button", { name: "Retry from the failed step" }));
     await waitFor(() => expect(calls.some((c) => c.path.endsWith("/r1/retry"))).toBe(true));
+  });
+});
+
+describe("runs", () => {
+  it("says where each run is, shows its steps so far and cancels one under way", async () => {
+    window.history.pushState(null, "", "/workflows");
+    const calls = mockApi({
+      ...BASE,
+      "GET /api/v1/workflow-schema": { body: SCHEMA },
+      "GET /api/v1/automation-schema": { body: FIELDS },
+      "GET /api/v1/workflows": { body: [CHASING] },
+      "GET /api/v1/workflow-runs": (_body: unknown, url: URL) => ({
+        body: {
+          results: url.searchParams.get("status") === "under_way" ? [WAITING] : [RUN, WAITING],
+          next: null,
+          previous: null,
+        },
+      }),
+      "GET /api/v1/workflow-runs/r2": {
+        body: { ...WAITING, steps: [
+          { step_key: "0", step_type: "wait", status: "completed",
+            resume_at: "2026-10-29T09:00:00Z", result: {}, error: "", updated_at: "" },
+          { step_key: "1", step_type: "action", status: "completed", resume_at: null,
+            result: {}, error: "", updated_at: "" },
+          { step_key: "2", step_type: "wait", status: "waiting",
+            resume_at: "2026-11-12T09:00:00Z", result: {}, error: "", updated_at: "" },
+        ] },
+      }, // prettier-ignore
+      "POST /api/v1/workflow-runs/r2/cancel": { body: { ...WAITING, steps: [] } },
+    });
+    vi.stubGlobal("confirm", () => true);
+    render(<App />);
+    fireEvent.click(await screen.findByRole("tab", { name: "Runs" }));
+    const row = (await screen.findByText("INV-0043")).closest("tr") as HTMLElement;
+    expect(within(row).getByText(/^Waiting until 12 Nov 2026/)).toBeInTheDocument();
+    // The failed run has Retry, not Cancel; the waiting one has Cancel.
+    const failed = screen.getByText("INV-0042").closest("tr") as HTMLElement;
+    expect(within(failed).queryByRole("button", { name: "Cancel" })).toBeNull();
+
+    fireEvent.click(within(row).getByRole("button", { name: "Steps so far: Payment chasing" }));
+    const steps = await screen.findByRole("list", { name: "Steps so far" });
+    expect(within(steps).getByText(/^Waited until 29 Oct 2026/)).toBeInTheDocument();
+    expect(within(steps).getByText("Done")).toBeInTheDocument();
+    expect(within(steps).getByText(/^Waiting until 12 Nov 2026/)).toBeInTheDocument();
+
+    fireEvent.click(within(row).getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(calls.some((c) => c.path.endsWith("/r2/cancel"))).toBe(true));
+
+    fireEvent.change(screen.getByLabelText("Show"), { target: { value: "under_way" } });
+    await waitFor(() => expect(calls.some((c) => c.search === "?status=under_way")).toBe(true));
+    await waitFor(() => expect(screen.queryByText("INV-0042")).toBeNull());
   });
 });
 
@@ -293,6 +353,71 @@ describe("the sequence editor", () => {
       trigger_config: { subject: "lesson", field: "start", minutes: [-1440, -60] },
       conditions: { predicate: "lesson.still_planned" },
     });
+  });
+
+  it("previews a real record with its dates, the path a split takes and what it sends", async () => {
+    const calls = editor(CHASING, {
+      "GET /api/v1/workflows/w2/records": { body: [{ id: "i1", label: "INV-0042" }] },
+      "POST /api/v1/workflows/w2/preview": {
+        body: {
+          record: { id: "i1", label: "INV-0042" }, matched: true, failed_checks: [],
+          start: "2026-11-03T10:30:00Z", starts: ["2026-11-03T10:30:00Z"], start_passed: false,
+          stop_when: ["Invoice paid"],
+          steps: [
+            { key: "0", path: "", type: "wait", at: "2026-11-11T09:00:00Z", ok: true,
+              skipped: false, description: "Wait until 3 days before invoice.due_date",
+              questions: [], message: null },
+            { key: "1", path: "", type: "branch", at: "2026-11-11T09:00:00Z", ok: true,
+              skipped: false, description: "No", answer: "no",
+              questions: ["The family pays automatically"], message: null },
+            { key: "1.else.0", path: "no", type: "action", at: "2026-11-11T09:00:00Z", ok: true,
+              skipped: false, description: "Remind the family the invoice is due or overdue",
+              questions: [], message: { type: "invoice_reminder", label: "Invoice reminder" } },
+            { key: "2", path: "", type: "action", at: "2026-11-11T09:00:00Z", ok: true,
+              skipped: true, description: "Collect payment now",
+              questions: ["The invoice is still unpaid"], message: null },
+          ],
+        },
+      }, // prettier-ignore
+    });
+    render(<App />);
+    const panel = await screen.findByRole("region", { name: "Preview for a record" });
+    const which = within(panel).getByLabelText("Which invoice");
+    await within(panel).findByRole("option", { name: "INV-0042" });
+    fireEvent.change(which, { target: { value: "i1" } });
+    fireEvent.click(within(panel).getByRole("button", { name: "Preview" }));
+    const result = await within(panel).findByRole("region", { name: "Preview for INV-0042" });
+    expect(within(result).getByText(/^It would start on 3 Nov 2026/)).toBeInTheDocument();
+    expect(within(result).getByText("It stops early if: Invoice paid.")).toBeInTheDocument();
+    expect(within(result).getByText("The family pays automatically? No")).toBeInTheDocument();
+    expect(within(result).getAllByText(/^No path · 11 Nov 2026/)).toHaveLength(1);
+    expect(within(result).getByText(/Sends “Invoice reminder”/)).toBeInTheDocument();
+    expect(within(result).getByRole("link", { name: "Edit wording" })).toHaveAttribute(
+      "href",
+      "/settings/notifications?edit=invoice_reminder",
+    );
+    expect(
+      within(result).getByText("Skipped, because “The invoice is still unpaid” isn't so"),
+    ).toBeInTheDocument();
+    // Nothing unsaved, so it previews the saved steps.
+    const sent = calls.find((c) => c.path.endsWith("/preview"))?.body as Record<string, unknown>;
+    expect(sent).toEqual({ subject_id: "i1" });
+  });
+
+  it("lists what's coming up for a scheduled start", async () => {
+    editor(INVOICING, {
+      "GET /api/v1/workflows/w1/upcoming": {
+        body: { kind: "schedule", before_checks: false, looked_ahead_days: 0, dates: [
+          { at: "2026-12-01T06:00:00Z", count: 2 }, { at: "2027-01-01T06:00:00Z", count: 1 },
+        ] },
+      }, // prettier-ignore
+    });
+    render(<App />);
+    const panel = await screen.findByRole("region", { name: "Coming up" });
+    expect(
+      await within(panel).findByText(/^1 Dec 2026, \d\d:\d\d: 2 branches$/),
+    ).toBeInTheDocument();
+    expect(within(panel).getByText(/: 1 branch$/)).toBeInTheDocument();
   });
 
   it("pauses a workflow", async () => {

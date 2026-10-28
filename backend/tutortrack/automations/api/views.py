@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 from tutortrack.core.api.viewsets import TenantScopedViewMixin
 from tutortrack.core.permissions import HasMethodPermission, HasOrganisation, has_perm
 
-from .. import builtin_workflows, catalogue, conditions, recipes, registry, services
+from .. import builtin_workflows, catalogue, conditions, recipes, registry, selectors, services
 from ..models import Automation, AutomationRun
 from . import serializers as s
 
@@ -47,6 +47,26 @@ class CanManageWorkflow(BasePermission):
         if obj.kind == Automation.Kind.BUILTIN:
             return has_perm(request.user, "automation.builtin.manage")
         return has_perm(request.user, "automation.manage")
+
+
+class CanManageRun(BasePermission):
+    """Reads need ``automation.view``; cancelling or retrying a run needs the permission that
+    changes its workflow (built-in or custom)."""
+
+    def has_permission(self, request: Request, view: Any) -> bool:
+        if request.method in SAFE_METHODS:
+            return has_perm(request.user, "automation.view")
+        return has_perm(request.user, "automation.manage") or has_perm(
+            request.user, "automation.builtin.manage"
+        )
+
+    def has_object_permission(self, request: Request, view: Any, obj: AutomationRun) -> bool:
+        return CanManageWorkflow().has_object_permission(request, view, obj.automation)
+
+
+def _run_rows(rows: list[AutomationRun]) -> Any:
+    labels = selectors.labels_for(rows)
+    return s.AutomationRunSerializer(rows, many=True, context={"labels": labels}).data
 
 
 class AutomationViewSet(TenantScopedViewMixin, viewsets.ModelViewSet):
@@ -163,6 +183,39 @@ class AutomationViewSet(TenantScopedViewMixin, viewsets.ModelViewSet):
         result = services.dry_run(self.get_object(), payload.validated_data["subject_id"])
         return Response(s.DryRunSerializer(result).data)
 
+    @extend_schema(
+        request=s.WorkflowPreviewRequestSerializer, responses=s.WorkflowPreviewSerializer
+    )
+    @action(detail=True, methods=["post"])
+    def preview(self, request: Request, pk: Any = None) -> Response:
+        """Preview for a record: the timeline with real dates, the path each split would take
+        and what each step would send. Nothing is sent or changed. ``draft`` previews the
+        editor's unsaved sequence."""
+        payload = s.WorkflowPreviewRequestSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        result = selectors.preview(self.get_object(), data["subject_id"], data.get("draft"))
+        return Response(s.WorkflowPreviewSerializer(result).data)
+
+    @extend_schema(responses=s.WorkflowUpcomingSerializer)
+    @action(detail=True, methods=["get"])
+    def upcoming(self, request: Request, pk: Any = None) -> Response:
+        """Coming up: a scheduled or date start's next 5 dates and how many records each
+        would pick (empty for event and manual starts)."""
+        return Response(s.WorkflowUpcomingSerializer(selectors.upcoming(self.get_object())).data)
+
+    @extend_schema(
+        parameters=[OpenApiParameter("q", str, required=False, description="Search by name")],
+        responses=s.RecordOptionSerializer(many=True),
+    )
+    @action(detail=True, methods=["get"])
+    def records(self, request: Request, pk: Any = None) -> Response:
+        """Records of the workflow's kind to preview with (up to 20, newest first)."""
+        rows = selectors.find_records(
+            self.get_object().subject_type, request.query_params.get("q", "")[:100]
+        )
+        return Response(s.RecordOptionSerializer(rows, many=True).data)
+
     @extend_schema(request=s.ManualRunSerializer, responses=s.StartedSerializer)
     @action(detail=True, methods=["post"])
     def run(self, request: Request, pk: Any = None) -> Response:
@@ -175,32 +228,54 @@ class AutomationViewSet(TenantScopedViewMixin, viewsets.ModelViewSet):
     @extend_schema(responses=s.AutomationRunSerializer(many=True))
     @action(detail=True, methods=["get"])
     def runs(self, request: Request, pk: Any = None) -> Response:
-        rows = AutomationRun.objects.filter(automation=self.get_object()).select_related(
-            "automation", "version"
-        )[:100]  # fmt: skip
-        return Response(s.AutomationRunSerializer(rows, many=True).data)
+        rows = selectors.with_position(
+            AutomationRun.objects.filter(automation=self.get_object()).select_related(
+                "automation", "version"
+            )
+        )[:100]
+        return Response(_run_rows(list(rows)))
 
 
 class AutomationRunViewSet(
     TenantScopedViewMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):  # fmt: skip
-    """Automation runs and their step log (``?status=``)."""
+    """Workflow runs, where each one is, and their step log (``?status=``,
+    ``?automation=``)."""
 
     model = AutomationRun
-    permission_classes = PERMS
+    permission_classes = [*AUTH, CanManageRun]
 
     def get_tenant_queryset(self) -> Any:
-        qs = AutomationRun.objects.select_related("automation", "version")
-        state = self.request.query_params.get("status")
-        return qs.filter(status=state) if state else qs
+        qs = selectors.with_position(AutomationRun.objects.select_related("automation", "version"))
+        params = self.request.query_params
+        if params.get("status") == "under_way":
+            qs = qs.filter(status__in=services.UNDER_WAY)
+        elif params.get("status"):
+            qs = qs.filter(status=params["status"])
+        if params.get("automation"):
+            qs = qs.filter(automation_id=params["automation"])
+        return qs
+
+    def get_serializer(self, *args: Any, **kwargs: Any) -> Any:
+        if args and args[0] is not None and not isinstance(args[0], dict):
+            rows = list(args[0]) if kwargs.get("many") else [args[0]]
+            context = kwargs.setdefault("context", self.get_serializer_context())
+            context["labels"] = selectors.labels_for(rows)
+        return super().get_serializer(*args, **kwargs)
 
     def get_serializer_class(self) -> Any:
         return (
             s.AutomationRunDetailSerializer if self.action != "list" else s.AutomationRunSerializer
         )
 
-    @extend_schema(parameters=[OpenApiParameter("status", str, required=False)])
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("status", str, required=False,
+                             description="A status, or under_way (running, waiting or paused)"),
+            OpenApiParameter("automation", str, required=False, description="One workflow's runs"),
+        ]
+    )  # fmt: skip
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
@@ -209,7 +284,19 @@ class AutomationRunViewSet(
     def retry(self, request: Request, pk: Any = None) -> Response:
         """Re-run a failed run from its failed step."""
         run = services.retry(self.get_object())
-        return Response(s.AutomationRunDetailSerializer(run).data)
+        return Response(self._detail(run))
+
+    @extend_schema(request=None, responses=s.AutomationRunDetailSerializer)
+    @action(detail=True, methods=["post"])
+    def cancel(self, request: Request, pk: Any = None) -> Response:
+        """Cancel a run under way: it ends before its next step and is recorded as stopped
+        ("cancelled"). Nothing it already did is undone."""
+        run = services.cancel(self.get_object(), user=request.user)
+        return Response(self._detail(run))
+
+    def _detail(self, run: AutomationRun) -> Any:
+        fresh = self.get_tenant_queryset().get(pk=run.pk)
+        return self.get_serializer(fresh).data
 
 
 class RecipesView(APIView):

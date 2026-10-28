@@ -2261,7 +2261,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description Automation runs and their step log (``?status=``). */
+    /**
+     * @description Workflow runs, where each one is, and their step log (``?status=``,
+     *     ``?automation=``).
+     */
     get: operations["automation_runs_list"];
     put?: never;
     post?: never;
@@ -2278,10 +2281,33 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description Automation runs and their step log (``?status=``). */
+    /**
+     * @description Workflow runs, where each one is, and their step log (``?status=``,
+     *     ``?automation=``).
+     */
     get: operations["automation_runs_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automation-runs/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Cancel a run under way: it ends before its next step and is recorded as stopped
+     *     ("cancelled"). Nothing it already did is undone.
+     */
+    post: operations["automation_runs_cancel_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -2428,6 +2454,44 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/automations/{id}/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Preview for a record: the timeline with real dates, the path each split would take
+     *     and what each step would send. Nothing is sent or changed. ``draft`` previews the
+     *     editor's unsaved sequence.
+     */
+    post: operations["automations_preview_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automations/{id}/records": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Records of the workflow's kind to preview with (up to 20, newest first). */
+    get: operations["automations_records_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/automations/{id}/reset-to-default": {
     parameters: {
       query?: never;
@@ -2510,6 +2574,26 @@ export interface paths {
     put?: never;
     /** @description Dry run against a record: whether it matches and what each step would do. */
     post: operations["automations_test_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/automations/{id}/upcoming": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Coming up: a scheduled or date start's next 5 dates and how many records each
+     *     would pick (empty for event and manual starts).
+     */
+    get: operations["automations_upcoming_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -22403,7 +22487,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description Automation runs and their step log (``?status=``). */
+    /**
+     * @description Workflow runs, where each one is, and their step log (``?status=``,
+     *     ``?automation=``).
+     */
     get: operations["workflow_runs_list"];
     put?: never;
     post?: never;
@@ -22420,10 +22507,33 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description Automation runs and their step log (``?status=``). */
+    /**
+     * @description Workflow runs, where each one is, and their step log (``?status=``,
+     *     ``?automation=``).
+     */
     get: operations["workflow_runs_retrieve"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflow-runs/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Cancel a run under way: it ends before its next step and is recorded as stopped
+     *     ("cancelled"). Nothing it already did is undone.
+     */
+    post: operations["workflow_runs_cancel_create"];
     delete?: never;
     options?: never;
     head?: never;
@@ -22573,6 +22683,44 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/workflows/{id}/preview": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Preview for a record: the timeline with real dates, the path each split would take
+     *     and what each step would send. Nothing is sent or changed. ``draft`` previews the
+     *     editor's unsaved sequence.
+     */
+    post: operations["workflows_preview_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}/records": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Records of the workflow's kind to preview with (up to 20, newest first). */
+    get: operations["workflows_records_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/workflows/{id}/reset-to-default": {
     parameters: {
       query?: never;
@@ -22655,6 +22803,26 @@ export interface paths {
     put?: never;
     /** @description Dry run against a record: whether it matches and what each step would do. */
     post: operations["workflows_test_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/workflows/{id}/upcoming": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Coming up: a scheduled or date start's next 5 dates and how many records each
+     *     would pick (empty for event and manual starts).
+     */
+    get: operations["workflows_upcoming_retrieve"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -23696,6 +23864,12 @@ export interface components {
       type: string;
       value: unknown;
     };
+    /**
+     * @description * `yes` - yes
+     *     * `no` - no
+     * @enum {string}
+     */
+    AnswerEnum: "yes" | "no";
     ApiKey: {
       /** Format: uuid */
       readonly id: string;
@@ -24321,6 +24495,7 @@ export interface components {
       /** Format: uuid */
       automation: string;
       readonly automation_name: string;
+      readonly automation_kind: string;
       readonly version: number;
       subject_type: string;
       subject_id?: string;
@@ -24334,6 +24509,17 @@ export interface components {
       attempts?: number;
       error?: string;
       stop_reason?: string;
+      /** @description The record as staff know it (a family's name, an invoice number). */
+      readonly record_label: string;
+      /**
+       * Format: date-time
+       * @description Where the run is: the end of the wait it's in (display only).
+       */
+      readonly waiting_until: string | null;
+      /** @description The step key of that wait. */
+      readonly waiting_step: string;
+      /** @description Steps done or skipped so far. */
+      readonly steps_done: number;
     };
     AutomationRunDetail: {
       /** Format: uuid */
@@ -24341,6 +24527,7 @@ export interface components {
       /** Format: uuid */
       automation: string;
       readonly automation_name: string;
+      readonly automation_kind: string;
       readonly version: number;
       subject_type: string;
       subject_id?: string;
@@ -24354,6 +24541,17 @@ export interface components {
       attempts?: number;
       error?: string;
       stop_reason?: string;
+      /** @description The record as staff know it (a family's name, an invoice number). */
+      readonly record_label: string;
+      /**
+       * Format: date-time
+       * @description Where the run is: the end of the wait it's in (display only).
+       */
+      readonly waiting_until: string | null;
+      /** @description The step key of that wait. */
+      readonly waiting_step: string;
+      /** @description Steps done or skipped so far. */
+      readonly steps_done: number;
       readonly steps: components["schemas"]["RunStep"][];
     };
     /**
@@ -40232,6 +40430,10 @@ export interface components {
       /** @default false */
       on_behalf_of_child: boolean;
     };
+    RecordOption: {
+      id: string;
+      label: string;
+    };
     /**
      * @description * `direct_debit` - Direct debit
      *     * `bank_transfer` - Bank transfer
@@ -45499,6 +45701,70 @@ export interface components {
       /** @description The date its first wait counts from. */
       date: string;
     };
+    WorkflowPreview: {
+      record: components["schemas"]["WorkflowPreviewRecord"];
+      /** @description Whether the start's checks pass for it now. */
+      matched: boolean;
+      failed_checks: string[];
+      /**
+       * Format: date-time
+       * @description When a run would start for it (null: never, no date).
+       */
+      start: string | null;
+      starts: string[];
+      /** @description Its last start date has passed. */
+      start_passed: boolean;
+      stop_when: string[];
+      steps: components["schemas"]["WorkflowPreviewStep"][];
+    };
+    WorkflowPreviewDraftRequest: {
+      trigger_type: components["schemas"]["AutomationTriggerEnum"];
+      trigger_config: {
+        [key: string]: unknown;
+      };
+      conditions?: {
+        [key: string]: unknown;
+      };
+      steps: {
+        [key: string]: unknown;
+      }[];
+      stop_when?: string[];
+    };
+    WorkflowPreviewMessage: {
+      /** @description The notification it sends (Settings > Notifications). */
+      type: string;
+      label: string;
+    };
+    WorkflowPreviewRecord: {
+      id: string;
+      label: string;
+    };
+    WorkflowPreviewRequestRequest: {
+      subject_id: string;
+      /** @description The editor's unsaved sequence; the saved one without it. */
+      draft?: components["schemas"]["WorkflowPreviewDraftRequest"];
+    };
+    WorkflowPreviewStep: {
+      /** @description The step's place: "2", or "2.then.0" on a path. */
+      key: string;
+      /** @description "yes" or "no" on a split's path, else empty. */
+      path: string;
+      type: string;
+      /**
+       * Format: date-time
+       * @description When it would happen.
+       */
+      at: string;
+      /** @description What it would do or send, in words. */
+      description: string;
+      /** @description False when it couldn't run as things are. */
+      ok: boolean;
+      skipped: boolean;
+      note?: string;
+      answer?: components["schemas"]["AnswerEnum"];
+      questions: string[];
+      message: components["schemas"]["WorkflowPreviewMessage"] | null;
+    };
     WorkflowQuestion: {
       key: string;
       label: string;
@@ -45540,6 +45806,20 @@ export interface components {
       dates: components["schemas"]["WorkflowDateStart"][];
       schedules: components["schemas"]["WorkflowScheduleStart"][];
       frequencies: string[];
+    };
+    WorkflowUpcoming: {
+      /** @description The start: event, schedule, date or manual. */
+      kind: string;
+      dates: components["schemas"]["WorkflowUpcomingDate"][];
+      /** @description Counts are before the start's own checks, asked of each record on the day. */
+      before_checks: boolean;
+      looked_ahead_days: number;
+    };
+    WorkflowUpcomingDate: {
+      /** Format: date-time */
+      at: string;
+      /** @description Records the start would pick then. */
+      count: number;
     };
     XeroEarningsRate: {
       id: string;
@@ -49134,12 +49414,15 @@ export interface operations {
   automation_runs_list: {
     parameters: {
       query?: {
+        /** @description One workflow's runs */
+        automation?: string;
         /** @description The pagination cursor value. */
         cursor?: string;
         /** @description Which field to use when ordering the results. */
         ordering?: string;
         /** @description Number of results to return per page. */
         page_size?: number;
+        /** @description A status, or under_way (running, waiting or paused) */
         status?: string;
       };
       header?: never;
@@ -49162,6 +49445,31 @@ export interface operations {
     parameters: {
       query?: never;
       header?: never;
+      path: {
+        /** @description A UUID string identifying this automation run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AutomationRunDetail"];
+        };
+      };
+    };
+  };
+  automation_runs_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
       path: {
         /** @description A UUID string identifying this automation run. */
         id: string;
@@ -49472,6 +49780,64 @@ export interface operations {
       };
     };
   };
+  automations_preview_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WorkflowPreviewRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["WorkflowPreviewRequestRequest"];
+        "multipart/form-data": components["schemas"]["WorkflowPreviewRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorkflowPreview"];
+        };
+      };
+    };
+  };
+  automations_records_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Search by name */
+        q?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RecordOption"][];
+        };
+      };
+    };
+  };
   automations_reset_to_default_create: {
     parameters: {
       query?: never;
@@ -49605,6 +49971,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["DryRun"];
+        };
+      };
+    };
+  };
+  automations_upcoming_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorkflowUpcoming"];
         };
       };
     };
@@ -85692,12 +86080,15 @@ export interface operations {
   workflow_runs_list: {
     parameters: {
       query?: {
+        /** @description One workflow's runs */
+        automation?: string;
         /** @description The pagination cursor value. */
         cursor?: string;
         /** @description Which field to use when ordering the results. */
         ordering?: string;
         /** @description Number of results to return per page. */
         page_size?: number;
+        /** @description A status, or under_way (running, waiting or paused) */
         status?: string;
       };
       header?: never;
@@ -85720,6 +86111,31 @@ export interface operations {
     parameters: {
       query?: never;
       header?: never;
+      path: {
+        /** @description A UUID string identifying this automation run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AutomationRunDetail"];
+        };
+      };
+    };
+  };
+  workflow_runs_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
       path: {
         /** @description A UUID string identifying this automation run. */
         id: string;
@@ -86030,6 +86446,64 @@ export interface operations {
       };
     };
   };
+  workflows_preview_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["WorkflowPreviewRequestRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["WorkflowPreviewRequestRequest"];
+        "multipart/form-data": components["schemas"]["WorkflowPreviewRequestRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorkflowPreview"];
+        };
+      };
+    };
+  };
+  workflows_records_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Search by name */
+        q?: string;
+      };
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["RecordOption"][];
+        };
+      };
+    };
+  };
   workflows_reset_to_default_create: {
     parameters: {
       query?: never;
@@ -86163,6 +86637,28 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["DryRun"];
+        };
+      };
+    };
+  };
+  workflows_upcoming_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this automation. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["WorkflowUpcoming"];
         };
       };
     };

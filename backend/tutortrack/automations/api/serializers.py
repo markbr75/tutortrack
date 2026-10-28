@@ -144,7 +144,34 @@ class RunStepSerializer(serializers.ModelSerializer):
 
 class AutomationRunSerializer(serializers.ModelSerializer):
     automation_name = serializers.CharField(source="automation.name", read_only=True)
+    automation_kind = serializers.CharField(source="automation.kind", read_only=True)
     version = serializers.IntegerField(source="version.version", read_only=True)
+    record_label = serializers.SerializerMethodField(
+        help_text="The record as staff know it (a family's name, an invoice number)."
+    )
+    waiting_until = serializers.SerializerMethodField(
+        help_text="Where the run is: the end of the wait it's in (display only)."
+    )
+    waiting_step = serializers.SerializerMethodField(help_text="The step key of that wait.")
+    steps_done = serializers.SerializerMethodField(help_text="Steps done or skipped so far.")
+
+    def get_record_label(self, obj: AutomationRun) -> str:
+        return str(self.context.get("labels", {}).get(obj.subject_id, ""))
+
+    @extend_schema_field(serializers.DateTimeField(allow_null=True))
+    def get_waiting_until(self, obj: AutomationRun) -> Any:
+        if obj.status != AutomationRun.Status.WAITING:
+            return None
+        value = getattr(obj, "waiting_until", None)
+        return serializers.DateTimeField().to_representation(value) if value else None
+
+    def get_waiting_step(self, obj: AutomationRun) -> str:
+        if obj.status != AutomationRun.Status.WAITING:
+            return ""
+        return str(getattr(obj, "waiting_step", "") or "")
+
+    def get_steps_done(self, obj: AutomationRun) -> int:
+        return int(getattr(obj, "steps_done", 0) or 0)
 
     class Meta:
         model = AutomationRun
@@ -152,6 +179,7 @@ class AutomationRunSerializer(serializers.ModelSerializer):
             "id",
             "automation",
             "automation_name",
+            "automation_kind",
             "version",
             "subject_type",
             "subject_id",
@@ -163,6 +191,10 @@ class AutomationRunSerializer(serializers.ModelSerializer):
             "attempts",
             "error",
             "stop_reason",
+            "record_label",
+            "waiting_until",
+            "waiting_step",
+            "steps_done",
         ]
 
 
@@ -188,6 +220,77 @@ class DryRunSerializer(serializers.Serializer):
     matched = serializers.BooleanField()
     record = serializers.DictField()
     steps = DryRunStepSerializer(many=True)
+
+
+class WorkflowPreviewDraftSerializer(serializers.Serializer):
+    trigger_type = serializers.ChoiceField(choices=Automation.Trigger.choices)
+    trigger_config = serializers.DictField()
+    conditions = serializers.DictField(required=False, default=dict)
+    steps = serializers.ListField(child=serializers.DictField())
+    stop_when = serializers.ListField(child=serializers.CharField(), required=False, default=list)
+
+
+class WorkflowPreviewRequestSerializer(serializers.Serializer):
+    subject_id = serializers.CharField(max_length=64)
+    draft = WorkflowPreviewDraftSerializer(
+        required=False, help_text="The editor's unsaved sequence; the saved one without it."
+    )
+
+
+class WorkflowPreviewRecordSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
+
+
+class WorkflowPreviewMessageSerializer(serializers.Serializer):
+    type = serializers.CharField(help_text="The notification it sends (Settings > Notifications).")
+    label = serializers.CharField()  # type: ignore[assignment]
+
+
+class WorkflowPreviewStepSerializer(serializers.Serializer):
+    key = serializers.CharField(help_text='The step\'s place: "2", or "2.then.0" on a path.')
+    path = serializers.CharField(help_text='"yes" or "no" on a split\'s path, else empty.')
+    type = serializers.CharField()
+    at = serializers.DateTimeField(help_text="When it would happen.")
+    description = serializers.CharField(help_text="What it would do or send, in words.")
+    ok = serializers.BooleanField(help_text="False when it couldn't run as things are.")
+    skipped = serializers.BooleanField()
+    note = serializers.CharField(required=False)
+    answer = serializers.ChoiceField(choices=["yes", "no"], required=False)
+    questions = serializers.ListField(child=serializers.CharField())
+    message = WorkflowPreviewMessageSerializer(allow_null=True)
+
+
+class WorkflowPreviewSerializer(serializers.Serializer):
+    record = WorkflowPreviewRecordSerializer()
+    matched = serializers.BooleanField(help_text="Whether the start's checks pass for it now.")
+    failed_checks = serializers.ListField(child=serializers.CharField())
+    start = serializers.DateTimeField(
+        allow_null=True, help_text="When a run would start for it (null: never, no date)."
+    )
+    starts = serializers.ListField(child=serializers.DateTimeField())
+    start_passed = serializers.BooleanField(help_text="Its last start date has passed.")
+    stop_when = serializers.ListField(child=serializers.CharField())
+    steps = WorkflowPreviewStepSerializer(many=True)
+
+
+class WorkflowUpcomingDateSerializer(serializers.Serializer):
+    at = serializers.DateTimeField()
+    count = serializers.IntegerField(help_text="Records the start would pick then.")
+
+
+class WorkflowUpcomingSerializer(serializers.Serializer):
+    kind = serializers.CharField(help_text="The start: event, schedule, date or manual.")
+    dates = WorkflowUpcomingDateSerializer(many=True)
+    before_checks = serializers.BooleanField(
+        help_text="Counts are before the start's own checks, asked of each record on the day."
+    )
+    looked_ahead_days = serializers.IntegerField()
+
+
+class RecordOptionSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    label = serializers.CharField()  # type: ignore[assignment]
 
 
 class ManualRunSerializer(serializers.Serializer):
