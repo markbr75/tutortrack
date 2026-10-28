@@ -46,7 +46,7 @@ Record results in the tables below. Write the WCAG criterion number when somethi
 | TP-A11Y-016 | Payroll `/payroll`, `/payroll/runs/<id>`, expenses | Warnings in text; approve buttons named with the run; masked bank details announced as masked | P1 | No | |
 | TP-A11Y-017 | Inbox `/inbox` | Conversation list and thread readable; new messages announced politely; AI buttons named; internal note clearly marked | P1 | e2e: `e2e/accessibility.spec.ts` | |
 | TP-A11Y-018 | Broadcasts `/broadcasts`, templates `/settings/notifications`, Messaging `/settings/messaging`, notification bell | Template editor labelled; preview available as text; bell count announced | P2 | No | |
-| TP-A11Y-019 | Automations `/automations`, `/automations/<id>` | Rule builder usable by keyboard; run history table | P2 | No | |
+| TP-A11Y-019 | Workflows `/workflows` (all tabs), `/workflows/<id>` (editor, Preview, Coming up) | Cards are labelled regions; Edit has `aria-expanded`; Move and Delete name their step; problems in text; split paths stack on phones; runs table readable (TP-E33-071, TP-E33-072) | P1 | e2e: `e2e/accessibility.spec.ts` (`/workflows`), `e2e/workflows.spec.ts` | |
 | TP-A11Y-020 | Enquiries `/leads` (board), `/leads/<id>`, forms `/leads/forms` | "Move to" select on every card (TP-E17-020); form builder keyboard-usable | P1 | e2e: `e2e/accessibility.spec.ts` (`/leads`) | |
 | TP-A11Y-021 | Recruitment `/recruitment`, `/recruitment/<id>`, Compliance `/compliance` | Matrix table has row and column headers; status not colour only | P2 | No | |
 | TP-A11Y-022 | Matching `/jobs/<id>/match`, `/matching` | Score breakdown in text; heatmap has a text alternative; shortlist actions named | P2 | No | |

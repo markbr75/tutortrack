@@ -1,10 +1,10 @@
 # TutorTrack manual test plan
 
-This plan lets testers, product owners and developers check every feature of TutorTrack by hand before a release. It also says which checks are automated. It covers epics E01–E32, including the Phase 2, 2b and 3 tickets, plus end-to-end business journeys, accessibility (WCAG 2.2 AA) and non-functional checks.
+This plan lets testers, product owners and developers check every feature of TutorTrack by hand before a release. It also says which checks are automated. It covers epics E01–E33, including the Phase 2, 2b and 3 tickets, plus end-to-end business journeys, accessibility (WCAG 2.2 AA) and non-functional checks.
 
 | File | What it covers |
 |---|---|
-| `E01-…md` to `E32-…md` | One file per epic: functional cases, permissions, tenant isolation, i18n/time zones/currency, errors and edge cases |
+| `E01-…md` to `E33-…md` | One file per epic: functional cases, permissions, tenant isolation, i18n/time zones/currency, errors and edge cases |
 | [journeys.md](journeys.md) | End-to-end business journeys that cross epics (J01–J18) |
 | [accessibility.md](accessibility.md) | WCAG 2.2 AA checklist per key screen |
 | [non-functional.md](non-functional.md) | Performance smoke, security spot checks, backup/restore, observability, resilience |

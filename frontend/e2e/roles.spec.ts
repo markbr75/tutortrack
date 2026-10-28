@@ -34,11 +34,11 @@ const NAV: Record<string, { sees: string[]; settings: string[]; hidden: string[]
       "Safeguarding",
       "Recruitment",
       "Compliance",
-      "Automations",
+      "Workflows",
     ],
   },
   finance: {
-    sees: ["Billing", "Payroll", "Clients"],
+    sees: ["Billing", "Payroll", "Clients", "Workflows"],
     settings: ["Accounting"],
     hidden: [
       "Students",
@@ -49,7 +49,6 @@ const NAV: Record<string, { sees: string[]; settings: string[]; hidden: string[]
       "Unconfirmed lessons",
       "Inbox",
       "Broadcasts",
-      "Automations",
       "Website & branding",
       "Audit log",
       "Safeguarding",

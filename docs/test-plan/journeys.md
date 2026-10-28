@@ -24,7 +24,7 @@ These journeys follow real work across several epics. Each one checks that the h
 | J13 | Reviews, referrals and affiliate commission | P2 |
 | J14 | Reporting and a scheduled report | P2 |
 | J15 | Public API key and webhooks | P2 |
-| J16 | Automation rule end to end | P2 |
+| J16 | Workflows: a built-in and a custom workflow end to end | P2 |
 | J17 | Tenant isolation sweep | P1 |
 | J18 | Phase 3 features | P2 |
 
@@ -92,7 +92,7 @@ These journeys follow real work across several epics. Each one checks that the h
 - One charge per lesson, and totals are the sum of the rounded lines (TP-E10-019).
 - Re-running the same period creates no duplicate invoices (TP-E10-012).
 - Payment is recorded once, even when the webhook is replayed (TP-E11-004).
-- Dunning stops once the invoice is paid (TP-E10-045).
+- Payment chasing stops once the invoice is paid (TP-E10-045, TP-E33-020).
 
 **Automated (in part):** `e2e/delivery.spec.ts`, `e2e/portal-tutor.spec.ts`, `e2e/billing.spec.ts`, `e2e/portal-parent.spec.ts`.
 
@@ -324,23 +324,27 @@ These journeys follow real work across several epics. Each one checks that the h
 
 **Automated:** backend only.
 
-## J16 — Automation rule end to end
+## J16 — Workflows: a built-in and a custom workflow end to end
 
-**Goal:** a no-code rule acts on real events safely.
-**Roles:** admin (office@).
-**Preconditions:** none.
+**Goal:** an owner changes when TutorTrack chases payment and builds a workflow of their own, and both act on real records safely.
+**Roles:** owner (admin@), finance (finance@), coordinator.
+**Preconditions:** Team plan or above (for custom workflows); an issued, unpaid Patel invoice.
 
-1. Install the "New enquiry" recipe and every other recipe (TP-E14-024, TP-E14-025).
-2. Create an event automation with conditions; dry-run it with a record (TP-E14-001, TP-E14-003, TP-E14-005).
-3. Trigger it (submit an enquiry); it creates a task, adds a tag and sends a signed webhook (TP-E14-002, TP-E14-008, TP-E14-010).
-4. Add "wait then branch"; check the run in the Temporal UI (TP-E14-015, TP-E32-042).
-5. Edit the rule (new version) while a run is in flight; retry a failed step (TP-E14-006, TP-E14-019).
+1. Open **Workflows** → **Built-in** → **Payment chasing**; move the first reminder to 5 days before the due date and save (TP-E33-012, TP-E33-024).
+2. **Preview for a record** with the Patel invoice: real dates, what each step sends, nothing sent (TP-E33-027).
+3. Open **Invoicing cycle**, change the day of the month, check **Coming up** (TP-E33-013, TP-E33-033).
+4. Record payment on the invoice; its run shows "Stopped: Invoice paid" in **Runs** (TP-E33-020, TP-E33-035).
+5. Use the "New enquiry" template and the others (TP-E14-024, TP-E14-025); make a custom workflow on client created with an Only if and a Yes / No split, and preview it (TP-E14-001, TP-E14-003, TP-E33-016, TP-E33-028).
+6. Trigger it; it creates a task, adds a tag and sends a signed webhook (TP-E14-002, TP-E14-008, TP-E14-010).
+7. Edit it while a run is waiting; cancel one run and retry a failed one (TP-E33-024, TP-E33-036, TP-E14-019); the failure reaches a `workflow.*` webhook subscription (TP-E33-060).
+8. **Reset to default** on Payment chasing (TP-E33-008).
 
 **Checkpoints:**
 - Loop detection and the per-record daily limit hold (TP-E14-016, TP-E14-017).
-- The coordinator and finance can't see automations (TP-E14-027).
+- Finance can change the billing built-ins but not the enquiry follow-up or make new workflows; the coordinator has no Workflows (TP-E33-061, TP-E33-062).
+- Runs under way finish on the version they started with (TP-E33-024).
 
-**Automated:** backend only.
+**Automated (in part):** `e2e/workflows.spec.ts` (changing the Invoicing cycle and resetting it), `e2e/roles.spec.ts` (who sees Workflows); the rest backend.
 
 ## J17 — Tenant isolation sweep
 
