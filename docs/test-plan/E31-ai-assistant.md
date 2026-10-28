@@ -70,7 +70,7 @@
 
 | ID | Title | Role | Preconditions / data | Steps | Expected result | Priority | Automated? | Result |
 |---|---|---|---|---|---|---|---|---|
-| TP-E31-026 | Open with keyboard | Coordinator | — | 1. Press Ctrl+J (⌘J on Mac).<br>2. Press Escape. | Modal "Command bar" with focus in "What would you like to do?"; Escape closes and returns focus. | P1 | No | |
+| TP-E31-026 | Open with keyboard | Coordinator | — | 1. Press Ctrl+J (⌘J on Mac).<br>2. Press Escape. | Modal "Ask AI" with focus in "What would you like to do?"; Escape closes and returns focus. | P1 | No | |
 | TP-E31-027 | Propose a reschedule; confirm | Coordinator | Arjun's Tuesday 16:30 lessons | 1. Type "Move Arjun's Tuesday maths to 5pm from next week" → Go.<br>2. Review "Proposed changes" → Confirm. | A reschedule proposal listing the lessons and new time; nothing changes until Confirm; then "Done." and the lessons move to 17:00. | P1 | backend: `tutortrack/ai/tests/test_features.py::test_command_bar_proposes_a_reschedule_and_runs_it_only_on_confirm` | |
 | TP-E31-028 | Discard a proposal | Coordinator | — | 1. Repeat; Discard. | "Discarded."; nothing changes. | P2 | backend: same | |
 | TP-E31-029 | Tasks and tutor search | Coordinator | — | 1. "Remind me to call Tom Okafor tomorrow" → Confirm.<br>2. "Find a GCSE physics tutor free Tuesday evenings near LS6" → Run this search. | Task created for tomorrow; Matching tutors list (Sam Clarke if available) or "No tutors match." | P2 | backend: `tutortrack/ai/tests/test_features.py::test_command_bar_tasks_and_tutor_search` | |

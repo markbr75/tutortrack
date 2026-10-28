@@ -166,7 +166,7 @@ Sign-in 30/minute, 2FA 20/minute, magic link 10/hour, password reset 10/hour, si
 
 | Date | Tester | Commit | Environment | Files covered | Notes |
 |---|---|---|---|---|---|
-| | | | | | |
+| 2026-10-28 | Claude Code (scripted browser and API checks) for MB | 7794f818 | Host stack, separate `tutortrack_release` database, Chromium 1248 headless; built portal preview for the PWA cases | Every P1 case without an automated test (56) and the P1 journeys (J01–J06, J08, J10, J12, J17) | Release blocked: 4 per-epic P1 failures plus 3 found in journeys. See [runs/2026-10-28](runs/2026-10-28/README.md) |
 
 ## Running the Playwright journeys
 
