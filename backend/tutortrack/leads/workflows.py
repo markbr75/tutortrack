@@ -1,5 +1,5 @@
 """Workflows defined by this app (autodiscovered by the worker)."""
 
-from .processes import EnquiryFollowUpWorkflow, ProposalWorkflow, WaitlistOfferWorkflow
+from .processes import ProposalWorkflow, WaitlistOfferWorkflow
 
-__all__ = ["EnquiryFollowUpWorkflow", "ProposalWorkflow", "WaitlistOfferWorkflow"]
+__all__ = ["ProposalWorkflow", "WaitlistOfferWorkflow"]

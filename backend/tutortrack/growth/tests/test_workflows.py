@@ -1,4 +1,4 @@
-"""E25-TW1: the review request, referral reward and affiliate statement workflows."""
+"""E25-TW1: the referral reward and affiliate statement workflows."""
 
 from __future__ import annotations
 
@@ -23,7 +23,6 @@ from tutortrack.growth.models import CommissionItem, Referral
 from tutortrack.growth.processes import (
     AffiliateStatementRunWorkflow,
     ReferralRewardWorkflow,
-    ReviewRequestWorkflow,
     StatementRunInput,
     referral_workflow_id,
 )
@@ -65,11 +64,6 @@ def family(org, name: str, email: str):
     client = ClientFactory(organisation=org, display_name=name)
     ContactFactory(organisation=org, client=client, email=email, first_name="Pat", mobile="")
     return client
-
-
-# --- ReviewRequestWorkflow ----------------------------------------------------------------------
-# The Review request built-in workflow sends, reminds and closes requests now (E33 T06): see
-# test_workflows_builtin_runs.py. Its recorded histories still replay below.
 
 
 # --- ReferralRewardWorkflow ---------------------------------------------------------------------
@@ -171,10 +165,7 @@ def test_the_monthly_run_issues_last_months_statements(org, temporal_env):
     record(temporal_env, wid, "AffiliateStatementRunWorkflow-issued")
 
 
-@pytest.mark.parametrize(
-    "prefix",
-    ["ReviewRequestWorkflow", "ReferralRewardWorkflow", "AffiliateStatementRunWorkflow"],
-)
+@pytest.mark.parametrize("prefix", ["ReferralRewardWorkflow", "AffiliateStatementRunWorkflow"])
 def test_histories_replay(prefix):
     from temporalio.client import WorkflowHistory
     from temporalio.worker import Replayer
@@ -186,7 +177,7 @@ def test_histories_replay(prefix):
     files = sorted(HISTORIES.glob(f"{prefix}-*.json"))
     assert files, "record with RECORD_WORKFLOW_HISTORIES=1 (see the README there)"
     replayer = Replayer(
-        workflows=[ReviewRequestWorkflow, ReferralRewardWorkflow, AffiliateStatementRunWorkflow],
+        workflows=[ReferralRewardWorkflow, AffiliateStatementRunWorkflow],
         data_converter=data_converter(),
         workflow_runner=sandbox_runner(),
     )

@@ -17,9 +17,9 @@ from tutortrack.core.events.dispatcher import dispatch_batch
 from tutortrack.core.exceptions import BusinessRuleViolation
 from tutortrack.core.models import OutboxEvent, WorkflowLink
 from tutortrack.core.time import now
+from tutortrack.core.workflows import workflow_id
 from tutortrack.delivery import services
 from tutortrack.delivery.models import LessonFeedback, LessonReport
-from tutortrack.delivery.processes import feedback_workflow_id, sla_workflow_id
 from tutortrack.scheduling import services as scheduling
 from tutortrack.tenancy import settings_service
 
@@ -229,6 +229,9 @@ def test_reports_and_completed_lessons_no_longer_start_the_old_workflows(org, pe
         report = LessonReport.objects.get(lesson=lesson)
     dispatch_batch()
     with tenant_context(org):
-        ids = [sla_workflow_id(org.pk, report.pk), feedback_workflow_id(org.pk, lesson.pk)]
+        ids = [
+            workflow_id("report-sla", org.pk, report.pk),
+            workflow_id("lesson-feedback", org.pk, lesson.pk),
+        ]
         assert not WorkflowLink.objects.filter(workflow_id__in=ids).exists()
         assert not LessonFeedback.objects.exists()  # the built-in is off by default

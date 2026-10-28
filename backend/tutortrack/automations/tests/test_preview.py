@@ -260,3 +260,21 @@ def test_a_cancelled_run_ends_before_its_next_step(org, temporal_env):
         assert (run.status, run.stop_reason) == ("stopped", services.CANCELLED)
         assert run.steps.get(step_key="0").status == "skipped"
         assert not run.steps.filter(step_key="1").exists()
+
+
+def test_a_failed_run_publishes_the_workflow_run_failed_webhook_event(org):
+    from tutortrack.core.models import OutboxEvent
+    from tutortrack.developer.catalogue import offered
+
+    student = student_in(org)
+    rule = make(org, [TASK], trigger_type="manual", trigger_config={"subject": "student"})
+    run = run_for(org, rule, student)
+    with tenant_context(org):
+        services.finish(str(run.pk), AutomationRun.Status.FAILED, error="The card was declined")
+        event = OutboxEvent.objects.get(event_type="workflow.run_failed")
+    assert event.payload["data"] == {
+        "workflow_id": str(rule.pk), "workflow_name": rule.name, "builtin_key": "",
+        "record_type": "student", "record_id": str(student.pk), "error": "The card was declined",
+    }  # fmt: skip
+    assert offered("workflow.run_failed")
+    assert not offered("automation.run_failed")

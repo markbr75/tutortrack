@@ -1,5 +1,5 @@
-"""Gap G3 workflows: the invoice run's tutor review step (FR-10-3) and the monthly
-statement run (FR-10-9), with recorded replay histories."""
+"""Gap G3: the invoice run's tutor review step (FR-10-3), with a recorded replay history, and
+emailed monthly statements (FR-10-9; the Monthly statements built-in workflow sends them)."""
 
 from __future__ import annotations
 
@@ -16,8 +16,6 @@ from tutortrack.billing import services, tutor_review
 from tutortrack.billing.models import Invoice, InvoiceRun, TutorInvoiceReview
 from tutortrack.billing.processes import (
     InvoiceRunWorkflow,
-    StatementRunInput,
-    StatementRunWorkflow,
     run_workflow_id,
 )
 from tutortrack.billing.tests.test_workflows import local_today, settings_for, wait_for
@@ -102,32 +100,29 @@ def test_flagged_drafts_are_held_when_the_window_ends(org, temporal_env):
     assert run.status == InvoiceRun.Status.COMPLETED
 
 
-def test_statement_run_emails_last_months_statements(org, temporal_env):
+def test_statements_email_last_months_statement_with_the_pdf(org):
+    from datetime import datetime, time
+    from zoneinfo import ZoneInfo
+
+    from tutortrack.billing import statements
+    from tutortrack.billing.models import ClientLedgerEntry
+
     settings_for(org, {})
     client, _tutor = tutored_charge(org)
     with transaction.atomic(), tenant_context(org):
         invoice = services.issue_invoice(services.create_draft(client), send=False)
         # Back-date the ledger entry into last month (the statement period).
-        from tutortrack.billing.models import ClientLedgerEntry
-
         entry = ClientLedgerEntry.objects.get(ref_id=str(invoice.pk))
         last_month = services.org_today().replace(day=1) - timedelta(days=3)
-        from datetime import datetime, time
-        from zoneinfo import ZoneInfo
-
         moment = datetime.combine(last_month, time(12, 0), tzinfo=ZoneInfo(org.timezone))
         ClientLedgerEntry.objects.filter(pk=entry.pk).update(occurred_at=moment)
     mail.outbox.clear()
-    from tutortrack.core.workflows import start_now, workflow_id
-
-    wid = workflow_id("client-statements", org.pk, "test")
     with tenant_context(org):
-        start_now(StatementRunWorkflow, StatementRunInput(organisation_id=str(org.pk)), id=wid)
-    assert temporal_env.result(wid) == "sent:1"
+        start, end = statements.last_month(services.org_today())
+        assert statements.send([str(client.pk)], start, end) == 1
+        assert statements.send([str(client.pk)], start, end) == 0  # once per period
     assert len(mail.outbox) == 1
     assert mail.outbox[0].attachments
-    if os.environ.get("RECORD_WORKFLOW_HISTORIES"):
-        (HISTORIES / "StatementRunWorkflow-sent.json").write_text(temporal_env.history_json(wid))
 
 
 def test_record_tutor_review_history_if_requested(org, temporal_env):
@@ -148,14 +143,7 @@ def test_record_tutor_review_history_if_requested(org, temporal_env):
     dispatch_batch()
 
 
-@pytest.mark.parametrize(
-    ("prefix", "workflows"),
-    [
-        ("InvoiceRunWorkflow-tutor-review", "run"),
-        ("StatementRunWorkflow", "statement"),
-    ],
-)
-def test_g3_histories_replay(prefix, workflows):
+def test_g3_histories_replay():
     from temporalio.client import WorkflowHistory
     from temporalio.worker import Replayer
 
@@ -163,10 +151,10 @@ def test_g3_histories_replay(prefix, workflows):
     from tutortrack.core.workflows.client import data_converter
     from tutortrack.core.workflows.worker import sandbox_runner
 
-    files = sorted(HISTORIES.glob(f"{prefix}*.json"))
+    files = sorted(HISTORIES.glob("InvoiceRunWorkflow-tutor-review*.json"))
     assert files, "record with RECORD_WORKFLOW_HISTORIES=1 (see the README there)"
     replayer = Replayer(
-        workflows=[InvoiceRunWorkflow, StatementRunWorkflow],
+        workflows=[InvoiceRunWorkflow],
         data_converter=data_converter(),
         workflow_runner=sandbox_runner(),
     )

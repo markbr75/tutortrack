@@ -10,7 +10,7 @@ from tutortrack.core.events import DomainEvent
 
 @dataclass(frozen=True, kw_only=True)
 class ReviewRequested(DomainEvent):
-    """Starts ``ReviewRequestWorkflow`` (send, remind, expire)."""
+    """Starts the Review request built-in workflow (send, remind, close)."""
 
     event_type: ClassVar[str] = "review.requested"
     subject_type: ClassVar[str] = "review_request"
@@ -29,8 +29,6 @@ class _ReviewEvent(DomainEvent):
 
 @dataclass(frozen=True, kw_only=True)
 class ReviewSubmitted(_ReviewEvent):
-    """Signals ``ReviewRequestWorkflow`` (``submitted``) when it came from a request."""
-
     event_type: ClassVar[str] = "review.submitted"
     request_id: str | None = None
 

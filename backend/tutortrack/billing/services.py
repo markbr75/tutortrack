@@ -1245,7 +1245,7 @@ def mark_sent(invoice: Invoice, *, to: list[str]) -> Invoice:
     return invoice
 
 
-# --- reminders (T09; called by the dunning workflow) --------------------------------------------
+# --- reminders (T09; called by the Payment chasing built-in workflow) ---------------------------
 
 
 @transaction.atomic

@@ -224,7 +224,7 @@
         <h1>TutorTrack admin guide</h1>
         <p class="lead">How to set up and configure a tutoring business on TutorTrack, and how
           the TutorTrack service itself is operated.</p>
-        <p class="meta">Last updated: 2026-10-27</p>
+        <p class="meta">Last updated: 2026-10-28</p>
       </header>
 
       <section id="overview" aria-labelledby="overview-h">
@@ -1277,6 +1277,26 @@
             <code>automation.builtin.manage</code> for a built-in, <code>automation.manage</code>
             for your own.</li>
         </ul>
+        <p>A run that fails sends the <code>workflow.run_failed</code> webhook event, so an
+          integration can raise an alert (see the <a href="api-guide.html#webhooks">API
+          guide</a>).</p>
+
+        <h3 id="automations-moved">Moving from Automations</h3>
+        <ul>
+          <li>Every automation you had is now one of <span class="ui">Your workflows</span>, with
+            its versions and runs. Its conditions and branches open in the editor as they
+            were: a branch is a Yes / No split, and an older condition on fields is shown in
+            words (you can swap it for a plain question).</li>
+          <li>An automation with a split inside a split still runs exactly as before but opens
+            read-only, as the editor shows one level of splits; contact support from
+            <span class="ui">Help</span> to change it.</li>
+          <li>The recipes are the <span class="ui">Templates</span> tab.</li>
+          <li>Links to <span class="path">Automations</span> open
+            <span class="path">Workflows</span>.</li>
+          <li>The settings the built-ins replaced (for example the invoice day, reminder days
+            and statement day) are read-only for one more release and say "This is now set in
+            Workflows".</li>
+        </ul>
 
         <h3 id="automations-builtin">Built-in workflows</h3>
         <p>TutorTrack installs a set of <strong>built-in workflows</strong> for every
@@ -1366,7 +1386,7 @@
           </ul>
         </details>
         <details class="ref">
-          <summary>Recipes</summary>
+          <summary>Templates</summary>
           <ul>
             <li>New enquiry: reply and follow up</li>
             <li>Trial lesson: feedback, then chase</li>
@@ -2273,7 +2293,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>TutorTrack admin guide · Last updated: 2026-10-27 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
+    <p>TutorTrack admin guide · Last updated: 2026-10-28 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
   </footer>
 </body>
 </html>

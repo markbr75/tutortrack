@@ -1,8 +1,7 @@
 """Leads reactions to domain events and the Temporal bridge (E17-TW1).
 
-Enquiries no longer start ``EnquiryFollowUpWorkflow``: the Enquiry follow-up built-in
-workflows acknowledge them and watch the stage time limits (E33 T06). Runs started before
-still get their ``trial_done`` signal."""
+The Enquiry follow-up and stage time limits built-in workflows acknowledge enquiries and
+watch the stage time limits (E33 T06, ``workflows_builtin.py``)."""
 
 from __future__ import annotations
 
@@ -14,7 +13,6 @@ from .processes import (
     ProposalInput,
     ProposalWorkflow,
     WaitlistOfferWorkflow,
-    enquiry_workflow_id,
     offer_workflow_id,
     proposal_workflow_id,
 )
@@ -32,22 +30,6 @@ def trial_lesson_missed(event: EventEnvelope) -> None:
     from . import services
 
     services.note_trial_no_show(event.subject["id"])
-
-
-@subscribe("lesson.completed")
-def trial_lesson_done(event: EventEnvelope) -> None:
-    """A trial lesson happened: an ``EnquiryFollowUpWorkflow`` from before E33 T06 reminds
-    the owner for the outcome (the Trial lesson follow-up built-in does it now)."""
-    from .models import Enquiry
-
-    enquiry = Enquiry.objects.filter(trial_lesson_id=event.subject["id"]).first()
-    if enquiry is None:
-        return
-    wid = enquiry_workflow_id(enquiry.organisation_id, enquiry.pk)
-    if _running(wid):
-        from tutortrack.core.workflows import signal_now
-
-        signal_now(wid, "trial_done")
 
 
 @subscribe("job.status_changed", "job.tutor_removed")

@@ -420,6 +420,34 @@ describe("the sequence editor", () => {
     expect(within(panel).getByText(/: 1 branch$/)).toBeInTheDocument();
   });
 
+  it("opens a migrated automation with a split inside a split read-only", async () => {
+    const step = { type: "action", action: "send_invoice_reminder", config: {} };
+    const inner = { type: "branch", if: { predicate: "invoice.auto_pay" }, then: [step], else: [] };
+    editor({
+      ...BUILTIN, id: "a1", name: "Old chaser", kind: "custom", builtin_key: "", builtin: null,
+      trigger_type: "event", subject_type: "invoice", trigger_config: { event: "invoice.issued" },
+      steps: [{ type: "branch", if: { predicate: "invoice.unpaid" }, then: [inner], else: [] }],
+    }); // prettier-ignore
+    render(<App />);
+    expect(await screen.findByText(/a split inside a split/)).toHaveTextContent(/contact support/);
+    expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Edit/ })).not.toBeInTheDocument();
+  });
+
+  it("opens a migrated automation with one split as an editable sequence", async () => {
+    const step = { type: "action", action: "send_invoice_reminder", config: {} };
+    editor({
+      ...BUILTIN, id: "a2", name: "Old reminder", kind: "custom", builtin_key: "", builtin: null,
+      trigger_type: "event", subject_type: "invoice", trigger_config: { event: "invoice.issued" },
+      steps: [{ type: "wait", days: 3 },
+              { type: "branch", if: { predicate: "invoice.unpaid" }, then: [step], else: [] }],
+    }); // prettier-ignore
+    render(<App />);
+    expect(await screen.findByRole("region", { name: "Yes: step 1" })).toBeInTheDocument();
+    expect(screen.queryByText(/a split inside a split/)).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /^Edit/ }).length).toBeGreaterThan(0);
+  });
+
   it("pauses a workflow", async () => {
     const calls = editor(CHASING, {
       "POST /api/v1/workflows/w2/pause": { body: { ...CHASING, paused: true } },

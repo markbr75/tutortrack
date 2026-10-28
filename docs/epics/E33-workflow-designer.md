@@ -1,6 +1,6 @@
 # E33 — Workflow Designer
 
-- **Status:** In progress (T01 to T08 done 2026-10-27)
+- **Status:** ✅ Done (2026-10-28)
 - **Depends on:** E14 Automation (the engine it grows from), E32 Temporal, E10 Billing, E13
   Communications, E09 Delivery, E17 Leads, E18 Recruitment, E24 Growth
 - **ADR:** [0047](../adr/0047-workflow-designer-on-the-automation-engine.md)
@@ -227,7 +227,7 @@ Each ticket is one pull request, merged when CI is green.
   built-ins (a first-time owner can change "when invoices go out" in under a minute).
 - [x] **T08 — Preview, coming up and runs.** Preview for a family, coming-up dates with
   counts, the runs list with where each run is, cancel and retry.
-- [ ] **T09 — Migration and docs.** Automations → custom workflows (their branches map to
+- [x] **T09 — Migration and docs.** Automations → custom workflows (their branches map to
   splits; any that don't fit stay as they are and open read-only with "Contact support"),
   recipes → templates, `/automations` redirect, guides, help articles, What's new, roadmap
   and README.
@@ -621,3 +621,39 @@ against the API.
   `stopped` with `stop_reason` `cancelled`; a run whose Temporal workflow is gone is closed
   directly. Cancelling and retrying now need the permission that changes the run's workflow
   (`automation.builtin.manage` for a built-in), as finance can change billing built-ins.
+
+**T09 (2026-10-28).**
+- **Automations → custom workflows:** nothing to convert. Since T03 every automation is a
+  `kind=custom` workflow (the column's default) with its versions and runs, and an E14
+  `branch` is already a Yes / No split (T01). The editor opens anything with splits one
+  level deep; one with a split inside a split keeps running and opens read-only, saying to
+  contact support from **Help** (component tests for both). Recipes are the **Templates**
+  tab, and `/automations` redirects (both since T07).
+- **The replaced per-record workflows are removed:** `ScheduledInvoiceRunWorkflow`,
+  `InvoiceDunningWorkflow`, `PaymentRequestWorkflow`, `StatementRunWorkflow`,
+  `LessonReportSlaWorkflow`, `LessonFeedbackWorkflow`, `UnconfirmedLessonWorkflow`,
+  `EnquiryFollowUpWorkflow` and `ReviewRequestWorkflow`, with their activities, inputs,
+  bridge signals, recorded histories and tests, and the code that kept them going
+  (`dunning.dunning_plan`, `leads.services.acknowledge`/`sla_status` and the enquiry
+  signals, `growth.services.review_request_state`, the "an earlier check is handling it"
+  skip in **Complete or flag the unconfirmed lesson**). `delivery` has no Temporal
+  workflows left. `PackageExpiryWorkflow` and `ComplianceRecordWorkflow` stay (write-off and
+  restriction are protected); `ReviewRequest.workflow_id` stays as a column (contract later).
+- **Runs of them still open** (FR-33-6): `install_builtins`, which runs at sign-up and on
+  every deploy, terminates the organisation's running `WorkflowLink`s of those processes
+  (`REPLACED_PROCESSES`) after its commit and marks them terminated, as no worker can carry
+  them on now. One Temporal can't reach is tried again at the next sync; one Temporal no
+  longer has is just closed. The built-ins handle those records, and the old schedules were
+  already deleted by `retire` (T04).
+- **Webhook `workflow.run_failed`** (§4, not built before): published with
+  `automation.run_failed` when a run fails, with the workflow's id, name and built-in key,
+  the record and the error. The `workflow` aggregate is offered to webhooks;
+  `automation.*` stays internal (E27). It never starts a workflow.
+- **Kept for one more release, as planned:** the `/automations` and `/automation-runs` API
+  aliases, `POST /automations/{id}/test` and the replaced settings (read-only,
+  `replaced_by`).
+- **Docs:** help article "Decide when things happen" (`/workflows`), What's new
+  "Workflows", the admin guide's "Moving from Automations" and the webhook, the API guide's
+  event list, the events table, roadmap and README. The workflow endpoints aren't part of
+  the public API reference (internal, like `/automations`), so the API guide only gains
+  the event.

@@ -1,17 +1,9 @@
-"""Billing reactions to domain events (idempotent) and the Temporal bridge (E10-TW1)."""
+"""Billing reactions to domain events (idempotent). Payment chasing and payment request
+reminders are built-in workflows (E33 T04, ``workflows_builtin.py``)."""
 
 from __future__ import annotations
 
 from tutortrack.core.events import EventEnvelope, subscribe
-from tutortrack.core.workflows import bridge
-
-from .processes import dunning_workflow_id, request_workflow_id
-
-
-def _running(workflow_id: str) -> bool:
-    from tutortrack.core.models import WorkflowLink
-
-    return WorkflowLink.objects.filter(workflow_id=workflow_id, status="running").exists()
 
 
 @subscribe(
@@ -87,22 +79,3 @@ def leave_collections(event: EventEnvelope) -> None:
     from . import dunning
 
     dunning.close_collections(event.subject["id"], reason=event.type)
-
-
-# Payment chasing and payment request reminders are built-in workflows (E33 T04,
-# ``workflows_builtin.py``). The workflows they replaced are no longer started; ones already
-# under way still hear when the invoice or request closes, and finish.
-for _closing in ("invoice.paid", "invoice.voided", "invoice.written_off"):
-    bridge.on(
-        _closing,
-        signal="closed",
-        id=lambda e: dunning_workflow_id(e.organisation_id, e.subject["id"]),
-        when=lambda e: _running(dunning_workflow_id(e.organisation_id, e.subject["id"])),
-    )
-for _closing in ("payment_request.paid", "payment_request.cancelled"):
-    bridge.on(
-        _closing,
-        signal="closed",
-        id=lambda e: request_workflow_id(e.organisation_id, e.subject["id"]),
-        when=lambda e: _running(request_workflow_id(e.organisation_id, e.subject["id"])),
-    )

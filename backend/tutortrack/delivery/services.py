@@ -746,7 +746,7 @@ def add_comment(
     return comment
 
 
-# --- SLA steps (called by the LessonReportSlaWorkflow activities) ---------------------------
+# --- SLA steps (called by the Lesson report chasing built-in workflow's actions) ------------
 
 
 @transaction.atomic

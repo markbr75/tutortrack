@@ -67,7 +67,7 @@
     <header>
       <h1>TutorTrack API guide</h1>
       <p class="lead">Connect your own systems to TutorTrack with the REST API and webhooks.</p>
-      <p class="meta">Last updated: 2026-10-25 · API version v1</p>
+      <p class="meta">Last updated: 2026-10-28 · API version v1</p>
     </header>
 
     <section id="overview">
@@ -460,7 +460,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <h3 id="webhook-events">Event catalogue</h3>
       <p>Subscribe to individual types or to <code>&lt;aggregate&gt;.*</code>.</p>
       <!-- BEGIN GENERATED: webhook-events -->
-<p class="meta">260 event types on 72 aggregates, generated from the webhook event catalogue.</p>
+<p class="meta">261 event types on 73 aggregates, generated from the webhook event catalogue.</p>
 <details class="ref" id="events-affiliate_statement">
   <summary><code>affiliate_statement.*</code> <span class="badge">1</span></summary>
   <div class="table-wrap"><table>
@@ -682,7 +682,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
     <tbody>
       <tr><td><code>enquiry.assigned</code></td><td>Enquiry assigned.</td><td><code>client_id</code>, <code>owner_id</code></td></tr>
       <tr><td><code>enquiry.lost</code></td><td>Enquiry lost.</td><td><code>client_id</code>, <code>reason</code></td></tr>
-      <tr><td><code>enquiry.received</code></td><td>Starts <code>EnquiryFollowUpWorkflow</code> (auto-acknowledgement, SLA timers).</td><td><code>client_id</code>, <code>source</code>, <code>owner_id</code></td></tr>
+      <tr><td><code>enquiry.received</code></td><td>Enquiry received.</td><td><code>client_id</code>, <code>source</code>, <code>owner_id</code></td></tr>
       <tr><td><code>enquiry.sla_breached</code></td><td>Enquiry sla breached.</td><td><code>client_id</code>, <code>stage</code></td></tr>
       <tr><td><code>enquiry.stage_changed</code></td><td>Enquiry stage changed.</td><td><code>client_id</code>, <code>from_stage</code>, <code>to_stage</code></td></tr>
       <tr><td><code>enquiry.won</code></td><td>Enquiry won.</td><td><code>client_id</code>, <code>job_ids</code></td></tr>
@@ -1160,8 +1160,8 @@ export function verify(secret, header, rawBody, tolerance = 300) {
     <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
     <tbody>
       <tr><td><code>review.published</code></td><td>Review published.</td><td><code>client_id</code>, <code>tutor_id</code>, <code>rating</code></td></tr>
-      <tr><td><code>review.requested</code></td><td>Starts <code>ReviewRequestWorkflow</code> (send, remind, expire).</td><td><code>client_id</code>, <code>tutor_id</code>, <code>trigger</code></td></tr>
-      <tr><td><code>review.submitted</code></td><td>Signals <code>ReviewRequestWorkflow</code> (<code>submitted</code>) when it came from a request.</td><td><code>client_id</code>, <code>tutor_id</code>, <code>rating</code>, <code>request_id</code></td></tr>
+      <tr><td><code>review.requested</code></td><td>Review requested.</td><td><code>client_id</code>, <code>tutor_id</code>, <code>trigger</code></td></tr>
+      <tr><td><code>review.submitted</code></td><td>Review submitted.</td><td><code>client_id</code>, <code>tutor_id</code>, <code>rating</code>, <code>request_id</code></td></tr>
     </tbody>
   </table></div>
 </details>
@@ -1294,6 +1294,15 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <tr><td><code>waitlist.place_declined</code></td><td>Waitlist place declined.</td><td><code>student_id</code>, <code>group_class_id</code></td></tr>
       <tr><td><code>waitlist.place_offered</code></td><td>Starts <code>WaitlistOfferWorkflow</code>.</td><td><code>student_id</code>, <code>group_class_id</code>, <code>expires_at</code></td></tr>
       <tr><td><code>waitlist.suggestion_created</code></td><td>A tutor now has room for a waiting student; the payload carries ids only.</td><td><code>entry_id</code>, <code>student_id</code>, <code>tutor_id</code>, <code>reason</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-workflow">
+  <summary><code>workflow.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>workflow.run_failed</code></td><td>Workflow run failed.</td><td><code>workflow_id</code>, <code>workflow_name</code>, <code>builtin_key</code>, <code>record_type</code>, <code>record_id</code>, <code>error</code></td></tr>
     </tbody>
   </table></div>
 </details>

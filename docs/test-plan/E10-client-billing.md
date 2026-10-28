@@ -48,7 +48,7 @@
 | TP-E10-021 | One invoice per currency | Finance | Patel ad hoc charge in EUR plus GBP lessons | 1. **Invoice now**. | Two drafts: one GBP, one EUR. | P2 | backend: `test_draft_editing_minimum_and_currency_splits` | |
 | TP-E10-022 | Group per student instead of per family | Finance | Client setting group by student | 1. Run invoicing. | One invoice for Arjun, one for Maya. | P2 | No | |
 | TP-E10-023 | Hold invoices for missing reports | Finance | `delivery.hold_invoice_without_report` on; a lesson without a report | 1. Run invoicing. | That charge is left out. | P2 | backend: `test_hold_invoices_for_missing_reports` | |
-| TP-E10-024 | Scheduled invoice runs follow settings | Owner | `billing.invoice_schedule` monthly, `invoice_day` 1 | 1. Temporal UI → Schedules. | A per-branch schedule exists for `ScheduledInvoiceRunWorkflow`; changing the setting updates it. | P3 | backend: `test_invoice_schedule_follows_settings` | |
+| TP-E10-024 | Scheduled invoice runs follow the Invoicing cycle | Owner | Invoicing cycle on, monthly on the 1st | 1. Workflows › Invoicing cycle › Coming up. | The next dates are listed; changing the start's day changes them after saving. | P3 | backend: `tutortrack/billing/tests/test_workflows_builtin.py` | |
 
 ## Credit notes, void, write-off, credit (FR-10-4, FR-10-5, T05)
 
@@ -71,7 +71,7 @@
 | TP-E10-034 | Paid request becomes credit, drawn down by lessons (epic AC) | Finance, Parent | Request from TP-E10-033 paid (record a bank transfer against it, or via fake Stripe webhook — see README) | 1. Check Okafor credit.<br>2. Complete two prepaid lessons.<br>3. Parent checks the portal billing page. | Credit +£400, then reduced by each lesson (receipt invoices when `billing.prepaid_invoice_each_lesson`). The portal shows the running balance. | P1 | backend: `test_payment_request_credit_is_drawn_down_by_lessons` | |
 | TP-E10-035 | Bulk top-up requests | Finance | Several prepaid clients with low credit | 1. Payment requests tab → **Request top-ups**: **Clients with credit below** £50, **Top up to** £200. | "N payment requests created." Amounts top each client up to £200. | P2 | backend: `test_bulk_and_automatic_top_up_requests` | |
 | TP-E10-036 | Automatic request at threshold | Owner | `billing.topup_threshold` set | 1. Complete lessons until credit drops below the threshold. | `client.balance_low` and one automatic request. | P2 | backend: `test_bulk_and_automatic_top_up_requests` | |
-| TP-E10-037 | Request reminders | Finance | Open request | 1. Temporal UI: `PaymentRequestWorkflow` for the request. | Reminders at day 3 and day 7; stops on payment or cancel. | P3 | backend: `tutortrack/billing/tests/test_workflows.py` | |
+| TP-E10-037 | Request reminders | Finance | Open request | 1. Workflows › Runs: the **Payment request reminders** run for the request. | Reminders at day 3 and day 7; stops on payment or cancel. | P3 | backend: `tutortrack/billing/tests/test_workflows_builtin_runs.py` | |
 | TP-E10-038 | Negative balance guard for prepaid jobs | Tutor | Prepaid job, credit £0, guard on | See E09 TP-E09-009. | Completion blocked for the tutor. | P1 | backend: `test_negative_balance_guard_blocks_prepaid_completion` | |
 
 ## In advance billing (FR-10-1, T07)

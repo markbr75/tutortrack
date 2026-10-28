@@ -548,7 +548,44 @@ def install_builtins() -> dict[str, int]:
         if builtin.retire is not None:  # idempotent, so a failed retirement is tried again
             org_id = current_organisation_id()
             transaction.on_commit(functools.partial(_retire, org_id, builtin))
+    transaction.on_commit(functools.partial(_end_replaced_runs, current_organisation_id()))
     return counts
+
+
+# The per-record Temporal workflows the built-ins replaced (E33 T04 to T06; their code went
+# in T09), by process name.
+REPLACED_PROCESSES = (
+    "invoice-schedule", "invoice-dunning", "payment-request", "client-statements",
+    "report-sla", "lesson-feedback", "unconfirmed-lesson", "enquiry", "review-request",
+)  # fmt: skip
+
+
+def _end_replaced_runs(organisation_id: Any) -> int:
+    """Terminate the organisation's runs of the replaced workflows that are still open
+    (FR-33-6): their code is gone, so a worker can't carry them on. The built-ins handle
+    those records now. Returns how many were ended; a run Temporal can't reach is tried
+    again on the next sync."""
+    from tutortrack.core.context import tenant_context
+    from tutortrack.core.models import WorkflowLink
+    from tutortrack.core.workflows.ops import terminate_now
+
+    ended = 0
+    with tenant_context(organisation_id):
+        open_runs = WorkflowLink.objects.filter(
+            process__in=REPLACED_PROCESSES, status=WorkflowLink.Status.RUNNING
+        )
+        for link in open_runs:
+            try:
+                terminate_now(link.workflow_id, "replaced by a built-in workflow (E33)")
+            except Exception as exc:  # already closed in Temporal, or Temporal unreachable
+                if "not found" not in str(exc).lower():
+                    logger.warning("automation.replaced_run_not_ended", error=str(exc))
+                    continue
+            link.status = WorkflowLink.Status.TERMINATED
+            link.closed_at = now()
+            link.save(update_fields=["status", "closed_at"])
+            ended += 1
+    return ended
 
 
 def _retire(organisation_id: Any, builtin: builtin_workflows.BuiltinWorkflow) -> None:
@@ -986,6 +1023,14 @@ def finish(run_id: str, status: str, error: str = "", reason: str = "") -> None:
                 subject_id=run.pk, automation_id=str(run.automation_id), error=run.error[:300]
             )
         )
+        automation = run.automation
+        publish(  # the webhook event (E33 §4)
+            events.WorkflowRunFailed(
+                subject_id=run.pk, workflow_id=str(automation.pk), workflow_name=automation.name,
+                builtin_key=automation.builtin_key, record_type=run.subject_type,
+                record_id=str(run.subject_id), error=run.error[:300],
+            )
+        )  # fmt: skip
 
 
 # --- dry run (FR-14-4) --------------------------------------------------------------------------

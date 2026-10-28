@@ -224,18 +224,6 @@ def request_review(
     return request
 
 
-def review_request_state(request_id: Any) -> dict[str, Any]:
-    """What ``ReviewRequestWorkflow`` (runs from before E33 T06) needs: status and when to
-    remind/expire."""
-    request = ReviewRequest.objects.get(pk=request_id)
-    reminder_at = request.created_at + timedelta(days=int(_setting("review_reminder_days")))
-    return {
-        "status": request.status,
-        "reminder_at": min(reminder_at, request.expires_at).isoformat(),
-        "expires_at": request.expires_at.isoformat(),
-    }
-
-
 @transaction.atomic
 def send_review_request(request_id: Any, *, reminder: bool = False) -> bool:
     """Email (or text) the review link; the reminder goes once. Idempotent."""
@@ -274,16 +262,12 @@ def expire_request(request_id: Any) -> str:
 
 @transaction.atomic
 def cancel_request(request: ReviewRequest) -> ReviewRequest:
-    from tutortrack.core.workflows import signal
-
     request = ReviewRequest.objects.select_for_update().get(pk=request.pk)
     if request.status not in OPEN_REQUESTS:
         raise BusinessRuleViolation(_("This request is no longer open."))
     with audit.track(request, action="cancel"):
         request.status = ReviewRequest.Status.CANCELLED
         request.save(update_fields=["status", "updated_at"])
-    if request.workflow_id:  # a ReviewRequestWorkflow from before E33 T06
-        signal(request.workflow_id, "cancelled")
     return request
 
 

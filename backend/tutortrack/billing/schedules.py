@@ -1,7 +1,6 @@
 """Per-branch invoicing schedules (Temporal Schedules, E10-TW1), replaced by the **Invoicing
 cycle** built-in workflow (E33 T04). ``retire_invoice_schedules`` deletes an organisation's
-schedules when the built-in is installed; ``ScheduledInvoiceRunWorkflow`` stays registered
-for one release so a run already under way can finish."""
+schedules when the built-in is installed."""
 
 from __future__ import annotations
 

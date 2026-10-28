@@ -1,5 +1,5 @@
-"""E10 Phase 2 workflows: PackageExpiryWorkflow (TW1), BillingPlanWorkflow (T13) and the
-late-fee/collections steps of InvoiceDunningWorkflow (T14), with replayed histories."""
+"""E10 Phase 2 workflows: PackageExpiryWorkflow (TW1) and BillingPlanWorkflow (T13), with
+replayed histories."""
 
 from __future__ import annotations
 
@@ -14,11 +14,7 @@ from django.db import transaction
 
 from tutortrack.billing import packages, plans, services
 from tutortrack.billing.models import BillingPlan, Charge, Invoice, PackagePurchase
-from tutortrack.billing.processes import (
-    BillingPlanWorkflow,
-    InvoiceDunningWorkflow,
-    PackageExpiryWorkflow,
-)
+from tutortrack.billing.processes import BillingPlanWorkflow, PackageExpiryWorkflow
 from tutortrack.billing.tests.test_billing import events_of, gbp, set_settings
 from tutortrack.catalogue.models import PackageTemplate
 from tutortrack.core.context import tenant_context
@@ -134,12 +130,10 @@ def test_pausing_then_ending_a_plan_charges_nothing(org, client_, temporal_env):
     assert temporal_env.result(plan.workflow_id) == "charged:0"
 
 
-REPLAYED = (PackageExpiryWorkflow, BillingPlanWorkflow, InvoiceDunningWorkflow)
+REPLAYED = (PackageExpiryWorkflow, BillingPlanWorkflow)
 
 
-@pytest.mark.parametrize(
-    "prefix", ["PackageExpiryWorkflow", "BillingPlanWorkflow", "InvoiceDunningWorkflow"]
-)
+@pytest.mark.parametrize("prefix", ["PackageExpiryWorkflow", "BillingPlanWorkflow"])
 def test_phase2_histories_replay(prefix):
     from temporalio.client import WorkflowHistory
     from temporalio.worker import Replayer
@@ -177,5 +171,3 @@ def test_record_phase2_histories_if_requested(org, client_, temporal_env):
     (HISTORIES / "BillingPlanWorkflow-ended.json").write_text(
         temporal_env.history_json(plan.workflow_id)
     )
-    # InvoiceDunningWorkflow-late-fees.json stays as recorded: the Payment chasing built-in
-    # workflow replaced it (E33 T04), so nothing starts it any more.

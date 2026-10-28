@@ -1,4 +1,4 @@
-"""E17-TW1: waitlist offers on Temporal, and the enquiry follow-up's recorded history."""
+"""E17-TW1: waitlist offers on Temporal."""
 
 from __future__ import annotations
 
@@ -13,21 +13,12 @@ from tutortrack.core.context import tenant_context
 from tutortrack.core.events.dispatcher import dispatch_batch
 from tutortrack.leads import services
 from tutortrack.leads.models import WaitlistEntry
-from tutortrack.leads.processes import (
-    EnquiryFollowUpWorkflow,
-    WaitlistOfferWorkflow,
-    offer_workflow_id,
-)
+from tutortrack.leads.processes import WaitlistOfferWorkflow, offer_workflow_id
 from tutortrack.people.tests.factories import ClientFactory, StudentFactory
 from tutortrack.tenancy import settings_service
 
 pytestmark = pytest.mark.django_db(transaction=True)
 HISTORIES = Path(__file__).resolve().parents[3] / "tests" / "workflow_histories"
-
-
-# EnquiryFollowUpWorkflow: the Enquiry follow-up built-in workflows acknowledge enquiries and
-# flag them when a stage's time limit is up now (E33 T06): see test_workflows_builtin_runs.py.
-# Its recorded history still replays below.
 
 
 def test_unanswered_offer_expires(org, temporal_env):
@@ -45,8 +36,7 @@ def test_unanswered_offer_expires(org, temporal_env):
         assert WaitlistEntry.objects.get(pk=entry.pk).status == "expired"
 
 
-@pytest.mark.parametrize("prefix", ["EnquiryFollowUpWorkflow", "WaitlistOfferWorkflow"])
-def test_histories_replay(prefix):
+def test_histories_replay():
     from temporalio.client import WorkflowHistory
     from temporalio.worker import Replayer
 
@@ -54,10 +44,10 @@ def test_histories_replay(prefix):
     from tutortrack.core.workflows.client import data_converter
     from tutortrack.core.workflows.worker import sandbox_runner
 
-    files = sorted(HISTORIES.glob(f"{prefix}-*.json"))
+    files = sorted(HISTORIES.glob("WaitlistOfferWorkflow-*.json"))
     assert files, "record with RECORD_WORKFLOW_HISTORIES=1 (see the README there)"
     replayer = Replayer(
-        workflows=[EnquiryFollowUpWorkflow, WaitlistOfferWorkflow],
+        workflows=[WaitlistOfferWorkflow],
         data_converter=data_converter(),
         workflow_runner=sandbox_runner(),
     )
@@ -72,7 +62,6 @@ def test_histories_replay(prefix):
 def test_record_histories_if_requested(org, temporal_env):
     if not os.environ.get("RECORD_WORKFLOW_HISTORIES"):
         pytest.skip("set RECORD_WORKFLOW_HISTORIES=1 to (re)record")
-    # EnquiryFollowUpWorkflow-breached.json stays as recorded: nothing starts it any more.
     test_unanswered_offer_expires(org, temporal_env)
     with tenant_context(org):
         entry = WaitlistEntry.objects.get()
