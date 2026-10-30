@@ -10,7 +10,10 @@ need real provider credentials or infrastructure are listed at the end of
 [docs/05-gap-backlog.md](docs/05-gap-backlog.md). E33 (the workflow designer) turned
 Automations into **Workflows**: editable built-in workflows for invoicing, payment chasing,
 statements, lesson communications, sales follow-ups and expiry reminders, a sequence editor
-with preview, coming-up dates and runs, on the E14 Temporal interpreter. Build order and
+with preview, coming-up dates and runs, on the E14 Temporal interpreter. Next, planned and
+not started: **E34, the TutorTrack Network** ([docs/epics/E34-network.md](docs/epics/E34-network.md)):
+shared pathways for applying for and joining jobs, consent before a family's information is
+shared, and sharing jobs with other businesses, sole traders and guest tutors. Build order and
 progress: [docs/04-roadmap.md](docs/04-roadmap.md).
 
 ## Guides

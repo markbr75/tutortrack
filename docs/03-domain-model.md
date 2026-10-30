@@ -43,6 +43,11 @@ This is the shared vocabulary for all epics. Epics may add fields, but **must no
 | **Affiliate** | A referrer earning commission on referred clients' revenue. |
 | **Automation** | A tenant-defined rule: Trigger (event or schedule) → Conditions → Actions. Each run executes as a Temporal workflow (E14/E32). |
 | **Workflow (process)** | A durable, long-running business process run on Temporal (E32), e.g. an invoice's dunning or a pay run's approval. Linked to its subject record and shown as a process timeline. Workflows act with actor type `workflow` in audit and events. |
+| **Pathway** (E34, planned) | A shared process a business sets for someone else to follow: stages of steps (questions, uploads, checks, signing, calls, family consent, staff review) with gates. Ready-made: Apply for a job, Join a job, Finish a job. Runs in the owning business; the participant sees Tasks. Not the same as a Workflow (process) timeline. |
+| **Connection** (E34, planned) | An accepted link between two businesses (sole traders included), with versioned terms: what may be shared, rates, self-billing and data-processing terms. |
+| **Engagement** (E34, planned) | A job one business has subcontracted to a connection: the sharing business keeps the family, the job and the billing; the partner has its own copy and delivers the lessons. Linked by ids only. |
+| **Data share grant** (E34, planned) | Consent-backed release of named types of a family's information (name, details, contact details, address, needs, special category, history) to one tutor or partner for one job, until withdrawn, expired or the job ends. Safeguarding notes are never shared. |
+| **Partner tutor / Guest tutor** (E34, planned) | Tutor records of kind `partner` (a connection delivering an engagement) and `guest` (a tutor not on TutorTrack, reached by links, with a limited Guest tutor login). |
 
 ## 2. Core entity relationships
 
