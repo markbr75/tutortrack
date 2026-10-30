@@ -52,6 +52,11 @@ Exit criteria: a solo tutor can sign up, configure services, add families and st
 | 34 | E29 Part 2 (data residency, SOC 2 readiness, advanced safeguarding) |
 | 35 | E30 Part 2 (usage analytics, tenant health scoring, support tooling) |
 
+### Phase 4 — Network: "Businesses and tutors share jobs and pathways"
+| Order | Epic |
+|---|---|
+| 36 | E34 The TutorTrack Network (shared pathways, consent before sharing, connections, engagements, guest tutors, passport, open network) |
+
 ## Dependency graph (simplified)
 
 ```
@@ -64,6 +69,7 @@ E01 ─► E02 ─► E03 ─► E05 ─► E06 ─► E07 ─► E08 ─► E09
 E05 ─► E17 ─► E19 ◄─ E18
 E08 ─► E22 ; E10/E11/E12 ─► E23 ; E05/E06 ─► E24 ; E10 ─► E25
 All ─► E26, E27, E28, E31
+E18/E19/E29 ─► E34 (pathways and consent first; then connections, engagements via E12/E28)
 ```
 
 ## Progress tracker
@@ -103,6 +109,7 @@ All ─► E26, E27, E28, E31
 | E31 | ✅ Done (2026-10-14) | T01–T08 + FR-31-6: `ai` app on Claude (Opus 5.5 for drafting, command bar and copilot; Haiku 5.5 for classification and extraction) behind a provider abstraction with a deterministic fake for CI, per-feature opt-in, pseudonymisation, prompt-free request logs, metering against E04 AI credits with monthly caps, refusal fallbacks and an eval harness. Lesson report drafting (notes and voice notes) in the tutor portal, progress comments and parent rewrite/translation, enquiry extraction and triage, inbox replies, intent and summaries, a command bar whose changes run only when confirmed, a report-grounded copilot with cited sources, content and matching explanations. See ADR 0029 and Implementation notes |
 | E32 | ✅ Done (2026-10-09) | Runtime, bridge, codec, timers, schedules, processes API, test harness; reference + closure workflows |
 | E33 | ✅ Done (2026-10-28) | Workflow designer: Automations becomes Workflows; built-in, editable workflows replace the hard-wired timing of invoicing, payment chasing, lesson communications, sales follow-ups and expiry reminders. A workflow is a simple sequence (timed steps, plain "only if" questions, one-level Yes / No splits, Stop when) on the E14 Temporal interpreter, with preview, coming-up dates, runs with cancel and retry, and the `workflow.run_failed` webhook; the replaced per-record workflows are removed (ADR 0047). T01–T09. See Implementation notes |
+| E34 | 📝 Planned (written 2026-10-30) | The network: shared pathways (apply for, join and finish a job), information about a family released only after consent, connections between businesses (sole traders included), subcontracted jobs as engagements with self-billing, guest tutors not on TutorTrack, cover and the job board across connections, a tutor checks passport and a verified open network. T01–T11 not started. See the epic and ADR 0048 |
 
 ## Test plan and end-to-end journeys
 
