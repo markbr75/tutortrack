@@ -24,7 +24,7 @@ describe("public pages", () => {
     expect(await screen.findByText("Bright Minds")).toBeInTheDocument();
     expect(document.querySelector("link[rel~=icon]")?.getAttribute("href")).toBe("/media/bm.ico");
     expect(document.documentElement.style.getPropertyValue("--tt-brand")).toBe("224 76% 48%");
-    expect(document.documentElement.style.getPropertyValue("font-family")).toBe("");
+    expect(document.documentElement.style.getPropertyValue("--font-sans")).toBe("");
     // Leaving the tenant's page hands the tab back to TutorTrack's icon.
     unmount();
     expect(document.querySelector("link[rel~=icon]")).toBeNull();
