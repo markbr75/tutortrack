@@ -180,6 +180,27 @@ def test_approval_creates_onboarding_tutor_invitation_and_checklist(org, applica
         assert {i["key"] for i in instance.items} >= {"agreement", "documents", "payout"}
 
 
+def test_a_recruited_tutor_stays_onboarding_after_accepting_the_invitation(
+    org, application, recruiter
+):
+    """Release test 2026-10-28 (TP-E18-020): joining doesn't skip the onboarding checklist."""
+    from tutortrack.people.services import link_membership
+
+    with tenant_context(org):
+        tutor = services.approve(application, user=recruiter)
+        membership = MembershipFactory(organisation=org, role="tutor", user__email=tutor.email)
+        link_membership(tutor, membership)
+        tutor.refresh_from_db()
+        assert (tutor.membership_id, tutor.status) == (membership.pk, "onboarding")
+        ChecklistInstance.objects.filter(tutor=tutor).update(
+            items=[{"key": "agreement", "label": "Agree", "kind": "agreement", "mandatory": True}]
+        )
+        services.complete_item(tutor, "agreement", user=recruiter)
+        assert services.check_onboarding(tutor.pk) == "complete"
+        tutor.refresh_from_db()
+        assert tutor.status == "active"
+
+
 def test_rejection_emails_the_applicant(org, application, recruiter):
     api = client_for(org, recruiter)
     api.post(f"/api/v1/applications/{application.pk}/reject", {"reason": "No availability"})

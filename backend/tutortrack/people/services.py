@@ -573,11 +573,16 @@ def approve_subject(subject: TutorSubject, approver: Any, approved: bool = True)
 
 
 def link_membership(tutor: TutorProfile, membership: Any) -> TutorProfile:
-    """Called when the invited tutor accepts (user.joined)."""
+    """Called when the invited tutor accepts (user.joined). A tutor with an unfinished
+    onboarding checklist (recruited, E18) stays in onboarding until it's done."""
+    from tutortrack.recruitment.selectors import onboarding_open
+
     if tutor.membership_id is None:
         tutor.membership = membership
         tutor.save(update_fields=["membership", "updated_at"])
-        if tutor.status in {TutorProfile.Status.APPLICANT, TutorProfile.Status.ONBOARDING}:
+        if tutor.status in {
+            TutorProfile.Status.APPLICANT, TutorProfile.Status.ONBOARDING
+        } and not onboarding_open(tutor.pk):  # fmt: skip
             change_tutor_status(tutor, TutorProfile.Status.ACTIVE)
     return tutor
 

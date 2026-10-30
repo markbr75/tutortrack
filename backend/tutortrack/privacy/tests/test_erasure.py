@@ -66,6 +66,7 @@ def test_every_app_with_personal_data_registers_a_provider():
         "billing",
         "payments",
         "scheduling",
+        "jobs",
         "delivery",
         "learning",
         "courses",
@@ -152,6 +153,29 @@ def test_erasing_a_student_meets_the_acceptance_criteria(org, family, s3):
         entry = AuditEntry.objects.get(object_id=str(record.pk), action="erase")
         assert entry.changes["anonymised"] > 0
         assert OutboxEvent.objects.filter(event_type="data_subject.erased").exists()
+
+
+def test_erasing_a_student_scrubs_their_name_from_job_names_and_search(org, family):
+    """Release test 2026-10-28 (TP-E29-031): the job named after the student loses the name."""
+    from tutortrack.catalogue.tests.factories import ServiceFactory
+    from tutortrack.jobs import services as jobs
+    from tutortrack.jobs.models import Job
+
+    with tenant_context(org):
+        job = jobs.create_job(
+            client=family.client,
+            service=ServiceFactory(organisation=org),
+            students=[{"student": family.student}],
+            name="GCSE Maths – Arjun Patel",
+            notes_for_tutor="Arjun likes worked examples",
+        )
+        record = erasure.erase_now("people.student", str(family.student.pk))
+        label = record.labels[f"people.student:{family.student.pk}"]
+        job = Job.objects.get(pk=job.pk)
+        assert job.name == f"GCSE Maths – {label}"
+        assert "Arjun" not in job.notes_for_tutor
+        owner = MembershipFactory(organisation=org, role="owner").user
+        assert not [h for h in search(owner, "Arjun Patel") if h.type == "job"]
 
 
 def test_erased_student_has_no_personal_data_left_in_the_export(org, family, s3):

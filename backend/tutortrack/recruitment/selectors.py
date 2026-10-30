@@ -7,13 +7,18 @@ from datetime import date
 
 from django.db.models import Avg, Q
 
-from .models import ComplianceRecord, ReferenceRequest
+from .models import ChecklistInstance, ComplianceRecord, ReferenceRequest
 
 
 def _valid_q(on: date) -> Q:
     return Q(status=ComplianceRecord.Status.VERIFIED) & (
         Q(expiry_date__isnull=True) | Q(expiry_date__gt=on)
     )
+
+
+def onboarding_open(tutor_id: object) -> bool:
+    """The tutor has an onboarding checklist that isn't finished yet (E05 activation waits)."""
+    return ChecklistInstance.objects.filter(tutor_id=tutor_id, completed_at__isnull=True).exists()
 
 
 def lapsed_tutor_ids(tutor_ids: Iterable[object], on: date) -> set[str]:
