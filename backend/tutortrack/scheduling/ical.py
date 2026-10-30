@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
+from urllib.parse import urlsplit
 
 from django.db.models import QuerySet
 
@@ -81,3 +82,13 @@ def render(lessons: Iterable[Lesson], *, name: str, host: str) -> str:
         ]
     lines.append("END:VCALENDAR")
     return "\r\n".join(_fold(line) for line in lines) + "\r\n"
+
+
+def lesson_attachment(lesson: Lesson) -> list[tuple[str, bytes, str]]:
+    """The lesson as an .ics file for booked, moved and cancelled emails (E08 FR-08-8). Same
+    UID as the feeds, so calendars update the event they already hold."""
+    from tutortrack.tenancy.models import Organisation
+
+    host = urlsplit(Organisation.objects.get(pk=lesson.organisation_id).base_url).netloc
+    body = render([lesson], name=lesson.title, host=host)
+    return [("lesson.ics", body.encode(), "text/calendar")]

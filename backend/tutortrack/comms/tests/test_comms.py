@@ -232,6 +232,20 @@ def test_preferences_suppressions_and_transactional_fallback(org, family):
     assert mail.outbox[-1].attachments[0][0] == invoice.number + ".pdf"
 
 
+def test_the_lesson_moved_email_carries_the_updated_ics(org, family):
+    """Release test 2026-10-28 (TP-E08-025, FR-08-8): the change email includes an .ics with
+    the new time and the feed's UID, so calendars move the event they already hold."""
+    lesson = lesson_at(org, family, now() + timedelta(days=3))
+    with tenant_context(org):
+        services.update_setting("lesson_changed", enabled=True, channels=["email"])
+        services.notify("lesson_changed", lesson, key="moved", immediate=True)
+    [ics] = [a for a in mail.outbox[-1].attachments if a[0] == "lesson.ics"]
+    body = ics[1].decode() if isinstance(ics[1], bytes) else ics[1]
+    assert ics[2].startswith("text/calendar")
+    assert f"UID:{lesson.pk}@brightminds." in body
+    assert f"DTSTART:{lesson.start.strftime('%Y%m%dT%H%M%SZ')}" in body
+
+
 def test_sms_quiet_hours_stop_and_credits(org, family, fake_sms):
     with tenant_context(org):
         settings_service.update_settings("comms", quiet_window(now_is_quiet=True))

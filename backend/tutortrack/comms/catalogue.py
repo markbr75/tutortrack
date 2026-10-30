@@ -230,9 +230,25 @@ def _lesson_type(key: str, label: Any, **options: Any) -> NotificationType:
     )
 
 
-_lesson_type("lesson_booked", _("Lesson booked"))
-_lesson_type("lesson_changed", _("Lesson moved"), default_channels=("email", "in_app"))
-_lesson_type("lesson_cancelled", _("Lesson cancelled"), default_channels=("email", "in_app"))
+def _lesson_ics(lesson: Any) -> list[tuple[str, bytes, str]]:
+    from tutortrack.scheduling.ical import lesson_attachment
+
+    return lesson_attachment(lesson)
+
+
+_lesson_type("lesson_booked", _("Lesson booked"), attachments=_lesson_ics)
+_lesson_type(
+    "lesson_changed",
+    _("Lesson moved"),
+    default_channels=("email", "in_app"),
+    attachments=_lesson_ics,
+)
+_lesson_type(
+    "lesson_cancelled",
+    _("Lesson cancelled"),
+    default_channels=("email", "in_app"),
+    attachments=_lesson_ics,
+)
 _lesson_type(
     "lesson_reminder",
     _("Lesson reminder"),
