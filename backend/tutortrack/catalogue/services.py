@@ -252,6 +252,37 @@ def create_service(**data: Any) -> Service:
 
 
 @transaction.atomic
+def create_first_service(
+    *, subject: str, level: str = "", duration_minutes: int, price: Money
+) -> Service:
+    """The setup wizard's "Your first service" step (FR-02-6): a one-to-one service priced
+    per lesson, on the named subject and level (added to the catalogue when missing).
+    Idempotent: a service with the same name is returned as it is."""
+    subject_name, level_name = subject.strip(), level.strip()
+    name = f"{level_name} {subject_name}".strip()
+    existing = Service.objects.filter(name__iexact=name).first()
+    if existing is not None:
+        return existing
+    subject_row = Subject.objects.filter(name__iexact=subject_name).first() or save_subject(
+        None, name=subject_name
+    )
+    level_row = None
+    if level_name:
+        level_row = Level.objects.filter(
+            subject=subject_row, name__iexact=level_name
+        ).first() or save_level(None, subject=subject_row, name=level_name)
+    return create_service(
+        name=name,
+        subject=subject_row,
+        level=level_row,
+        format=Service.Format.ONE_TO_ONE,
+        default_duration_minutes=duration_minutes,
+        pricing_unit=Service.PricingUnit.PER_LESSON,
+        charge_rate=price,
+    )
+
+
+@transaction.atomic
 def update_service(service: Service, **changes: Any) -> Service:
     branches = changes.pop("branches", None)
     old = (service.charge_rate, service.pay_rate, service.pay_percent)

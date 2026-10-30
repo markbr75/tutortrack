@@ -131,3 +131,4 @@ Implement these processes as Temporal workflows following the rules in [E32](E32
 - **Notifications:** `class_enrolment_confirmed`, `term_rollover_invite` (with reminders), and staff alerts for full and under-minimum classes.
 - **Dev seed:** an academic year, this term with half term, an 11+ course and an open Saturday class.
 - **Limits:** "running" classes still accept mid-term enrolment (the status is informational). Instalments are fixed monthly charges from enrolment, not E11 auto-pay schedules (auto-pay applies to each invoice as usual). Absence reasons are free text, not a catalogue.
+- **Release test fix (2026-10-30, TP-E20-008).** The admin *New course* form has *Usual class size* (`default_capacity`), filled in from the service's `max_students` (at most 10). Without it, a new course's capacity defaults to the smaller of 10 and the service's limit, so courses on small group services are no longer refused.

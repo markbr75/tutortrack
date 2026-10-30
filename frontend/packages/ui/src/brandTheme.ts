@@ -82,7 +82,13 @@ export function applyBrandTheme(
   }
   if ((full || favicon) && brand.favicon_url) applyBrandFavicon(brand.favicon_url);
   if (!full) return;
-  if (brand.font_family) root.style.setProperty("font-family", brand.font_family);
+  // The body (styles.css) and the `font-sans` utilities read --font-sans, so set the token
+  // rather than font-family on the root, which the body would override.
+  if (brand.font_family)
+    root.style.setProperty(
+      "--font-sans",
+      `${brand.font_family}, ui-sans-serif, system-ui, sans-serif`,
+    );
   if (brand.font_css_url && !document.querySelector(`link[href="${brand.font_css_url}"]`)) {
     const link = document.createElement("link");
     link.rel = "stylesheet";

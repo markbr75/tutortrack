@@ -144,6 +144,41 @@ def test_service_step_is_recorded_and_announced(api, new_org):
     assert event.payload["data"] == {"step": "service", "skipped": False, "answers": payload}
 
 
+def test_service_and_student_steps_create_the_records(api, new_org):
+    """Release test 2026-10-28 (TP-E02-012): the first service and the first family are
+    created by catalogue and people from the step events, once each."""
+    from tutortrack.catalogue.models import Service
+    from tutortrack.core.events.dispatcher import dispatch_batch
+    from tutortrack.people.models import Student
+
+    service = {
+        "subject": "Maths",
+        "level": "GCSE",
+        "duration_minutes": 45,
+        "price": {"amount": "40.00", "currency": "GBP"},
+    }
+    student = {
+        "student_first_name": "Ada",
+        "student_last_name": "Okafor",
+        "contact_name": "Grace Okafor",
+        "contact_email": "Grace@example.com",
+    }
+    for _ in range(2):  # revisiting a step doesn't add a second service or family
+        assert step(api, "service", service).status_code == 200
+        assert step(api, "students", student).status_code == 200
+        dispatch_batch()
+    with tenant_context(new_org):
+        [made] = Service.objects.filter(name="GCSE Maths")
+        assert (made.subject.name, made.level.name, made.format) == ("Maths", "GCSE", "one_to_one")
+        assert (made.default_duration_minutes, made.pricing_unit) == (45, "per_lesson")
+        assert made.charge_rate.amount == 40
+        [ada] = Student.objects.filter(first_name="Ada")
+        contact = ada.client.primary_contact
+        assert (ada.client.display_name, contact.first_name, contact.email) == (
+            "The Okafor Family", "Grace", "grace@example.com",
+        )  # fmt: skip
+
+
 def test_invoicing_step_sets_the_billing_setting(api, new_org):
     step(api, "invoicing", invoicing_style="monthly_advance")
     with tenant_context(new_org):
@@ -167,8 +202,8 @@ def test_tutors_step_only_applies_to_teams(api, new_org):
 
 def test_completing_the_wizard(api, new_org, owner):
     """AC: completing the wizard leaves the org, default branch, owner membership and
-    settings in place and announces the outcome (service and trial come from E06/E04
-    handlers of the onboarding/organisation events)."""
+    settings in place and announces the outcome (the first service and student come from
+    the catalogue and people handlers of the step events; the trial from E04)."""
     step(api, "business", business_type="sole_trader")
     body = api.post("/api/v1/onboarding/complete").json()
     assert body["completed_at"] is not None

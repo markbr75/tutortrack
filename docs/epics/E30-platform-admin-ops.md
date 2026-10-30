@@ -173,3 +173,4 @@ Batch G6 of `docs/05-gap-backlog.md`; design in ADR 0034.
   refunds after a day was reported are shown for a manual credit, not sent (meter events
   can't be negative).
 - **Customer notices** and the **workflow console** are listed under E29 and E32.
+- **Release test fix (2026-10-30, TP-E30-029).** The help panel closes natively (Escape or *Close*) and returns focus to *Help* on the dialog's `close` event, once the page behind is no longer inert. The welcome tour and NPS prompt wait while the panel is open: the tour's window-level Escape handler had stopped Escape closing a panel opened before the page finished loading.

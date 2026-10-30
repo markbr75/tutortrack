@@ -117,6 +117,41 @@ describe("help panel", () => {
     expect(calls.some((c) => c.search.includes("route=%2F"))).toBe(true);
   });
 
+  it("puts focus back on Help when the panel closes (TP-E30-029)", async () => {
+    mockApi(shell({ "GET /api/v1/help/articles": { body: [] } }));
+    render(<App />);
+    const help = await screen.findByRole("button", { name: "Help" });
+    fireEvent.click(help);
+    let dialog = await screen.findByRole("dialog", { name: "Help" });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Help" })).toBeNull());
+    expect(document.activeElement).toBe(help);
+    // Escape: the browser closes the dialog itself, then fires its close event.
+    fireEvent.click(help);
+    dialog = await screen.findByRole("dialog", { name: "Help" });
+    (dialog as HTMLDialogElement).close();
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Help" })).toBeNull());
+    expect(document.activeElement).toBe(help);
+  });
+
+  it("holds the welcome tour back while the panel is open", async () => {
+    window.history.pushState(null, "", "/?support=1");
+    mockApi(
+      shell({
+        "GET /api/v1/me/guidance": { body: { ...GUIDANCE, completed_tours: [] } },
+        "GET /api/v1/help/articles": { body: [] },
+      }),
+    );
+    render(<App />);
+    const dialog = await screen.findByRole("dialog", { name: "Help" });
+    await screen.findByRole("region", { name: "Get started" });
+    expect(screen.queryByRole("dialog", { name: "Welcome to TutorTrack" })).toBeNull();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
+    expect(
+      await screen.findByRole("dialog", { name: "Welcome to TutorTrack" }),
+    ).toBeInTheDocument();
+  });
+
   it("links to the full guide's section about this page", async () => {
     window.history.pushState(null, "", "/tutors");
     mockApi(

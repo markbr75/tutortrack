@@ -426,6 +426,35 @@ def quick_add_family(
     return new_client, new_contact, created
 
 
+@transaction.atomic
+def add_first_student(
+    *, student_first_name: str, student_last_name: str = "", contact_name: str = "",
+    contact_email: str = "",
+) -> Student:  # fmt: skip
+    """The setup wizard's "Your first student" step (FR-02-6): the student in a new household,
+    with the parent or guardian as its primary contact when given. Idempotent: a student
+    with the same name is returned as it is."""
+    first, last = student_first_name.strip(), student_last_name.strip()
+    existing = Student.objects.filter(first_name__iexact=first, last_name__iexact=last).first()
+    if existing is not None:
+        return existing
+    contact_first, _sep, contact_last = contact_name.strip().partition(" ")
+    email = contact_email.strip().lower()
+    if contact_first or email:
+        contact = {
+            "first_name": contact_first or email.split("@")[0],
+            "last_name": contact_last.strip() or last,
+            "email": email,
+            "relationship": Contact.Relationship.PARENT,
+        }
+        _client, _contact, students = quick_add_family(
+            contact=contact, students=[{"first_name": first, "last_name": last}]
+        )
+        return students[0]
+    client = create_client(display_name=household_name(last), type=Client.Type.HOUSEHOLD)
+    return create_student(client, first_name=first, last_name=last)
+
+
 # --- tutors -------------------------------------------------------------------------------------
 
 TUTOR_FIELDS = {
@@ -573,11 +602,16 @@ def approve_subject(subject: TutorSubject, approver: Any, approved: bool = True)
 
 
 def link_membership(tutor: TutorProfile, membership: Any) -> TutorProfile:
-    """Called when the invited tutor accepts (user.joined)."""
+    """Called when the invited tutor accepts (user.joined). A tutor with an unfinished
+    onboarding checklist (recruited, E18) stays in onboarding until it's done."""
+    from tutortrack.recruitment.selectors import onboarding_open
+
     if tutor.membership_id is None:
         tutor.membership = membership
         tutor.save(update_fields=["membership", "updated_at"])
-        if tutor.status in {TutorProfile.Status.APPLICANT, TutorProfile.Status.ONBOARDING}:
+        if tutor.status in {
+            TutorProfile.Status.APPLICANT, TutorProfile.Status.ONBOARDING
+        } and not onboarding_open(tutor.pk):  # fmt: skip
             change_tutor_status(tutor, TutorProfile.Status.ACTIVE)
     return tutor
 

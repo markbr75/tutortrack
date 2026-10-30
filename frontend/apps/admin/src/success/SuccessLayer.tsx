@@ -48,13 +48,14 @@ export function SuccessLayer() {
     if (data?.nps_due && !impersonating) setNpsOpen(true);
   }, [data?.nps_due, impersonating]);
 
-  // New members get the welcome tour once, on the dashboard.
+  // New members get the welcome tour once, on the dashboard; not over the open help panel
+  // (the tour's Escape would otherwise stop Escape closing the panel).
   useEffect(() => {
-    if (!data || offeredWelcome || impersonating || pathname !== "/") return;
+    if (!data || offeredWelcome || impersonating || pathname !== "/" || panelOpen) return;
     setOfferedWelcome(true);
     const seen = [...data.completed_tours, ...data.dismissed_tours];
     if (!seen.includes("welcome")) setTour(tourByKey("welcome") ?? null);
-  }, [data, offeredWelcome, impersonating, pathname]);
+  }, [data, offeredWelcome, impersonating, pathname, panelOpen]);
 
   const startTour = useCallback(
     (key: string) => {
@@ -116,7 +117,7 @@ export function SuccessLayer() {
       {tour
         ? createPortal(<Tour key={tour.key} tour={tour} onFinish={finishTour} />, document.body)
         : null}
-      {npsOpen && !tour
+      {npsOpen && !tour && !panelOpen
         ? createPortal(<NpsPrompt onClose={() => setNpsOpen(false)} />, document.body)
         : null}
     </>

@@ -4043,6 +4043,8 @@
     "createCourse": "Create course",
     "service": "Scheduled as",
     "serviceHint": "The group service sessions use for rates, tutor pay and tax.",
+    "classSize": "Usual class size",
+    "classSizeHint": "Most students per class; this service allows up to {{max}}.",
     "instalments": "Number of instalments",
     "registrationFee": "Registration fee (once a year)",
     "publicDescription": "Description for families",

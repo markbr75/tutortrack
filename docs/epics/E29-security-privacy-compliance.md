@@ -202,3 +202,4 @@ Batch G6 of `docs/05-gap-backlog.md`; design in ADR 0034.
   `IMPOSSIBLE_TRAVEL_HOURS` (2) emails the person and raises `security.alert`
   (`impossible_travel`) in each organisation where they are staff. Deviation: no GeoIP
   database ships; the rule is country-based, not distance-based.
+- **Release test fix (2026-10-30, TP-E29-031).** New `jobs` privacy provider (`jobs/privacy.py`, order 29): erasure scrubs the person's name from job names, goals, notes and status reasons (jobs stay; they underpin lessons, charges and pay), so search no longer finds an erased student through their job; DSAR exports list the person's jobs.

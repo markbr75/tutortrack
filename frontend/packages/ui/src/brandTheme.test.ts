@@ -20,7 +20,9 @@ describe("brand theme", () => {
     );
     expect(root.style.getPropertyValue("--tt-brand")).toBe("50 98% 64%");
     expect(root.style.getPropertyValue("--tt-brand-foreground")).toBe("221 39% 11%");
-    expect(root.style.getPropertyValue("font-family")).toContain("Lato");
+    // The token, not font-family on the root: the body reads --font-sans (TP-E24-003).
+    expect(root.style.getPropertyValue("--font-sans")).toMatch(/^'Lato', /);
+    expect(root.style.getPropertyValue("font-family")).toBe("");
     expect(document.querySelector<HTMLLinkElement>("link[rel=icon]")?.getAttribute("href")).toBe(
       "/f.png",
     );
@@ -39,7 +41,7 @@ describe("brand theme", () => {
       { favicon: true, root },
     );
     expect(root.style.getPropertyValue("--tt-brand")).toBe("224 76% 48%");
-    expect(root.style.getPropertyValue("font-family")).toBe("");
+    expect(root.style.getPropertyValue("--font-sans")).toBe("");
     expect(document.querySelector("link[rel~=icon]")?.getAttribute("href")).toBe("/t.ico");
   });
 
