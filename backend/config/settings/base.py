@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     "tutortrack.growth",
     "tutortrack.learning",
     "tutortrack.ai",
+    "tutortrack.pathways",
     # Last: subscribes webhooks to the event types every other app registers (E27).
     "tutortrack.developer",
 ]
@@ -457,6 +458,10 @@ SPECTACULAR_SETTINGS = {
         "InterviewStatusEnum": "tutortrack.recruitment.models.Interview.Status",
         "ReferenceStatusEnum": "tutortrack.recruitment.models.ReferenceRequest.Status",
         "OfferBatchStatusEnum": "tutortrack.matching.models.OfferBatch.Status",
+        "PathwayTemplateKindEnum": "tutortrack.pathways.models.PathwayTemplate.Kind",
+        "PathwayRunStatusEnum": "tutortrack.pathways.models.PathwayRun.Status",
+        "PathwayStepStatusEnum": "tutortrack.pathways.models.PathwayStep.Status",
+        "PathwayStepAssigneeEnum": "tutortrack.pathways.models.PathwayStep.Assignee",
         "OfferModeEnum": "tutortrack.matching.models.OfferBatch.Mode",
         "JobOfferStatusEnum": "tutortrack.matching.models.JobOffer.Status",
         "JobPostingStatusEnum": "tutortrack.matching.models.JobPosting.Status",
