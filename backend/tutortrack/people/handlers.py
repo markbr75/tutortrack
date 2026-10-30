@@ -60,3 +60,19 @@ def rename_own_tutor_profile(event: EventEnvelope) -> None:
     changes = {k: v for k, v in names.items() if v and v != getattr(tutor, k)}
     if changes:
         update_tutor(tutor, **changes)
+
+
+@subscribe("onboarding.step_completed")
+def add_first_student_from_onboarding(event: EventEnvelope) -> None:
+    """The wizard's "Your first student" step (FR-02-6) adds the family."""
+    if event.data.get("step") != "students" or event.data.get("skipped"):
+        return
+    answers = event.data.get("answers", {})
+    from .services import add_first_student
+
+    add_first_student(
+        student_first_name=answers["student_first_name"],
+        student_last_name=answers.get("student_last_name", ""),
+        contact_name=answers.get("contact_name", ""),
+        contact_email=answers.get("contact_email", ""),
+    )
