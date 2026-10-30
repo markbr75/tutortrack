@@ -166,13 +166,13 @@ def test_erasing_a_student_scrubs_their_name_from_job_names_and_search(org, fami
             client=family.client,
             service=ServiceFactory(organisation=org),
             students=[{"student": family.student}],
-            name="GCSE Maths – Arjun Patel",
+            name="GCSE Maths - Arjun Patel",
             notes_for_tutor="Arjun likes worked examples",
         )
         record = erasure.erase_now("people.student", str(family.student.pk))
         label = record.labels[f"people.student:{family.student.pk}"]
         job = Job.objects.get(pk=job.pk)
-        assert job.name == f"GCSE Maths – {label}"
+        assert job.name == f"GCSE Maths - {label}"
         assert "Arjun" not in job.notes_for_tutor
         owner = MembershipFactory(organisation=org, role="owner").user
         assert not [h for h in search(owner, "Arjun Patel") if h.type == "job"]

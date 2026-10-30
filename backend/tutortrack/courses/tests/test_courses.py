@@ -1076,6 +1076,18 @@ class TestRolloverIsolation(TenantIsolationTestMixin):
             return services.start_rollover(current, nxt, deadline=now() + timedelta(days=3))
 
 
+def test_a_new_course_fits_a_small_group_service_by_default(org, world):
+    """Release test 2026-10-28 (TP-E20-008): without a class size, a course on a service
+    capped below 10 takes the service's limit instead of being refused."""
+    small = ServiceFactory(organisation=org, format="class", max_students=8)
+    with tenant_context(org):
+        course = services.save_course(None, name="11+ Prep", service=small, price=gbp("120.00"))
+        assert course.default_capacity == 8
+        roomy = ServiceFactory(organisation=org, format="class", max_students=20)
+        course = services.save_course(None, name="Big", service=roomy, price=gbp("120.00"))
+        assert course.default_capacity == 10
+
+
 def test_course_validation(org, world):
     split = ServiceFactory(organisation=org, format="class", max_students=10, group_charge="split")
     with tenant_context(org), pytest.raises(BusinessRuleViolation, match="each student"):

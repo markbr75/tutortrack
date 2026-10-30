@@ -309,6 +309,9 @@ def save_course(course: Course | None, **data: Any) -> Course:
             raise _invalid("service", _("Choose the service sessions are scheduled as."))
         if created and data.get("price") is None:
             raise _invalid("price", _("Give the price."))
+        if created and data.get("default_capacity") is None:
+            data.pop("default_capacity", None)
+            course.default_capacity = min(course.default_capacity, course.service.max_students)
         _money(course, data)
         for key, value in data.items():
             setattr(course, key, value)

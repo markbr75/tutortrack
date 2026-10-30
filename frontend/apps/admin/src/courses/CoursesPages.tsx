@@ -371,14 +371,13 @@ function CoursesSection() {
     price: "",
     registration_fee: "",
     instalments: "3",
+    default_capacity: "",
     public_description: "",
     is_public: true,
   };
   const [draft, setDraft] = useState(empty);
-  const currency =
-    services.data?.results.find((s) => s.id === draft.service)?.currency ??
-    org?.default_currency ??
-    "GBP";
+  const service = services.data?.results.find((s) => s.id === draft.service);
+  const currency = service?.currency ?? org?.default_currency ?? "GBP";
   const create = useMutation({
     mutationFn: async () =>
       unwrap(
@@ -392,6 +391,7 @@ function CoursesSection() {
               ? { amount: draft.registration_fee, currency }
               : null,
             instalments: draft.pricing_model === "instalments" ? Number(draft.instalments) : 1,
+            ...(draft.default_capacity ? { default_capacity: Number(draft.default_capacity) } : {}),
             public_description: draft.public_description,
             is_public: draft.is_public,
           },
@@ -473,13 +473,33 @@ function CoursesSection() {
             hint={t("courses.serviceHint")}
             value={draft.service}
             required
-            onChange={(e) => setDraft({ ...draft, service: e.target.value })}
+            onChange={(e) => {
+              const max = services.data?.results.find((s) => s.id === e.target.value)?.max_students;
+              setDraft({
+                ...draft,
+                service: e.target.value,
+                default_capacity: max ? String(Math.min(max, 10)) : "",
+              });
+            }}
             options={[
               { value: "", label: "–" },
               ...(services.data?.results ?? [])
                 .filter((s) => s.format !== "one_to_one")
                 .map((s) => ({ value: s.id, label: s.name })),
             ]}
+          />
+          <TextField
+            label={t("courses.classSize")}
+            hint={
+              service?.max_students
+                ? t("courses.classSizeHint", { max: service.max_students })
+                : undefined
+            }
+            type="number"
+            min={1}
+            max={service?.max_students ?? undefined}
+            value={draft.default_capacity}
+            onChange={(e) => setDraft({ ...draft, default_capacity: e.target.value })}
           />
           <SelectField
             label={t("courses.pricing")}

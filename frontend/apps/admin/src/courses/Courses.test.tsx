@@ -77,6 +77,39 @@ describe("courses and classes", () => {
     expect(screen.getByRole("form", { name: "New class" })).toBeInTheDocument();
   });
 
+  it("creates a course sized to a small group service", async () => {
+    window.history.pushState(null, "", "/courses");
+    const service = { id: "sv1", name: "11+ group class", format: "class", currency: "GBP",
+      max_students: 8 }; // prettier-ignore
+    const calls = mockApi(
+      routes({
+        "GET /api/v1/terms": { body: { results: [], next: null, previous: null } },
+        "GET /api/v1/classes": { body: { results: [], next: null, previous: null } },
+        "GET /api/v1/courses": { body: { results: [], next: null, previous: null } },
+        "GET /api/v1/tutors": { body: { results: [], next: null, previous: null } },
+        "GET /api/v1/catalogue/services": {
+          body: { results: [service], next: null, previous: null },
+        },
+        "POST /api/v1/courses": { status: 201, body: { id: "co2" } },
+      }),
+    );
+    render(<App />);
+    fireEvent.click(await screen.findByRole("tab", { name: "Courses" }));
+    await screen.findByRole("option", { name: "11+ group class" });
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "11+ Prep" } });
+    fireEvent.change(screen.getByLabelText(/Scheduled as/), { target: { value: "sv1" } });
+    const size = screen.getByLabelText("Usual class size");
+    expect(size).toHaveValue(8);
+    expect(screen.getByText(/allows up to 8/)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/^Price/), { target: { value: "120" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create course" }));
+    await vi.waitFor(() =>
+      expect(
+        calls.find((c) => c.method === "POST" && c.path === "/api/v1/courses")?.body,
+      ).toMatchObject({ service: "sv1", default_capacity: 8 }),
+    );
+  });
+
   it("shows a class, prices a late joiner and enrols them", async () => {
     window.history.pushState(null, "", "/classes/c1");
     const calls = mockApi(
