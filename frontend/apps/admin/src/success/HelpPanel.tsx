@@ -245,7 +245,9 @@ export interface HelpPanelProps {
 /**
  * The help panel (E30 FR-30-5): articles for the current page and search, "What's new",
  * product tours, chat with support and the usage-data choice. A modal side sheet: focus
- * moves into it, Escape closes it and focus returns to the Help button.
+ * moves into it, Escape closes it and focus returns to the Help button. Escape and Close both
+ * close the dialog natively and `onClose` runs on its close event, once the page behind is
+ * no longer inert, so focus can go back (TP-E30-029).
  */
 export function HelpPanel({ open, onClose, onStartTour, initialTab = "articles" }: HelpPanelProps) {
   const { t } = useTranslation();
@@ -271,7 +273,6 @@ export function HelpPanel({ open, onClose, onStartTour, initialTab = "articles" 
       ref={ref}
       aria-labelledby="help-panel-title"
       onClose={onClose}
-      onCancel={onClose}
       className="m-0 ml-auto h-full max-h-none w-full max-w-md border-l border-border bg-surface p-0 text-foreground backdrop:bg-black/40"
     >
       {open ? (
@@ -284,7 +285,7 @@ export function HelpPanel({ open, onClose, onStartTour, initialTab = "articles" 
               size="sm"
               variant="ghost"
               className="-mr-3 text-muted-foreground"
-              onClick={onClose}
+              onClick={() => ref.current?.close()}
             >
               {t("help.close")}
             </Button>
