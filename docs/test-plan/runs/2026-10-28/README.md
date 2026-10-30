@@ -27,6 +27,22 @@ A P1 failure blocks the release (see the plan README). Seven P1 failures, four i
 | 6 | TP-E24-003 | **The brand font isn't applied in the portal**: `applyBrandTheme` sets `font-family` on `<html>`, the body keeps "Source Sans 3". Colours are applied and meet AA. | `frontend/packages/ui/src/brandTheme.ts` |
 | 7 | TP-E30-029 | Help panel: Escape closes it but **focus goes to the page body, not back to Help** (WCAG 2.4.3). Opened before the page has finished loading, Escape doesn't close it at all (reproduced three times). | `frontend/apps/admin/src/success/HelpPanel.tsx` |
 
+### Follow-up: fixes (2026-10-30)
+
+All seven are fixed on branch `fix/release-p1s`, each with a regression test. Re-run these cases (and J01, J06, J12) before release:
+
+| # | Case | Fix | Regression test |
+|---|---|---|---|
+| 1 | TP-E02-012 | Catalogue and people handle the wizard's service and student steps. | `tenancy/tests/test_onboarding.py::test_service_and_student_steps_create_the_records` |
+| 2 | TP-E18-020 | Joining leaves a tutor with an unfinished checklist in onboarding. | `recruitment/tests/test_recruitment.py::test_a_recruited_tutor_stays_onboarding_after_accepting_the_invitation` |
+| 3 | TP-E29-031 | New jobs privacy provider scrubs job names and notes. | `privacy/tests/test_erasure.py::test_erasing_a_student_scrubs_their_name_from_job_names_and_search` |
+| 4 | TP-E08-025 | Booked, moved and cancelled emails attach `lesson.ics`. | `comms/tests/test_comms.py::test_the_lesson_moved_email_carries_the_updated_ics` |
+| 5 | TP-E20-008 | *Usual class size* on New course; default capped at the service's limit. | `courses/tests/test_courses.py::test_a_new_course_fits_a_small_group_service_by_default`, `Courses.test.tsx` |
+| 6 | TP-E24-003 | Brand font set through `--font-sans`. | `packages/ui/src/brandTheme.test.ts` |
+| 7 | TP-E30-029 | Help closes natively and refocuses *Help*; no welcome tour over the open panel. | `success/Success.test.tsx` |
+
+The "16:30:00 Greenwich Mean Time" wording in lesson emails (note on TP-E08-025) is unchanged; it affects every email using `datetime("full")`.
+
 ## Other findings (not blocking)
 
 **P2: should be fixed with an agreed date**

@@ -142,3 +142,4 @@ Batch G6 of `docs/05-gap-backlog.md`; design in ADR 0034.
 **Gap G3** ([ADR 0037](../adr/0037-gap-batch-g3-scheduling-billing-payments-payroll.md)):
 
 - **Booking block (FR-24-4; E24:107):** the website builder's `booking` block (heading, intro, days) embeds the E08 `<tt-booking>` widget when online booking is on; see E08's gap notes.
+- **Release test fix (2026-10-30, TP-E24-003).** `applyBrandTheme` sets the brand font through the `--font-sans` token on the root (with the system fallbacks) instead of `font-family`, which the body's own `font-family: var(--font-sans)` overrode.

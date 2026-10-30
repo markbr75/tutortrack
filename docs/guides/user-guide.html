@@ -129,7 +129,7 @@
 <header>
 <h1>TutorTrack user guide</h1>
 <p class="lead">How to use TutorTrack day to day: for the office team in the admin app, tutors in the tutor app, families and students in the client portal, and affiliates in the partner portal.</p>
-<p class="meta">Last updated: 2026-10-26</p>
+<p class="meta">Last updated: 2026-10-30</p>
 </header>
 <p>Setting up the organisation (settings, roles, payments, integrations, the website and data import) is covered in the <a href="admin-guide.html">admin guide</a>. Developers should read the <a href="api-guide.html">API guide</a>.</p>
 
@@ -360,7 +360,7 @@
 <h5 id="calendar-lesson">Working with a lesson</h5>
 <p>Select a lesson to open its quick view: status, tutors, students, place, a link to the job, and <span class="ui">How this was priced</span> if you can see rates. From here:</p>
 <ul>
-<li><span class="ui">Reschedule</span>: enter the new date and times and a reason, then <span class="ui">Move lesson</span>. You can also drag a lesson in the day and week views. The people involved are told.</li>
+<li><span class="ui">Reschedule</span>: enter the new date and times and a reason, then <span class="ui">Move lesson</span>. You can also drag a lesson in the day and week views. The people involved are told; the email has a calendar file (<code>lesson.ics</code>) that moves the lesson in their own calendar. Booking and cancellation emails carry one too.</li>
 <li><span class="ui">Mark completed</span>: take the register (see <a href="#attendance">attendance</a>).</li>
 <li><span class="ui">Mark missed</span>: for a lesson that didn't happen and wasn't cancelled.</li>
 <li><span class="ui">Cancel lesson</span>: see <a href="#cancellations">cancellations</a>.</li>
@@ -498,7 +498,7 @@
 <p>Use <span class="ui">Courses</span> (<code>courses.view</code>) for group teaching. A <strong>course</strong> is the product (for example "GCSE Maths revision"), a <strong>class</strong> is a scheduled group with a number of places, and a <strong>term</strong> is the date range for enrolment and billing.</p>
 <ul>
 <li><span class="ui">Terms</span>: add academic years and terms, with breaks such as half term. Class sessions skip breaks.</li>
-<li><span class="ui">Courses</span>: <span class="ui">New course</span> sets the pricing (per term, per month, per session, whole course up front or in instalments), an optional yearly registration fee, a description, and <span class="ui">Show on the website and portal</span>.</li>
+<li><span class="ui">Courses</span>: <span class="ui">New course</span> sets the pricing (per term, per month, per session, whole course up front or in instalments), the <span class="ui">Usual class size</span> (filled in from the service, up to its limit), an optional yearly registration fee, a description, and <span class="ui">Show on the website and portal</span>.</li>
 <li><span class="ui">Classes</span>: <span class="ui">New class</span> sets the day, time, length, places and teacher, then <span class="ui">Create class and sessions</span>. TutorTrack tells you about any date it skipped because the teacher or room was busy.</li>
 </ul>
 <p>A class page opens with its status, course, day, time and term under its name. The class details, places taken and the waitlist sit in the column on the right. On a class page:</p>
@@ -1274,7 +1274,7 @@ A moved lesson tells the family. A request waits for the office or the family to
 <h3 id="task-new-tutor-h">Take on a new tutor</h3>
 <ol class="steps">
 <li>In <span class="path">Recruitment</span>, open the application, invite the applicant to interview and ask for references.</li>
-<li>Select <span class="ui">Approve and onboard</span>. The tutor gets an invitation and a <span class="ui">Getting started</span> checklist.</li>
+<li>Select <span class="ui">Approve and onboard</span>. The tutor gets an invitation and a <span class="ui">Getting started</span> checklist. Accepting the invitation gives them a login but leaves them <span class="ui">Onboarding</span>.</li>
 <li>The tutor signs agreements, adds bank details and uploads documents in <span class="ui">Checks</span>. Start an online background check from their page if you use one.</li>
 <li>Verify each document from the tutor's compliance card. When the required items are done, the tutor becomes active.</li>
 <li>Approve the subjects they teach on their page. They now appear in matching.</li>
@@ -1315,7 +1315,7 @@ A moved lesson tells the family. A request waits for the office or the family to
 </main>
 </div>
 <footer class="site-footer">
-<p>TutorTrack user guide. Last updated 2026-10-26. Found something out of date? Update this guide in the same pull request as the change.</p>
+<p>TutorTrack user guide. Last updated 2026-10-30. Found something out of date? Update this guide in the same pull request as the change.</p>
 </footer>
 </body>
 </html>
