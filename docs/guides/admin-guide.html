@@ -461,6 +461,7 @@
                 <tr><td>Data migration</td><td>Import rollback window (7 days); export link lifetime (7 days)</td></tr>
                 <tr><td>Developer</td><td>API key rotation overlap (24 hours)</td></tr>
                 <tr><td>Recruitment and compliance</td><td>Probation review after activation (<code>recruitment.probation_days</code>, 90 days; 0 = no automatic review); remind staff before a probation review is due (7 days); interview hours for interviewers without their own availability (<code>recruitment.interview_hours</code>, weekdays 09:00–17:00 in the organisation's time zone); create a video link automatically when an interview is booked (on); days before a tutor can retake a failed subject test (7); days a referee has to reply (14); activate tutors automatically when onboarding is complete (on); compliance reminders (60, 30 and 7 days); hold pay while restricted (on)</td></tr>
+                <tr><td>Pathways</td><td>Days before a pathway step is due to remind whoever has to do it (<code>pathways.reminder_days</code>, 1 day, 0–14; 0 = no reminder). Overdue steps are always flagged.</td></tr>
               </tbody>
             </table>
           </div>
@@ -564,6 +565,17 @@
             <code>compliance.view</code>/<code>verify</code> (verifying and requesting documents),
             <code>recruitment.performance.view</code>/<code>manage</code> (probation reviews and
             notes) and <code>recruitment.offboarding.manage</code>.</p>
+        </div>
+
+        <div class="callout tip">
+          <strong>Pathway permissions</strong>
+          <p>Pathways are the steps you ask a tutor to follow, such as joining a job (the screens
+            arrive in a later release; today they are used through the API). Seeing them needs
+            <code>pathway.view</code>; creating and changing pathway templates needs
+            <code>pathway.manage</code>; starting and cancelling a pathway for a tutor needs
+            <code>pathway.run.manage</code>; doing staff steps, checking what tutors send,
+            skipping steps and sending reminders needs <code>pathway.step.complete</code>.
+            Coordinators have all four; owners and admins have everything.</p>
         </div>
 
         <h3 id="roles-custom">Custom roles</h3>

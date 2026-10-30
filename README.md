@@ -110,6 +110,7 @@ Each app in `backend/tutortrack/` owns its models, `services.py` (writes), `sele
 | `leads` | Enquiries, pipeline, forms (with file uploads), waitlist with tutor-capacity suggestions, proposals | E17 |
 | `recruitment` | Job openings, tutor applications (CV and video uploads), interview booking, onboarding, compliance checks, probation reviews, offboarding, subject tests | E18 |
 | `matching` | Tutor matching (incl. exam boards, SEN experience, optional gender preference) and the job marketplace | E19 |
+| `pathways` | Pathways: stages of steps a business asks a tutor to follow (questions, uploads, click-to-sign, read and acknowledge, staff review, system checks), versioned templates, runs with gates, the tutor's Tasks, reminders on Temporal | E34 |
 | `courses` | Group classes, courses, terms and enrolment | E20 |
 | `learning` | Homework, resources (also in the online classroom), progress reports (manual or on a schedule) and assessments | E21 |
 | `integrations` | Integration framework and provider connections | E22 |

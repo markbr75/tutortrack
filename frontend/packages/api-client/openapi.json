@@ -50251,6 +50251,100 @@
                 "x-visibility": "internal"
             }
         },
+        "/api/v1/me/tasks": {
+            "get": {
+                "operationId": "me_tasks_list",
+                "description": "The steps the signed-in tutor has to do, or has sent for review.",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MyPathwayTask"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/me/tasks/{id}/complete": {
+            "post": {
+                "operationId": "me_tasks_complete_create",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayCompleteStepRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayCompleteStepRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayCompleteStepRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MyPathwayTask"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
         "/api/v1/me/tax-identity": {
             "get": {
                 "operationId": "me_tax_identity_retrieve",
@@ -53372,6 +53466,691 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PackageDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/pathway-runs": {
+            "get": {
+                "operationId": "pathway_runs_list",
+                "description": "Pathways that tutors are following, and their steps (filter with ``?template=``,\n``?status=``, ``?tutor=``, or ``?record_type=`` with ``?record_id=``).",
+                "parameters": [
+                    {
+                        "name": "cursor",
+                        "required": false,
+                        "in": "query",
+                        "description": "The pagination cursor value.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "record_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "record_type",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "template",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "tutor",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "pathway-runs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedPathwayRunList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "pathway_runs_create",
+                "description": "Start a pathway for a tutor about one record (for a job, ``record_id`` is the job).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "pathway-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StartPathwayRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StartPathwayRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StartPathwayRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PathwayRunDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/pathway-runs/{id}": {
+            "get": {
+                "operationId": "pathway_runs_retrieve",
+                "description": "Pathways that tutors are following, and their steps (filter with ``?template=``,\n``?status=``, ``?tutor=``, or ``?record_type=`` with ``?record_id=``).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this pathway run.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pathway-runs"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PathwayRunDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/pathway-runs/{id}/cancel": {
+            "post": {
+                "operationId": "pathway_runs_cancel_create",
+                "description": "Pathways that tutors are following, and their steps (filter with ``?template=``,\n``?status=``, ``?tutor=``, or ``?record_type=`` with ``?record_id=``).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this pathway run.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pathway-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayReasonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayReasonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayReasonRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PathwayRunDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/pathway-runs/{id}/steps/{key}/{act}": {
+            "post": {
+                "operationId": "pathway_runs_steps_create",
+                "description": "Staff act on a step: ``complete`` (a staff step, or accept what a tutor sent),\n``skip`` or ``reject`` (with a reason), or ``remind`` whoever has to do it.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "act",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^complete|skip|reject|remind$"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f-]{36}$"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "key",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[a-z][a-z0-9_]{0,39}$"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pathway-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayCompleteStepRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayCompleteStepRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayCompleteStepRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PathwayStep"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/pathway-schema": {
+            "get": {
+                "operationId": "pathway_schema_retrieve",
+                "description": "What a pathway can contain: step types, kinds of record, the questions TutorTrack can\ncheck, and the staff roles a staff step can name.",
+                "tags": [
+                    "pathway-schema"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PathwaySchema"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/pathway-templates": {
+            "get": {
+                "operationId": "pathway_templates_list",
+                "description": "Pathway templates: stages of steps that a tutor follows (FR-34-1). Changing the\nstages adds a version; runs already started keep theirs. Switch one off with\n``active: false``.",
+                "parameters": [
+                    {
+                        "name": "ordering",
+                        "required": false,
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "pathway-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PathwayTemplate"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "post": {
+                "operationId": "pathway_templates_create",
+                "description": "Pathway templates: stages of steps that a tutor follows (FR-34-1). Changing the\nstages adds a version; runs already started keep theirs. Switch one off with\n``active: false``.",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    }
+                ],
+                "tags": [
+                    "pathway-templates"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayTemplateRequest"
+                            },
+                            "examples": {
+                                "AShortOnboarding": {
+                                    "value": {
+                                        "name": "Join a GCSE job",
+                                        "kind": "join",
+                                        "record_type": "job",
+                                        "stages": [
+                                            {
+                                                "key": "before_first_lesson",
+                                                "name": "Before your first lesson",
+                                                "gate": "ready",
+                                                "steps": [
+                                                    {
+                                                        "key": "agreement",
+                                                        "type": "sign",
+                                                        "name": "Sign the job agreement",
+                                                        "due_days": 3,
+                                                        "config": {
+                                                            "title": "Job agreement",
+                                                            "text": "I agree to..."
+                                                        }
+                                                    },
+                                                    {
+                                                        "key": "check",
+                                                        "type": "staff_review",
+                                                        "assignee": "staff",
+                                                        "role": "coordinator",
+                                                        "config": {
+                                                            "question": "Is the tutor ready?"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "summary": "A short onboarding"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayTemplateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayTemplateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PathwayTemplate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/pathway-templates/{id}": {
+            "get": {
+                "operationId": "pathway_templates_retrieve",
+                "description": "Pathway templates: stages of steps that a tutor follows (FR-34-1). Changing the\nstages adds a version; runs already started keep theirs. Switch one off with\n``active: false``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this pathway template.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pathway-templates"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PathwayTemplate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "put": {
+                "operationId": "pathway_templates_update",
+                "description": "Pathway templates: stages of steps that a tutor follows (FR-34-1). Changing the\nstages adds a version; runs already started keep theirs. Switch one off with\n``active: false``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this pathway template.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pathway-templates"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayTemplateRequest"
+                            },
+                            "examples": {
+                                "AShortOnboarding": {
+                                    "value": {
+                                        "name": "Join a GCSE job",
+                                        "kind": "join",
+                                        "record_type": "job",
+                                        "stages": [
+                                            {
+                                                "key": "before_first_lesson",
+                                                "name": "Before your first lesson",
+                                                "gate": "ready",
+                                                "steps": [
+                                                    {
+                                                        "key": "agreement",
+                                                        "type": "sign",
+                                                        "name": "Sign the job agreement",
+                                                        "due_days": 3,
+                                                        "config": {
+                                                            "title": "Job agreement",
+                                                            "text": "I agree to..."
+                                                        }
+                                                    },
+                                                    {
+                                                        "key": "check",
+                                                        "type": "staff_review",
+                                                        "assignee": "staff",
+                                                        "role": "coordinator",
+                                                        "config": {
+                                                            "question": "Is the tutor ready?"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "summary": "A short onboarding"
+                                }
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayTemplateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PathwayTemplateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PathwayTemplate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            },
+            "patch": {
+                "operationId": "pathway_templates_partial_update",
+                "description": "Pathway templates: stages of steps that a tutor follows (FR-34-1). Changing the\nstages adds a version; runs already started keep theirs. Switch one off with\n``active: false``.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this pathway template.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pathway-templates"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPathwayTemplateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPathwayTemplateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedPathwayTemplateRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PathwayTemplate"
                                 }
                             }
                         },
@@ -116547,6 +117326,76 @@
                     "url"
                 ]
             },
+            "MyPathwayTask": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "run": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "pathway": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "stage": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "step_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PathwayStepStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "view": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "readOnly": true
+                    },
+                    "result": {
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "due_at",
+                    "id",
+                    "name",
+                    "pathway",
+                    "reason",
+                    "result",
+                    "run",
+                    "stage",
+                    "status",
+                    "step_type",
+                    "view"
+                ]
+            },
             "MyPosting": {
                 "type": "object",
                 "properties": {
@@ -121873,6 +122722,32 @@
                     }
                 }
             },
+            "PaginatedPathwayRunList": {
+                "type": "object",
+                "required": [
+                    "results"
+                ],
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cD00ODY%3D\""
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?cursor=cj0xJnA9NDg3"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PathwayRun"
+                        }
+                    }
+                }
+            },
             "PaginatedPayItemList": {
                 "type": "object",
                 "required": [
@@ -126599,6 +127474,31 @@
                     }
                 }
             },
+            "PatchedPathwayTemplateRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/PathwayTemplateKindEnum"
+                    },
+                    "record_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "stages": {}
+                }
+            },
             "PatchedPayProfileUpdateRequest": {
                 "type": "object",
                 "properties": {
@@ -128636,6 +129536,612 @@
                         "type": "boolean"
                     }
                 }
+            },
+            "PathwayCompleteStepRequest": {
+                "type": "object",
+                "description": "What finishing a step sends; which fields apply depends on the step's type.",
+                "properties": {
+                    "answers": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    },
+                    "files": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "note": {
+                        "type": "string",
+                        "maxLength": 2000
+                    }
+                }
+            },
+            "PathwayPerson": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name"
+                ]
+            },
+            "PathwayQuestion": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "record_type": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "label",
+                    "record_type"
+                ]
+            },
+            "PathwayReasonRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 2000
+                    }
+                }
+            },
+            "PathwayRun": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "template_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "template_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "kind": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "version": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "record_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "record_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "tutor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PathwayPerson"
+                            }
+                        ],
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PathwayRunStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "stage": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "stages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PathwayStage"
+                        },
+                        "readOnly": true
+                    },
+                    "gates": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "readOnly": true
+                    },
+                    "progress": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        },
+                        "readOnly": true
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "finished_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "finished_at",
+                    "gates",
+                    "id",
+                    "kind",
+                    "progress",
+                    "reason",
+                    "record_id",
+                    "record_type",
+                    "stage",
+                    "stages",
+                    "started_at",
+                    "status",
+                    "template",
+                    "template_key",
+                    "template_name",
+                    "tutor",
+                    "version"
+                ]
+            },
+            "PathwayRunDetail": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "template_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "template_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "kind": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "version": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "record_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "record_id": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "tutor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PathwayPerson"
+                            }
+                        ],
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PathwayRunStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "stage": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "stages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PathwayStage"
+                        },
+                        "readOnly": true
+                    },
+                    "gates": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "readOnly": true
+                    },
+                    "progress": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        },
+                        "readOnly": true
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "finished_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "steps": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PathwayStep"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "finished_at",
+                    "gates",
+                    "id",
+                    "kind",
+                    "progress",
+                    "reason",
+                    "record_id",
+                    "record_type",
+                    "stage",
+                    "stages",
+                    "started_at",
+                    "status",
+                    "steps",
+                    "template",
+                    "template_key",
+                    "template_name",
+                    "tutor",
+                    "version"
+                ]
+            },
+            "PathwayRunStatusEnum": {
+                "enum": [
+                    "running",
+                    "completed",
+                    "rejected",
+                    "cancelled"
+                ],
+                "type": "string",
+                "description": "* `running` - In progress\n* `completed` - Completed\n* `rejected` - Turned down\n* `cancelled` - Cancelled"
+            },
+            "PathwaySchema": {
+                "type": "object",
+                "properties": {
+                    "step_types": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StepType"
+                        }
+                    },
+                    "record_types": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RecordType"
+                        }
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PathwayQuestion"
+                        }
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "questions",
+                    "record_types",
+                    "roles",
+                    "step_types"
+                ]
+            },
+            "PathwayStage": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "gate": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "gate",
+                    "key",
+                    "name"
+                ]
+            },
+            "PathwayStep": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "stage": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "step_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "assignee": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PathwayStepAssigneeEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "role": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PathwayStepStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "opened_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "submitted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "completed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "completed_by": {
+                        "type": "string",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "config": {
+                        "readOnly": true
+                    },
+                    "result": {
+                        "readOnly": true
+                    },
+                    "reason": {
+                        "type": "string",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "assignee",
+                    "completed_at",
+                    "completed_by",
+                    "config",
+                    "due_at",
+                    "id",
+                    "key",
+                    "name",
+                    "opened_at",
+                    "reason",
+                    "result",
+                    "role",
+                    "stage",
+                    "status",
+                    "step_type",
+                    "submitted_at"
+                ]
+            },
+            "PathwayStepAssigneeEnum": {
+                "enum": [
+                    "participant",
+                    "staff",
+                    "family",
+                    "system"
+                ],
+                "type": "string",
+                "description": "* `participant` - The tutor\n* `staff` - Staff\n* `family` - The family\n* `system` - TutorTrack"
+            },
+            "PathwayStepStatusEnum": {
+                "enum": [
+                    "waiting",
+                    "open",
+                    "review",
+                    "done",
+                    "skipped",
+                    "rejected"
+                ],
+                "type": "string",
+                "description": "* `waiting` - Not started\n* `open` - To do\n* `review` - Waiting for review\n* `done` - Done\n* `skipped` - Skipped\n* `rejected` - Turned down"
+            },
+            "PathwayTemplate": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "key": {
+                        "type": "string",
+                        "readOnly": true,
+                        "pattern": "^[-a-zA-Z0-9_]+$"
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 120
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/PathwayTemplateKindEnum"
+                    },
+                    "record_type": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "builtin_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "edited": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "version": {
+                        "type": "integer",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "stages": {},
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "builtin_key",
+                    "created_at",
+                    "edited",
+                    "id",
+                    "key",
+                    "name",
+                    "record_type",
+                    "stages",
+                    "updated_at",
+                    "version"
+                ]
+            },
+            "PathwayTemplateKindEnum": {
+                "enum": [
+                    "apply",
+                    "join",
+                    "finish",
+                    "custom"
+                ],
+                "type": "string",
+                "description": "* `apply` - Apply for a job\n* `join` - Join a job\n* `finish` - Finish a job\n* `custom` - Custom"
+            },
+            "PathwayTemplateRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/PathwayTemplateKindEnum"
+                    },
+                    "record_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "stages": {}
+                },
+                "required": [
+                    "name",
+                    "record_type",
+                    "stages"
+                ]
             },
             "PayBasisEnum": {
                 "enum": [
@@ -139226,6 +140732,21 @@
                     "method"
                 ]
             },
+            "RecordType": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "label"
+                ]
+            },
             "RecordingLink": {
                 "type": "object",
                 "properties": {
@@ -147117,6 +148638,29 @@
                     "tutors"
                 ]
             },
+            "StartPathwayRequest": {
+                "type": "object",
+                "properties": {
+                    "template": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "record_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                    },
+                    "tutor": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "record_id",
+                    "template",
+                    "tutor"
+                ]
+            },
             "StartThreadKindEnum": {
                 "enum": [
                     "client",
@@ -147290,6 +148834,28 @@
                 },
                 "required": [
                     "status"
+                ]
+            },
+            "StepType": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "assignees": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "assignees",
+                    "key",
+                    "label"
                 ]
             },
             "StorageUsage": {

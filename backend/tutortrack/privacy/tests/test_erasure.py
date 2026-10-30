@@ -80,6 +80,7 @@ def test_every_app_with_personal_data_registers_a_provider():
         "sites",
         "developer",
         "ai",
+        "pathways",
     } <= keys
 
 
