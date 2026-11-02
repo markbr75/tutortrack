@@ -46,6 +46,7 @@
             <li><a href="#versioning">Versioning and deprecation</a></li>
             <li><a href="#public-uploads">Files on public forms</a></li>
             <li><a href="#matching-needs">Matching needs, waitlist suggestions and classroom resources</a></li>
+            <li><a href="#pathways">Pathways</a></li>
           </ol>
         </li>
         <li><a href="#webhooks">Webhooks</a>
@@ -67,7 +68,7 @@
     <header>
       <h1>TutorTrack API guide</h1>
       <p class="lead">Connect your own systems to TutorTrack with the REST API and webhooks.</p>
-      <p class="meta">Last updated: 2026-10-28 · API version v1</p>
+      <p class="meta">Last updated: 2026-10-30 · API version v1</p>
     </header>
 
     <section id="overview">
@@ -355,6 +356,55 @@ const { results, next } = await res.json();</code></pre>
           <code>progress_report.batch_drafted</code> (counts only) fires once per period when the
           organisation's schedule drafts reports.</li>
       </ul>
+
+      <h3 id="pathways">Pathways</h3>
+      <p>A pathway is a set of steps a business asks a tutor to follow, such as applying for a
+        job or joining one (E34). Templates are stages of steps; a run is one tutor following a
+        template about one record.</p>
+      <ul>
+        <li><strong>Templates.</strong> <code>GET/POST /api/v1/pathway-templates</code> and
+          <code>PATCH …/{id}</code> (<code>pathway.view</code> to read, <code>pathway.manage</code>
+          to change). A template has a <code>record_type</code> (a workflow record type such as
+          <code>job</code>) and <code>stages</code>: each with a <code>key</code>, a
+          <code>name</code>, an optional <code>gate</code> and its <code>steps</code>. A step has a
+          <code>key</code>, a <code>type</code>, a <code>name</code>, who does it
+          (<code>assignee</code>: <code>participant</code>, <code>staff</code> or
+          <code>system</code>), an optional staff <code>role</code>, optional
+          <code>due_days</code> and its <code>config</code>. Changing the stages adds a
+          <code>version</code>; runs already started keep theirs. <code>active: false</code>
+          switches a template off.</li>
+        <li><strong>Step types.</strong> <code>questions</code> (<code>fields</code>; with
+          <code>review: true</code> staff check the answers), <code>upload</code>
+          (<code>instructions</code>, <code>max_files</code>, <code>verify</code>, on by default),
+          <code>sign</code> (click-to-sign <code>title</code> and <code>text</code>; the signed copy
+          is kept like an onboarding agreement), <code>acknowledge</code> (<code>title</code>,
+          <code>text</code> or an https <code>link</code>), <code>staff_review</code>
+          (<code>question</code>) and <code>system_check</code> (a workflow plain question about
+          the record, checked when the run moves and daily while open).
+          <code>GET /api/v1/pathway-schema</code> lists the step types, record types, questions
+          and the staff roles a step can name.</li>
+        <li><strong>Runs.</strong> <code>POST /api/v1/pathway-runs</code> with
+          <code>template</code>, <code>record_id</code> and <code>tutor</code> starts one
+          (<code>pathway.run.manage</code>); <code>GET /api/v1/pathway-runs</code> filters by
+          <code>template</code>, <code>status</code>, <code>tutor</code>, or
+          <code>record_type</code> with <code>record_id</code>; <code>POST …/{id}/cancel</code>
+          takes an optional <code>reason</code>. A run's <code>status</code> is
+          <code>running</code>, <code>completed</code>, <code>rejected</code> (a staff review said
+          no) or <code>cancelled</code>; <code>gates</code> lists the gates it has reached.</li>
+        <li><strong>Steps.</strong> One stage is open at a time. Staff use
+          <code>POST /api/v1/pathway-runs/{id}/steps/{key}/complete</code> (a staff step, or
+          accepting what a tutor sent for review), <code>…/skip</code> and <code>…/reject</code>
+          (both need a <code>reason</code>; rejecting something sent for review sends it back to
+          the tutor, rejecting a staff review turns the run down) and <code>…/remind</code>
+          (<code>pathway.step.complete</code>). Only the tutor can do the tutor's steps:
+          <code>GET /api/v1/me/tasks</code> lists them and
+          <code>POST /api/v1/me/tasks/{id}/complete</code> sends <code>answers</code>,
+          <code>files</code> (ids from <code>POST /api/v1/files/uploads</code>) or
+          <code>full_name</code>, as the step needs.</li>
+        <li><strong>Webhook.</strong> <code>pathway.completed</code> fires when a run finishes
+          (<code>outcome</code> <code>completed</code> or <code>rejected</code>). The other
+          pathway events are internal; workflows can start on them.</li>
+      </ul>
     </section>
 
     <section id="webhooks">
@@ -460,7 +510,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <h3 id="webhook-events">Event catalogue</h3>
       <p>Subscribe to individual types or to <code>&lt;aggregate&gt;.*</code>.</p>
       <!-- BEGIN GENERATED: webhook-events -->
-<p class="meta">261 event types on 73 aggregates, generated from the webhook event catalogue.</p>
+<p class="meta">262 event types on 74 aggregates, generated from the webhook event catalogue.</p>
 <details class="ref" id="events-affiliate_statement">
   <summary><code>affiliate_statement.*</code> <span class="badge">1</span></summary>
   <div class="table-wrap"><table>
@@ -972,6 +1022,15 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <tr><td><code>package.extended</code></td><td>Package extended.</td><td><code>client_id</code>, <code>units_remaining</code>, <code>expires_at</code></td></tr>
       <tr><td><code>package.low</code></td><td>Package low.</td><td><code>client_id</code>, <code>units_remaining</code></td></tr>
       <tr><td><code>package.purchased</code></td><td>Package purchased.</td><td><code>client_id</code>, <code>units_remaining</code>, <code>name</code>, <code>price</code></td></tr>
+    </tbody>
+  </table></div>
+</details>
+<details class="ref" id="events-pathway">
+  <summary><code>pathway.*</code> <span class="badge">1</span></summary>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
+    <tbody>
+      <tr><td><code>pathway.completed</code></td><td>The run finished: <code>outcome</code> is <code>completed</code> or <code>rejected</code> (a staff review said</td><td><code>template_key</code>, <code>kind</code>, <code>outcome</code>, <code>record_type</code>, <code>record_id</code>, <code>tutor_id</code></td></tr>
     </tbody>
   </table></div>
 </details>

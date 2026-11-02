@@ -1,6 +1,6 @@
 # E34 — The TutorTrack Network
 
-- **Status:** Planned (written 2026-10-30; no ticket started)
+- **Status:** In progress (T01 done 2026-10-30)
 - **Depends on:** E05 People, E07 Jobs, E08 Scheduling, E09 Delivery, E12 Payroll (self-billing),
   E13 Communications, E18 Recruitment (checklists, checks, click-to-sign), E19 Matching (offers,
   job board, cover, shared shortlists), E28 Import (imported invoices), E29 Privacy (consent,
@@ -441,7 +441,7 @@ BYPASSRLS role is used.
 Each ticket is one pull request, merged when CI is green, with the guides, README and test plan
 updated in the same change.
 
-- [ ] **T01 — Pathway engine.** The `pathways` app (models, RLS, isolation tests), the step-type
+- [x] **T01 — Pathway engine.** The `pathways` app (models, RLS, isolation tests), the step-type
   registry with the first types (questions, upload, sign, read and acknowledge, staff review,
   system check), `PathwayRunWorkflow`, the services, the API, and events. Replay histories.
 - [ ] **T02 — Ready-made pathways, editor and Tasks.**
@@ -534,4 +534,59 @@ T07 needs only T03 (it can be built before T04 if guest tutors are wanted sooner
 
 ## Implementation notes
 
-None yet.
+### T01 — Pathway engine (as built 2026-10-30)
+
+- **App:** `pathways`, with RLS on every table:
+  - `PathwayTemplate` (its `subject_type` is the workflow record type a run is about, such as
+    `job`; shown as `record_type` in the API);
+  - `PathwayTemplateVersion`;
+  - `PathwayRun` (branch-scoped, taking the record's branch);
+  - `PathwayStep`.
+  Isolation tests cover templates and runs.
+- **Who owns the state:**
+  - `services` hold the run's state. Finishing, skipping or turning down a step moves the
+    run on in the same transaction: the stage completes, its gate is recorded, and the next
+    stage opens, with its system steps checked.
+  - `PathwayRunWorkflow` (`pathway:{org}:{run}`) is only the clock. It calls `services.tick`
+    with *its own* time, which sends due-soon reminders (`pathways.reminder_days` before the
+    due date, default 1) and overdue notices and re-checks system steps daily. It then sleeps
+    until the next wake time or a `changed` signal from services.
+  - It continues as new after 200 wake-ups. Replay histories: `PathwayRunWorkflow-completed`
+    and `PathwayRunWorkflow-reminded-cancelled`.
+- **Step types (registry `pathway_steps.py`, autodiscovered from other apps):**
+  - `questions`: E17 field types without files or mappings; optional staff review.
+  - `upload`: the tutor's own uploaded files, attached to the step; staff verify by default.
+  - `sign`: `crm.signing.sign_agreement`, key `pathway:<step id>`.
+  - `acknowledge`.
+  - `staff_review`: optionally limited to a built-in staff role; owners and admins can always
+    act.
+  - `system_check`: an E33 plain question about the run's record.
+  - The remaining types (show a check, book a call, trial lesson, family chooses) come in T02.
+- **Who may act:**
+  - Only the run's tutor (an active login) can do the tutor's steps.
+  - Staff need `pathway.step.complete` for staff steps, accepting or sending back what was sent
+    for review, skipping (with a reason) and reminding.
+  - Coordinators get `pathway.*`; owners and admins get everything.
+- **Deviations from the spec:**
+  - **New permission:** `pathway.run.manage` (start and cancel) was added, so starting runs
+    isn't tied to editing templates.
+  - **New step status:** `review`. A tutor's answer to a checked step waits for staff, and
+    rejecting it sends it back with the reason.
+  - **Rejection:** a staff review that says no ends the run as `rejected`; `pathway.completed`
+    says the outcome.
+  - **New endpoint:** `GET /api/v1/pathway-schema` (step types, record types, questions, staff
+    roles) feeds the T02 editor.
+  - **Participants and steps not yet built:** the only participant is a tutor (partners come in
+    T05). Family steps come with T03.
+- **Messages:**
+  - To tutors: `pathway_tasks_opened` (one per stage), `pathway_task_reminder` (due soon,
+    overdue, or a staff nudge) and `pathway_task_returned`.
+  - To staff: `staff_pathway_attention`, sent to holders of `pathway.step.complete` when a staff
+    step opens, something waits for review, or a step is overdue.
+  - Tutor messages link to `/portal/tutor/tasks`, which T02 builds.
+- **Workflows and webhooks:**
+  - Pathway runs are an E33 record type (`pathway_run`). They have starts for each pathway
+    event, a "still in progress" question, and the tutor as recipient.
+  - Only `pathway.completed` is a webhook event.
+- **Privacy:** the `pathways` provider exports a tutor's runs and answers. Erasure replaces step
+  results (answers, uploads, typed names) and removes uploaded files, and keeps the steps.

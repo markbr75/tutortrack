@@ -111,6 +111,7 @@ EXEMPT_GENERIC = {
     ("accounting.ExternalRecordLink", "object_type", "object_id"),  # ledger contacts: a note
     ("billing.ClientLedgerEntry", "ref_type", "ref_id"),  # immutable ledger history
     ("privacy.SafeguardingFlag", "source_type", "source_id"),  # flags messages, not people
+    ("pathways.PathwayRun", "subject_type", "subject_id"),  # jobs and runs, never merged
 }
 
 

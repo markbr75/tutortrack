@@ -13050,6 +13050,39 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/me/tasks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The steps the signed-in tutor has to do, or has sent for review. */
+    get: operations["me_tasks_list"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/tasks/{id}/complete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["me_tasks_complete_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/me/tax-identity": {
     parameters: {
       query?: never;
@@ -13819,6 +13852,164 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pathway-runs": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Pathways that tutors are following, and their steps (filter with ``?template=``,
+     *     ``?status=``, ``?tutor=``, or ``?record_type=`` with ``?record_id=``).
+     */
+    get: operations["pathway_runs_list"];
+    put?: never;
+    /** @description Start a pathway for a tutor about one record (for a job, ``record_id`` is the job). */
+    post: operations["pathway_runs_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pathway-runs/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Pathways that tutors are following, and their steps (filter with ``?template=``,
+     *     ``?status=``, ``?tutor=``, or ``?record_type=`` with ``?record_id=``).
+     */
+    get: operations["pathway_runs_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pathway-runs/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Pathways that tutors are following, and their steps (filter with ``?template=``,
+     *     ``?status=``, ``?tutor=``, or ``?record_type=`` with ``?record_id=``).
+     */
+    post: operations["pathway_runs_cancel_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pathway-runs/{id}/steps/{key}/{act}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * @description Staff act on a step: ``complete`` (a staff step, or accept what a tutor sent),
+     *     ``skip`` or ``reject`` (with a reason), or ``remind`` whoever has to do it.
+     */
+    post: operations["pathway_runs_steps_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pathway-schema": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description What a pathway can contain: step types, kinds of record, the questions TutorTrack can
+     *     check, and the staff roles a staff step can name.
+     */
+    get: operations["pathway_schema_retrieve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pathway-templates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Pathway templates: stages of steps that a tutor follows (FR-34-1). Changing the
+     *     stages adds a version; runs already started keep theirs. Switch one off with
+     *     ``active: false``.
+     */
+    get: operations["pathway_templates_list"];
+    put?: never;
+    /**
+     * @description Pathway templates: stages of steps that a tutor follows (FR-34-1). Changing the
+     *     stages adds a version; runs already started keep theirs. Switch one off with
+     *     ``active: false``.
+     */
+    post: operations["pathway_templates_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/pathway-templates/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * @description Pathway templates: stages of steps that a tutor follows (FR-34-1). Changing the
+     *     stages adds a version; runs already started keep theirs. Switch one off with
+     *     ``active: false``.
+     */
+    get: operations["pathway_templates_retrieve"];
+    /**
+     * @description Pathway templates: stages of steps that a tutor follows (FR-34-1). Changing the
+     *     stages adds a version; runs already started keep theirs. Switch one off with
+     *     ``active: false``.
+     */
+    put: operations["pathway_templates_update"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * @description Pathway templates: stages of steps that a tutor follows (FR-34-1). Changing the
+     *     stages adds a version; runs already started keep theirs. Switch one off with
+     *     ``active: false``.
+     */
+    patch: operations["pathway_templates_partial_update"];
     trace?: never;
   };
   "/api/v1/pay-items": {
@@ -32717,6 +32908,24 @@ export interface components {
       /** Format: date-time */
       last_active_at: string | null;
     };
+    MyPathwayTask: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly run: string;
+      readonly pathway: string;
+      readonly stage: string;
+      readonly name: string;
+      readonly step_type: string;
+      readonly status: components["schemas"]["PathwayStepStatusEnum"];
+      /** Format: date-time */
+      readonly due_at: string | null;
+      readonly reason: string;
+      readonly view: {
+        [key: string]: unknown;
+      };
+      readonly result: unknown;
+    };
     MyPosting: {
       /** Format: uuid */
       readonly id: string;
@@ -34780,6 +34989,19 @@ export interface components {
       previous?: string | null;
       results: components["schemas"]["PackageTemplate"][];
     };
+    PaginatedPathwayRunList: {
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+       */
+      next?: string | null;
+      /**
+       * Format: uri
+       * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+       */
+      previous?: string | null;
+      results: components["schemas"]["PathwayRun"][];
+    };
     PaginatedPayItemList: {
       /**
        * Format: uri
@@ -36584,6 +36806,14 @@ export interface components {
       auto_renew?: boolean;
       active?: boolean;
     };
+    PatchedPathwayTemplateRequest: {
+      name?: string;
+      description?: string;
+      kind?: components["schemas"]["PathwayTemplateKindEnum"];
+      record_type?: string;
+      active?: boolean;
+      stages?: unknown;
+    };
     PatchedPayProfileUpdateRequest: {
       method?: components["schemas"]["TutorPayMethodEnum"];
       currency?: string;
@@ -37206,6 +37436,174 @@ export interface components {
       };
       allowed_origins?: string[];
       active?: boolean;
+    };
+    /** @description What finishing a step sends; which fields apply depends on the step's type. */
+    PathwayCompleteStepRequest: {
+      answers?: {
+        [key: string]: unknown;
+      };
+      files?: string[];
+      full_name?: string;
+      note?: string;
+    };
+    PathwayPerson: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
+    PathwayQuestion: {
+      key: string;
+      label: string;
+      record_type: string;
+    };
+    PathwayReasonRequest: {
+      /** @default  */
+      reason: string;
+    };
+    PathwayRun: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly template: string;
+      readonly template_name: string;
+      readonly template_key: string;
+      readonly kind: string;
+      readonly version: number;
+      readonly record_type: string;
+      readonly record_id: string;
+      readonly tutor: components["schemas"]["PathwayPerson"] | null;
+      readonly status: components["schemas"]["PathwayRunStatusEnum"];
+      readonly stage: string;
+      readonly stages: components["schemas"]["PathwayStage"][];
+      readonly gates: string[];
+      readonly progress: {
+        [key: string]: number;
+      };
+      /** Format: date-time */
+      readonly started_at: string;
+      /** Format: date-time */
+      readonly finished_at: string | null;
+      readonly reason: string;
+    };
+    PathwayRunDetail: {
+      /** Format: uuid */
+      readonly id: string;
+      /** Format: uuid */
+      readonly template: string;
+      readonly template_name: string;
+      readonly template_key: string;
+      readonly kind: string;
+      readonly version: number;
+      readonly record_type: string;
+      readonly record_id: string;
+      readonly tutor: components["schemas"]["PathwayPerson"] | null;
+      readonly status: components["schemas"]["PathwayRunStatusEnum"];
+      readonly stage: string;
+      readonly stages: components["schemas"]["PathwayStage"][];
+      readonly gates: string[];
+      readonly progress: {
+        [key: string]: number;
+      };
+      /** Format: date-time */
+      readonly started_at: string;
+      /** Format: date-time */
+      readonly finished_at: string | null;
+      readonly reason: string;
+      readonly steps: components["schemas"]["PathwayStep"][];
+    };
+    /**
+     * @description * `running` - In progress
+     *     * `completed` - Completed
+     *     * `rejected` - Turned down
+     *     * `cancelled` - Cancelled
+     * @enum {string}
+     */
+    PathwayRunStatusEnum: "running" | "completed" | "rejected" | "cancelled";
+    PathwaySchema: {
+      step_types: components["schemas"]["StepType"][];
+      record_types: components["schemas"]["RecordType"][];
+      questions: components["schemas"]["PathwayQuestion"][];
+      roles: string[];
+    };
+    PathwayStage: {
+      key: string;
+      name: string;
+      gate: string;
+    };
+    PathwayStep: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly key: string;
+      readonly stage: string;
+      readonly name: string;
+      readonly step_type: string;
+      readonly assignee: components["schemas"]["PathwayStepAssigneeEnum"];
+      readonly role: string;
+      readonly status: components["schemas"]["PathwayStepStatusEnum"];
+      /** Format: date-time */
+      readonly due_at: string | null;
+      /** Format: date-time */
+      readonly opened_at: string | null;
+      /** Format: date-time */
+      readonly submitted_at: string | null;
+      /** Format: date-time */
+      readonly completed_at: string | null;
+      readonly completed_by: string | null;
+      readonly config: unknown;
+      readonly result: unknown;
+      readonly reason: string;
+    };
+    /**
+     * @description * `participant` - The tutor
+     *     * `staff` - Staff
+     *     * `family` - The family
+     *     * `system` - TutorTrack
+     * @enum {string}
+     */
+    PathwayStepAssigneeEnum: "participant" | "staff" | "family" | "system";
+    /**
+     * @description * `waiting` - Not started
+     *     * `open` - To do
+     *     * `review` - Waiting for review
+     *     * `done` - Done
+     *     * `skipped` - Skipped
+     *     * `rejected` - Turned down
+     * @enum {string}
+     */
+    PathwayStepStatusEnum: "waiting" | "open" | "review" | "done" | "skipped" | "rejected";
+    PathwayTemplate: {
+      /** Format: uuid */
+      readonly id: string;
+      readonly key: string;
+      name: string;
+      description?: string;
+      kind?: components["schemas"]["PathwayTemplateKindEnum"];
+      record_type: string;
+      active?: boolean;
+      readonly builtin_key: string;
+      readonly edited: boolean;
+      readonly version: number | null;
+      stages: unknown;
+      /** Format: date-time */
+      readonly created_at: string;
+      /** Format: date-time */
+      readonly updated_at: string;
+    };
+    /**
+     * @description * `apply` - Apply for a job
+     *     * `join` - Join a job
+     *     * `finish` - Finish a job
+     *     * `custom` - Custom
+     * @enum {string}
+     */
+    PathwayTemplateKindEnum: "apply" | "join" | "finish" | "custom";
+    PathwayTemplateRequest: {
+      name: string;
+      description?: string;
+      kind?: components["schemas"]["PathwayTemplateKindEnum"];
+      record_type: string;
+      active?: boolean;
+      stages: unknown;
     };
     /**
      * @description * `rate` - Pay rate per lesson
@@ -40469,6 +40867,10 @@ export interface components {
       /** @description Leave out to pay the oldest invoices first (the rest is credit). */
       allocations?: components["schemas"]["AllocationInputRequest"][] | null;
     };
+    RecordType: {
+      key: string;
+      label: string;
+    };
     RecordingLink: {
       url: string;
       password: string;
@@ -43001,6 +43403,13 @@ export interface components {
         currency: string;
       } | null;
     };
+    StartPathwayRequest: {
+      /** Format: uuid */
+      template: string;
+      record_id: string;
+      /** Format: uuid */
+      tutor: string;
+    };
     /**
      * @description * `client` - Family
      *     * `tutor` - Tutor
@@ -43054,6 +43463,11 @@ export interface components {
     };
     StatusRequest: {
       status: string;
+    };
+    StepType: {
+      key: string;
+      label: string;
+      assignees: string[];
     };
     StorageUsage: {
       used_bytes: number;
@@ -69467,6 +69881,55 @@ export interface operations {
       };
     };
   };
+  me_tasks_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyPathwayTask"][];
+        };
+      };
+    };
+  };
+  me_tasks_complete_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PathwayCompleteStepRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PathwayCompleteStepRequest"];
+        "multipart/form-data": components["schemas"]["PathwayCompleteStepRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MyPathwayTask"];
+        };
+      };
+    };
+  };
   me_tax_identity_retrieve: {
     parameters: {
       query?: never;
@@ -70940,6 +71403,297 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["PackageDetail"];
+        };
+      };
+    };
+  };
+  pathway_runs_list: {
+    parameters: {
+      query?: {
+        /** @description The pagination cursor value. */
+        cursor?: string;
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+        /** @description Number of results to return per page. */
+        page_size?: number;
+        record_id?: string;
+        record_type?: string;
+        status?: string;
+        template?: string;
+        tutor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PaginatedPathwayRunList"];
+        };
+      };
+    };
+  };
+  pathway_runs_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StartPathwayRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["StartPathwayRequest"];
+        "multipart/form-data": components["schemas"]["StartPathwayRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PathwayRunDetail"];
+        };
+      };
+    };
+  };
+  pathway_runs_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pathway run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PathwayRunDetail"];
+        };
+      };
+    };
+  };
+  pathway_runs_cancel_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pathway run. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PathwayReasonRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PathwayReasonRequest"];
+        "multipart/form-data": components["schemas"]["PathwayReasonRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PathwayRunDetail"];
+        };
+      };
+    };
+  };
+  pathway_runs_steps_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        act: string;
+        id: string;
+        key: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PathwayCompleteStepRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PathwayCompleteStepRequest"];
+        "multipart/form-data": components["schemas"]["PathwayCompleteStepRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PathwayStep"];
+        };
+      };
+    };
+  };
+  pathway_schema_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PathwaySchema"];
+        };
+      };
+    };
+  };
+  pathway_templates_list: {
+    parameters: {
+      query?: {
+        /** @description Which field to use when ordering the results. */
+        ordering?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PathwayTemplate"][];
+        };
+      };
+    };
+  };
+  pathway_templates_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PathwayTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PathwayTemplateRequest"];
+        "multipart/form-data": components["schemas"]["PathwayTemplateRequest"];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PathwayTemplate"];
+        };
+      };
+    };
+  };
+  pathway_templates_retrieve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pathway template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PathwayTemplate"];
+        };
+      };
+    };
+  };
+  pathway_templates_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pathway template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PathwayTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PathwayTemplateRequest"];
+        "multipart/form-data": components["schemas"]["PathwayTemplateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PathwayTemplate"];
+        };
+      };
+    };
+  };
+  pathway_templates_partial_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description A UUID string identifying this pathway template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["PatchedPathwayTemplateRequest"];
+        "application/x-www-form-urlencoded": components["schemas"]["PatchedPathwayTemplateRequest"];
+        "multipart/form-data": components["schemas"]["PatchedPathwayTemplateRequest"];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PathwayTemplate"];
         };
       };
     };

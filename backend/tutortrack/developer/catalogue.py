@@ -45,6 +45,8 @@ PUBLIC_AGGREGATES = frozenset(
         "offboarding", "probation",
         # E33: failed workflow runs (``workflow.run_failed``); automation.* stays internal.
         "workflow",
+        # E34: a pathway finishing (``pathway.completed``); its other events stay internal.
+        "pathway",
     }
 )  # fmt: skip
 
@@ -61,7 +63,13 @@ NEVER_AGGREGATES = frozenset(
         "performance",
     }
 )  # fmt: skip
-NEVER_EVENT_TYPES = frozenset({"thread.intent_classified"})
+NEVER_EVENT_TYPES = frozenset(
+    {
+        "thread.intent_classified",
+        "pathway.started", "pathway.step_completed", "pathway.stage_completed",
+        "pathway.cancelled",
+    }
+)  # fmt: skip
 # Ids-only events: only these fields of the event leave TutorTrack (and no record
 # representation is attached). Background-check results and safeguarding flags never do.
 IDS_ONLY: dict[str, frozenset[str]] = {

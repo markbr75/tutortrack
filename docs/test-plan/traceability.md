@@ -43,7 +43,8 @@ This file maps each epic to its manual test cases and automated coverage. Counts
 | E31 AI assistant | [E31-ai-assistant.md](E31-ai-assistant.md) | TP-E31-001–045 | 45 (25) | Phase 3 epic (built) | 40 | 1 | inbox |
 | E32 Workflow orchestration (Temporal) | [E32-workflow-orchestration-temporal.md](E32-workflow-orchestration-temporal.md) | TP-E32-001–070 | 70 (29) | all workflows (TW1 tickets of each epic) | 60 | 0 | — |
 | E33 Workflow designer | [E33-workflow-designer.md](E33-workflow-designer.md) | TP-E33-001–072 | 72 (39) | all tickets T01–T09 (built-ins, editor, preview, runs, migration, `workflow.run_failed`) | 61 | 7 | workflows, roles, accessibility |
-| **Total** | 33 files | | **2,072 (943)** | | **1,714** | **87** | |
+| E34 The TutorTrack Network | [E34-network.md](E34-network.md) | TP-E34-001–018 | 18 (12) | T01 (pathway engine); grows with each ticket | 18 | 0 | — |
+| **Total** | 34 files | | **2,090 (955)** | | **1,732** | **87** | |
 
 ## Cross-cutting files
 

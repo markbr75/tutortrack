@@ -89,6 +89,8 @@ CASES = {
                                {"tutor_application": {"status": "hired"}}),
     "review_request.open": ({"review_request": {"status": "reminded"}},
                             {"review_request": {"status": "submitted"}}),
+    "pathway_run.in_progress": ({"pathway_run": {"status": "running"}},
+                                {"pathway_run": {"status": "completed"}}),
 }  # fmt: skip
 
 
