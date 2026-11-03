@@ -244,6 +244,7 @@ class JobPostingSerializer(serializers.ModelSerializer):
             "published_at",
             "closes_on",
             "closed_at",
+            "apply_template",
             "applications_count",
             "eligible_count",
         ]
@@ -276,6 +277,9 @@ class PublishPostingSerializer(serializers.Serializer):
         max_digits=4, decimal_places=1, min_value=Decimal(0), default=Decimal(0)
     )
     closes_on = serializers.DateField(required=False, allow_null=True)
+    apply_template = serializers.UUIDField(
+        required=False, allow_null=True, help_text="The Apply pathway (E34); empty: the default."
+    )
 
 
 class MyPostingSerializer(serializers.ModelSerializer):

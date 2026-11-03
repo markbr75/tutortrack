@@ -140,6 +140,11 @@ class JobPosting(TenantModel):
     published_at = models.DateTimeField(null=True, blank=True)
     closes_on = models.DateField(null=True, blank=True)
     closed_at = models.DateTimeField(null=True, blank=True)
+    # E34: the Apply pathway for applicants; the business default when empty.
+    apply_template = models.ForeignKey(
+        "pathways.PathwayTemplate", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="+",
+    )  # fmt: skip
 
     class Meta(TenantModel.Meta):
         ordering = ["-published_at"]

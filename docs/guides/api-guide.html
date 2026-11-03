@@ -68,7 +68,7 @@
     <header>
       <h1>TutorTrack API guide</h1>
       <p class="lead">Connect your own systems to TutorTrack with the REST API and webhooks.</p>
-      <p class="meta">Last updated: 2026-10-30 · API version v1</p>
+      <p class="meta">Last updated: 2026-11-02 · API version v1</p>
     </header>
 
     <section id="overview">
@@ -372,17 +372,39 @@ const { results, next } = await res.json();</code></pre>
           <code>system</code>), an optional staff <code>role</code>, optional
           <code>due_days</code> and its <code>config</code>. Changing the stages adds a
           <code>version</code>; runs already started keep theirs. <code>active: false</code>
-          switches a template off.</li>
+          switches a template off. Ready-made templates (Apply, Join and Finish a job) have a
+          <code>builtin_key</code>; <code>edited</code> says they were changed,
+          <code>update_available</code> that TutorTrack has a newer default, and
+          <code>POST …/{id}/reset-to-default</code> puts the default back.
+          <code>used_by_default: true</code> (on an <code>apply</code>, <code>join</code> or
+          <code>finish</code> template) makes it start on its own for that kind; none does until
+          you set one.</li>
         <li><strong>Step types.</strong> <code>questions</code> (<code>fields</code>; with
           <code>review: true</code> staff check the answers), <code>upload</code>
           (<code>instructions</code>, <code>max_files</code>, <code>verify</code>, on by default),
           <code>sign</code> (click-to-sign <code>title</code> and <code>text</code>; the signed copy
           is kept like an onboarding agreement), <code>acknowledge</code> (<code>title</code>,
           <code>text</code> or an https <code>link</code>), <code>staff_review</code>
-          (<code>question</code>) and <code>system_check</code> (a workflow plain question about
-          the record, checked when the run moves and daily while open).
-          <code>GET /api/v1/pathway-schema</code> lists the step types, record types, questions
-          and the staff roles a step can name.</li>
+          (<code>question</code>), <code>system_check</code> (a workflow plain question about
+          the record, checked when the run moves and daily while open), <code>show_check</code>
+          (<code>requirement</code>: a check type key, or empty for all the tutor's required
+          checks; ticks itself once verified), <code>book_call</code> (<code>title</code>,
+          <code>minutes</code>, <code>days</code>; the tutor chooses one of the host's free times),
+          <code>trial_lesson</code> (ticks itself when a lesson on the job with the tutor is
+          completed) and <code>family_chooses</code> (assignee <code>family</code>; ticks itself
+          when the family chooses the tutor from a shared shortlist, and turns the run down if
+          they choose another). <code>GET /api/v1/pathway-schema</code> lists the step types,
+          record types, questions, the staff roles a step can name and the check types
+          (<code>requirements</code>).</li>
+        <li><strong>Starting on their own.</strong> With a default set, an application on the job
+          board starts Apply (or the posting's <code>apply_template</code>, set when publishing
+          with <code>POST /api/v1/job-postings</code>), a tutor put on a job or accepting an offer
+          starts Join (or the job's <code>join_template</code>), and a tutor leaving or the job
+          completing starts Finish. While Join runs, the tutor's place on the job has
+          <code>join_status: "joining"</code> (<code>"ready"</code> from its <code>ready</code>
+          gate) and completing their lessons returns a <code>tutor_joining</code> error. An Apply
+          run that completes selects the applicant; one turned down rejects the application. A
+          new <code>job.tutor_accepted</code> event fires when a tutor accepts an offered job.</li>
         <li><strong>Runs.</strong> <code>POST /api/v1/pathway-runs</code> with
           <code>template</code>, <code>record_id</code> and <code>tutor</code> starts one
           (<code>pathway.run.manage</code>); <code>GET /api/v1/pathway-runs</code> filters by
@@ -399,8 +421,12 @@ const { results, next } = await res.json();</code></pre>
           (<code>pathway.step.complete</code>). Only the tutor can do the tutor's steps:
           <code>GET /api/v1/me/tasks</code> lists them and
           <code>POST /api/v1/me/tasks/{id}/complete</code> sends <code>answers</code>,
-          <code>files</code> (ids from <code>POST /api/v1/files/uploads</code>) or
-          <code>full_name</code>, as the step needs.</li>
+          <code>files</code> (ids from <code>POST /api/v1/files/uploads</code>),
+          <code>full_name</code>, <code>start</code> (a call time from the step's
+          <code>view.slots</code>) or a check's <code>number</code>, <code>issue_date</code> and
+          <code>expiry_date</code>, as the step needs. The list ends with booked calls still to
+          come (<code>status: "done"</code>, with <code>result.start</code> and
+          <code>result.meeting_url</code>).</li>
         <li><strong>Webhook.</strong> <code>pathway.completed</code> fires when a run finishes
           (<code>outcome</code> <code>completed</code> or <code>rejected</code>). The other
           pathway events are internal; workflows can start on them.</li>
@@ -510,7 +536,7 @@ export function verify(secret, header, rawBody, tolerance = 300) {
       <h3 id="webhook-events">Event catalogue</h3>
       <p>Subscribe to individual types or to <code>&lt;aggregate&gt;.*</code>.</p>
       <!-- BEGIN GENERATED: webhook-events -->
-<p class="meta">262 event types on 74 aggregates, generated from the webhook event catalogue.</p>
+<p class="meta">263 event types on 74 aggregates, generated from the webhook event catalogue.</p>
 <details class="ref" id="events-affiliate_statement">
   <summary><code>affiliate_statement.*</code> <span class="badge">1</span></summary>
   <div class="table-wrap"><table>
@@ -816,13 +842,14 @@ export function verify(secret, header, rawBody, tolerance = 300) {
   </table></div>
 </details>
 <details class="ref" id="events-job">
-  <summary><code>job.*</code> <span class="badge">7</span></summary>
+  <summary><code>job.*</code> <span class="badge">8</span></summary>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Event</th><th scope="col">Description</th><th scope="col"><code>event_data</code> fields</th></tr></thead>
     <tbody>
       <tr><td><code>job.created</code></td><td>Job created.</td><td><code>reference</code>, <code>client_id</code>, <code>status</code></td></tr>
       <tr><td><code>job.hours_cap_reached</code></td><td>Job hours cap reached.</td><td><code>used_hours</code>, <code>cap_hours</code>, <code>level</code></td></tr>
       <tr><td><code>job.status_changed</code></td><td>Job status changed.</td><td><code>from_status</code>, <code>to_status</code>, <code>reason</code>, <code>future_lessons</code></td></tr>
+      <tr><td><code>job.tutor_accepted</code></td><td>A tutor accepted the job they were offered.</td><td><code>tutor_id</code></td></tr>
       <tr><td><code>job.tutor_assigned</code></td><td>Job tutor assigned.</td><td><code>tutor_id</code>, <code>role</code>, <code>offered</code></td></tr>
       <tr><td><code>job.tutor_removed</code></td><td>Job tutor removed.</td><td><code>tutor_id</code>, <code>end_date</code></td></tr>
       <tr><td><code>job.tutor_replaced</code></td><td>Job tutor replaced.</td><td><code>old_tutor_id</code>, <code>new_tutor_id</code>, <code>effective_date</code></td></tr>

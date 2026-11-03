@@ -42,6 +42,7 @@ import {
   type DetailField,
   type Value,
 } from "./details";
+import { PathwayRunsPanel } from "../pathways/PathwayRuns";
 import { DetailsForm, EditableDetails, EditButton } from "./EditableDetails";
 import { StudentMatchingCard, TutorMatchingCard } from "./MatchingProfileCard";
 import { STUDENT_STATUSES, TUTOR_STATUSES } from "./statuses";
@@ -646,6 +647,7 @@ export function TutorPage({ tutorId }: { tutorId: string }) {
             ) : (
               subjects
             )}
+            <PathwayRunsPanel tutorId={p.id} />
             <RecordActivity target={{ target_type: "people.tutor", target_id: p.id }} />
           </>
         }

@@ -10,11 +10,12 @@ need real provider credentials or infrastructure are listed at the end of
 [docs/05-gap-backlog.md](docs/05-gap-backlog.md). E33 (the workflow designer) turned
 Automations into **Workflows**: editable built-in workflows for invoicing, payment chasing,
 statements, lesson communications, sales follow-ups and expiry reminders, a sequence editor
-with preview, coming-up dates and runs, on the E14 Temporal interpreter. Next, planned and
-not started: **E34, the TutorTrack Network** ([docs/epics/E34-network.md](docs/epics/E34-network.md)):
-shared pathways for applying for and joining jobs, consent before a family's information is
-shared, and sharing jobs with other businesses, sole traders and guest tutors. Build order and
-progress: [docs/04-roadmap.md](docs/04-roadmap.md).
+with preview, coming-up dates and runs, on the E14 Temporal interpreter. In progress:
+**E34, the TutorTrack Network** ([docs/epics/E34-network.md](docs/epics/E34-network.md)).
+Pathways are built (T01–T02): ready-made Apply, Join and Finish pathways in Settings ›
+Pathways, starting from the job board, assignments and leaving, with the tutor's Tasks. Next:
+consent before a family's information is shared, then sharing jobs with other businesses, sole
+traders and guest tutors. Build order and progress: [docs/04-roadmap.md](docs/04-roadmap.md).
 
 ## Guides
 
@@ -110,7 +111,7 @@ Each app in `backend/tutortrack/` owns its models, `services.py` (writes), `sele
 | `leads` | Enquiries, pipeline, forms (with file uploads), waitlist with tutor-capacity suggestions, proposals | E17 |
 | `recruitment` | Job openings, tutor applications (CV and video uploads), interview booking, onboarding, compliance checks, probation reviews, offboarding, subject tests | E18 |
 | `matching` | Tutor matching (incl. exam boards, SEN experience, optional gender preference) and the job marketplace | E19 |
-| `pathways` | Pathways: stages of steps a business asks a tutor to follow (questions, uploads, click-to-sign, read and acknowledge, staff review, system checks), versioned templates, runs with gates, the tutor's Tasks, reminders on Temporal | E34 |
+| `pathways` | Pathways: stages of steps a business asks a tutor to follow (questions, uploads, click-to-sign, read and acknowledge, show a check, book a call, trial lesson, family chooses, staff review, system checks), ready-made Apply, Join and Finish pathways that start from the job board, assignments and leaving, versioned templates, runs with gates, the tutor's Tasks, reminders on Temporal | E34 |
 | `courses` | Group classes, courses, terms and enrolment | E20 |
 | `learning` | Homework, resources (also in the online classroom), progress reports (manual or on a schedule) and assessments | E21 |
 | `integrations` | Integration framework and provider connections | E22 |

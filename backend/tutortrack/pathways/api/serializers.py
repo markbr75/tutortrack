@@ -5,6 +5,7 @@ from typing import Any
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from .. import services
 from ..models import PathwayRun, PathwayStep, PathwayTemplate
 from ..pathway_steps import step_type
 
@@ -13,18 +14,30 @@ class PathwayTemplateSerializer(serializers.ModelSerializer):
     record_type = serializers.CharField(source="subject_type", max_length=40)
     version = serializers.SerializerMethodField()
     stages = serializers.JSONField()
+    update_available = serializers.SerializerMethodField()
+    used_by_default = serializers.BooleanField(required=False)
 
     class Meta:
         model = PathwayTemplate
         fields = (
             "id", "key", "name", "description", "kind", "record_type", "active", "builtin_key",
-            "edited", "version", "stages", "created_at", "updated_at",
+            "edited", "update_available", "used_by_default", "version", "stages", "created_at",
+            "updated_at",
         )  # fmt: skip
         read_only_fields = ("id", "key", "builtin_key", "edited", "created_at", "updated_at")
 
     @extend_schema_field(serializers.IntegerField(allow_null=True))
     def get_version(self, obj: PathwayTemplate) -> int | None:
         return obj.current_version.version if obj.current_version else None
+
+    @extend_schema_field(serializers.BooleanField())
+    def get_update_available(self, obj: PathwayTemplate) -> bool:
+        return services.update_available(obj)
+
+    def to_representation(self, instance: PathwayTemplate) -> dict[str, Any]:
+        data = super().to_representation(instance)
+        data["used_by_default"] = services.used_by_default(instance)
+        return data
 
 
 class PathwayStepSerializer(serializers.ModelSerializer):
@@ -120,14 +133,21 @@ class PathwayCompleteStepSerializer(serializers.Serializer):
     """What finishing a step sends; which fields apply depends on the step's type."""
 
     answers = serializers.DictField(required=False)  # questions
-    files = serializers.ListField(child=serializers.UUIDField(), required=False)  # upload
+    files = serializers.ListField(child=serializers.UUIDField(), required=False)  # upload, check
     full_name = serializers.CharField(max_length=200, required=False)  # sign
     note = serializers.CharField(max_length=2000, required=False, allow_blank=True)  # review
+    start = serializers.DateTimeField(required=False)  # book a call
+    number = serializers.CharField(max_length=100, required=False, allow_blank=True)  # check
+    issue_date = serializers.DateField(required=False, allow_null=True)  # show a check
+    expiry_date = serializers.DateField(required=False, allow_null=True)  # show a check
 
     def payload(self) -> dict[str, Any]:
         data = dict(self.validated_data)
         if "files" in data:
             data["files"] = [str(f) for f in data["files"]]
+        for key in ("issue_date", "expiry_date"):
+            if data.get(key) is not None:
+                data[key] = data[key].isoformat()
         return data
 
 
@@ -151,6 +171,11 @@ class MyPathwayTaskSerializer(serializers.ModelSerializer):
         kind = step_type(obj.type)
         return kind.view(obj) if kind else {}
 
+    def to_representation(self, instance: PathwayStep) -> dict[str, Any]:
+        data = super().to_representation(instance)
+        data["result"] = {k: v for k, v in (data["result"] or {}).items() if k != "host_url"}
+        return data
+
 
 class StepTypeSerializer(serializers.Serializer):
     key = serializers.CharField()
@@ -169,8 +194,14 @@ class PathwayQuestionSerializer(serializers.Serializer):
     record_type = serializers.CharField()
 
 
+class PathwayRequirementSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    name = serializers.CharField()
+
+
 class PathwaySchemaSerializer(serializers.Serializer):
     step_types = StepTypeSerializer(many=True)
     record_types = RecordTypeSerializer(many=True)
     questions = PathwayQuestionSerializer(many=True)
     roles = serializers.ListField(child=serializers.CharField())
+    requirements = PathwayRequirementSerializer(many=True)  # what a "Show a check" can ask for

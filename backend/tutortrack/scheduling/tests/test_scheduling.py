@@ -24,6 +24,18 @@ from tutortrack.scheduling.models import CalendarEvent, Lesson, LessonSeries
 
 pytestmark = pytest.mark.django_db
 
+# The cases below use fixed dates around October 2026 ("2026-10-05" has passed, "2026-11-02"
+# is still to come), so the clock is held at a moment that keeps them so.
+NOW = datetime(2026, 10, 30, 12, 0, tzinfo=UTC)
+
+
+@pytest.fixture(autouse=True)
+def fixed_now(monkeypatch):
+    from django.utils import timezone
+
+    monkeypatch.setattr(timezone, "now", lambda: NOW)
+
+
 LONDON = ZoneInfo("Europe/London")
 
 

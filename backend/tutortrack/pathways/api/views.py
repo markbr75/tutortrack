@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
@@ -98,15 +99,20 @@ class PathwayTemplateViewSet(
         payload.is_valid(raise_exception=True)
         data = payload.validated_data
         current = instance.current_version.stages if instance and instance.current_version else []
-        template = services.save_template(
-            instance,
-            name=data.get("name", instance.name if instance else ""),
-            subject_type=data.get("subject_type", instance.subject_type if instance else ""),
-            stages=data.get("stages", current),
-            kind=data.get("kind", instance.kind if instance else PathwayTemplate.Kind.CUSTOM),
-            description=data.get("description", instance.description if instance else ""),
-            active=data.get("active", instance.active if instance else True),
-        )
+        with transaction.atomic():
+            template = services.save_template(
+                instance,
+                name=data.get("name", instance.name if instance else ""),
+                subject_type=data.get("subject_type", instance.subject_type if instance else ""),
+                stages=data.get("stages", current),
+                kind=data.get("kind", instance.kind if instance else PathwayTemplate.Kind.CUSTOM),
+                description=data.get("description", instance.description if instance else ""),
+                active=data.get("active", instance.active if instance else True),
+            )
+            if "used_by_default" in data:
+                services.set_used_by_default(template, data["used_by_default"])
+            elif not template.active and services.used_by_default(template):
+                services.set_used_by_default(template, False)  # switched off: stops starting
         template = selectors.templates().get(pk=template.pk)
         return Response(
             s.PathwayTemplateSerializer(template).data,
@@ -124,6 +130,13 @@ class PathwayTemplateViewSet(
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return self._save(request, self.get_object())
 
+    @extend_schema(request=None, responses=s.PathwayTemplateSerializer)
+    @action(detail=True, methods=["post"], url_path="reset-to-default")
+    def reset_to_default(self, request: Request, pk: Any = None) -> Response:
+        """Put a ready-made pathway back to TutorTrack's default (runs under way keep theirs)."""
+        template = services.reset_to_default(self.get_object())
+        return Response(s.PathwayTemplateSerializer(selectors.templates().get(pk=template.pk)).data)
+
 
 class PathwaySchemaView(APIView):
     """What a pathway can contain: step types, kinds of record, the questions TutorTrack can
@@ -135,6 +148,7 @@ class PathwaySchemaView(APIView):
     def get(self, request: Request) -> Response:
         from tutortrack.automations import registry
         from tutortrack.automations.conditions import questions
+        from tutortrack.recruitment.compliance import ensure_requirement_types
 
         return Response(
             {
@@ -148,6 +162,11 @@ class PathwaySchemaView(APIView):
                     for q in questions()
                 ],
                 "roles": list(services.STAFF_ROLES),
+                "requirements": [
+                    {"key": r.key, "name": r.name}
+                    for r in sorted(ensure_requirement_types(), key=lambda r: r.name)
+                    if r.active
+                ],
             }
         )
 
@@ -246,13 +265,15 @@ class PathwayStepActionView(APIView):
 
 
 class MyPathwayTasksView(APIView):
-    """The steps the signed-in tutor has to do, or has sent for review."""
+    """The steps the signed-in tutor has to do, or has sent for review, then the calls they
+    booked that are still to come (``status`` done, with ``result.start``)."""
 
     permission_classes = AUTH
 
     @extend_schema(responses=s.MyPathwayTaskSerializer(many=True))
     def get(self, request: Request) -> Response:
-        tasks = selectors.my_tasks(_my_tutor(request))[:200]
+        tutor = _my_tutor(request)
+        tasks = [*selectors.my_tasks(tutor)[:200], *selectors.my_booked_calls(tutor)]
         return Response(s.MyPathwayTaskSerializer(tasks, many=True).data)
 
 

@@ -1,10 +1,16 @@
-"""Pathway templates and runs (E34 FR-34-1, T01).
+"""Pathway templates and runs (E34 FR-34-1, T01; ready-made pathways and automatic starts T02).
 
 The run's state lives here. Finishing, skipping or turning down a step moves the run on in
 the same transaction: when every step in a stage is done or skipped, the stage completes
 (and reaches its gate, if it has one) and the next stage opens. ``PathwayRunWorkflow`` holds
 the clock: services signal it after each change, and it calls ``tick`` when a reminder or a
-deadline is due, or once a day to re-check open system steps.
+deadline is due, or once a day to re-check open steps that TutorTrack checks.
+
+What a pathway does to its record lives in ``_outcome``: a Join run marks the tutor ready on
+the job at its ``ready`` gate (or when it completes), and an Apply run that completes chooses
+the applicant on the job board (turned down: not chosen). Pathways start on their own only
+when the business has picked a default for the kind (``pathways.default_templates``) or the
+job or posting names one (``start_for``).
 """
 
 from __future__ import annotations
@@ -13,7 +19,8 @@ import re
 from datetime import datetime, timedelta
 from typing import Any
 
-from django.db import transaction
+import structlog
+from django.db import IntegrityError, transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 
@@ -25,15 +32,18 @@ from tutortrack.core.permissions import has_perm
 from tutortrack.core.time import now
 from tutortrack.core.workflows import signal, start
 
-from . import events
+from . import builtin_pathways, events
 from .models import PathwayRun, PathwayStep, PathwayTemplate, PathwayTemplateVersion
-from .pathway_steps import PARTICIPANT, STAFF, SYSTEM, Completion, step_type
+from .pathway_steps import FAMILY, PARTICIPANT, STAFF, SYSTEM, Completion, step_type
 
 KEY = re.compile(r"[a-z][a-z0-9_]{0,39}")
 MAX_STAGES, MAX_STEPS_PER_STAGE, MAX_STEPS = 10, 20, 60
 STAFF_ROLES = ("owner", "admin", "branch_manager", "coordinator", "finance")
 CLOSED = (PathwayStep.Status.DONE, PathwayStep.Status.SKIPPED, PathwayStep.Status.REJECTED)
 RECHECK = timedelta(days=1)  # how often open system steps are checked again
+JOB_KINDS = (PathwayTemplate.Kind.APPLY, PathwayTemplate.Kind.JOIN, PathwayTemplate.Kind.FINISH)
+
+logger = structlog.get_logger(__name__)
 
 
 # --- templates ----------------------------------------------------------------------------------
@@ -153,17 +163,20 @@ def save_template(
     kind: str = PathwayTemplate.Kind.CUSTOM,
     description: str = "",
     active: bool = True,
+    builtin: builtin_pathways.BuiltinPathway | None = None,
 ) -> PathwayTemplate:
     """Create or change a template. Changed stages make a new version; runs already started
-    keep theirs (FR-34-1 AC)."""
+    keep theirs (FR-34-1 AC). ``builtin`` installs, upgrades or resets a ready-made pathway
+    to its default (not counted as an edit)."""
     _record_type(subject_type)
     if template is not None and template.subject_type != subject_type and template.runs.exists():
         raise BusinessRuleViolation(_("A pathway that has runs can't change its kind of record."))
     cleaned = clean_stages(stages, subject_type)
     if template is None:
         template = PathwayTemplate.objects.create(
-            key=_unique_key(name), name=name, description=description, kind=kind,
-            subject_type=subject_type, active=active,
+            key=_unique_key(builtin.key if builtin else name), name=name,
+            description=description, kind=kind, subject_type=subject_type, active=active,
+            builtin_key=builtin.key if builtin else "",
         )  # fmt: skip
         audit.record_create(template)
     else:
@@ -180,11 +193,251 @@ def save_template(
             stages=cleaned,
         )
         template.current_version = version
-        template.edited = bool(template.builtin_key) or template.edited
+        template.edited = builtin is None and (bool(template.builtin_key) or template.edited)
         template.save(update_fields=["current_version", "edited", "updated_at"])
         if current is not None:
             audit.record(template, "new_version", {"version": [current.version, version.version]})
+    if builtin is not None and (template.edited or template.builtin_version != builtin.version):
+        template.edited, template.builtin_version = False, builtin.version
+        template.save(update_fields=["edited", "builtin_version", "updated_at"])
     return template
+
+
+# --- ready-made pathways (T02) ------------------------------------------------------------------
+
+TEXT_KEYS = frozenset({"name", "title", "text", "label", "question", "help", "instructions"})
+
+
+def _translated(value: Any) -> Any:
+    """A built-in's stages with their ``gettext_noop`` texts translated."""
+    if isinstance(value, list):
+        return [_translated(v) for v in value]
+    if isinstance(value, dict):
+        return {
+            k: str(_(v)) if k in TEXT_KEYS and isinstance(v, str) and v else _translated(v)
+            for k, v in value.items()
+        }
+    return value
+
+
+def _save_builtin(
+    template: PathwayTemplate | None, builtin: builtin_pathways.BuiltinPathway
+) -> PathwayTemplate:
+    definition = builtin.definition()
+    return save_template(
+        template,
+        name=template.name if template else str(_(builtin.name)),
+        description=template.description if template else str(_(builtin.description)),
+        subject_type=definition["record_type"],
+        stages=_translated(definition["stages"]),
+        kind=builtin.kind,
+        active=template.active if template else True,
+        builtin=builtin,
+    )
+
+
+def install_builtins() -> dict[str, int]:
+    """Install the ready-made pathways the organisation doesn't have yet and move unedited
+    ones to a newer default; edited ones are left alone (``update_available``). Idempotent:
+    runs at sign-up and on every deploy (``sync_builtin_pathways``)."""
+    existing = {
+        t.builtin_key: t
+        for t in PathwayTemplate.objects.exclude(builtin_key="").select_related("current_version")
+    }
+    counts = {"installed": 0, "upgraded": 0}
+    for builtin in builtin_pathways.all_builtins():
+        found = existing.get(builtin.key)
+        try:
+            with transaction.atomic():
+                if found is None:
+                    _save_builtin(None, builtin)
+                    counts["installed"] += 1
+                elif not found.edited and (found.builtin_version or 0) < builtin.version:
+                    _save_builtin(found, builtin)
+                    counts["upgraded"] += 1
+        except (BusinessRuleViolation, IntegrityError) as exc:  # a broken default, or a race
+            logger.error("pathways.builtin_install_failed", key=builtin.key, error=str(exc))
+    return counts
+
+
+def update_available(template: PathwayTemplate) -> bool:
+    """An edited ready-made pathway whose default TutorTrack has improved since."""
+    builtin = builtin_pathways.builtin(template.builtin_key) if template.builtin_key else None
+    return bool(builtin and template.edited and (template.builtin_version or 0) < builtin.version)
+
+
+@transaction.atomic
+def reset_to_default(template: PathwayTemplate) -> PathwayTemplate:
+    """Put a ready-made pathway back to TutorTrack's current default; runs under way keep
+    their version."""
+    builtin = builtin_pathways.builtin(template.builtin_key) if template.builtin_key else None
+    if not template.builtin_key:
+        raise BusinessRuleViolation(_("Only ready-made pathways have a default to reset to."))
+    if builtin is None:
+        raise BusinessRuleViolation(_("TutorTrack no longer ships this pathway."))
+    template = _save_builtin(template, builtin)
+    version = template.current_version.version if template.current_version else None
+    audit.record(template, "reset", {"version": [None, version]})
+    return template
+
+
+# --- which pathway starts on its own (T02) ------------------------------------------------------
+
+
+def _defaults() -> dict[str, str]:
+    from tutortrack.tenancy.settings_service import get_setting
+
+    return dict(get_setting("pathways.default_templates") or {})
+
+
+def used_by_default(template: PathwayTemplate) -> bool:
+    return _defaults().get(template.kind) == template.key
+
+
+@transaction.atomic
+def set_used_by_default(template: PathwayTemplate, used: bool) -> None:
+    """Make ``template`` the one that starts on its own for its kind (or stop that)."""
+    from tutortrack.tenancy.settings_service import update_settings
+
+    if template.kind not in JOB_KINDS:
+        raise BusinessRuleViolation(
+            _("Only Apply, Join and Finish pathways start on their own; start others by hand.")
+        )
+    if used and not template.active:
+        raise BusinessRuleViolation(_("Switch the pathway on first."))
+    defaults = _defaults()
+    if used:
+        defaults[template.kind] = template.key
+    elif defaults.get(template.kind) == template.key:
+        defaults.pop(template.kind)
+    else:
+        return
+    update_settings("pathways", {"pathways.default_templates": defaults})
+    audit.record(template, "default", {"used_by_default": [not used, used]})
+
+
+def template_for(kind: str, *, job: Any = None, posting: Any = None) -> PathwayTemplate | None:
+    """The pathway of ``kind`` that starts for a job (or job posting): the one the posting
+    or job names, else the business default, else none."""
+    chosen = None
+    if kind == PathwayTemplate.Kind.APPLY and posting is not None:
+        chosen = posting.apply_template_id
+    elif kind == PathwayTemplate.Kind.JOIN and job is not None:
+        chosen = job.join_template_id
+    templates = PathwayTemplate.objects.filter(
+        kind=kind, active=True, current_version__isnull=False
+    )
+    if chosen:
+        found = templates.filter(pk=chosen).first()
+        if found is not None:
+            return found
+    key = _defaults().get(kind)
+    return templates.filter(key=key).first() if key else None
+
+
+def _running(kind: str, job_id: Any, tutor_id: Any) -> Any:
+    return PathwayRun.objects.filter(
+        template__kind=kind, subject_type="job", subject_id=str(job_id), tutor_id=tutor_id,
+        status=PathwayRun.Status.RUNNING,
+    )  # fmt: skip
+
+
+def start_for(
+    kind: str, *, job_id: Any, tutor_id: Any, posting_id: Any = None
+) -> PathwayRun | None:
+    """Start the job's pathway of ``kind`` for a tutor, if one applies and none is under way
+    (event handlers call this, so it is safe to call twice)."""
+    from tutortrack.jobs.models import Job
+    from tutortrack.people.models import TutorProfile
+
+    job = Job.objects.filter(pk=job_id).first()
+    tutor = TutorProfile.objects.filter(pk=tutor_id).first()
+    if job is None or tutor is None or _running(kind, job.pk, tutor.pk).exists():
+        return None
+    posting = None
+    if posting_id:
+        from tutortrack.matching.models import JobPosting
+
+        posting = JobPosting.objects.filter(pk=posting_id).first()
+    template = template_for(kind, job=job, posting=posting)
+    if template is None or template.subject_type != "job":
+        return None
+    with transaction.atomic():
+        if kind == PathwayTemplate.Kind.JOIN:
+            from tutortrack.jobs import services as jobs
+
+            jobs.set_join_status(job, tutor, "joining")
+        return start_run(template, record_id=job.pk, tutor=tutor, owner=job.account_manager)
+
+
+def cancel_for(kinds: tuple[str, ...], *, job_id: Any, tutor_id: Any = None, reason: str) -> int:
+    """Cancel the job's running pathways of ``kinds`` (for one tutor, or all)."""
+    runs = PathwayRun.objects.filter(
+        template__kind__in=kinds, subject_type="job", subject_id=str(job_id),
+        status=PathwayRun.Status.RUNNING,
+    )  # fmt: skip
+    if tutor_id is not None:
+        runs = runs.filter(tutor_id=tutor_id)
+    count = 0
+    for run in runs:
+        cancel_run(run, user=None, reason=reason)
+        count += 1
+    return count
+
+
+def recheck(runs: Any) -> int:
+    """Check the open steps of running pathways again (an event that may finish one came in);
+    returns how many pathways moved on."""
+    moved = 0
+    for run_id in list(runs.filter(status=PathwayRun.Status.RUNNING).values_list("pk", flat=True)):
+        with transaction.atomic():
+            run = (
+                PathwayRun.objects.select_for_update()
+                .select_related("version", "template")
+                .filter(pk=run_id, status=PathwayRun.Status.RUNNING)
+                .first()
+            )
+            if run is None:
+                continue
+            before = (run.stage, run.status, run.steps.filter(status__in=CLOSED).count())
+            _advance(run)
+            if before != (run.stage, run.status, run.steps.filter(status__in=CLOSED).count()):
+                moved += 1
+                _signal(run)
+    return moved
+
+
+def _outcome(run: PathwayRun, what: str, gate: str = "") -> None:
+    """What a pathway about a job does to it: Join marks the tutor ready (at its ``ready``
+    gate or when it completes; cancelling it stops holding lessons back), and Apply chooses
+    the applicant when it completes or turns them down when it is turned down."""
+    if run.subject_type != "job" or run.tutor_id is None:
+        return
+    kind = run.template.kind
+    if kind == PathwayTemplate.Kind.JOIN:
+        from tutortrack.jobs import services as jobs
+
+        if (what == "gate" and gate == "ready") or what == PathwayRun.Status.COMPLETED:
+            jobs.set_join_status(run.subject_id, run.tutor_id, "ready")
+        elif what == PathwayRun.Status.CANCELLED:
+            jobs.set_join_status(run.subject_id, run.tutor_id, None, only_if="joining")
+    elif kind == PathwayTemplate.Kind.APPLY and what in (
+        PathwayRun.Status.COMPLETED, PathwayRun.Status.REJECTED,
+    ):  # fmt: skip
+        from tutortrack.matching import selectors as matching_selectors
+        from tutortrack.matching import services as matching
+
+        application = matching_selectors.open_application(run.subject_id, run.tutor_id)
+        if application is None:
+            return
+        try:
+            with transaction.atomic():
+                if what == PathwayRun.Status.COMPLETED:
+                    matching.select_applicant(application)
+                else:
+                    matching.reject_applicant(application)
+        except BusinessRuleViolation as exc:  # the posting closed, the tutor can't take it...
+            logger.info("pathways.apply_outcome_skipped", run=str(run.pk), error=str(exc))
 
 
 # --- runs ---------------------------------------------------------------------------------------
@@ -277,6 +530,7 @@ def _advance(run: PathwayRun) -> None:
             meta = next(s for s in stages if s["key"] == run.stage)
             if meta["gate"]:
                 run.gates = [*run.gates, meta["gate"]]
+                _outcome(run, "gate", meta["gate"])
             publish(
                 events.PathwayStageCompleted(
                     subject_id=run.pk, stage=run.stage, gate=meta["gate"],
@@ -312,21 +566,30 @@ def _open_stage(run: PathwayRun, stage: str, steps: list[PathwayStep]) -> None:
     if any(s.assignee == PARTICIPANT for s in opened):
         notifications.tasks_opened(run, stage)
     for step in opened:
-        if step.assignee == STAFF:
+        if step.assignee in (STAFF, FAMILY):  # staff share the shortlist for family steps
             notifications.staff_attention(step, "open")
 
 
 def _run_checks(run: PathwayRun, steps: list[PathwayStep]) -> bool:
-    """Check open system steps; True if any finished."""
-    changed = False
+    """Check the open steps TutorTrack can check; True if any finished (or the pathway was
+    turned down)."""
     for step in steps:
-        if step.status != PathwayStep.Status.OPEN or step.assignee != SYSTEM:
+        if step.status not in (PathwayStep.Status.OPEN, PathwayStep.Status.REVIEW):
             continue
         kind = step_type(step.type)
-        if kind is not None and kind.check is not None and kind.check(step):
-            _close(step, PathwayStep.Status.DONE, user=None, result={"checked": True})
-            changed = True
-    return changed
+        if kind is None or kind.check is None:
+            continue
+        outcome = kind.check(step)
+        if outcome == "rejected":
+            reason = _("Turned down: %(step)s") % {"step": step.name}
+            _close(step, PathwayStep.Status.REJECTED, user=None, reason=reason)
+            _finish(run, PathwayRun.Status.REJECTED, reason)
+            return True
+        if outcome is True:
+            _close(step, PathwayStep.Status.DONE, user=None,
+                   result={**step.result, "checked": True})  # fmt: skip
+            return True
+    return False
 
 
 def _close(
@@ -359,6 +622,7 @@ def _finish(run: PathwayRun, status: str, reason: str = "") -> None:
     run.reason = reason
     run.save(update_fields=["status", "finished_at", "reason", "gates", "stage", "updated_at"])
     audit.record(run, "finish", {"status": [PathwayRun.Status.RUNNING, status]})
+    _outcome(run, status)
     publish(
         events.PathwayCompleted(
             subject_id=run.pk, template_key=run.template.key, kind=run.template.kind,
@@ -420,6 +684,8 @@ def complete_step(
     if step.status == PathwayStep.Status.REVIEW:
         if not has_perm(user, "pathway.step.complete"):
             raise PermissionDenied(_("Only staff can accept what was sent."))
+        if kind.accept is not None:
+            kind.accept(step, user)
         _close(step, PathwayStep.Status.DONE, user=user)
     elif step.status != PathwayStep.Status.OPEN:
         raise BusinessRuleViolation(_("This step isn't open."))
@@ -483,6 +749,9 @@ def reject_step(step: PathwayStep, *, user: Any, reason: str) -> PathwayStep:
     if step.status == PathwayStep.Status.REVIEW:
         if not has_perm(user, "pathway.step.complete"):
             raise PermissionDenied(_("Only staff can send a step back."))
+        kind = step_type(step.type)
+        if kind is not None and kind.send_back is not None:
+            kind.send_back(step, user, reason)
         step.status = PathwayStep.Status.OPEN
         step.submitted_at = None
         step.result = {}
@@ -533,6 +802,7 @@ def cancel_run(run: PathwayRun, *, user: Any, reason: str = "") -> PathwayRun:
     run.reason = (reason or "").strip()[:2000]
     run.save(update_fields=["status", "finished_at", "reason", "updated_at"])
     audit.record(run, "cancel", {"status": [PathwayRun.Status.RUNNING, run.status]})
+    _outcome(run, PathwayRun.Status.CANCELLED)
     publish(
         events.PathwayCancelled(
             subject_id=run.pk, template_key=run.template.key, record_type=run.subject_type,
@@ -594,6 +864,47 @@ def tick(run_id: str, *, at: datetime | None = None) -> dict[str, Any]:
     }
 
 
+def provision_call(step_id: Any) -> str:
+    """Create the online meeting for a booked call (after the booking commits). Idempotent:
+    a link already set is kept."""
+    from tutortrack.calendar_sync import meetings
+    from tutortrack.tenancy.models import Organisation
+
+    from .pathway_steps import call_host
+
+    step = PathwayStep.objects.select_related("run__tutor", "run__owner").filter(pk=step_id).first()
+    if step is None or step.type != "book_call" or not step.result.get("start"):
+        return "skipped"
+    if step.result.get("meeting_url"):
+        return "kept"
+    host = call_host(step)
+    if host is None:
+        return "none"
+    start_at = datetime.fromisoformat(step.result["start"])
+    who = step.run.tutor.full_name if step.run.tutor else ""
+    provider, info = meetings.create_standalone_meeting(
+        key=f"pathway-call-{step.pk}",
+        topic=f"{step.config['title']}: {who}" if who else step.config["title"],
+        start=start_at,
+        end=start_at + timedelta(minutes=int(step.result.get("minutes") or 30)),
+        timezone=Organisation.objects.get(pk=step.organisation_id).timezone,
+        host_user_id=host.pk,
+        host_name=host.get_full_name() or host.email,
+    )
+    if info is None:
+        return "none"
+    with transaction.atomic():
+        step = PathwayStep.objects.select_for_update().get(pk=step.pk)
+        if step.result.get("meeting_url"):
+            return "kept"
+        step.result = {
+            **step.result, "meeting_url": info.join_url[:1000],
+            "host_url": (info.host_url or info.join_url)[:1000], "provider": provider,
+        }  # fmt: skip
+        step.save(update_fields=["result", "updated_at"])
+    return "created"
+
+
 def _due_notice(step: PathwayStep, kind: str, notifications: Any) -> None:
     if step.assignee == PARTICIPANT:
         notifications.task_reminder(step, kind)
@@ -603,9 +914,11 @@ def _due_notice(step: PathwayStep, kind: str, notifications: Any) -> None:
 
 def _next_wake(run: PathwayRun, moment: datetime, days: int) -> str | None:
     times: list[datetime] = []
-    for step in run.steps.filter(status=PathwayStep.Status.OPEN):
-        if step.assignee == SYSTEM:
+    for step in run.steps.filter(status__in=(PathwayStep.Status.OPEN, PathwayStep.Status.REVIEW)):
+        kind = step_type(step.type)
+        if kind is not None and kind.check is not None:
             times.append(moment + RECHECK)
+        if step.assignee == SYSTEM or step.status == PathwayStep.Status.REVIEW:
             continue
         remind_at = _remind_at(step, days)
         if remind_at is not None and step.reminded_at is None and remind_at > moment:

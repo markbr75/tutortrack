@@ -46,6 +46,15 @@ class JobTutorAssigned(DomainEvent):
 
 
 @dataclass(frozen=True, kw_only=True)
+class JobTutorAccepted(DomainEvent):
+    """A tutor accepted the job they were offered (E34: their Join pathway starts)."""
+
+    event_type: ClassVar[str] = "job.tutor_accepted"
+    subject_type: ClassVar[str] = "job"
+    tutor_id: str
+
+
+@dataclass(frozen=True, kw_only=True)
 class JobTutorRemoved(DomainEvent):
     event_type: ClassVar[str] = "job.tutor_removed"
     subject_type: ClassVar[str] = "job"

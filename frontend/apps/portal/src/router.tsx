@@ -32,6 +32,7 @@ import { CalendarSyncPage } from "./tutor/CalendarSyncPage";
 import { AvailabilityPage, StudentsPage, TutorProfilePage } from "./tutor/OtherPages";
 import { JobsPage } from "./tutor/JobsPages";
 import { ChecksPage, OnboardingPage } from "./tutor/OnboardingPages";
+import { TasksPage } from "./tutor/TasksPage";
 import { SubjectTestsPage } from "./tutor/SubjectTestsPage";
 import { NotificationsPage } from "./push/NotificationsPage";
 import { OfflineReportPage } from "./tutor/OfflineReportPage";
@@ -127,6 +128,7 @@ const routeTree = rootRoute.addChildren([
   page("/tutor/earnings", EarningsPage),
   page("/tutor/invoice-review", InvoiceReviewPage),
   page("/tutor/expenses", ExpensesPage),
+  page("/tutor/tasks", TasksPage),
   page("/tutor/onboarding", OnboardingPage),
   page("/tutor/compliance", ChecksPage),
   page("/tutor/tests", SubjectTestsPage),

@@ -1,6 +1,6 @@
 # E34 — The TutorTrack Network
 
-- **Status:** In progress (T01 done 2026-10-30)
+- **Status:** In progress (T01 done 2026-10-30, T02 done 2026-11-02)
 - **Depends on:** E05 People, E07 Jobs, E08 Scheduling, E09 Delivery, E12 Payroll (self-billing),
   E13 Communications, E18 Recruitment (checklists, checks, click-to-sign), E19 Matching (offers,
   job board, cover, shared shortlists), E28 Import (imported invoices), E29 Privacy (consent,
@@ -444,7 +444,7 @@ updated in the same change.
 - [x] **T01 — Pathway engine.** The `pathways` app (models, RLS, isolation tests), the step-type
   registry with the first types (questions, upload, sign, read and acknowledge, staff review,
   system check), `PathwayRunWorkflow`, the services, the API, and events. Replay histories.
-- [ ] **T02 — Ready-made pathways, editor and Tasks.**
+- [x] **T02 — Ready-made pathways, editor and Tasks.**
   - `@builtin_pathway`: Apply, Join and Finish (install, edit, reset).
   - The remaining step types: show a check, book a call, trial lesson, family chooses.
   - Wired to the E19 job board (Apply), to offer acceptance and assignment (Join and
@@ -590,3 +590,69 @@ T07 needs only T03 (it can be built before T04 if guest tutors are wanted sooner
   - Only `pathway.completed` is a webhook event.
 - **Privacy:** the `pathways` provider exports a tutor's runs and answers. Erasure replaces step
   results (answers, uploads, typed names) and removes uploaded files, and keeps the steps.
+
+### T02 — Ready-made pathways, editor and Tasks (as built 2026-11-02)
+
+- **Ready-made pathways:** `@builtin_pathway` in `pathways/builtin_pathways.py`, discovered from
+  each app's `pathways_builtin.py`, installed for new organisations (`organisation.created`) and
+  by `sync_builtin_pathways` (the Temporal worker runs it at start, after
+  `sync_builtin_workflows`). Unedited ones move to a newer default; edited ones say
+  `update_available`; `reset-to-default` puts the default back. Templates keep
+  `builtin_version`.
+  - **Apply for a job:** questions → checks in date → book a call → staff choose (gate
+    `chosen`).
+  - **Join a job:** sign the job agreement → checks in date → read the handover and
+    safeguarding policy (gate `ready`).
+  - **Finish a job:** final report (reviewed) → return resources → check the final pay.
+  - Left for later tickets (new built-in versions then): Family consents, the intro call with
+    the family, setting up the online classroom and "information access ends" (T03); trial
+    lesson and family chooses are available in the editor but not in the defaults, since the
+    spec marks them optional. E21 loans and E09 feedback aren't checked yet: Finish uses a
+    read-and-acknowledge step for resources.
+- **Step types added:** `show_check` (in `recruitment/pathway_steps.py`: one requirement
+  type, sent as an E18 compliance record that staff verify; accepting or sending it back in
+  the pathway verifies or rejects the record; empty = every required check in date, ticked by
+  TutorTrack), `book_call` (the host is whoever started the run, else the job's account
+  manager; slots from E18 `interviewer_slots`; the meeting is made after commit by
+  `pathways.tasks.provision_call` through `calendar_sync.meetings`), `trial_lesson`
+  (`scheduling`, ticked when a lesson on the job with the tutor is completed) and
+  `family_chooses` (`matching`, ticked when an E19 shortlist share picks the tutor; picking
+  another tutor turns the run down). Any step type may have a `check` (`True`, or
+  `"rejected"`), and `accept` / `send_back` hooks. Checks run when the run moves, on related
+  events (`compliance.record_verified`, `compliance.expired`, `lesson.completed`,
+  `shortlist.tutor_chosen`) and daily.
+- **Where pathways start (`pathways/handlers.py`):** `job_posting.application_received` →
+  Apply; `job.tutor_assigned` (not offers) and the new `job.tutor_accepted` → Join;
+  `job.tutor_removed`, `job.tutor_replaced` (the old tutor) and a job completing → Finish, and
+  their Apply and Join are cancelled; a job cancelled cancels Apply and Join;
+  `job_posting.filled` cancels the other applicants' Apply runs. `services.start_for` never
+  starts a second run of a kind for the same job and tutor.
+- **Outcomes:** a Join run sets `JobTutor.join_status` to `joining` when it starts and `ready`
+  at its `ready` gate or when it completes; cancelling it clears `joining`. An Apply run that
+  completes selects the applicant (which assigns the tutor and so starts Join); turned down, it
+  rejects the application.
+- **Lessons wait for joining:** `delivery.complete_lesson` refuses (code `tutor_joining`) while
+  a tutor on the lesson is joining and `pathways.block_lessons_until_joined` is on. Lessons
+  TutorTrack completes on its own (unconfirmed-lesson auto-complete) aren't held back, so
+  workflows never fail on it.
+- **Per job and posting:** `Job.join_template` and `JobPosting.apply_template` (set when
+  publishing through the API; no screen yet for postings).
+- **Screens:**
+  - Settings › Pathways: the list (ready-made and your own, with **Starts on its own**) and the
+    stage-and-step editor (add, move, remove; problems in words; Save; Reset to default).
+  - A **Pathways** panel on jobs and tutors: runs with their steps, staff actions, starting a
+    pathway, and the job's Join pathway. **Joining** / **Ready** beside a job's tutor.
+  - **Tasks** in the tutor app (`/portal/tutor/tasks`, with a count in the menu): each step
+    done in place, then calls booked that are still to come with their link.
+- **Deviations from the spec:**
+  - **Nothing starts on its own by default.** `pathways.default_templates` is empty for every
+    business, new or existing, so turning pathways on doesn't change how anyone works; a
+    business ticks **Starts on its own** per kind. (Like `privacy.consent_for_own_tutors`, off by
+    default.)
+  - **"Information access" before ready** (the tutor sees only the anonymised brief while
+    joining) comes with T03's consent gate.
+  - **Finish has no per-job choice;** it uses the default. Job postings choose an Apply
+    pathway through the API only.
+  - **Calls aren't added to the host's calendar** or checked against the host's other pathway
+    calls (E18 interviews are); the slot finder uses availability, office hours and interviews.
+

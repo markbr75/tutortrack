@@ -10,7 +10,7 @@ import { ACCOUNTS, OTHER_ORG_URL, PASSWORD, createFamily, expect, test, uid } fr
 const NAV: Record<string, { sees: string[]; settings: string[]; hidden: string[] }> = {
   owner: {
     sees: ["Clients", "Billing", "Payroll"],
-    settings: ["Audit log", "Safeguarding", "Billing & plan"],
+    settings: ["Audit log", "Safeguarding", "Billing & plan", "Pathways"],
     hidden: [],
   },
   admin: {
@@ -52,6 +52,7 @@ const NAV: Record<string, { sees: string[]; settings: string[]; hidden: string[]
       "Website & branding",
       "Audit log",
       "Safeguarding",
+      "Pathways",
     ],
   },
 };

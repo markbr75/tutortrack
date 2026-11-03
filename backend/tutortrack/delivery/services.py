@@ -45,6 +45,29 @@ def _setting(key: str, lesson: Lesson | None = None) -> Any:
 # --- completion ---------------------------------------------------------------------------------
 
 
+def _check_joined(lesson: Lesson) -> None:
+    """E34: a lesson can't be confirmed while its tutor is still joining the job (their Join
+    pathway hasn't reached "ready") and ``pathways.block_lessons_until_joined`` is on."""
+    from tutortrack.jobs.selectors import joining_tutor_ids
+
+    if not lesson.job_id or not _setting("pathways.block_lessons_until_joined", lesson):
+        return
+    joining = joining_tutor_ids(lesson.job_id)
+    if not joining:
+        return
+    names = [
+        link.tutor.full_name
+        for link in lesson.tutors.select_related("tutor")
+        if str(link.tutor_id) in joining
+    ]
+    if names:
+        raise BusinessRuleViolation(
+            _("%(names)s hasn't finished joining this job yet, so the lesson can't be confirmed.")
+            % {"names": ", ".join(names)},
+            extra={"code": "tutor_joining"},
+        )
+
+
 @dataclass(frozen=True)
 class AttendanceRow:
     attendee_id: Any
@@ -123,6 +146,8 @@ def complete_lesson(
 ) -> Lesson:
     """FR-09-1: complete with attendance; the policy maps outcomes to charge/pay shares.
     Blocks (unless ``override_balance``) when a prepaid client would go below their limit."""
+    if not auto:
+        _check_joined(lesson)
     policy = policies.resolve(lesson)
     inputs, pay = _attendance_inputs(lesson, attendance, policy)
     if lesson.status == Lesson.Status.PLANNED and not override_balance:
