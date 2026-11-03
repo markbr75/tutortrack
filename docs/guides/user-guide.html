@@ -84,6 +84,7 @@
 <li><a href="#tutor-homework-h">Homework and resources</a></li>
 <li><a href="#tutor-pay-h">Earnings and expenses</a></li>
 <li><a href="#tutor-invoice-review-h">Check invoices</a></li>
+<li><a href="#tutor-tasks-h">Tasks</a></li>
 <li><a href="#tutor-onboarding-h">Getting started and checks</a></li>
 <li><a href="#tutor-profile-h">Profile and pay details</a></li>
 <li><a href="#tutor-notifications-h">Notifications</a></li>
@@ -129,7 +130,7 @@
 <header>
 <h1>TutorTrack user guide</h1>
 <p class="lead">How to use TutorTrack day to day: for the office team in the admin app, tutors in the tutor app, families and students in the client portal, and affiliates in the partner portal.</p>
-<p class="meta">Last updated: 2026-10-30</p>
+<p class="meta">Last updated: 2026-11-02</p>
 </header>
 <p>Setting up the organisation (settings, roles, payments, integrations, the website and data import) is covered in the <a href="admin-guide.html">admin guide</a>. Developers should read the <a href="api-guide.html">API guide</a>.</p>
 
@@ -425,6 +426,12 @@
 <li><span class="ui">Find a tutor</span>: opens matching for this job (see <a href="#matching">Matching</a>).</li>
 </ul>
 <p>If a job has an hours cap, you get a warning at 80% and scheduling past 100% is blocked.</p>
+<p><strong>Pathways.</strong> If your business uses pathways (see the admin guide), the job page's <span class="ui">Pathways</span> panel lists what each tutor is working through, such as <span class="ui">Join a job</span>, with where it is ("At Before your first lesson · 1 of 3 steps"). The same panel is on each tutor's page.</p>
+<ul>
+<li>A tutor whose Join pathway isn't finished shows <span class="ui">Joining</span> beside their name, and their lessons can't be confirmed yet ("… hasn't finished joining this job yet"). Once it reaches its ready gate they show <span class="ui">Ready</span>.</li>
+<li>Select <span class="ui">Steps</span> to see each step and act on it: <span class="ui">Approve</span> or <span class="ui">Turn down</span> a staff review, <span class="ui">Accept</span> or <span class="ui">Send back</span> what the tutor sent, <span class="ui">Remind</span> or <span class="ui">Skip</span> (with a reason). For a <span class="ui">Family chooses</span> step, share the shortlist with the family from <span class="ui">Find a tutor</span>.</li>
+<li>To start a pathway by hand, choose it under <span class="ui">Start a pathway</span> (and the tutor, if the job has several). <span class="ui">Join pathway for this job</span> picks a different Join pathway for tutors put on this job.</li>
+</ul>
 </section>
 
 <section id="matching" data-route="admin:/matching" aria-labelledby="matching-h">
@@ -936,6 +943,20 @@ A moved lesson tells the family. A request waits for the office or the family to
 </ol>
 </section>
 
+<section id="tutor-tasks" data-route="portal:/tutor/tasks" aria-labelledby="tutor-tasks-h">
+<h3 id="tutor-tasks-h">Tasks</h3>
+<p><span class="ui">Tasks</span> lists the steps the business asks of you, grouped by pathway (for example <span class="ui">Join a job</span>), each with its due date. The menu shows how many are waiting. Only one stage of a pathway is open at a time, so new steps appear as you finish others.</p>
+<ul>
+<li><span class="ui">Answer</span>: fill in the questions and select <span class="ui">Send</span>.</li>
+<li><span class="ui">Upload</span>: choose the files and select <span class="ui">Send</span>.</li>
+<li><span class="ui">Read and sign</span>: read the agreement, type your full name and sign. The signed copy is kept with your documents.</li>
+<li><span class="ui">Read</span>: read the text (or open the document) and select <span class="ui">I've read this</span>.</li>
+<li><span class="ui">Add details</span> for a check: enter the details, add the document and select <span class="ui">Send</span>. A step asking for all your checks ticks itself once they are verified on <span class="ui">Checks</span>.</li>
+<li><span class="ui">Choose a time</span> for a call: pick one of the free times and select <span class="ui">Book</span>. The call appears under <span class="ui">Calls you booked</span> with <span class="ui">Join the call</span> once the link is ready.</li>
+</ul>
+<p>Some steps tick themselves, such as a trial lesson once it is marked. Something you sent shows <span class="ui">Waiting for review</span> until the office checks it; if they send it back you see why ("Sent back: …") and can do it again. While you are joining a job you can't confirm its lessons yet.</p>
+</section>
+
 <section id="tutor-onboarding" data-route="portal:/tutor/onboarding portal:/tutor/compliance" aria-labelledby="tutor-onboarding-h">
 <h3 id="tutor-onboarding-h">Getting started and checks</h3>
 <p>New tutors see a checklist in <span class="ui">Getting started</span>. Items marked <span class="ui">Required</span> must be done before you can teach. Some you tick with <span class="ui">Mark done</span>; agreements you read and sign with <span class="ui">Sign …</span> (see <a href="#portal-documents">signing documents</a>); others complete themselves when you do them elsewhere in the app. When everything is done you see "You're all set."</p>
@@ -1315,7 +1336,7 @@ A moved lesson tells the family. A request waits for the office or the family to
 </main>
 </div>
 <footer class="site-footer">
-<p>TutorTrack user guide. Last updated 2026-10-30. Found something out of date? Update this guide in the same pull request as the change.</p>
+<p>TutorTrack user guide. Last updated 2026-11-02. Found something out of date? Update this guide in the same pull request as the change.</p>
 </footer>
 </body>
 </html>

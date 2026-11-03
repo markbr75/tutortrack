@@ -11,6 +11,7 @@ from tutortrack.core.api.serializers import (
     MoneySerializerField,
     TenantRelatedField,
 )
+from tutortrack.pathways.models import PathwayTemplate
 from tutortrack.people.models import Client, Student, TutorProfile
 
 from ..models import Job, JobStatusHistory, JobStudent, JobTutor
@@ -43,9 +44,11 @@ class JobTutorSerializer(BaseModelSerializer):
         model = JobTutor
         fields = [
             "id", "tutor", "tutor_name", "role", "status", "pay_rate_override", "start_date",
-            "end_date", "responded_at",
+            "end_date", "responded_at", "join_status",
         ]  # fmt: skip
-        read_only_fields = ["id", "tutor", "status", "start_date", "end_date", "responded_at"]
+        read_only_fields = [
+            "id", "tutor", "status", "start_date", "end_date", "responded_at", "join_status",
+        ]  # fmt: skip
         field_permissions = {"pay_rate_override": "billing.rates.view_pay"}
 
 
@@ -90,6 +93,12 @@ class JobSerializer(BaseModelSerializer):
         allow_null=True,
         help_text="How this job's invoices look when they are one per job; empty: the family's.",
     )
+    join_template = TenantRelatedField(
+        PathwayTemplate,
+        required=False,
+        allow_null=True,
+        help_text="The Join pathway for tutors put on this job (E34); empty: the default.",
+    )
 
     class Meta:
         model = Job
@@ -102,7 +111,7 @@ class JobSerializer(BaseModelSerializer):
             "expected_total_hours", "goals", "notes_internal", "notes_for_tutor",
             "notes_for_client", "account_manager", "hours_cap", "hours_cap_period",
             "policy_overrides", "custom_fields", "students", "tutors", "created_at",
-            "attention_reasons", "invoice_template",
+            "attention_reasons", "invoice_template", "join_template",
         ]  # fmt: skip
         read_only_fields = [
             "id", "reference", "client", "service", "status", "status_changed_at", "currency",

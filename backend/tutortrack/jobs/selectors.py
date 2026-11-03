@@ -227,6 +227,17 @@ def attention_reasons(job: Job) -> list[str]:
     return [r for r in ATTENTION_REASONS if getattr(job, f"att_{r}", False)]
 
 
+def joining_tutor_ids(job_id: Any) -> set[str]:
+    """Tutors on the job who are still joining it (E34): their lessons can't be confirmed
+    while ``pathways.block_lessons_until_joined`` is on."""
+    return {
+        str(t)
+        for t in JobTutor.objects.filter(
+            job_id=job_id, status=JobTutor.Status.ACTIVE, join_status=JobTutor.JoinStatus.JOINING
+        ).values_list("tutor_id", flat=True)
+    }
+
+
 def last_assignment(tutor_ids: list[str]) -> dict[str, Any]:
     """When each tutor was last given a job (offered or assigned), for fair distribution."""
     from django.db.models import Max

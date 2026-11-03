@@ -46,6 +46,7 @@ import {
   WorkflowEditorPage,
   WorkflowsPage as TenantWorkflowsPage,
 } from "./workflows/WorkflowPages";
+import { PathwayEditorPage, PathwaysPage } from "./pathways/PathwayPages";
 import { JobPage } from "./jobs/JobPage";
 import { JobMatchPage, MatchingPage } from "./matching/MatchingPages";
 import { JobsPage } from "./jobs/JobsPage";
@@ -548,6 +549,15 @@ const workflowRoute = createRoute({
     return <WorkflowEditorPage id={workflowRoute.useParams().id} />;
   },
 });
+// E34: pathways (Settings › Pathways).
+const pathwaysRoute = appPage("/settings/pathways", PathwaysPage);
+const pathwayRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/settings/pathways/$id",
+  component: function PathwayRoute() {
+    return <PathwayEditorPage id={pathwayRoute.useParams().id} />;
+  },
+});
 const automationsRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/automations",
@@ -670,6 +680,8 @@ const routeTree = rootRoute.addChildren([
     matchingRoute,
     workflowsRoute,
     workflowRoute,
+    pathwaysRoute,
+    pathwayRoute,
     automationsRoute,
     automationRoute,
     calendarRoute,

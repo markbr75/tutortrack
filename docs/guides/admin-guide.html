@@ -148,6 +148,7 @@
               <li><a href="#automations-safety">Safety limits</a></li>
             </ol>
           </li>
+          <li><a href="#pathways-h">Pathways</a></li>
           <li><a href="#portal-config-h">Portal configuration</a></li>
           <li><a href="#data-h">Import, export and migration</a>
             <ol>
@@ -224,7 +225,7 @@
         <h1>TutorTrack admin guide</h1>
         <p class="lead">How to set up and configure a tutoring business on TutorTrack, and how
           the TutorTrack service itself is operated.</p>
-        <p class="meta">Last updated: 2026-10-30</p>
+        <p class="meta">Last updated: 2026-11-02</p>
       </header>
 
       <section id="overview" aria-labelledby="overview-h">
@@ -461,7 +462,7 @@
                 <tr><td>Data migration</td><td>Import rollback window (7 days); export link lifetime (7 days)</td></tr>
                 <tr><td>Developer</td><td>API key rotation overlap (24 hours)</td></tr>
                 <tr><td>Recruitment and compliance</td><td>Probation review after activation (<code>recruitment.probation_days</code>, 90 days; 0 = no automatic review); remind staff before a probation review is due (7 days); interview hours for interviewers without their own availability (<code>recruitment.interview_hours</code>, weekdays 09:00–17:00 in the organisation's time zone); create a video link automatically when an interview is booked (on); days before a tutor can retake a failed subject test (7); days a referee has to reply (14); activate tutors automatically when onboarding is complete (on); compliance reminders (60, 30 and 7 days); hold pay while restricted (on)</td></tr>
-                <tr><td>Pathways</td><td>Days before a pathway step is due to remind whoever has to do it (<code>pathways.reminder_days</code>, 1 day, 0–14; 0 = no reminder). Overdue steps are always flagged.</td></tr>
+                <tr><td>Pathways</td><td>Days before a pathway step is due to remind whoever has to do it (<code>pathways.reminder_days</code>, 1 day, 0–14; 0 = no reminder). Overdue steps are always flagged. Lessons can't be confirmed while the tutor is joining (<code>pathways.block_lessons_until_joined</code>, on). Which pathways start on their own (<code>pathways.default_templates</code>, none; set on <a href="#pathways">Settings › Pathways</a>).</td></tr>
               </tbody>
             </table>
           </div>
@@ -569,8 +570,8 @@
 
         <div class="callout tip">
           <strong>Pathway permissions</strong>
-          <p>Pathways are the steps you ask a tutor to follow, such as joining a job (the screens
-            arrive in a later release; today they are used through the API). Seeing them needs
+          <p>Pathways are the steps you ask a tutor to follow, such as joining a job (see
+            <a href="#pathways">Pathways</a>). Seeing them needs
             <code>pathway.view</code>; creating and changing pathway templates needs
             <code>pathway.manage</code>; starting and cancelling a pathway for a tutor needs
             <code>pathway.run.manage</code>; doing staff steps, checking what tutors send,
@@ -1425,6 +1426,90 @@
         </ul>
       </section>
 
+      <section id="pathways" data-route="admin:/settings/pathways" aria-labelledby="pathways-h">
+        <h2 id="pathways-h">Pathways</h2>
+        <p><span class="path">Settings › Pathways</span> holds the steps you ask a tutor to
+          follow: applying for a job on the job board, joining a job, and finishing one. A pathway
+          is a list of <strong>stages</strong>; each stage holds <strong>steps</strong>, and one
+          stage is open at a time. Seeing pathways needs <code>pathway.view</code>; changing them
+          needs <code>pathway.manage</code> (see <a href="#roles-h">pathway permissions</a>).</p>
+        <h3 id="pathways-ready">Ready-made pathways</h3>
+        <ul>
+          <li><strong>Apply for a job</strong>: questions, your checks in date, a call, then
+            <span class="ui">Choose this tutor</span> (a staff review). Approving it chooses the
+            applicant on the job board, which puts them on the job; turning it down marks the
+            application not selected.</li>
+          <li><strong>Join a job</strong>: sign the job agreement, checks in date, read the
+            handover and safeguarding policy. Its stage ends at the <code>ready</code> gate.</li>
+          <li><strong>Finish a job</strong>: a final report (staff check it), return resources and
+            <span class="ui">Check the final pay</span>.</li>
+        </ul>
+        <p>Change them to suit you. A changed one says <span class="ui">Changed from the
+          default</span>; <span class="ui">Reset to default</span> puts TutorTrack's version back.
+          When TutorTrack improves a ready-made pathway, unchanged ones get the new version and
+          changed ones say <span class="ui">Newer default available</span>. Runs already under way
+          keep the version they started with.</p>
+        <h3 id="pathways-start">Which pathways start on their own</h3>
+        <p>Nothing starts on its own until you choose. Tick <span class="ui">Starts on its
+          own</span> beside one Apply, one Join and one Finish pathway. Then:</p>
+        <ul>
+          <li>a tutor applying on the job board starts the Apply pathway;</li>
+          <li>putting a tutor on a job, or a tutor accepting an offer, starts Join. Until Join
+            reaches its <code>ready</code> gate the tutor is <span class="ui">Joining</span> on the
+            job page and their lessons can't be confirmed
+            (<code>pathways.block_lessons_until_joined</code>, on by default; lessons TutorTrack
+            completes on its own aren't held back);</li>
+          <li>a tutor leaving the job, being replaced or the job completing starts Finish and
+            cancels their Apply and Join; cancelling the job cancels them too.</li>
+        </ul>
+        <p>A job can use a different Join pathway (<span class="ui">Join pathway for this
+          job</span> under <span class="ui">Pathways</span> on the job page), and a job posting a
+          different Apply pathway (through the API for now). Staff can also start any pathway for a
+          tutor on a job from the job page (<code>pathway.run.manage</code>).</p>
+        <h3 id="pathways-edit">Change or make a pathway</h3>
+        <ol class="steps">
+          <li>Open a pathway, or select <span class="ui">New pathway</span>.</li>
+          <li>Under <span class="ui">Details</span>, give it a <span class="ui">Name</span> and a
+            <span class="ui">Kind</span> (Apply, Join, Finish or Other).</li>
+          <li>For each stage, enter its <span class="ui">Stage name</span> and, if you want, a
+            <span class="ui">Gate</span> (a Join pathway's <code>ready</code> gate lets lessons be
+            confirmed).</li>
+          <li>Choose a <span class="ui">New step</span> type and select <span class="ui">Add a
+            step</span>. Give it a name, a due date in days if it needs one, and its settings.
+            Move steps and stages with the arrows.</li>
+          <li>Fix anything listed under <span class="ui">Before you save</span>, then select
+            <span class="ui">Save</span>.</li>
+        </ol>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Step</th><th scope="col">Who</th><th scope="col">Finishes when</th></tr></thead>
+            <tbody>
+              <tr><td>Answer questions</td><td>Tutor</td><td>They answer (staff check the answers if you tick it)</td></tr>
+              <tr><td>Upload a document</td><td>Tutor</td><td>They upload and staff accept the files</td></tr>
+              <tr><td>Sign an agreement</td><td>Tutor</td><td>They sign (kept like an onboarding agreement)</td></tr>
+              <tr><td>Read and acknowledge</td><td>Tutor</td><td>They tick it as read</td></tr>
+              <tr><td>Show a check</td><td>Tutor</td><td>The check is verified (here or on the tutor's checks). "All the tutor's required checks" ticks itself when none is missing</td></tr>
+              <tr><td>Book a call</td><td>Tutor</td><td>They choose a free time of whoever started the pathway (else the job's account manager); a video link is made</td></tr>
+              <tr><td>Staff review</td><td>Staff, optionally one role</td><td>Approved. Turning it down ends the pathway</td></tr>
+              <tr><td>Trial lesson</td><td>TutorTrack</td><td>A lesson on the job with the tutor is completed</td></tr>
+              <tr><td>Family chooses</td><td>The family</td><td>The family chooses this tutor from the shortlist you share; choosing someone else ends the pathway</td></tr>
+              <tr><td>TutorTrack checks</td><td>TutorTrack</td><td>A workflow question about the record holds</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3 id="pathways-runs">Following a pathway</h3>
+        <p>The <span class="ui">Pathways</span> panel on a job, and on a tutor, lists each
+          pathway with where it is. Select <span class="ui">Steps</span> to see every step.
+          With <code>pathway.step.complete</code> you can <span class="ui">Approve</span> or
+          <span class="ui">Turn down</span> a staff review, <span class="ui">Accept</span> or
+          <span class="ui">Send back</span> what a tutor sent (with a reason they see),
+          <span class="ui">Remind</span> whoever has to do a step and <span class="ui">Skip</span>
+          a step with a reason. <span class="ui">Cancel pathway</span> needs
+          <code>pathway.run.manage</code>. Tutors do their steps in <span class="ui">Tasks</span>
+          in the tutor app. Reminders go before a due date (<code>pathways.reminder_days</code>)
+          and staff are told when a step is overdue.</p>
+      </section>
+
       <section id="portal-config" aria-labelledby="portal-config-h">
         <h2 id="portal-config-h">Portal configuration</h2>
         <p>The client portal and the tutor app are described in the
@@ -2042,7 +2127,7 @@
               <tr><td>Web API</td><td>ECS Fargate service <code>web</code> (gunicorn, Django 5 + DRF)</td><td>Serves <code>/api/v1/</code>, provider webhooks (<code>/webhooks/…</code>), <code>/healthz</code> and <code>/readyz</code> (checks the database and Redis).</td></tr>
               <tr><td>Background jobs</td><td>ECS service <code>worker</code> (Celery) on the queues <code>default</code>, <code>outbox</code>, <code>notifications</code>, <code>billing</code>, <code>integrations</code>, <code>imports</code>, <code>reports</code></td><td>Short, stateless tasks: dispatching the event outbox, sending messages, webhook deliveries, syncs.</td></tr>
               <tr><td>Scheduler</td><td>ECS service <code>beat</code> (Celery Beat)</td><td>Global housekeeping crons (fan out one task per organisation). It also writes the application metrics that the alarms read. Lesson reminders and the unconfirmed-lesson checks are workflows now, not beat tasks.</td></tr>
-              <tr><td>Workflow workers</td><td>ECS service <code>temporal-worker</code></td><td>Runs every Temporal task queue: dunning, invoice runs, reminders, automations, imports, erasure and other long-running processes. Runs <code>ensure_platform_schedules</code> and <code>sync_builtin_workflows</code> (installs the built-in workflows each organisation is missing and moves unedited ones to newer defaults) at start.</td></tr>
+              <tr><td>Workflow workers</td><td>ECS service <code>temporal-worker</code></td><td>Runs every Temporal task queue: dunning, invoice runs, reminders, automations, imports, erasure and other long-running processes. Runs <code>ensure_platform_schedules</code>, <code>sync_builtin_workflows</code> (installs the built-in workflows each organisation is missing and moves unedited ones to newer defaults) and <code>sync_builtin_pathways</code> (the same for ready-made pathways) at start.</td></tr>
               <tr><td>Migrations</td><td>One-off ECS task <code>migrate</code></td><td>Runs <code>ensure_db_roles</code> then <code>migrate</code> as the table owner.</td></tr>
               <tr><td>Database</td><td>RDS PostgreSQL 16 (encrypted, 35-day point-in-time recovery)</td><td>Shared schema; every tenant row carries <code>organisation_id</code> and row-level security (RLS) policies enforce isolation.</td></tr>
               <tr><td>Cache and broker</td><td>ElastiCache Redis 7 (TLS)</td><td>Cache, Celery broker, locks and the pub/sub channel for the realtime notification bell.</td></tr>
@@ -2305,7 +2390,7 @@
   </div>
 
   <footer class="site-footer">
-    <p>TutorTrack admin guide · Last updated: 2026-10-30 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
+    <p>TutorTrack admin guide · Last updated: 2026-11-02 · <a href="user-guide.html">User guide</a> · <a href="api-guide.html">API guide</a></p>
   </footer>
 </body>
 </html>

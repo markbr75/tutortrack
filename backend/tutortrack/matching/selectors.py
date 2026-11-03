@@ -156,3 +156,20 @@ def analytics(*, days: int = 90) -> dict[str, Any]:
             for subject, count in sorted(empty.items(), key=lambda kv: -kv[1])
         ],
     }
+
+
+def open_application(job_id: Any, tutor_id: Any) -> Any:
+    """The tutor's application to the job's open posting still waiting for a decision (E34:
+    an Apply pathway chooses or turns it down)."""
+    from .models import JobPosting, JobPostingApplication
+
+    return (
+        JobPostingApplication.objects.filter(
+            posting__job_id=job_id,
+            posting__status=JobPosting.Status.OPEN,
+            tutor_id=tutor_id,
+            status=JobPostingApplication.Status.APPLIED,
+        )
+        .order_by("-created_at")
+        .first()
+    )

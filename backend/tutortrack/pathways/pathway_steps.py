@@ -3,8 +3,12 @@
 A step type says who may do it (``assignees``), cleans its settings when a template is
 saved (``clean``), records what the person did (``complete``, returning the step's
 ``result``), and says what the person doing it sees (``view``). Tutors' answers can wait for
-staff to check them (``review``). System steps have a ``check`` instead, evaluated whenever
-the run moves and once a day while open.
+staff to check them (``review``); staff accepting or sending back what was sent can call into
+the app that owns it (``accept``, ``send_back``). A ``check`` finishes a step on its own when
+it holds (``True``) or turns the pathway down (``"rejected"``). It is evaluated whenever the
+run moves, when a related event arrives (``services.recheck``) and once a day while the step
+is open. System and family steps rely on it; others may have one too (a check already
+verified finishes "Show a check").
 
 Other apps add step types in their own ``pathway_steps.py`` (autodiscovered):
 
@@ -45,8 +49,10 @@ class StepType:
     clean: Callable[[dict[str, Any], str], dict[str, Any]]  # (config, record type) -> config
     complete: Callable[[Completion], dict[str, Any]] | None = None
     review: Callable[[dict[str, Any]], bool] = lambda config: False
-    check: Callable[[PathwayStep], bool] | None = None
+    check: Callable[[PathwayStep], bool | str] | None = None
     view: Callable[[PathwayStep], dict[str, Any]] = lambda step: {}
+    accept: Callable[[PathwayStep, Any], None] | None = None  # (step, staff user)
+    send_back: Callable[[PathwayStep, Any, str], None] | None = None  # (step, user, reason)
 
 
 _types: dict[str, StepType] = {}
@@ -362,5 +368,101 @@ register_step_type(
         clean=_clean_check,
         check=_check,
         view=_question_label,
+    )
+)
+
+
+# --- book a call (T02) --------------------------------------------------------------------------
+
+
+def _clean_call(config: dict[str, Any], record_type: str) -> dict[str, Any]:
+    cleaned: dict[str, Any] = {"title": _text(config, "title", limit=200) or str(_("Call"))}
+    for key, default, low, high in (("minutes", 30, 15, 120), ("days", 14, 1, 28)):
+        value = config.get(key, default)
+        if not isinstance(value, int) or isinstance(value, bool) or not low <= value <= high:
+            raise BusinessRuleViolation(
+                _("%(field)s must be between %(low)s and %(high)s.")
+                % {"field": key, "low": low, "high": high}
+            )
+        cleaned[key] = value
+    return cleaned
+
+
+def call_host(step: PathwayStep) -> Any:
+    """Who the tutor talks to: whoever started the pathway, else the job's account manager."""
+    run = step.run
+    if run.owner_id:
+        return run.owner
+    if run.subject_type == "job":
+        from tutortrack.jobs.models import Job
+
+        job = Job.objects.select_related("account_manager").filter(pk=run.subject_id).first()
+        return job.account_manager if job else None
+    return None
+
+
+def call_slots(step: PathwayStep) -> list[Any]:
+    """Start times the host is free for the call, from today for ``days`` days."""
+    from datetime import timedelta
+
+    from tutortrack.recruitment import compliance
+    from tutortrack.recruitment.interviews import interviewer_slots
+
+    host = call_host(step)
+    if host is None:
+        return []
+    today = compliance.today()
+    return interviewer_slots(
+        host,
+        start=today,
+        end=today + timedelta(days=step.config["days"]),
+        minutes=step.config["minutes"],
+    )
+
+
+def _complete_call(c: Completion) -> dict[str, Any]:
+    from django.db import transaction
+
+    from tutortrack.core.context import require_organisation_id
+
+    start = c.payload.get("start")
+    host = call_host(c.step)
+    if host is None:
+        raise BusinessRuleViolation(_("Nobody is set up to take this call yet."))
+    if start is None or start not in call_slots(c.step):
+        raise BusinessRuleViolation(_("That time isn't free any more. Choose another."))
+    org_id, step_id = str(require_organisation_id()), str(c.step.pk)
+
+    def provision() -> None:
+        from .tasks import provision_call
+
+        provision_call.delay(organisation_id=org_id, step_id=step_id)
+
+    transaction.on_commit(provision)
+    return {
+        "start": start.isoformat(),
+        "minutes": c.step.config["minutes"],
+        "host": host.get_full_name() or host.email,
+        "meeting_url": "",
+    }
+
+
+def _call_view(step: PathwayStep) -> dict[str, Any]:
+    view: dict[str, Any] = {"title": step.config["title"], "minutes": step.config["minutes"]}
+    if step.status == PathwayStep.Status.OPEN:
+        view["slots"] = [s.isoformat() for s in call_slots(step)]
+    host = call_host(step)
+    view["host"] = (host.get_full_name() or host.email) if host else ""
+    return view
+
+
+register_step_type(
+    StepType(
+        key="book_call",
+        label=gettext_lazy("Book a call"),
+        assignees=(PARTICIPANT,),
+        clean=_clean_call,
+        complete=_complete_call,
+        view=_call_view,
     )
 )

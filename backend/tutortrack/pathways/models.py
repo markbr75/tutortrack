@@ -30,6 +30,7 @@ class PathwayTemplate(TenantModel):
     kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.CUSTOM)
     subject_type = models.CharField(max_length=40)  # an automations record type, e.g. "job"
     builtin_key = models.CharField(max_length=60, blank=True, default="")  # E34 T02
+    builtin_version = models.PositiveIntegerField(null=True, blank=True)  # default it came from
     edited = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     current_version = models.ForeignKey(

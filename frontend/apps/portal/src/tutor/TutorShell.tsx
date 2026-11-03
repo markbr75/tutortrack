@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Sun,
   ClipboardCheck,
+  ListTodo,
   UserRound,
   Wallet,
 } from "lucide-react";
@@ -55,6 +56,12 @@ function useTutorWaiting(enabled: boolean) {
     refetchInterval: 60_000,
     queryFn: async () => unwrap(await api.GET("/api/v1/tutor/threads")),
   });
+  const tasks = useQuery({
+    queryKey: ["tutor", "tasks"],
+    enabled,
+    refetchInterval: 60_000,
+    queryFn: async () => unwrap(await api.GET("/api/v1/me/tasks")),
+  });
   const d = today.data;
   const now = Date.now();
   // The API counts every lesson still to mark over the last 60 days; a response cached
@@ -67,6 +74,7 @@ function useTutorWaiting(enabled: boolean) {
   return {
     toMark: due + (d?.reports_due ?? 0),
     offers: d?.offers ?? 0,
+    tasks: (tasks.data ?? []).filter((task) => task.status === "open").length,
     notifications: d?.unread ?? 0,
     unreadMessages: (threads.data ?? []).reduce((sum, row) => sum + (row.unread ?? 0), 0),
   };
@@ -172,6 +180,13 @@ export function TutorShell() {
       icon: Bell,
       group: "you",
       count: waiting.notifications,
+    },
+    {
+      to: "/tutor/tasks",
+      label: t("pathways.tasks.nav"),
+      icon: ListTodo,
+      group: "you",
+      count: waiting.tasks,
     },
     { to: "/tutor/onboarding", label: t("tutor.nav.onboarding"), icon: ListChecks, group: "you" },
     { to: "/tutor/compliance", label: t("tutor.nav.compliance"), icon: ShieldCheck, group: "you" },

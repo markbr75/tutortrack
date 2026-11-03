@@ -29,6 +29,7 @@ import {
 import { useTemplateOptions } from "../billing/invoiceTemplateHooks";
 import { RecordActivity } from "../crm/Activity";
 import { EditableDetails } from "../people/EditableDetails";
+import { JoinPathwayChoice, PathwayRunsPanel } from "../pathways/PathwayRuns";
 import { NEXT_STATUSES, type JobStatus } from "./statuses";
 
 type Job = components["schemas"]["Job"];
@@ -329,6 +330,7 @@ function Tutors({ job }: { job: Job }) {
               context={[
                 t(`jobs.role.${link.role ?? "lead"}`),
                 t(`jobs.tutorStatus.${link.status}`),
+                link.join_status ? t(`pathways.joinStatus.${link.join_status}`) : "",
                 link.pay_rate_override ? formatRate(link.pay_rate_override, i18n.language) : "",
               ]
                 .filter(Boolean)
@@ -561,6 +563,13 @@ export function JobPage({ jobId }: { jobId: string }) {
         main={
           <>
             <Tutors job={j} />
+            <PathwayRunsPanel
+              jobId={j.id}
+              tutors={j.tutors
+                .filter((x) => x.status === "active")
+                .map((x) => ({ id: x.tutor, name: x.tutor_name }))}
+              footer={<JoinPathwayChoice jobId={j.id} value={j.join_template ?? null} />}
+            />
             <Panel title={t("jobs.students")} flush>
               <PanelRows>
                 {j.students.map((link) => (

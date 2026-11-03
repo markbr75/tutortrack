@@ -41,7 +41,7 @@ EDITABLE = {
     "default_schedule", "start_date", "expected_end_date", "lessons_per_week",
     "expected_total_hours", "goals", "notes_internal", "notes_for_tutor", "notes_for_client",
     "account_manager", "hours_cap", "hours_cap_period", "policy_overrides", "custom_fields",
-    "branch", "invoice_template",
+    "branch", "invoice_template", "join_template",
 }  # fmt: skip
 
 
@@ -75,6 +75,8 @@ def _validate(job: Job) -> None:
     if job.hours_cap is not None and job.hours_cap <= 0:
         raise _invalid("hours_cap", _("The cap must be more than zero hours."))
     _check_rate("charge_rate", job.charge_rate, job.currency)
+    if job.join_template is not None and job.join_template.kind != "join":
+        raise _invalid("join_template", _("Choose a Join pathway."))
     job.default_schedule = _clean_schedule(job.default_schedule)
 
 
@@ -363,9 +365,34 @@ def respond_to_offer(link: JobTutor, *, accept: bool) -> JobTutor:
         link.responded_at = now()
         link.save(update_fields=["status", "responded_at", "updated_at"])
     job = link.job
+    if accept:
+        publish(
+            events.JobTutorAccepted(subject_id=job.pk, tutor_id=str(link.tutor_id)),
+            branch_id=job.branch_id,
+        )
     if accept and job.status == S.SEEKING_TUTOR:
         change_status(job, S.ACTIVE, reason=_("Tutor accepted"))
     return link
+
+
+@transaction.atomic
+def set_join_status(job: Any, tutor: Any, status: str | None, *, only_if: str | None = None) -> int:
+    """Where the tutor is in joining the job (E34 Join pathway): ``joining`` holds back
+    confirming lessons (``pathways.block_lessons_until_joined``), ``ready`` or None doesn't.
+    ``only_if`` changes only places in that state. Returns how many places changed."""
+    links = JobTutor.objects.filter(
+        job_id=getattr(job, "pk", job), tutor_id=getattr(tutor, "pk", tutor),
+        status__in=CURRENT,
+    ).exclude(join_status=status)  # fmt: skip
+    if only_if is not None:
+        links = links.filter(join_status=only_if)
+    changed = 0
+    for link in links:
+        with audit.track(link, action="join_status"):
+            link.join_status = status
+            link.save(update_fields=["join_status", "updated_at"])
+        changed += 1
+    return changed
 
 
 @transaction.atomic

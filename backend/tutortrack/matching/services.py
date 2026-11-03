@@ -528,11 +528,20 @@ def publish_posting(
     title: str = "",
     min_score: Decimal | int = 0,
     closes_on: Any = None,
+    apply_template: Any = None,
 ) -> JobPosting:
     """Post the job for every eligible tutor (those passing the hard filters, scoring at
-    least ``min_score``) and tell them."""
+    least ``min_score``) and tell them. ``apply_template`` (an id) is the Apply pathway
+    applicants follow (E34); none: the business default."""
     if job.status in CLOSED_JOB:
         raise BusinessRuleViolation(_("The job is closed."))
+    if apply_template is not None:
+        from tutortrack.pathways.models import PathwayTemplate
+
+        found = PathwayTemplate.objects.filter(pk=apply_template, kind="apply").first()
+        if found is None:
+            raise _invalid("apply_template", _("Choose an Apply pathway."))
+        apply_template = found
     if JobPosting.objects.filter(job=job, status=JobPosting.Status.OPEN).exists():
         raise BusinessRuleViolation(_("This job is already on the job board."))
     matches = engine.search(engine.criteria_for_job(job), limit=1000)
@@ -546,6 +555,7 @@ def publish_posting(
         eligible=eligible,
         published_at=now(),
         closes_on=closes_on,
+        apply_template=apply_template,
     )
     audit.record_create(posting)
     publish(

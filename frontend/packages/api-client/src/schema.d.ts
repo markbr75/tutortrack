@@ -13057,7 +13057,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description The steps the signed-in tutor has to do, or has sent for review. */
+    /**
+     * @description The steps the signed-in tutor has to do, or has sent for review, then the calls they
+     *     booked that are still to come (``status`` done, with ``result.start``).
+     */
     get: operations["me_tasks_list"];
     put?: never;
     post?: never;
@@ -14010,6 +14013,23 @@ export interface paths {
      *     ``active: false``.
      */
     patch: operations["pathway_templates_partial_update"];
+    trace?: never;
+  };
+  "/api/v1/pathway-templates/{id}/reset-to-default": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Put a ready-made pathway back to TutorTrack's default (runs under way keep theirs). */
+    post: operations["pathway_templates_reset_to_default_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/api/v1/pay-items": {
@@ -30854,6 +30874,11 @@ export interface components {
        * @description How this job's invoices look when they are one per job; empty: the family's.
        */
       invoice_template?: string | null;
+      /**
+       * Format: uuid
+       * @description The Join pathway for tutors put on this job (E34); empty: the default.
+       */
+      join_template?: string | null;
     };
     JobCreate: {
       /** Format: uuid */
@@ -30931,6 +30956,11 @@ export interface components {
        * @description How this job's invoices look when they are one per job; empty: the family's.
        */
       invoice_template?: string | null;
+      /**
+       * Format: uuid
+       * @description The Join pathway for tutors put on this job (E34); empty: the default.
+       */
+      join_template?: string | null;
     };
     JobCreateRequest: {
       name?: string;
@@ -30994,6 +31024,11 @@ export interface components {
        * @description How this job's invoices look when they are one per job; empty: the family's.
        */
       invoice_template?: string | null;
+      /**
+       * Format: uuid
+       * @description The Join pathway for tutors put on this job (E34); empty: the default.
+       */
+      join_template?: string | null;
       student_inputs: components["schemas"]["StudentInputRequest"][];
       tutor_inputs?: components["schemas"]["TutorInputRequest"][];
     };
@@ -31084,6 +31119,8 @@ export interface components {
       readonly closes_on: string | null;
       /** Format: date-time */
       readonly closed_at: string | null;
+      /** Format: uuid */
+      readonly apply_template: string | null;
       readonly applications_count: number;
       readonly eligible_count: number;
     };
@@ -31102,6 +31139,8 @@ export interface components {
       readonly closes_on: string | null;
       /** Format: date-time */
       readonly closed_at: string | null;
+      /** Format: uuid */
+      readonly apply_template: string | null;
       readonly applications_count: number;
       readonly eligible_count: number;
       readonly applications: components["schemas"]["PostingApplication"][];
@@ -31189,6 +31228,8 @@ export interface components {
       readonly end_date: string | null;
       /** Format: date-time */
       readonly responded_at: string | null;
+      readonly join_status:
+        (components["schemas"]["JoinStatusEnum"] | components["schemas"]["NullEnum"]) | null;
     };
     JobTutorRequest: {
       role?: components["schemas"]["JobTutorRoleEnum"];
@@ -31232,6 +31273,12 @@ export interface components {
      * @enum {string}
      */
     JoinLinkRoleEnum: "host" | "participant";
+    /**
+     * @description * `joining` - Joining
+     *     * `ready` - Ready
+     * @enum {string}
+     */
+    JoinStatusEnum: "joining" | "ready";
     JoinWaitlistRequest: {
       /** Format: uuid */
       student: string;
@@ -36633,6 +36680,11 @@ export interface components {
        * @description How this job's invoices look when they are one per job; empty: the family's.
        */
       invoice_template?: string | null;
+      /**
+       * Format: uuid
+       * @description The Join pathway for tutors put on this job (E34); empty: the default.
+       */
+      join_template?: string | null;
     };
     PatchedLateFeeRuleRequest: {
       /** Format: uuid */
@@ -36812,6 +36864,7 @@ export interface components {
       kind?: components["schemas"]["PathwayTemplateKindEnum"];
       record_type?: string;
       active?: boolean;
+      used_by_default?: boolean;
       stages?: unknown;
     };
     PatchedPayProfileUpdateRequest: {
@@ -37445,6 +37498,13 @@ export interface components {
       files?: string[];
       full_name?: string;
       note?: string;
+      /** Format: date-time */
+      start?: string;
+      number?: string;
+      /** Format: date */
+      issue_date?: string | null;
+      /** Format: date */
+      expiry_date?: string | null;
     };
     PathwayPerson: {
       /** Format: uuid */
@@ -37459,6 +37519,10 @@ export interface components {
     PathwayReasonRequest: {
       /** @default  */
       reason: string;
+    };
+    PathwayRequirement: {
+      key: string;
+      name: string;
     };
     PathwayRun: {
       /** Format: uuid */
@@ -37524,6 +37588,7 @@ export interface components {
       record_types: components["schemas"]["RecordType"][];
       questions: components["schemas"]["PathwayQuestion"][];
       roles: string[];
+      requirements: components["schemas"]["PathwayRequirement"][];
     };
     PathwayStage: {
       key: string;
@@ -37582,6 +37647,8 @@ export interface components {
       active?: boolean;
       readonly builtin_key: string;
       readonly edited: boolean;
+      readonly update_available: boolean;
+      used_by_default?: boolean;
       readonly version: number | null;
       stages: unknown;
       /** Format: date-time */
@@ -37603,6 +37670,7 @@ export interface components {
       kind?: components["schemas"]["PathwayTemplateKindEnum"];
       record_type: string;
       active?: boolean;
+      used_by_default?: boolean;
       stages: unknown;
     };
     /**
@@ -40404,6 +40472,11 @@ export interface components {
       min_score: string;
       /** Format: date */
       closes_on?: string | null;
+      /**
+       * Format: uuid
+       * @description The Apply pathway (E34); empty: the default.
+       */
+      apply_template?: string | null;
     };
     /**
      * @description * `app` - Apps and portals
@@ -71687,6 +71760,31 @@ export interface operations {
         "multipart/form-data": components["schemas"]["PatchedPathwayTemplateRequest"];
       };
     };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PathwayTemplate"];
+        };
+      };
+    };
+  };
+  pathway_templates_reset_to_default_create: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Makes the request safe to retry for 24 hours. */
+        "Idempotency-Key"?: string;
+      };
+      path: {
+        /** @description A UUID string identifying this pathway template. */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
     responses: {
       200: {
         headers: {

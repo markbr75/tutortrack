@@ -97,6 +97,11 @@ class Job(BranchScopedModel, CustomisableModel):
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
         related_name="+",
     )  # fmt: skip
+    # E34: the Join pathway for tutors put on this job; the business default when empty.
+    join_template = models.ForeignKey(
+        "pathways.PathwayTemplate", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="+",
+    )  # fmt: skip
     hours_cap = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     hours_cap_period = models.CharField(
         max_length=5, choices=CapPeriod.choices, default=CapPeriod.TOTAL
@@ -153,6 +158,10 @@ class JobTutor(TenantModel):
         ENDED = "ended", _("Ended")
         DECLINED = "declined", _("Declined")
 
+    class JoinStatus(models.TextChoices):
+        JOINING = "joining", _("Joining")
+        READY = "ready", _("Ready")
+
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="tutors")
     tutor = models.ForeignKey(
         "people.TutorProfile", on_delete=models.PROTECT, related_name="job_links"
@@ -164,6 +173,9 @@ class JobTutor(TenantModel):
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     responded_at = models.DateTimeField(null=True, blank=True)
+    # E34: while the Join pathway is under way the tutor is joining; null when no Join
+    # pathway ran (assignments made before E34, or none in use).
+    join_status = models.CharField(max_length=7, choices=JoinStatus.choices, null=True, blank=True)
 
     class Meta(TenantModel.Meta):
         ordering = ["created_at"]

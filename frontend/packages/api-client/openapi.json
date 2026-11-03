@@ -50254,7 +50254,7 @@
         "/api/v1/me/tasks": {
             "get": {
                 "operationId": "me_tasks_list",
-                "description": "The steps the signed-in tutor has to do, or has sent for review.",
+                "description": "The steps the signed-in tutor has to do, or has sent for review, then the calls they\nbooked that are still to come (``status`` done, with ``result.start``).",
                 "tags": [
                     "me"
                 ],
@@ -54140,6 +54140,53 @@
                         }
                     }
                 },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PathwayTemplate"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                },
+                "x-visibility": "internal"
+            }
+        },
+        "/api/v1/pathway-templates/{id}/reset-to-default": {
+            "post": {
+                "operationId": "pathway_templates_reset_to_default_create",
+                "description": "Put a ready-made pathway back to TutorTrack's default (runs under way keep theirs).",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Makes the request safe to retry for 24 hours."
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this pathway template.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "pathway-templates"
+                ],
                 "security": [
                     {
                         "cookieAuth": []
@@ -110877,6 +110924,12 @@
                         "format": "uuid",
                         "nullable": true,
                         "description": "How this job's invoices look when they are one per job; empty: the family's."
+                    },
+                    "join_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "The Join pathway for tutors put on this job (E34); empty: the default."
                     }
                 },
                 "required": [
@@ -111105,6 +111158,12 @@
                         "format": "uuid",
                         "nullable": true,
                         "description": "How this job's invoices look when they are one per job; empty: the family's."
+                    },
+                    "join_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "The Join pathway for tutors put on this job (E34); empty: the default."
                     }
                 },
                 "required": [
@@ -111279,6 +111338,12 @@
                         "format": "uuid",
                         "nullable": true,
                         "description": "How this job's invoices look when they are one per job; empty: the family's."
+                    },
+                    "join_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "The Join pathway for tutors put on this job (E34); empty: the default."
                     },
                     "student_inputs": {
                         "type": "array",
@@ -111574,6 +111639,12 @@
                         "readOnly": true,
                         "nullable": true
                     },
+                    "apply_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
                     "applications_count": {
                         "type": "integer",
                         "readOnly": true
@@ -111585,6 +111656,7 @@
                 },
                 "required": [
                     "applications_count",
+                    "apply_template",
                     "audience",
                     "brief",
                     "closed_at",
@@ -111646,6 +111718,12 @@
                         "readOnly": true,
                         "nullable": true
                     },
+                    "apply_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
                     "applications_count": {
                         "type": "integer",
                         "readOnly": true
@@ -111665,6 +111743,7 @@
                 "required": [
                     "applications",
                     "applications_count",
+                    "apply_template",
                     "audience",
                     "brief",
                     "closed_at",
@@ -111908,11 +111987,24 @@
                         "format": "date-time",
                         "readOnly": true,
                         "nullable": true
+                    },
+                    "join_status": {
+                        "readOnly": true,
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/JoinStatusEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     }
                 },
                 "required": [
                     "end_date",
                     "id",
+                    "join_status",
                     "responded_at",
                     "start_date",
                     "status",
@@ -112006,6 +112098,14 @@
                 ],
                 "type": "string",
                 "description": "* `host` - host\n* `participant` - participant"
+            },
+            "JoinStatusEnum": {
+                "enum": [
+                    "joining",
+                    "ready"
+                ],
+                "type": "string",
+                "description": "* `joining` - Joining\n* `ready` - Ready"
             },
             "JoinWaitlistRequest": {
                 "type": "object",
@@ -126853,6 +126953,12 @@
                         "format": "uuid",
                         "nullable": true,
                         "description": "How this job's invoices look when they are one per job; empty: the family's."
+                    },
+                    "join_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "The Join pathway for tutors put on this job (E34); empty: the default."
                     }
                 }
             },
@@ -127494,6 +127600,9 @@
                         "maxLength": 40
                     },
                     "active": {
+                        "type": "boolean"
+                    },
+                    "used_by_default": {
                         "type": "boolean"
                     },
                     "stages": {}
@@ -129560,6 +129669,24 @@
                     "note": {
                         "type": "string",
                         "maxLength": 2000
+                    },
+                    "start": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "number": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "issue_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "expiry_date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
                     }
                 }
             },
@@ -129607,6 +129734,21 @@
                         "maxLength": 2000
                     }
                 }
+            },
+            "PathwayRequirement": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "name"
+                ]
             },
             "PathwayRun": {
                 "type": "object",
@@ -129882,11 +130024,18 @@
                         "items": {
                             "type": "string"
                         }
+                    },
+                    "requirements": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PathwayRequirement"
+                        }
                     }
                 },
                 "required": [
                     "questions",
                     "record_types",
+                    "requirements",
                     "roles",
                     "step_types"
                 ]
@@ -130073,6 +130222,13 @@
                         "type": "boolean",
                         "readOnly": true
                     },
+                    "update_available": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "used_by_default": {
+                        "type": "boolean"
+                    },
                     "version": {
                         "type": "integer",
                         "nullable": true,
@@ -130099,6 +130255,7 @@
                     "name",
                     "record_type",
                     "stages",
+                    "update_available",
                     "updated_at",
                     "version"
                 ]
@@ -130133,6 +130290,9 @@
                         "maxLength": 40
                     },
                     "active": {
+                        "type": "boolean"
+                    },
+                    "used_by_default": {
                         "type": "boolean"
                     },
                     "stages": {}
@@ -139318,6 +139478,12 @@
                         "type": "string",
                         "format": "date",
                         "nullable": true
+                    },
+                    "apply_template": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "The Apply pathway (E34); empty: the default."
                     }
                 },
                 "required": [

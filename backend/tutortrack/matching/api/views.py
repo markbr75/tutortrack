@@ -347,6 +347,7 @@ class JobPostingViewSet(
             title=data["title"],
             min_score=data["min_score"],
             closes_on=data.get("closes_on"),
+            apply_template=data.get("apply_template"),
         )
         return Response(s.JobPostingDetailSerializer(posting).data, status=status.HTTP_201_CREATED)
 

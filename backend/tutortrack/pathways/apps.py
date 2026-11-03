@@ -9,6 +9,13 @@ class PathwaysConfig(AppConfig):
     def ready(self) -> None:
         from django.utils.module_loading import autodiscover_modules
 
-        from . import automations, notifications, org_settings, pathway_steps  # noqa: F401
+        from . import (  # noqa: F401
+            automations,
+            builtin_pathways,
+            notifications,
+            org_settings,
+            pathway_steps,
+        )
 
         autodiscover_modules("pathway_steps")  # step types from other apps (E34 T02 on)
+        builtin_pathways.discover()
