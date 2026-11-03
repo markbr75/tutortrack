@@ -35,6 +35,7 @@ def fixed_now(monkeypatch):
 
     monkeypatch.setattr(timezone, "now", lambda: NOW)
 
+
 LONDON = ZoneInfo("Europe/London")
 
 
